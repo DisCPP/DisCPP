@@ -9,7 +9,7 @@ Please follow [Google's styling guide](https://google.github.io/styleguide/cppgu
 - [cpr](https://github.com/whoshuu/cpr)
 - [ixwebsocket](https://github.com/machinezone/IXWebSocket)
 
-## Buidling
+## Building
 - Install vcpkg onto the root of your C drive (if you dont you'll need to modify the cmake file).
 - Install dependencies by running command: `vcpkg install nlohmann-json cpr zlib mbedtls ixwebsocket`.
 - Then run `vcpkg integrate install`.
