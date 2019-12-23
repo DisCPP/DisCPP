@@ -11,6 +11,6 @@ Please follow [Google's styling guide](https://google.github.io/styleguide/cppgu
 
 ## Building
 - Install vcpkg onto the root of your C drive (if you dont you'll need to modify the cmake file).
-- Install dependencies by running command: `vcpkg install nlohmann-json cpr zlib mbedtls ixwebsocket`.
+- Install dependencies by running command: `vcpkg install nlohmann-json cpr cpprestsdk`.
 - Then run `vcpkg integrate install`.
 - Open the CMake project in Visual Studio.
