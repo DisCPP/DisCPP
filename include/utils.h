@@ -6,7 +6,9 @@
 #include <cpr/cpr.h>
 
 namespace discord{
-	class Bot;
+	namespace detail {
+		class bot;
+	}
 
 	std::string GetOsName() {
 		#ifdef _WIN32

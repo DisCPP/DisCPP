@@ -1,5 +1,5 @@
 # DiscordPP
-Currently it wont even connect to the Discord gateway servers so yeah, useless for now.
+Currently it only connects to the discord gateway but crashes with undefined behavior when trying to send anything.
 
 ## Contributing
 Please follow [Google's styling guide](https://google.github.io/styleguide/cppguide.html#Naming) for naming convention.
@@ -7,7 +7,7 @@ Please follow [Google's styling guide](https://google.github.io/styleguide/cppgu
 ## Dependencies
 - [Nlohmann JSON](https://github.com/nlohmann/json)
 - [cpr](https://github.com/whoshuu/cpr)
-- [ixwebsocket](https://github.com/machinezone/IXWebSocket)
+- [cpprestsdk](https://github.com/microsoft/cpprestsdk.git)
 
 ## Building
 - Install vcpkg onto the root of your C drive (if you dont you'll need to modify the cmake file).

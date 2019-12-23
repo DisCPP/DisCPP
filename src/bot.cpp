@@ -1,6 +1,5 @@
 #include "bot.h"
 #include "utils.h"
-#include "ixwebsocket/IXNetSystem.h"
 
 #include <iostream>
 
@@ -21,6 +20,8 @@ namespace discord {
 		 * @return int, always 0 for now.
 		 */
 		
+		//WebSocketStart();
+		//websocket_thread = std::thread{ &Bot::WebSocketStart, this };
 		WebSocketStart();
 		while (true) {
 			for (size_t i = 0; i < futures.size(); i++) {
@@ -38,6 +39,8 @@ namespace discord {
 		internal_event_map["READY"] = std::bind(&Bot::ReadyEvent, this, std::placeholders::_1);
 		internal_event_map["HELLO"] = std::bind(&Bot::HelloEvent, this, std::placeholders::_1);
 	}
+	struct PerSocketData {
+	};
 
 	void Bot::WebSocketStart() {
 		nlohmann::json gateway_request = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", Format("Bot %", token) }, { "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" } }, { });
@@ -47,79 +50,56 @@ namespace discord {
 				throw std::runtime_error{ "GATEWAY ERROR: Maximum start limit reached" };
 			}
 
-			websocket_endpoint = gateway_request["url"];
+			gateway_endpoint = gateway_request["url"];
 			
-			// Bind events
-			std::thread bind_event_thread{ &Bot::BindEvents, this };
+			BindEvents();
 
-			ix::initNetSystem();
+			try {
+				websocket.set_access_channels(websocketpp::log::alevel::all);
+				websocket.clear_access_channels(websocketpp::log::alevel::frame_payload);
+				websocket.set_error_channels(websocketpp::log::elevel::all);
 
-			web_socket.setUrl(websocket_endpoint);
-			web_socket.disableAutomaticReconnection();
+				websocket.init_asio();
 
-			// Set on_websocket_callback for all packets received from the websocket
-			web_socket.setOnMessageCallback([this](const ix::WebSocketMessagePtr& msg) { OnWebsocketCallback(msg); });
+				websocket.set_message_handler(std::bind(&Bot::OnWebSocketPacket, this, websocketpp::lib::placeholders::_1, websocketpp::lib::placeholders::_2));
+				websocket.set_tls_init_handler([this](websocketpp::connection_hdl) {
+					return websocketpp::lib::make_shared<websocketpp::lib::asio::ssl::context>(websocketpp::lib::asio::ssl::context::tlsv1);
+				});
 
-			// Set certificate
-			ix::SocketTLSOptions tls_options = ix::SocketTLSOptions();
-			tls_options.certFile = "ca-chain.cert.pem";
-			web_socket.setTLSOptions(tls_options);
+				websocketpp::lib::error_code ec;
+				client::connection_ptr websocket_connection = websocket.get_connection(gateway_endpoint, ec);
+				if (ec) {
+					std::cout << "could not create connection because: " << ec.message() << std::endl;
+					return;
+				}
 
+				websocket.connect(websocket_connection);
 
-			// Wait for the events to get binded
-			bind_event_thread.join();
-
-			// Connect to discord server
-			web_socket.start();
+				websocket.run();
+				disconnected = false;
+			} catch (websocketpp::exception const& e) {
+				std::cout << e.what() << std::endl;
+			}
 		} else {
 			throw std::runtime_error{ "Improper token, failed to connect to discord gateway!" };
 		}
 	}
 
-	void Bot::OnWebsocketCallback(const ix::WebSocketMessagePtr& msg) {
-		if (msg->type == ix::WebSocketMessageType::Open) {
-			std::cout << "Websocket connected" << std::endl;
-			// Send an identify packet to the websocket so we can actually do things
-			web_socket.sendText(GetIdentifyPacket());
-			websocket_disconnected = false;
-		}
-		else if (msg->type == ix::WebSocketMessageType::Close) {
-			std::cout << "Client disconnected (" << msg->closeInfo.code << ", " << msg->closeInfo.reason << ")" << std::endl;
-			websocket_disconnected = true;
-		}
-		else if (msg->type == ix::WebSocketMessageType::Error) {
-			std::cout << "Error ! " << msg->errorInfo.reason << std::endl;
-		}
-		else if (msg->type == ix::WebSocketMessageType::Message) {
-			nlohmann::json result = nlohmann::json::parse(msg->str);
-			OnWebsocketPacket(result);
-		}
-		else {
-			std::cout << "Known message sent" << std::endl;
-		}
-	}
+	void Bot::OnWebSocketPacket(websocketpp::connection_hdl hdl, client::message_ptr msg) {
+		std::cout << "Packet recieved: " << msg->get_payload() << std::endl;
 
-	void Bot::OnWebsocketPacket(nlohmann::json result) {
+		nlohmann::json result = nlohmann::json::parse(msg->get_payload());
 		// Switch on the op code of the packet, else send it to the event handler
 		switch (result["op"].get<int>()) {
-		case (hello):
+		case (hello): {
 			hello_packet = result;
-			websocket_ready = true;
-			heartbeat_thread = std::thread{ &Bot::HandleHeartbeat, this };
+			websocket_connection->send(GetIdentifyPacket().dump()); // Crashes the application with a "read access exception"
 			break;
-		case (heartbeat_ack):
+		} case (heartbeat_ack):
 			heartbeat_acked = true;
 			break;
 		default:
-			std::string event_name = result["t"];
-
-			// If the event doesn't have its name specified, find it in the event map and send that found name to the event handler
-			/*auto possible_event = std::find_if(internal_event_map.begin(), internal_event_map.end(), [&result](auto&& p) { return p.second == result["op"].get<int>(); });
-			if (possible_event != internal_event_map.end()) {
-				event_name = possible_event->first;
-			}*/
-
-			HandleDiscordEvent(result, event_name);
+			HandleDiscordEvent(result, result["t"]);
 			break;
 		}
 		packet_counter++;
@@ -129,10 +109,11 @@ namespace discord {
 		std::cout << "Handling discord event (" << event_name << ")" << std::endl;
 
 		const nlohmann::json data = j["d"];
-		websocket_last_sequence = (j.contains("s") && j["s"].is_number()) ? j["s"].get<int>() : -1;
+		last_sequence = (j.contains("s") && j["s"].is_number()) ? j["s"].get<int>() : -1;
 
 		if (internal_event_map.find(event_name) != internal_event_map.end()) {
-			if (websocket_ready) {
+
+			if (ready) {
 				internal_event_map[event_name](data);
 			} else {
 				futures.push_back(std::async(std::launch::async, internal_event_map[event_name], data));
@@ -141,13 +122,13 @@ namespace discord {
 	}
 
 	void Bot::HandleHeartbeat() {
-		while (!websocket_disconnected) {
+		while (!disconnected) {
 			nlohmann::json data = { { "op", 3 }, { "d", nullptr } };
-			if (websocket_last_sequence != -1) {
-				data["d"] = websocket_last_sequence;
+			if (last_sequence != -1) {
+				data["d"] = last_sequence;
 			}
 
-			web_socket.sendText(data.dump());
+			websocket_connection->send(data.dump());
 			heartbeat_acked = false;
 
 			// Wait for the required heartbeat interval and while waiting it should be acked.
@@ -159,24 +140,26 @@ namespace discord {
 		}
 	}
 
-	std::string Bot::GetIdentifyPacket() {
+	nlohmann::json Bot::GetIdentifyPacket() {
 		nlohmann::json obj = { { "op", 2 },
 							   { "d",
 								 { { "token", token },
 								   { "properties",
 									 { { "$os", GetOsName() },
-									   { "$browser", "DiscordPP" },
-									   { "$device", "DiscordPP" } } },
+									   { "$browser", "discordpp" },
+									   { "$device", "discordpp" } } },
 								   { "compress", false },
 								   { "large_threshold", 250 } } } };
-		return obj.dump();
+		return obj;
 	}
 
 	void Bot::ReadyEvent(nlohmann::json) {
-
+		std::cout << "READY EVENT" << std::endl;
+		heartbeat_thread = std::thread{ &Bot::HandleHeartbeat, this };
+		ready = true;
 	}
 
 	void Bot::HelloEvent(nlohmann::json) {
-
+		std::cout << "HELLO EVENT" << std::endl;
 	}
 }

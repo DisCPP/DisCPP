@@ -3,12 +3,17 @@
 
 #include <string>
 #include <future>
+#include <string_view>
 
 #include <nlohmann/json.hpp>
 
-#include <ixwebsocket/IXWebSocket.h>
+#include <websocketpp/config/asio_client.hpp>
+#include <websocketpp/client.hpp>
 
 namespace discord {
+	typedef websocketpp::client<websocketpp::config::asio_tls_client> client;
+	typedef websocketpp::lib::shared_ptr<websocketpp::lib::asio::ssl::context> context_ptr;
+
 	class Bot {
 	public:
 		std::string prefix;
@@ -31,23 +36,19 @@ namespace discord {
 		int Run();
 	private:
 		bool ready = false;
+		bool disconnected = true;
 		std::string token;
-		std::string websocket_endpoint;
-
-		std::string external_ip;
-		int external_port;
+		std::string gateway_endpoint;
 
 		nlohmann::json hello_packet;
 
-		ix::WebSocket web_socket;
-
 		std::thread heartbeat_thread;
 
+		client websocket;
+		client::connection_ptr websocket_connection;
+
 		bool heartbeat_acked;
-		bool disconnected;
-		bool websocket_disconnected;
-		bool websocket_ready;
-		int websocket_last_sequence;
+		int last_sequence;
 		long long packet_counter;
 
 		std::vector<std::future<void>> futures;
@@ -55,11 +56,11 @@ namespace discord {
 
 		// WEBSOCKET METHODS
 		void WebSocketStart();
-		std::string GetIdentifyPacket();
-		void OnWebsocketCallback(const ix::WebSocketMessagePtr& msg);
-		void OnWebsocketPacket(nlohmann::json result);
+		void OnWebSocketPacket(websocketpp::connection_hdl hdl, client::message_ptr msg);
 		void HandleDiscordEvent(nlohmann::json const j, std::string event_name);
 		void HandleHeartbeat();
+		//void OnWebSocketCallback(auto* ws, std::string_view message, uWS::OpCode opCode);
+		nlohmann::json GetIdentifyPacket();
 
 		void BindEvents();
 
