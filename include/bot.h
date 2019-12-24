@@ -7,12 +7,12 @@
 
 #include <nlohmann/json.hpp>
 
-#include <websocketpp/config/asio_client.hpp>
-#include <websocketpp/client.hpp>
+//#include <websocketpp/config/asio_client.hpp>
+//#include <websocketpp/client.hpp>
+#include <cpprest/ws_client.h>
 
 namespace discord {
-	typedef websocketpp::client<websocketpp::config::asio_tls_client> client;
-	typedef websocketpp::lib::shared_ptr<websocketpp::lib::asio::ssl::context> context_ptr;
+	using namespace web::websockets::client;
 
 	class Bot {
 	public:
@@ -44,8 +44,7 @@ namespace discord {
 
 		std::thread heartbeat_thread;
 
-		client websocket;
-		client::connection_ptr websocket_connection;
+		websocket_callback_client websocket_client;
 
 		bool heartbeat_acked;
 		int last_sequence;
@@ -56,7 +55,7 @@ namespace discord {
 
 		// WEBSOCKET METHODS
 		void WebSocketStart();
-		void OnWebSocketPacket(websocketpp::connection_hdl hdl, client::message_ptr msg);
+		void OnWebSocketPacket(websocket_incoming_message msg);
 		void HandleDiscordEvent(nlohmann::json const j, std::string event_name);
 		void HandleHeartbeat();
 		//void OnWebSocketCallback(auto* ws, std::string_view message, uWS::OpCode opCode);
