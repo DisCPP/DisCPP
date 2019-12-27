@@ -5,32 +5,59 @@
 
 #include <cpr/cpr.h>
 
-namespace discord{
-	namespace detail {
-		class bot;
+namespace discord {
+	class Bot;
+
+	namespace globals {
+		//class Bot* bot_instance;
+		inline discord::Bot* bot_instance;
 	}
 
-	std::string GetOsName() {
-		#ifdef _WIN32
-			return "Windows 32-bit";
-		#elif _WIN64
-			return "Windows 64-bit";
-		#elif __APPLE__ || __MACH__
-			return "Mac OSX";
-		#elif __linux__
-			return "Linux";
-		#elif __FreeBSD__
-			return "FreeBSD";
-		#elif __unix || __unix__
-			return "Unix";
-		#else
-			return "Other";
-		#endif
+	namespace specials {
+		enum NitroSubscription : int {
+			NO_NITRO = 0,
+			NITRO_CLASSIC = 1,
+			NITRO = 2
+		};
+
+		enum NitroTier : int {
+			NO_TIER = 0,
+			TIER_1 = 1,
+			TIER_2 = 2,
+			TIER_3 = 3
+		};
+
+		enum VerificationLevel : int {
+			NO_VERIFICATION = 0,
+			LOW = 1,
+			MEDIUM = 2,
+			HIGH = 3,
+			VERY_HIGH = 4
+		};
+
+		enum DefaultMessageNotificationLevel : int {
+			ALL_MESSAGES = 0,
+			ONLY_MENTIONS = 1
+		};
+
+		enum ExplicitContentFilterLevel : int {
+			DISABLED = 0,
+			MEMBERS_WITHOUT_ROLES = 1,
+			ALL_MEMBERS = 2
+		};
+
+		enum MFALevel : int {
+			NO_MFA = 0,
+			ELEVATED = 1
+		};
 	}
+
+	typedef int64_t snowflake;
+
+	std::string GetOsName();
 
 	template <typename S>
-	inline void FormatSlice(std::string const& input_str,
-		std::stringstream& output_str, int& start_index,
+	inline void FormatSlice(std::string const& input_str, std::stringstream& output_str, int& start_index,
 		S var) {
 		long unsigned int index = input_str.find('%', start_index);
 		if (index == std::string::npos) {
@@ -42,8 +69,7 @@ namespace discord{
 
 	template <typename... T>
 	inline std::string Format(std::string const& str, T... args) {
-		assert(sizeof...(args) == std::count(str.begin(), str.end(), '%') &&
-			"Amount of % does not match amount of arguments");
+		assert(sizeof...(args) == std::count(str.begin(), str.end(), '%') && "Amount of % does not match amount of arguments");
 		std::stringstream output_str;
 		int start_index = 0;
 		((FormatSlice(str, output_str, start_index, std::forward<T>(args))), ...);
@@ -57,10 +83,32 @@ namespace discord{
 		return Format(std::string("https://discordapp.com/api/v6") + endpoint_format, std::forward<Tys>(args)...);
 	}
 
-	nlohmann::json SendGetRequest(std::string url, cpr::Header headers, cpr::Parameters parameters) {
-		auto r = cpr::Get(cpr::Url{ url }, headers, parameters);
+	template <typename type>
+	inline type GetFromVector(std::vector<type> vector, type item) {
+		auto new_item = std::find_if(vector.begin(), vector.end(), [](type a, type b) { return a == b; });
 
-		return nlohmann::json::parse(r.text);
+		if (new_item != vector.end()) return new_item;
+		return nullptr;
+	}
+
+	nlohmann::json SendGetRequest(std::string url, cpr::Header headers, cpr::Parameters parameters, cpr::Body body);
+	nlohmann::json SendPostRequest(std::string url, cpr::Header headers, cpr::Parameters parameters, cpr::Body body);
+	nlohmann::json SendPutRequest(std::string url, cpr::Header headers, cpr::Payload payload);
+	nlohmann::json SendPatchRequest(std::string url, cpr::Header headers, cpr::Body body);
+	nlohmann::json SendDeleteRequest(std::string url, cpr::Header headers);
+	cpr::Header DefaultHeaders(cpr::Header add = {});
+	bool StartsWith(std::string string, std::string prefix);
+	std::vector<std::string> SplitString(std::string str, char delimter);
+	snowflake ToSnowflake(std::string snowflake_string);
+	std::string CombineVectorWithSpaces(std::vector<std::string> vector, int offset = 0);
+
+	template<typename T>
+	inline T GetDataSafely(nlohmann::json json, std::string value_name) {
+		return (json.contains(value_name) && json[value_name] != nullptr) ? json[value_name].get<T>() : T();
+	}
+
+	inline snowflake GetSnowflakeSafely(nlohmann::json json, std::string value_name) {
+		return (json.contains(value_name) && json[value_name] != nullptr) ? ToSnowflake(json[value_name]) : 0;
 	}
 }
 
