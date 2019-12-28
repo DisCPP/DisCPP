@@ -93,7 +93,7 @@ namespace discord {
 
 	nlohmann::json SendGetRequest(std::string url, cpr::Header headers, cpr::Parameters parameters, cpr::Body body);
 	nlohmann::json SendPostRequest(std::string url, cpr::Header headers, cpr::Parameters parameters, cpr::Body body);
-	nlohmann::json SendPutRequest(std::string url, cpr::Header headers, cpr::Payload payload);
+	nlohmann::json SendPutRequest(std::string url, cpr::Header headers, cpr::Body body);
 	nlohmann::json SendPatchRequest(std::string url, cpr::Header headers, cpr::Body body);
 	nlohmann::json SendDeleteRequest(std::string url, cpr::Header headers);
 	cpr::Header DefaultHeaders(cpr::Header add = {});
@@ -101,6 +101,7 @@ namespace discord {
 	std::vector<std::string> SplitString(std::string str, char delimter);
 	snowflake ToSnowflake(std::string snowflake_string);
 	std::string CombineVectorWithSpaces(std::vector<std::string> vector, int offset = 0);
+	int StringToInt(std::string str);
 
 	template<typename T>
 	inline T GetDataSafely(nlohmann::json json, std::string value_name) {

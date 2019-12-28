@@ -14,11 +14,9 @@ namespace discord {
 	Member::Member(nlohmann::json json) {
 		user = discord::User(json["user"]);
 		nick = GetDataSafely<std::string>(json, "nick");
-
 		for (auto& role : json["roles"]) {
-			roles.push_back(ToSnowflake(role));
+			roles.push_back(discord::Role(role));
 		}
-
 		joined_at = json["joined_at"];
 		premium_since = GetDataSafely<std::string>(json, "premium_since");
 		deaf = json["deaf"].get<bool>();

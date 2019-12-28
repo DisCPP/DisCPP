@@ -13,7 +13,7 @@ namespace discord {
 
 		discord::User user;
 		std::string nick;
-		std::vector<snowflake> roles; // TODO: turn this into a vector of discord::Role instead of snowflakes
+		std::vector<discord::Role> roles; // TODO: turn this into a vector of discord::Role instead of snowflakes
 		std::string joined_at; // TODO: Convert to iso8601Time
 		std::string premium_since; // TODO: Convert to iso8601Time
 		bool deaf;

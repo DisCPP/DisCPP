@@ -2,13 +2,14 @@
 #define DISCORDPP_CHANNEL_H
 
 #include "discord_object.h"
+#include "permission.h"
 
 #include <nlohmann/json.hpp>
 
-#include <pplx/pplxtasks.h>
-
 namespace discord {
 	class Message;
+	class Invite;
+	class User;
 
 	enum ModifyChannelValue : int {
 		NAME,
@@ -48,14 +49,23 @@ namespace discord {
 		discord::Message Send(std::string text, bool tts = false);
 		discord::Channel Modify(ModifyRequest modify_request);
 		discord::Channel Delete();
-		//std::vector<discord::Message> GetChannelMessages(GetChannelsMessagesFields messages_fields = GetChannelsMessagesFields::LIMIT);
+		//std::vector<discord::Message> GetChannelMessages(GetChannelsMessagesFields messages_fields = GetChannelsMessagesFields::LIMIT); // TODO: https://discordapp.com/developers/docs/resources/channel#get-channel-messages
 		discord::Message FindMessage(snowflake message_id);
+		void BulkDeleteMessage(std::vector<snowflake> messages);
+		// void EditPermissions() // TODO: https://discordapp.com/developers/docs/resources/channel#edit-channel-permissions
+		std::vector<discord::Invite> GetInvites();
+		discord::Invite CreateInvite(int max_age, int max_uses, bool temporary, bool unique);
+		// void deletePermission() // TODO: https://discordapp.com/developers/docs/resources/channel#edit-channel-permissions
+		void TriggerTypingIndicator();
+		std::vector<discord::Message> GetPinnedMessages();
+		void GroupDMAddRecipient(discord::User user); // TODO: Test
+		void GroupDMRemoveRecipient(discord::User user); // TODO: Test
 
 		snowflake id;
 		int type;
 		snowflake guild_id;
 		int position;
-		// permission_overwrites;
+		std::vector<discord::Permission> permissions;
 		std::string name;
 		std::string topic;
 		bool nsfw;
@@ -63,7 +73,7 @@ namespace discord {
 		int bitrate;
 		int user_limit;
 		int rate_limit_per_user;
-		// std::vector<discord::User> recipients;
+		std::vector<discord::User> recipients;
 		std::string icon;
 		snowflake owner_id;
 		snowflake application_id;

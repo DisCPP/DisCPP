@@ -3,11 +3,14 @@
 
 #include "discord_object.h"
 #include "user.h"
+#include "role.h"
 
 #include <nlohmann/json.hpp>
 
 namespace discord {
 	class Guild;
+	class User;
+
 	class Emoji : DiscordObject {
 	public:
 		Emoji() = default;
@@ -17,7 +20,7 @@ namespace discord {
 
 		snowflake id;
 		std::string name;
-		//std::vector<discord::Role> roles
+		std::vector<discord::Role> roles;
 		discord::User user;
 		bool require_colons;
 		bool managed;

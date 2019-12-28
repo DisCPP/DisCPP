@@ -23,27 +23,27 @@ std::string discord::GetOsName() {
 
 nlohmann::json discord::SendGetRequest(std::string url, cpr::Header headers, cpr::Parameters parameters, cpr::Body body) {
 	auto result = cpr::Get(cpr::Url{ url }, headers, parameters, body);
-	return nlohmann::json::parse(result.text);
+	return nlohmann::json::parse((!result.text.empty()) ? result.text : "{}");
 }
 
 nlohmann::json discord::SendPostRequest(std::string url, cpr::Header headers, cpr::Parameters parameters, cpr::Body body) {
 	auto result = cpr::Post(cpr::Url{ url }, headers, parameters, body);
-	return nlohmann::json::parse(result.text);
+	return nlohmann::json::parse( (!result.text.empty()) ? result.text : "{}");
 }
 
-nlohmann::json discord::SendPutRequest(std::string url, cpr::Header headers, cpr::Payload payload) {
-	auto result = cpr::Put(cpr::Url{ url }, headers, payload);
-	return nlohmann::json::parse(result.text);
+nlohmann::json discord::SendPutRequest(std::string url, cpr::Header headers, cpr::Body body) {
+	auto result = cpr::Put(cpr::Url{ url }, headers, body);
+	return nlohmann::json::parse((!result.text.empty()) ? result.text : "{}");
 }
 
 nlohmann::json discord::SendPatchRequest(std::string url, cpr::Header headers, cpr::Body body) {
 	auto result = cpr::Patch(cpr::Url{ url }, headers, body);
-	return nlohmann::json::parse(result.text);
+	return nlohmann::json::parse((!result.text.empty()) ? result.text : "{}");
 }
 
 nlohmann::json discord::SendDeleteRequest(std::string url, cpr::Header headers) {
 	auto result = cpr::Delete(cpr::Url{ url }, headers);
-	return nlohmann::json::parse(result.text);
+	return nlohmann::json::parse((!result.text.empty()) ? result.text : "{}");
 }
 
 cpr::Header discord::DefaultHeaders(cpr::Header add) {
@@ -80,4 +80,11 @@ discord::snowflake discord::ToSnowflake(std::string snowflake_string) {
 
 std::string discord::CombineVectorWithSpaces(std::vector<std::string> vector, int offset) {
 	return std::accumulate(vector.begin() + offset, vector.end(), std::string(""), [](std::string s0, std::string const& s1) { return s0 += " " + s1; }).substr(1);
+}
+
+int discord::StringToInt(std::string str) {
+	int number;
+	std::istringstream iss(str);
+	iss >> number;
+	return number;
 }

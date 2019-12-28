@@ -6,8 +6,16 @@
 #include "user.h"
 #include "member.h"
 #include "guild.h"
+#include "invite.h"
+#include "reaction.h"
+#include "role.h"
 
 namespace discord {
+	enum GetReactionsMethod : int {
+		BEFORE_USER,
+		AFTER_USER
+	};
+
 	class Message : DiscordObject {
 	public:
 		Message() = default;
@@ -17,24 +25,30 @@ namespace discord {
 		void AddReaction(discord::Emoji emoji);
 		void RemoveBotReaction(discord::Emoji emoji);
 		void RemoveReaction(discord::User user, discord::Emoji emoji);
-		std::vector<discord::User> GetReactants();
+		std::vector<discord::User> GetReactorsOfEmoji(discord::Emoji emoji, int amount);
+		std::vector<discord::User> GetReactorsOfEmoji(discord::Emoji emoji, discord::User user, GetReactionsMethod method);
+		void ClearReactions();
+		discord::Message EditMessage(std::string text);
+		//discord::Message EditMessage(discord::Embed embed); // TODO: Embed
+		void DeleteMessage();
+		void PinMessage();
+		void UnpinMessage();
 
 		snowflake id;
 		discord::Channel channel;
-		discord::Guild guild; // TODO: Convert to discord::Guild
+		discord::Guild guild;
 		discord::User author;
-		//discord::Member member;
 		std::string content;
 		std::string timestamp; // TODO: Convert to iso8601Time
 		std::string edited_timestamp; // TODO: Convert to iso8601Time
 		bool tts;
 		bool mention_everyone;
 		std::vector<discord::Member> mentions;
-		//std::vector<discord::Role> mentioned_roles;
+		std::vector<discord::Role> mentioned_roles;
 		std::vector<discord::Channel> mention_channels;
 		//std::vector<discord::Attachment> attachments;
 		//std::vector<discord::Embed> embeds;
-		//std::vector<<discord::Reaction> reactions;
+		std::vector<discord::Reaction> reactions;
 		bool pinned;
 		snowflake webhook_id;
 		int type;
