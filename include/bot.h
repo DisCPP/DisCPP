@@ -4,6 +4,7 @@
 #include <string>
 #include <future>
 #include <string_view>
+#include <optional>
 
 #include <nlohmann/json.hpp>
 
@@ -42,6 +43,7 @@ namespace discord {
 
 		Bot(std::string token, std::string prefix);
 		int Run();
+		discord::Guild GetGuild(snowflake guild_id);
 
 		void SetCommandHandler(std::function<void(discord::Bot*, discord::Message)> command_handler);
 

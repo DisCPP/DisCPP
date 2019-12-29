@@ -8,7 +8,7 @@
 
 namespace discord {
 	class Message;
-	class Invite;
+	class GuildInvite;
 	class User;
 
 	enum ModifyChannelValue : int {
@@ -53,8 +53,8 @@ namespace discord {
 		discord::Message FindMessage(snowflake message_id);
 		void BulkDeleteMessage(std::vector<snowflake> messages);
 		// void EditPermissions() // TODO: https://discordapp.com/developers/docs/resources/channel#edit-channel-permissions
-		std::vector<discord::Invite> GetInvites();
-		discord::Invite CreateInvite(int max_age, int max_uses, bool temporary, bool unique);
+		std::vector<discord::GuildInvite> GetInvites();
+		discord::GuildInvite CreateInvite(int max_age, int max_uses, bool temporary, bool unique);
 		// void deletePermission() // TODO: https://discordapp.com/developers/docs/resources/channel#edit-channel-permissions
 		void TriggerTypingIndicator();
 		std::vector<discord::Message> GetPinnedMessages();
@@ -63,9 +63,9 @@ namespace discord {
 
 		snowflake id;
 		int type;
-		snowflake guild_id;
+		snowflake guild_id; // TODO: Convert to discord::Guild
 		int position;
-		std::vector<discord::Permission> permissions;
+		std::vector<discord::Permissions> permissions;
 		std::string name;
 		std::string topic;
 		bool nsfw;

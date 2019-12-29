@@ -73,18 +73,6 @@ std::vector<std::string> discord::SplitString(std::string str, char delimter) {
 	return out;
 }
 
-discord::snowflake discord::ToSnowflake(std::string snowflake_string) {
-	//return std::stoul(snowflake_string);
-	return strtoll(snowflake_string.c_str(), NULL, 10);
-}
-
 std::string discord::CombineVectorWithSpaces(std::vector<std::string> vector, int offset) {
 	return std::accumulate(vector.begin() + offset, vector.end(), std::string(""), [](std::string s0, std::string const& s1) { return s0 += " " + s1; }).substr(1);
-}
-
-int discord::StringToInt(std::string str) {
-	int number;
-	std::istringstream iss(str);
-	iss >> number;
-	return number;
 }

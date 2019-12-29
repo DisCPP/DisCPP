@@ -12,7 +12,7 @@ namespace discord {
 	}
 
 	User::User(nlohmann::json json) {
-		id = ToSnowflake(json["id"]);
+		id = json["id"].get<snowflake>();
 		username = json["username"];
 		discriminator = json["discriminator"];
 		avatar = GetDataSafely<std::string>(json, "avatar");

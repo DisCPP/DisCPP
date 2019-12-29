@@ -1,6 +1,8 @@
 #ifndef DISCORDPP_UTILS_H
 #define DISCORDPP_UTILS_H
 
+#include "discord_object.h"
+
 #include <nlohmann/json.hpp>
 
 #include <cpr/cpr.h>
@@ -52,8 +54,6 @@ namespace discord {
 		};
 	}
 
-	typedef int64_t snowflake;
-
 	std::string GetOsName();
 
 	template <typename S>
@@ -99,17 +99,11 @@ namespace discord {
 	cpr::Header DefaultHeaders(cpr::Header add = {});
 	bool StartsWith(std::string string, std::string prefix);
 	std::vector<std::string> SplitString(std::string str, char delimter);
-	snowflake ToSnowflake(std::string snowflake_string);
 	std::string CombineVectorWithSpaces(std::vector<std::string> vector, int offset = 0);
-	int StringToInt(std::string str);
 
 	template<typename T>
 	inline T GetDataSafely(nlohmann::json json, std::string value_name) {
 		return (json.contains(value_name) && json[value_name] != nullptr) ? json[value_name].get<T>() : T();
-	}
-
-	inline snowflake GetSnowflakeSafely(nlohmann::json json, std::string value_name) {
-		return (json.contains(value_name) && json[value_name] != nullptr) ? ToSnowflake(json[value_name]) : 0;
 	}
 }
 

@@ -15,18 +15,18 @@ namespace discord {
 	}
 
 	Guild::Guild(nlohmann::json json) {
-		id = ToSnowflake(json["id"]);
+		id = json["id"].get<snowflake>();
 		name = json["name"];
 		icon = json["icon"];
 		splash = GetDataSafely<std::string>(json, "splash");
 		owner = GetDataSafely<bool>(json, owner);
-		owner_id = ToSnowflake(json["owner_id"]);
+		owner_id = json["owner_id"].get<snowflake>();
 		permissions = GetDataSafely<int>(json, "permissions");
 		region = json["region"];
-		afk_channel_id = GetSnowflakeSafely(json, "afk_channel_id");
+		afk_channel_id = GetDataSafely<snowflake>(json, "afk_channel_id");
 		afk_timeout = json["afk_timeout"].get<int>();
 		embed_enabled = GetDataSafely<bool>(json, "embed_enabled");
-		embed_channel_id = GetSnowflakeSafely(json, "embed_channel_id");
+		embed_channel_id = GetDataSafely<snowflake>(json, "embed_channel_id");
 		verification_level = static_cast<discord::specials::VerificationLevel>(json["verification_level"].get<int>());
 		default_message_notifications = static_cast<discord::specials::DefaultMessageNotificationLevel>(json["default_message_notifications"].get<int>());
 		explicit_content_filter = static_cast<discord::specials::ExplicitContentFilterLevel>(json["explicit_content_filter"].get<int>());
@@ -38,10 +38,10 @@ namespace discord {
 		}
 		// features
 		mfa_level = static_cast<discord::specials::MFALevel>(json["mfa_level"].get<int>());
-		application_id = GetSnowflakeSafely(json, "application_id");
+		application_id = GetDataSafely<snowflake>(json, "application_id");
 		widget_enabled = GetDataSafely<bool>(json, "widget_enabled");
-		widget_channel_id = GetSnowflakeSafely(json, "widget_channel_id");
-		system_channel_id = ToSnowflake(json["system_channel_id"]);
+		widget_channel_id = GetDataSafely<snowflake>(json, "widget_channel_id");
+		system_channel_id = json["system_channel_id"].get<snowflake>();
 		joined_at = GetDataSafely<std::string>(json, "joined_at");
 		large = GetDataSafely<bool>(json, "large");
 		unavailable = GetDataSafely<bool>(json, "unavailable");
@@ -65,11 +65,11 @@ namespace discord {
 	}
 
 	void Guild::DeleteGuild() {
-		SendDeleteRequest(Endpoint("/guilds/" + std::to_string(id)), DefaultHeaders());
+		SendDeleteRequest(Endpoint("/guilds/%", id), DefaultHeaders());
 	}
 
 	std::vector<discord::Channel> Guild::GetChannels() {
-		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/channels"), DefaultHeaders(), {}, {});
+		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/channels", id), DefaultHeaders(), {}, {});
 		std::vector<discord::Channel> channels;
 		for (auto& channel : result) {
 			channels.push_back(discord::Channel(channel));
@@ -78,50 +78,165 @@ namespace discord {
 	}
 
 	discord::Member Guild::GetMember(snowflake id) {
-		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/" + std::to_string(id)), DefaultHeaders(), {}, {});
-		return discord::Member(result);
-	}
+		auto member = std::find_if(discord::globals::bot_instance->members.begin(), discord::globals::bot_instance->members.end(), [id](discord::Member a) { return id == a.user.id; });
 
-	std::vector<discord::Member> Guild::GetMembers(int limit) {
-		cpr::Body body("{\"limit\": " + std::to_string(limit) + "}");
-		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/members"), DefaultHeaders(), {}, body);
-
-		std::vector<discord::Member> members;
-		for (auto& member : result) {
-			members.push_back(discord::Member(member));
+		if (member != discord::globals::bot_instance->members.end()) {
+			return *member;
 		}
-		return members;
-	}
-
-	std::vector<discord::Member> Guild::GetMembers(snowflake id) {
-		cpr::Body body("{\"after\": " + std::to_string(id) + "}");
-		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/members"), DefaultHeaders(), {}, body);
-
-		std::vector<discord::Member> members;
-		for (auto& member : result) {
-			members.push_back(discord::Member(member));
-		}
-		return members;
+		throw std::runtime_error("Member not found!");
 	}
 
 	discord::Member Guild::AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf) {
 		std::string json_roles = "[";
 		for (discord::Role role : roles) {
 			if (&role == &roles.front()) {
-				json_roles += "\"" + std::to_string(role.id) + "\"";
+				json_roles += "\"" + role.id + "\"";
 			} else {
-				json_roles += ", \"" + std::to_string(role.id) + "\"";
+				json_roles += ", \"" + role.id + "\"";
 			}
 		}
 		json_roles += "]";
 
 		cpr::Body body("{\"access_token\": \"" + access_token + "\", \"nick\": \"" + nick + "\", \"roles\": " + json_roles + ", \"mute\": " + std::to_string(mute) + ", \"deaf\": " + std::to_string(deaf) + "}");
-		nlohmann::json result = SendPutRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/" + std::to_string(id)), DefaultHeaders(), body);
+		nlohmann::json result = SendPutRequest(Endpoint("/guilds/%/members/%", this->id, id), DefaultHeaders(), body);
 		return (result == "{}") ? discord::Member(id) : discord::Member(result);
 	}
 
+	void Guild::AddRoleToMember(discord::Member member, discord::Role role) {
+		SendPutRequest(Endpoint("/guilds/" + id + "/members/" + member.id + "/roles/" + role.id), DefaultHeaders(), {});
+	}
+
+	void Guild::RemoveRoleToMember(discord::Member member, discord::Role role) {
+		SendDeleteRequest(Endpoint("/guilds/" + id + "/members/" + member.id + "/roles/" + role.id), DefaultHeaders());
+	}
+
+	void Guild::RemoveMember(discord::Member member) {
+		SendDeleteRequest(Endpoint("/guilds/" + id + "/members/" + member.id), DefaultHeaders());
+	}
+
+	std::vector<discord::GuildBan> Guild::GetBans() {
+		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + id + "/bans"), DefaultHeaders(), {}, {});
+
+		std::vector<discord::GuildBan> guild_bans;
+		for (auto& guild_ban : result) {
+			guild_bans.push_back(discord::GuildBan(guild_ban["reason"], discord::User(guild_ban["user"])));
+		}
+
+		return guild_bans;
+	}
+
+	std::optional<std::string> Guild::GetMemberBanReason(discord::Member member) {
+		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/bans/%", id, member.id), DefaultHeaders(), {}, {});
+		if (result.contains("reason")) return result["reason"];
+		return std::nullopt;
+	}
+
+	bool Guild::IsMemberBanned(discord::Member member) {
+		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/bans/%", id, member.id), DefaultHeaders(), {}, {});
+		return result.contains("reason");
+	}
+
+	void Guild::BanMember(discord::Member member, std::string reason) {
+		cpr::Body body(Format("{\"reason\": \"%\"}", reason));
+		SendPutRequest(Endpoint("/guilds/%/bans/%", id, member.id), DefaultHeaders(), body);
+	}
+
+	void Guild::UnbanMember(discord::Member member) {
+		SendDeleteRequest(Endpoint("/guilds/%/bans/%", id, member.id), DefaultHeaders());
+	}
+
+	discord::Role Guild::CreateRole(std::string name, Permissions permissions, int color, bool hoist, bool mentionable) {
+		cpr::Body body(Format("{\"name\": \"%\", \"permissions\": %, \"color\": %, \"hoist\": %, \"mentionable\": %}", name, permissions.allow_perms.value, color, hoist, mentionable));
+		nlohmann::json result = SendPostRequest(Endpoint("/guilds/%/roles", id), DefaultHeaders(), {}, body);
+		return discord::Role(result);
+	}
+
+	discord::Role Guild::ModifyRole(discord::Role role, std::string name, Permissions permissions, int color, bool hoist, bool mentionable) {
+		cpr::Body body(Format("{\"name\": \"%\", \"permissions\": %, \"color\": %, \"hoist\": %, \"mentionable\": %}", name, permissions.allow_perms.value, color, hoist, mentionable));
+		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/%/roles/%", id, role.id), DefaultHeaders(), body);
+		return discord::Role(result);
+	}
+
+	void Guild::DeleteRole(discord::Role role) {
+		nlohmann::json result = SendDeleteRequest(Endpoint("/guilds/%/roles/%", id, role.id), DefaultHeaders());
+	}
+
+	std::vector<discord::GuildInvite> Guild::GetInvites() {
+		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/invites", id), DefaultHeaders(), {}, {});
+
+		std::vector<discord::GuildInvite> guild_invites;
+		for (auto& guild_invite : result) {
+			guild_invites.push_back(discord::GuildInvite(guild_invite));
+		}
+		return guild_invites;
+	}
+
+	std::vector<discord::GuildIntegration> Guild::GetIntegrations() {
+		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/integrations", id), DefaultHeaders(), {}, {});
+
+		std::vector<discord::GuildIntegration> guild_integrations;
+		for (auto& guild_integration : result) {
+			guild_integrations.push_back(discord::GuildIntegration(guild_integration));
+		}
+		return guild_integrations;
+	}
+
+	void Guild::CreateIntegration(snowflake id, std::string type) {
+		cpr::Body body(Format("{\"type\": \"%\", \"id\": \"%\"}", type, id));
+		SendPostRequest(Endpoint("/guilds/%/integrations", this->id), DefaultHeaders(), {}, body);
+	}
+
+	void Guild::ModifyIntegration(discord::GuildIntegration guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons) {
+		cpr::Body body(Format("{\"expire_behavior\": %, \"expire_grace_period\": %, \"enable_emoticons\": %}", expire_behavior, expire_grace_period, enable_emoticons));
+		SendPostRequest(Endpoint("/guilds/%/integrations/%", id, guild_integration.id), DefaultHeaders(), {}, body);
+	}
+
+	void Guild::DeleteIntegration(discord::GuildIntegration guild_integration) {
+		SendDeleteRequest(Endpoint("/guilds/%/integrations/%", id, guild_integration.id), DefaultHeaders());
+	}
+
+	void Guild::SyncIntegration(discord::GuildIntegration guild_integration) {
+		SendPostRequest(Endpoint("/guilds/%/integrations/%/sync", id, guild_integration.id), DefaultHeaders(), {}, {});
+	}
+
+	discord::GuildEmbed Guild::GetGuildEmbed() {
+		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/embed", id), DefaultHeaders(), {}, {});
+		return discord::GuildEmbed(result);
+	}
+
+	discord::GuildEmbed Guild::ModifyGuildEmbed(snowflake channel_id, bool enabled) {
+		cpr::Body body(Format("{\"channel_id\": \"%\", \"enabled\": %}", channel_id, enabled));
+		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/%/embed", id), DefaultHeaders(), body);
+		return discord::GuildEmbed();
+	}
+
+	std::string Guild::GetWidgetImageURL(WidgetStyle widget_style) {
+		std::string style;
+		switch (widget_style) {
+		case WidgetStyle::SHIELD:
+			style = "shield";
+			break;
+		case WidgetStyle::BANNER1:
+			style = "banner1";
+			break;
+		case WidgetStyle::BANNER2:
+			style = "banner2";
+			break;
+		case WidgetStyle::BANNER3:
+			style = "banner3";
+			break;
+		case WidgetStyle::BANNER4:
+			style = "banner4";
+			break;
+		}
+		cpr::Body body(Format("{\"style\": %}", style));
+		std::cout << Endpoint("/guilds/%/widget.png", id) << std::endl;
+		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/widget.png", id), DefaultHeaders(), {}, body);
+		return std::string();
+	}
+
 	std::vector<discord::Emoji> Guild::GetEmojis() {
-		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/emojis"), DefaultHeaders(), {}, {});
+		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/emojis", id), DefaultHeaders(), {}, {});
 
 		std::vector<discord::Emoji> emojis;
 		for (auto& emoji : result) {
@@ -131,16 +246,28 @@ namespace discord {
 	}
 
 	discord::Emoji Guild::GetEmoji(snowflake id) {
-		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/emojis/" + std::to_string(id)), DefaultHeaders(), {}, {});
+		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/emojis/%", this->id, id), DefaultHeaders(), {}, {});
 		return discord::Emoji(result);
 	}
 
 	discord::Emoji Guild::ModifyEmoji(discord::Emoji emoji, std::string name, std::vector<discord::Role> roles) {
-		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + std::to_string(id) + "/emojis/" + std::to_string(emoji.id)), DefaultHeaders(), {});
+		std::string json_roles = "[";
+		for (discord::Role role : roles) {
+			if (&role == &roles.front()) {
+				json_roles += "\"" + role.id + "\"";
+			}
+			else {
+				json_roles += ", \"" + role.id + "\"";
+			}
+		}
+		json_roles += "]";
+
+		cpr::Body body(Format("{\"name\": \"%\", \"roles\": %}", json_roles));
+		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/%/emojis/%", this->id, id), DefaultHeaders(), body);
 		return emoji;
 	}
 
 	void Guild::DeleteEmoji(discord::Emoji emoji) {
-		nlohmann::json result = SendDeleteRequest(Endpoint("/guilds/" + std::to_string(id) + "/emojis/" + std::to_string(emoji.id)), DefaultHeaders());
+		nlohmann::json result = SendDeleteRequest(Endpoint("/guilds/%/emojis/%", this->id, id), DefaultHeaders());
 	}
 }

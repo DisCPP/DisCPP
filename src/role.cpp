@@ -3,7 +3,7 @@
 
 namespace discord {
 	Role::Role(nlohmann::json json) {
-		id = ToSnowflake(json["id"]);
+		id = json["id"].get<snowflake>();
 		name = json["name"];
 		color = json["color"].get<int>();
 		hoist = json["hoist"].get<bool>();

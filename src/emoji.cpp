@@ -17,10 +17,12 @@ namespace discord {
 	}
 
 	Emoji::Emoji(nlohmann::json json) {
-		id = ToSnowflake(json["id"]);
+		id = json["id"].get<snowflake>();
 		name = json["name"];
 		// roles?
-		user = discord::User(GetSnowflakeSafely(json, "user"));
+		if (json.contains("user")) {
+			user = discord::User(json["user"]);
+		}
 		require_colons = GetDataSafely<bool>(json, "require_colons");
 		managed = GetDataSafely<bool>(json, "managed");
 		animated = GetDataSafely<bool>(json, "animated");

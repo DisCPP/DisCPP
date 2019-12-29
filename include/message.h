@@ -6,7 +6,6 @@
 #include "user.h"
 #include "member.h"
 #include "guild.h"
-#include "invite.h"
 #include "reaction.h"
 #include "role.h"
 
@@ -44,7 +43,7 @@ namespace discord {
 		bool tts;
 		bool mention_everyone;
 		std::vector<discord::Member> mentions;
-		std::vector<discord::Role> mentioned_roles;
+		std::vector<snowflake> mentioned_roles; // TODO: Use discord::Role instead of snowflakes
 		std::vector<discord::Channel> mention_channels;
 		//std::vector<discord::Attachment> attachments;
 		//std::vector<discord::Embed> embeds;

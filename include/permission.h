@@ -6,7 +6,7 @@
 #include <nlohmann/json.hpp>
 
 namespace discord {
-	typedef int64_t snowflake;
+	typedef std::string snowflake;
 
 	enum PermissionType : int {
 		ROLE,

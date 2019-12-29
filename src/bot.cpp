@@ -1,3 +1,4 @@
+#include "..\include\bot.h"
 #include "bot.h"
 #include "utils.h"
 #include "command_handler.h"
@@ -23,6 +24,15 @@ namespace discord {
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 		return 0;
+	}
+
+	discord::Guild Bot::GetGuild(snowflake guild_id) {
+		auto guild = std::find_if(discord::globals::bot_instance->guilds.begin(), discord::globals::bot_instance->guilds.end(), [guild_id](discord::Guild a) { return guild_id == a.id; });
+
+		if (guild != discord::globals::bot_instance->guilds.end()) {
+			return *guild;
+		}
+		throw std::runtime_error("Guild not found!");
 	}
 
 	void Bot::SetCommandHandler(std::function<void(discord::Bot*, discord::Message)> command_handler) {
@@ -160,7 +170,7 @@ namespace discord {
 	}
 
 	void Bot::GuildCreateEvent(nlohmann::json result) {
-		snowflake guild_id = ToSnowflake(result["id"]);
+		snowflake guild_id = result["id"].get<snowflake>();
 
 		for (auto& member : result["members"]) {
 			members.push_back(discord::Member(member));

@@ -1,8 +1,8 @@
 #include "channel.h"
 #include "utils.h"
 #include "bot.h"
-#include "invite.h"
 #include "user.h"
+#include "guild.h"
 
 #include <cpprest/http_client.h>
 
@@ -15,20 +15,25 @@ namespace discord {
 		}
 	}
 
-	Channel::Channel(nlohmann::json json) : discord::DiscordObject(discord::ToSnowflake(json["id"])) {
-		id = ToSnowflake(json["id"]);
+	Channel::Channel(nlohmann::json json) : discord::DiscordObject(json["id"].get<snowflake>()) {
+		id = json["id"].get<snowflake>();
 		type = json["type"].get<int>();
-		guild_id = GetSnowflakeSafely(json, "guild_id");
+		if (json.contains("guild_id")) { // Can't use GetDataSafely so it doesn't over write the other constructor.
+			guild_id = json["guild_id"].get<snowflake>();
+		}
+		/*if (json.contains("guild_id")) {
+			guild = discord::Guild(json["guild_id"].get<snowflake>());
+		}*/
 		position = GetDataSafely<int>(json, "position");
 		if (json.contains("permission_overwrites")) {
 			for (auto permission_overwrite : json["permission_overwrites"]) {
-				permissions.push_back(discord::Permission(permission_overwrite));
+				permissions.push_back(discord::Permissions(permission_overwrite));
 			}
 		}
 		name = GetDataSafely<std::string>(json, "name");
 		topic = GetDataSafely<std::string>(json, "topic");
 		nsfw = GetDataSafely<bool>(json, "nsfw");
-		last_message_id = GetSnowflakeSafely(json, "last_message_id");
+		last_message_id = GetDataSafely<snowflake>(json, "last_message_id");
 		bitrate = GetDataSafely<int>(json, "bitrate");
 		user_limit = GetDataSafely<int>(json, "user_limit");
 		rate_limit_per_user = GetDataSafely<int>(json, "rate_limit_per_user");
@@ -38,21 +43,21 @@ namespace discord {
 			}
 		}
 		icon = GetDataSafely<std::string>(json, "icon");
-		owner_id = GetSnowflakeSafely(json, "owner_id");
-		application_id = GetSnowflakeSafely(json, "application_id");
-		category_id = GetSnowflakeSafely(json, "parent_id");
+		owner_id = GetDataSafely<snowflake>(json, "owner_id");
+		application_id = GetDataSafely<snowflake>(json, "application_id");
+		category_id = GetDataSafely<snowflake>(json, "parent_id");
 		last_pin_timestamp = GetDataSafely<std::string>(json, "last_pin_timestamp");
 	}
 
-	Channel::Channel(nlohmann::json json, snowflake guild_id) : discord::DiscordObject(discord::ToSnowflake(json["id"])), guild_id(guild_id) {
-		*this = Channel(json);
+	Channel::Channel(nlohmann::json json, snowflake guild_id) : Channel(json) {
+		this->guild_id = guild_id;
 	}
 
 	discord::Message Channel::Send(std::string text, bool tts) {
 		std::string raw_text = "{\"content\":\"" + text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
 		cpr::Body body = cpr::Body(raw_text);
 
-		nlohmann::json test = SendPostRequest(Endpoint("/channels/" + std::to_string(id) + "/messages"), {
+		nlohmann::json test = SendPostRequest(Endpoint("/channels/%/messages", id), {
 			{ "Authorization", Format("Bot %", discord::globals::bot_instance->token) },
 			{ "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" },
 			{ "Content-Type", "application/json" }
@@ -95,33 +100,33 @@ namespace discord {
 		}
 
 		cpr::Body body = cpr::Body("{\"" + field + "\": \"" + modify_request.value + "\"}");
-		nlohmann::json result = SendPatchRequest(Endpoint("/channels/" + std::to_string(id)), headers, body);
+		nlohmann::json result = SendPatchRequest(Endpoint("/channels/%", id), headers, body);
 		
 		*this = discord::Channel(result);
 		return *this;
 	}
 
 	discord::Channel Channel::Delete() {
-		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/" + std::to_string(id)), DefaultHeaders());
+		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/%", id), DefaultHeaders());
 		*this = discord::Channel();
 		return *this;
 	}
 
 	discord::Message Channel::FindMessage(snowflake message_id) {
-		nlohmann::json result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/messages/" + std::to_string(message_id)), DefaultHeaders(), {}, {});
+		nlohmann::json result = SendGetRequest(Endpoint("/channels/%/messages/%", id, message_id), DefaultHeaders(), {}, {});
 		return discord::Message(result);
 	}
 
 	void Channel::BulkDeleteMessage(std::vector<snowflake> messages) {
-		std::string endpoint = Endpoint("/channels/" + std::to_string(id) + "/messages/bulk-delete");
+		std::string endpoint = Endpoint("/channels/%/messages/bulk-delete", id);
 
 		std::string combined_message = "";
 		for (snowflake message : messages) {
 			if (message == messages[0]) {
-				combined_message += "\"" + std::to_string(message) + "\"";
+				combined_message += "\"" + message + "\"";
 			}
 			else {
-				combined_message += ", \"" + std::to_string(message) + "\"";
+				combined_message += ", \"" + message + "\"";
 			}
 		}
 
@@ -129,30 +134,30 @@ namespace discord {
 		nlohmann::json result = SendPostRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), {}, body);
 	}
 
-	std::vector<discord::Invite> Channel::GetInvites() {
-		nlohmann::json result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/invites"), DefaultHeaders(), {}, {});
-		std::vector<discord::Invite> invites;
+	std::vector<discord::GuildInvite> Channel::GetInvites() {
+		nlohmann::json result = SendGetRequest(Endpoint("/channels/%/invites", id), DefaultHeaders(), {}, {});
+		std::vector<discord::GuildInvite> invites;
 		for (auto invite : result) {
-			invites.push_back(discord::Invite(invite));
+			invites.push_back(discord::GuildInvite(invite));
 		}
 
 		return invites;
 	}
 
-	discord::Invite Channel::CreateInvite(int max_age, int max_uses, bool temporary, bool unique) {
+	discord::GuildInvite Channel::CreateInvite(int max_age, int max_uses, bool temporary, bool unique) {
 		cpr::Body body("{\"max_age\": " + std::to_string(max_age) + ", \"max_uses\": " + std::to_string(max_uses) + ", \"temporary\": " + std::to_string(temporary) + ", \"unique\": " + std::to_string(unique) + "}");
-		nlohmann::json result = SendPostRequest(Endpoint("/channels/" + std::to_string(id) + "/invites"), DefaultHeaders({ {"Content-Type", "application/json" } }), {}, body);
-		discord::Invite invite(result);
+		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/invites", id), DefaultHeaders({ {"Content-Type", "application/json" } }), {}, body);
+		discord::GuildInvite invite(result);
 
 		return invite;
 	}
 
 	void Channel::TriggerTypingIndicator() {
-		nlohmann::json result = SendPostRequest(Endpoint("/channels/" + std::to_string(id) + "/typing"), DefaultHeaders(), {}, {});
+		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/typing", id), DefaultHeaders(), {}, {});
 	}
 
 	std::vector<discord::Message> Channel::GetPinnedMessages() {
-		nlohmann::json result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/pins"), DefaultHeaders(), {}, {});
+		nlohmann::json result = SendGetRequest(Endpoint("/channels/%/pins", id), DefaultHeaders(), {}, {});
 		
 		std::vector<discord::Message> messages;
 		for (auto message : result) {
@@ -163,10 +168,10 @@ namespace discord {
 	}
 
 	void Channel::GroupDMAddRecipient(discord::User user) {
-		nlohmann::json result = SendPutRequest(Endpoint("/channels/" + std::to_string(id) + "/recipients/" + std::to_string(user.id)), DefaultHeaders(), {});
+		nlohmann::json result = SendPutRequest(Endpoint("/channels/%/recipients/%", id, user.id), DefaultHeaders(), {});
 	}
 
 	void Channel::GroupDMRemoveRecipient(discord::User user) {
-		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/" + std::to_string(id) + "/recipients/" + std::to_string(user.id)), DefaultHeaders());
+		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/%/recipients/%", id, user.id), DefaultHeaders());
 	}
 }

@@ -7,7 +7,7 @@ namespace discord {
 	}
 
 	Permissions::Permissions(nlohmann::json json) {
-		role_user_id = ToSnowflake(json["id"]);
+		role_user_id = json["id"].get<snowflake>();
 		permission_type = (json["type"] == "role") ? PermissionType::ROLE : PermissionType::MEMBER;
 		allow_perms = PermissionOverwrite(json["allow"].get<int>());
 		deny_perms = PermissionOverwrite(json["deny"].get<int>());

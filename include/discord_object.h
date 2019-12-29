@@ -5,7 +5,7 @@
 #include <iostream>
 
 namespace discord {
-	typedef int64_t snowflake;
+	typedef std::string snowflake;
 
 	class DiscordObject {
 	public:

@@ -13,8 +13,12 @@ int main(int argc, const char* argv[]) {
 
 	discord::Bot bot{ token, "!" };
 
-	discord::RegisterCommand("test", "", { }, [](discord::Context ctx) {
-		
+	discord::RegisterCommand("test", "", { }, [&](discord::Context ctx) {
+		try {
+			discord::Guild guild = bot.GetGuild(ctx.channel.guild_id);
+		} catch (std::runtime_error & e) {
+			std::cout << "ERROR: " << e.what() << std::endl;
+		}
 	}, {});
 
 	return bot.Run();
