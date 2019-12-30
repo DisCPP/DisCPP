@@ -40,6 +40,11 @@ namespace discord {
 		LIMIT
 	};
 
+	struct File {
+		std::string file_name;
+		std::string file_path;
+	};
+
 	class Channel : DiscordObject {
 	public:
 		Channel() = default;
@@ -49,9 +54,10 @@ namespace discord {
 
 		discord::Message Send(std::string text, bool tts = false);
 		discord::Message Send(discord::EmbedBuilder embed, std::string text = "");
+		discord::Message Send(std::vector<File> files, std::string text = "");
 		discord::Channel Modify(ModifyRequest modify_request);
 		discord::Channel Delete();
-		//std::vector<discord::Message> GetChannelMessages(GetChannelsMessagesFields messages_fields = GetChannelsMessagesFields::LIMIT); // TODO: https://discordapp.com/developers/docs/resources/channel#get-channel-messages
+		// std::vector<discord::Message> GetChannelMessages(GetChannelsMessagesFields messages_fields = GetChannelsMessagesFields::LIMIT); // TODO: https://discordapp.com/developers/docs/resources/channel#get-channel-messages
 		discord::Message FindMessage(snowflake message_id);
 		void BulkDeleteMessage(std::vector<snowflake> messages);
 		// void EditPermissions() // TODO: https://discordapp.com/developers/docs/resources/channel#edit-channel-permissions

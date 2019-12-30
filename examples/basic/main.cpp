@@ -14,13 +14,10 @@ int main(int argc, const char* argv[]) {
 
 	discord::Bot bot{ token, "!" };
 
-	discord::RegisterCommand("test", "", { }, [&](discord::Context ctx) {
-		try {
-			discord::EmbedBuilder embed("test title", "description", 0x08ff3d);
-			ctx.Send(embed);
-		} catch (std::runtime_error & e) {
-			std::cout << "ERROR: " << e.what() << std::endl;
-		}
+	discord::RegisterCommand("ping", "", { }, [&](discord::Context ctx) {
+		ctx.channel.TriggerTypingIndicator();
+		std::this_thread::sleep_for(std::chrono::milliseconds(750));
+		ctx.Send("Pong!");
 	}, {});
 
 	return bot.Run();

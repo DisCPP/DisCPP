@@ -26,6 +26,10 @@ namespace discord {
 		discord::Message Send(discord::EmbedBuilder embed, std::string text = "") {
 			return channel.Send(embed, text);
 		}
+
+		discord::Message Send(std::vector<discord::File> files, std::string text = "") {
+			return channel.Send(files, text);
+		}
 	};
 }
 

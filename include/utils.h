@@ -100,6 +100,7 @@ namespace discord {
 	bool StartsWith(std::string string, std::string prefix);
 	std::vector<std::string> SplitString(std::string str, char delimter);
 	std::string CombineVectorWithSpaces(std::vector<std::string> vector, int offset = 0);
+	std::string ReadEntireFile(std::ifstream& file);
 
 	template<typename T>
 	inline T GetDataSafely(nlohmann::json json, std::string value_name) {

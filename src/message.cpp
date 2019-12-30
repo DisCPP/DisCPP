@@ -44,7 +44,11 @@ namespace discord {
 				mention_channels.push_back(discord::Channel(mention_channel["id"].get<snowflake>()));
 			}
 		}
-		// std::vector<discord::Attachment> attachments;
+		if (json.contains("attachments")) {
+			for (auto& attachment : json["attachments"]) {
+				attachments.push_back(discord::Attachment(attachment));
+			}
+		}
 		if (json.contains("embeds")) {
 			for (auto& embed : json["embeds"]) {
 				embeds.push_back(discord::EmbedBuilder(embed));
@@ -58,6 +62,15 @@ namespace discord {
 		pinned = json["pinned"].get<bool>();
 		webhook_id = GetDataSafely<snowflake>(json, "webhook_id");
 		type = json["type"].get<int>();
+		if (json.contains("activity")) {
+			activity = discord::MessageActivity(json["activity"]);
+		}
+		if (json.contains("application")) {
+			application = discord::MessageApplication(json["application"]);
+		}
+		if (json.contains("message_reference")) {
+			message_reference = discord::MessageReference(json["message_reference"]);
+		}
 		flags = json["flags"].get<int>();
 	}
 

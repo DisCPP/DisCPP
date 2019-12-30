@@ -76,3 +76,7 @@ std::vector<std::string> discord::SplitString(std::string str, char delimter) {
 std::string discord::CombineVectorWithSpaces(std::vector<std::string> vector, int offset) {
 	return std::accumulate(vector.begin() + offset, vector.end(), std::string(""), [](std::string s0, std::string const& s1) { return s0 += " " + s1; }).substr(1);
 }
+
+std::string discord::ReadEntireFile(std::ifstream& file) {
+	return std::string((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
+}

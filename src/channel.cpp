@@ -1,4 +1,5 @@
 #include "..\include\channel.h"
+#include "..\include\channel.h"
 #include "channel.h"
 #include "utils.h"
 #include "bot.h"
@@ -57,12 +58,6 @@ namespace discord {
 	discord::Message Channel::Send(std::string text, bool tts) {
 		std::string raw_text = "{\"content\":\"" + text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
 		cpr::Body body = cpr::Body(raw_text);
-
-		/*nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), {
-			{ "Authorization", Format("Bot %", discord::globals::bot_instance->token) },
-			{ "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" },
-			{ "Content-Type", "application/json" }
-			}, { }, body);*/
 		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), { }, body);
 
 		return discord::Message(result);
@@ -70,11 +65,22 @@ namespace discord {
 
 	discord::Message Channel::Send(discord::EmbedBuilder embed, std::string text) {
 		cpr::Body body = cpr::Body(Format("{\"embed\": %%}", embed.ToJson(), ( (!text.empty()) ? Format(", \"content\": \"%\"", text) : "") ));
-		//std::string raw_text = "{\"embed\":\"" + embed + (!text.empty() ? "\",\"tts\":\"true\"" : "\"") + "}";
-
 		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ {"Content-Type", "application/json"} }), { }, body);
 
 		return discord::Message(result);
+	}
+
+	discord::Message discord::Channel::Send(std::vector<File> files, std::string text) {
+		cpr::Multipart multipart_data{};
+
+		for (int i = 0; i < files.size(); i++) {
+			multipart_data.parts.emplace_back("file" + std::to_string(i), cpr::File(files[i].file_path), "application/octet-stream");
+		}
+
+		multipart_data.parts.emplace_back("payload_json", Format("{\"content\": \"%\"}", text));
+		std::string response = cpr::Post(cpr::Url{ Endpoint("/channels/%/messages", id) }, DefaultHeaders({ {"Content-Type", "multipart/form-data"} }), multipart_data).text;
+
+		return discord::Message(nlohmann::json::parse(response));
 	}
 
 	discord::Channel Channel::Modify(ModifyRequest modify_request) {
