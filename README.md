@@ -1,5 +1,5 @@
 # DiscordPP
-Currently it only connects to the discord gateway but crashes with undefined behavior when trying to send anything.
+Almost usable for people.
 
 ## Contributing
 Please follow [Google's styling guide](https://google.github.io/styleguide/cppguide.html#Naming) for naming convention.
