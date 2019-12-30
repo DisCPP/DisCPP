@@ -41,7 +41,7 @@ namespace discord {
 		}
 		if (json.contains("mention_channels")) {
 			for (auto& mention_channel : json["mention_channels"]) {
-				mention_channels.push_back(discord::Channel(mention_channel));
+				mention_channels.push_back(discord::Channel(mention_channel["id"].get<snowflake>()));
 			}
 		}
 		// std::vector<discord::Attachment> attachments;
