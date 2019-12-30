@@ -22,6 +22,10 @@ namespace discord {
 		discord::Message Send(std::string text, bool tts = false) {
 			return channel.Send(text, tts);
 		}
+
+		discord::Message Send(discord::EmbedBuilder embed, std::string text = "") {
+			return channel.Send(embed, text);
+		}
 	};
 }
 

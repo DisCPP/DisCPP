@@ -3,6 +3,7 @@
 
 #include "discord_object.h"
 #include "permission.h"
+#include "embed_builder.h"
 
 #include <nlohmann/json.hpp>
 
@@ -47,6 +48,7 @@ namespace discord {
 		Channel(nlohmann::json json, snowflake guild_id);
 
 		discord::Message Send(std::string text, bool tts = false);
+		discord::Message Send(discord::EmbedBuilder embed, std::string text = "");
 		discord::Channel Modify(ModifyRequest modify_request);
 		discord::Channel Delete();
 		//std::vector<discord::Message> GetChannelMessages(GetChannelsMessagesFields messages_fields = GetChannelsMessagesFields::LIMIT); // TODO: https://discordapp.com/developers/docs/resources/channel#get-channel-messages

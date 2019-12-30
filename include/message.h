@@ -8,6 +8,7 @@
 #include "guild.h"
 #include "reaction.h"
 #include "role.h"
+#include "embed_builder.h"
 
 namespace discord {
 	enum GetReactionsMethod : int {
@@ -28,7 +29,8 @@ namespace discord {
 		std::vector<discord::User> GetReactorsOfEmoji(discord::Emoji emoji, discord::User user, GetReactionsMethod method);
 		void ClearReactions();
 		discord::Message EditMessage(std::string text);
-		//discord::Message EditMessage(discord::Embed embed); // TODO: Embed
+		discord::Message EditMessage(discord::EmbedBuilder embed);
+		discord::Message EditMessage(int flags);
 		void DeleteMessage();
 		void PinMessage();
 		void UnpinMessage();
@@ -45,15 +47,15 @@ namespace discord {
 		std::vector<discord::Member> mentions;
 		std::vector<snowflake> mentioned_roles; // TODO: Use discord::Role instead of snowflakes
 		std::vector<discord::Channel> mention_channels;
-		//std::vector<discord::Attachment> attachments;
-		//std::vector<discord::Embed> embeds;
+		// std::vector<discord::Attachment> attachments;
+		std::vector<discord::EmbedBuilder> embeds;
 		std::vector<discord::Reaction> reactions;
 		bool pinned;
 		snowflake webhook_id;
 		int type;
-		//activity?
-		//application?
-		//message_reference?
+		// activity?
+		// application?
+		// message_reference?
 		int flags;
 	};
 }

@@ -1,3 +1,4 @@
+#include "..\include\channel.h"
 #include "channel.h"
 #include "utils.h"
 #include "bot.h"
@@ -57,13 +58,23 @@ namespace discord {
 		std::string raw_text = "{\"content\":\"" + text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
 		cpr::Body body = cpr::Body(raw_text);
 
-		nlohmann::json test = SendPostRequest(Endpoint("/channels/%/messages", id), {
+		/*nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), {
 			{ "Authorization", Format("Bot %", discord::globals::bot_instance->token) },
 			{ "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" },
 			{ "Content-Type", "application/json" }
-			}, { }, body);
+			}, { }, body);*/
+		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), { }, body);
 
-		return discord::Message();
+		return discord::Message(result);
+	}
+
+	discord::Message Channel::Send(discord::EmbedBuilder embed, std::string text) {
+		cpr::Body body = cpr::Body(Format("{\"embed\": %%}", embed.ToJson(), ( (!text.empty()) ? Format(", \"content\": \"%\"", text) : "") ));
+		//std::string raw_text = "{\"embed\":\"" + embed + (!text.empty() ? "\",\"tts\":\"true\"" : "\"") + "}";
+
+		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ {"Content-Type", "application/json"} }), { }, body);
+
+		return discord::Message(result);
 	}
 
 	discord::Channel Channel::Modify(ModifyRequest modify_request) {

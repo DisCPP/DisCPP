@@ -1,4 +1,7 @@
 #include "..\include\bot.h"
+#include "..\include\bot.h"
+#include "..\include\bot.h"
+#include "..\include\bot.h"
 #include "bot.h"
 #include "utils.h"
 #include "command_handler.h"
@@ -33,6 +36,15 @@ namespace discord {
 			return *guild;
 		}
 		throw std::runtime_error("Guild not found!");
+	}
+
+	discord::User Bot::GetCurrentUser() {
+		nlohmann::json result = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
+		return discord::User(result);
+	}
+
+	void Bot::LeaveGuild(discord::Guild guild) {
+		SendDeleteRequest(Endpoint("/users/@me/guilds/%", guild.id), DefaultHeaders());
 	}
 
 	void Bot::SetCommandHandler(std::function<void(discord::Bot*, discord::Message)> command_handler) {

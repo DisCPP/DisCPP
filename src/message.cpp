@@ -18,8 +18,23 @@ namespace discord {
 		edited_timestamp = GetDataSafely<std::string>(json, "edited_timestamp");
 		tts = json["tts"].get<bool>();
 		mention_everyone = json["mention_everyone"].get<bool>();
-		for (auto& mention : json["mentions"]) {
-			mentions.push_back(discord::Member(mention));
+		for (auto& mention : json["mentions"]) { // This has a weird layout, thats why theres so much json stuff. 
+												 // The API docs says this type is an, "array of user objects, with an additional partial member field"
+			nlohmann::json new_member_json = {
+				{"user", {
+					{"id", mention["id"]},
+					{"username", mention["username"]},
+					{"discriminator", mention["discriminator"]},
+					{"avatar", mention["avatar"]}}
+				},
+				{"deaf", mention["member"]["deaf"]},
+				{"hoisted_role", mention["member"]["hoisted_role"]},
+				{"joined_at", mention["member"]["joined_at"]},
+				{"mute", mention["member"]["mute"]},
+				{"roles", mention["member"]["roles"]}
+			};
+
+			mentions.push_back(discord::Member(new_member_json));
 		}
 		for (auto& mentioned_role : json["mentioned_roles"]) {
 			mentioned_roles.push_back(mentioned_role.get<snowflake>());
@@ -30,7 +45,11 @@ namespace discord {
 			}
 		}
 		// std::vector<discord::Attachment> attachments;
-		// std::vector<discord::Embed> embeds;
+		if (json.contains("embeds")) {
+			for (auto& embed : json["embeds"]) {
+				embeds.push_back(discord::EmbedBuilder(embed));
+			}
+		}
 		if (json.contains("reactions")) {
 			for (auto& reaction : json["reactions"]) {
 				reactions.push_back(discord::Reaction(reaction));
@@ -94,11 +113,25 @@ namespace discord {
 		cpr::Body body("{\"content\": \"" + text + "\"}");
 		nlohmann::json result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), body);
 
-		std::cout << result << std::endl;
+		*this = { result };
+		return *this;
+	}
 
-		discord::Message message(result);
+	discord::Message Message::EditMessage(discord::EmbedBuilder embed) {
+		std::string endpoint = Endpoint("/channels/%/messages/%", channel.id, id);
+		cpr::Body body(Format("{\"embed\": %}", embed.ToJson()));
+		nlohmann::json result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), body);
 
-		*this = message;
+		*this = { result };
+		return *this;
+	}
+
+	discord::Message Message::EditMessage(int flags) {
+		std::string endpoint = Endpoint("/channels/%/messages/%", channel.id, id);
+		cpr::Body body(Format("{\"flags\": %}", flags));
+		nlohmann::json result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), body);
+
+		*this = { result };
 		return *this;
 	}
 

@@ -2,6 +2,7 @@
 #include <context.h>
 #include <command_handler.h>
 #include <channel.h>
+#include <embed_builder.h>
 
 #include <iostream>
 #include <fstream>
@@ -15,7 +16,8 @@ int main(int argc, const char* argv[]) {
 
 	discord::RegisterCommand("test", "", { }, [&](discord::Context ctx) {
 		try {
-			discord::Guild guild = bot.GetGuild(ctx.channel.guild_id);
+			discord::EmbedBuilder embed("test title", "description", 0x08ff3d);
+			ctx.Send(embed);
 		} catch (std::runtime_error & e) {
 			std::cout << "ERROR: " << e.what() << std::endl;
 		}
