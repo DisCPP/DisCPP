@@ -13,6 +13,9 @@ namespace discord {
 	EmbedBuilder::EmbedBuilder(nlohmann::json json) : embed_json(json) {}
 
 	EmbedBuilder& EmbedBuilder::SetTitle(std::string title) {
+		if (title.size() < 0 || title.size() > 256) {
+			throw std::runtime_error("Embed title can only be 0-256 characters");
+		}
 		embed_json["title"] = title;
 		return *this;
 	}
@@ -22,6 +25,9 @@ namespace discord {
 		return *this;
 	}
 	EmbedBuilder& EmbedBuilder::SetDescription(std::string description) {
+		if (description.size() < 0 || description.size() > 2048) {
+			throw std::runtime_error("Embed descriptions can only be 0-2048 characters");
+		}
 		embed_json["description"] = description;
 		return *this;
 	}
@@ -43,6 +49,9 @@ namespace discord {
 
 	EmbedBuilder& EmbedBuilder::SetFooter(std::string text, std::string icon_url) {
 		embed_json["footer"] = nlohmann::json({});
+		if (text.size() > 2048) {
+			throw std::runtime_error("Embed footer text can only be up to 0-2048 characters");
+		}
 		embed_json["footer"]["text"] = text;
 		if (!icon_url.empty()) {
 			embed_json["footer"]["icon_url"] = icon_url;
@@ -95,7 +104,11 @@ namespace discord {
 
 	EmbedBuilder& EmbedBuilder::SetAuthor(std::string name, std::string url, std::string icon_url) {
 		embed_json["author"] = nlohmann::json({});
+		if (name.size() > 256) {
+			throw std::runtime_error("Embed author names can only be up to 0-256 characters");
+		}
 		embed_json["author"]["name"] = name;
+
 		if (!url.empty()) {
 			embed_json["author"]["url"] = url;
 		}
@@ -108,7 +121,18 @@ namespace discord {
 	EmbedBuilder& EmbedBuilder::AddField(std::string name, std::string value, bool is_inline) {
 		if (!embed_json.contains("fields")) {
 			embed_json["fields"] = nlohmann::json::array();
+		} else if (embed_json["fields"].size() > 25) {
+			throw std::runtime_error("Embeds can only have 25 field objects");
 		}
+
+		if (name.size() > 256) {
+			throw std::runtime_error("Embed field names can only be up to 0-256 characters");
+		}
+
+		if (value.size() > 1024) {
+			throw std::runtime_error("Embed field values can only be up to 0-1024 characters");
+		}
+
 		std::string string_json = Format("{\"name\": \"%\", \"value\": \"%\", \"inline\": %}", name, value, is_inline);
 		embed_json["fields"].push_back(nlohmann::json::parse(string_json));
 		return *this;
