@@ -17,7 +17,6 @@ namespace discord {
 
 		void ModifyMember(std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf, snowflake channel_id);
 
-		snowflake id;
 		discord::User user;
 		std::string nick;
 		std::vector<snowflake> roles; // TODO: turn this into a vector of discord::Role instead of snowflakes

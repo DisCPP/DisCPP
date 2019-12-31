@@ -103,15 +103,15 @@ namespace discord {
 	}
 
 	void Guild::AddRoleToMember(discord::Member member, discord::Role role) {
-		SendPutRequest(Endpoint("/guilds/" + id + "/members/" + member.id + "/roles/" + role.id), DefaultHeaders(), {});
+		SendPutRequest(Endpoint("/guilds/" + id + "/members/" + member.user.id + "/roles/" + role.id), DefaultHeaders(), {});
 	}
 
 	void Guild::RemoveRoleToMember(discord::Member member, discord::Role role) {
-		SendDeleteRequest(Endpoint("/guilds/" + id + "/members/" + member.id + "/roles/" + role.id), DefaultHeaders());
+		SendDeleteRequest(Endpoint("/guilds/" + id + "/members/" + member.user.id + "/roles/" + role.id), DefaultHeaders());
 	}
 
 	void Guild::RemoveMember(discord::Member member) {
-		SendDeleteRequest(Endpoint("/guilds/" + id + "/members/" + member.id), DefaultHeaders());
+		SendDeleteRequest(Endpoint("/guilds/" + id + "/members/" + member.user.id), DefaultHeaders());
 	}
 
 	std::vector<discord::GuildBan> Guild::GetBans() {
@@ -126,23 +126,23 @@ namespace discord {
 	}
 
 	std::optional<std::string> Guild::GetMemberBanReason(discord::Member member) {
-		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/bans/%", id, member.id), DefaultHeaders(), {}, {});
+		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/bans/%", id, member.user.id), DefaultHeaders(), {}, {});
 		if (result.contains("reason")) return result["reason"];
 		return std::nullopt;
 	}
 
 	bool Guild::IsMemberBanned(discord::Member member) {
-		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/bans/%", id, member.id), DefaultHeaders(), {}, {});
+		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/bans/%", id, member.user.id), DefaultHeaders(), {}, {});
 		return result.contains("reason");
 	}
 
 	void Guild::BanMember(discord::Member member, std::string reason) {
 		cpr::Body body(Format("{\"reason\": \"%\"}", reason));
-		SendPutRequest(Endpoint("/guilds/%/bans/%", id, member.id), DefaultHeaders(), body);
+		SendPutRequest(Endpoint("/guilds/%/bans/%", id, member.user.id), DefaultHeaders(), body);
 	}
 
 	void Guild::UnbanMember(discord::Member member) {
-		SendDeleteRequest(Endpoint("/guilds/%/bans/%", id, member.id), DefaultHeaders());
+		SendDeleteRequest(Endpoint("/guilds/%/bans/%", id, member.user.id), DefaultHeaders());
 	}
 
 	discord::Role Guild::CreateRole(std::string name, Permissions permissions, int color, bool hoist, bool mentionable) {

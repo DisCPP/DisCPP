@@ -91,6 +91,21 @@ namespace discord {
 		return nullptr;
 	}
 
+	template<typename T>
+	inline T GetDataSafely(nlohmann::json json, std::string value_name) {
+		return (json.contains(value_name) && json[value_name] != nullptr) ? json[value_name].get<T>() : T();
+	}
+
+	template<typename type, typename func>
+	inline type GetIf(std::vector<type>& items, func const& predicate) {
+		auto item = std::find_if(items.begin(), items.end(), predicate);
+
+		if (item != items.end()) {
+			return *item;
+		}
+		return type();
+	}
+
 	nlohmann::json SendGetRequest(std::string url, cpr::Header headers, cpr::Parameters parameters, cpr::Body body);
 	nlohmann::json SendPostRequest(std::string url, cpr::Header headers, cpr::Parameters parameters, cpr::Body body);
 	nlohmann::json SendPutRequest(std::string url, cpr::Header headers, cpr::Body body);
@@ -101,11 +116,6 @@ namespace discord {
 	std::vector<std::string> SplitString(std::string str, char delimter);
 	std::string CombineVectorWithSpaces(std::vector<std::string> vector, int offset = 0);
 	std::string ReadEntireFile(std::ifstream& file);
-
-	template<typename T>
-	inline T GetDataSafely(nlohmann::json json, std::string value_name) {
-		return (json.contains(value_name) && json[value_name] != nullptr) ? json[value_name].get<T>() : T();
-	}
 }
 
 #endif

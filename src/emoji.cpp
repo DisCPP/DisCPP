@@ -17,8 +17,8 @@ namespace discord {
 	}
 
 	Emoji::Emoji(nlohmann::json json) {
-		id = json["id"].get<snowflake>();
-		name = json["name"];
+		id = GetDataSafely<snowflake>(json, "id");
+		name = GetDataSafely<std::string>(json, "name");
 		// roles?
 		if (json.contains("user")) {
 			user = discord::User(json["user"]);

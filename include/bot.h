@@ -5,6 +5,7 @@
 #include <future>
 #include <string_view>
 #include <optional>
+#include <vector>
 
 #include <nlohmann/json.hpp>
 
@@ -14,8 +15,14 @@
 #include "message.h"
 #include "member.h"
 #include "guild.h"
+#include "event_func_type.h"
+
 
 namespace discord {
+	class Role;
+	class User;
+	class Activity;
+
 	using namespace web::websockets::client;
 
 	class Bot {
@@ -47,20 +54,20 @@ namespace discord {
 		discord::User GetCurrentUser();
 		// discord::User ModifyCurrentUser(std::string username); // https://discordapp.com/developers/docs/resources/user#modify-current-user
 		void LeaveGuild(discord::Guild guild);
+		void UpdatePresence(discord::Activity activity);
+		void CreateWebsocketRequest(nlohmann::json json);
 
 		void SetCommandHandler(std::function<void(discord::Bot*, discord::Message)> command_handler);
 
 		template <size_t discord_event, typename FType>
 		void HandleEvent(FType&& func) {
-			//std::get<discord_event>(func_hol)
+			std::get<discord_event>(discord_event_func_holder.tuple).push_back(std::forward<FType>(func));
 		}
 
 		template <typename FType, typename... T>
 		void DoFunctionLater(FType&& func, T&&... args) {
 			futures.push_back(std::async(std::launch::async, func, std::forward<T>(args)...));
 		}
-
-		//void RegisterCommand(std::string const& command_name, std::string const& command_desc, std::vector<std::string> params, std::function<void(discord::Context)> function, std::vector<std::function<bool(discord::Context)>> requirements);
 	private:
 		bool ready = false;
 		bool disconnected =true;
@@ -78,6 +85,10 @@ namespace discord {
 		long long packet_counter;
 
 		std::vector<std::future<void>> futures;
+
+		int message_cache_count = 10000;
+		std::vector<discord::Message> messages;
+
 		std::unordered_map<std::string, std::function<void(nlohmann::json)>> internal_event_map;
 
 		// Websocket Methods
@@ -93,6 +104,47 @@ namespace discord {
 		// Commands
 		std::function<void(discord::Bot*, discord::Message)> fire_command_method;
 
+#ifdef __INTELLISENSE__ // This is here due to some issues with intellisense thinking there was something wrong with all of this.
+		Events<> discord_event_func_holder;
+#else
+		Events<
+			void(),																	   // READY
+			void(),																	   // RESUMED
+			void(),																	   // RECONNECT
+			void(),																	   // INVALID_SESSION
+			void(discord::Channel const),											   // CHANNEL_CREATE
+			void(discord::Channel const),											   // CHANNEL_UPDATE
+			void(discord::Channel const),											   // CHANNEL_DELETE
+			void(discord::Channel const),											   // CHANNEL_PINS_UPDATE
+			void(discord::Guild const),												   // GUILD_CREATE
+			void(discord::Guild const),												   // GUILD_UPDATE
+			void(discord::Guild const),												   // GUILD_DELETE
+			void(discord::Guild const, discord::User const),						   // GUILD_BAN_ADD
+			void(discord::Guild const, discord::User const),						   // GUILD_BAN_REMOVE
+			void(discord::Guild const),												   // GUILD_EMOJIS_UPDATE
+			void(discord::Guild const),												   // GUILD_INTEGRATIONS_UPDATE
+			void(discord::Guild const, discord::Member const),						   // GUILD_MEMBER_ADD
+			void(discord::Guild const, discord::User const),						   // GUILD_MEMBER_REMOVE
+			void(discord::Member const),											   // GUILD_MEMBER_UPDATE
+			void(),																	   // GUILD_MEMBERS_CHUNK
+			void(discord::Role const),												   // GUILD_ROLE_CREATE
+			void(discord::Role const),												   // GUILD_ROLE_UPDATE
+			void(discord::Role const),												   // GUILD_ROLE_DELETE
+			void(discord::Message const),											   // MESSAGE_CREATE
+			void(discord::Message const),											   // MESSAGE_UPDATE
+			void(discord::Message const),											   // MESSAGE_DELETE
+			void(std::vector<discord::Message> const),							       // MESSAGE_DELETE_BULK
+			void(discord::Message const, discord::Emoji const, discord::User const),   // MESSAGE_REACTION_ADD
+			void(discord::Message const, discord::Emoji const, discord::User const),   // MESSAGE_REACTION_REMOVE
+			void(discord::Message const),											   // MESSAGE_REACTION_REMOVE_ALL
+			void(discord::Member const),											   // PRECENSE_UPDATE
+			void(discord::User const, discord::Channel const, int const),			   // TYPING_START (user, channel, timestamp)
+			void(discord::User const),												   // USER_UPDATE
+			void(nlohmann::json const),												   // VOICE_STATE_UPDATE (raw_json)
+			void(nlohmann::json const),												   // VOICE_SERVER_UPDATE (raw_json)
+			void(discord::Channel const)											   // WEBHOOKS_UPDATE
+		> discord_event_func_holder;
+#endif
 		// Events
 		void ReadyEvent(nlohmann::json result);
 		void ResumedEvent(nlohmann::json result);

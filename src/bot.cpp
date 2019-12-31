@@ -1,12 +1,16 @@
-#include "..\include\bot.h"
-#include "..\include\bot.h"
-#include "..\include\bot.h"
-#include "..\include\bot.h"
 #include "bot.h"
 #include "utils.h"
 #include "command_handler.h"
+#include "channel.h"
+#include "message.h"
+#include "member.h"
+#include "guild.h"
+#include "role.h"
+#include "events.h"
+#include "activity.h"
 
 #include <iostream>
+#include <algorithm>
 
 namespace discord {
 	Bot::Bot(std::string token, std::string prefix) : token(token), prefix(prefix) {
@@ -47,15 +51,60 @@ namespace discord {
 		SendDeleteRequest(Endpoint("/users/@me/guilds/%", guild.id), DefaultHeaders());
 	}
 
+	void Bot::UpdatePresence(discord::Activity activity) {
+		nlohmann::json payload = nlohmann::json({
+			{"op", 3},
+			{"d", activity.ToJson()}
+		});
+
+		CreateWebsocketRequest(payload);
+	}
+
+	void discord::Bot::CreateWebsocketRequest(nlohmann::json json) {
+		websocket_outgoing_message msg;
+		msg.set_utf8_message(json.dump());
+		websocket_client.send(msg);
+	}
+
 	void Bot::SetCommandHandler(std::function<void(discord::Bot*, discord::Message)> command_handler) {
 		fire_command_method = command_handler;
 	}
 	
 	void Bot::BindEvents() {
 		internal_event_map["READY"] = std::bind(&Bot::ReadyEvent, this, std::placeholders::_1);
-		internal_event_map["CHANNEL_CREATE"] = std::bind(&Bot::ChannelCreateEvent, this, std::placeholders::_1);
-		internal_event_map["MESSAGE_CREATE"] = std::bind(&Bot::MessageCreateEvent, this, std::placeholders::_1);
-		internal_event_map["GUILD_CREATE"] = std::bind(&Bot::GuildCreateEvent, this, std::placeholders::_1);
+		internal_event_map["RESUMED"] = std::bind(&discord::Bot::ResumedEvent, this, std::placeholders::_1);
+		internal_event_map["INVALID_SESSION"] = std::bind(&discord::Bot::InvalidSesionEvent, this, std::placeholders::_1);
+		internal_event_map["CHANNEL_CREATE"] = std::bind(&discord::Bot::ChannelCreateEvent, this, std::placeholders::_1);
+		internal_event_map["CHANNEL_UPDATE"] = std::bind(&discord::Bot::ChannelUpdateEvent, this, std::placeholders::_1);
+		internal_event_map["CHANNEL_DELETE"] = std::bind(&discord::Bot::ChannelDeleteEvent, this, std::placeholders::_1);
+		internal_event_map["CHANNEL_PINS_UPDATE"] = std::bind(&discord::Bot::ChannelPinsUpdateEvent, this, std::placeholders::_1);
+		internal_event_map["GUILD_CREATE"] = std::bind(&discord::Bot::GuildCreateEvent, this, std::placeholders::_1);
+		internal_event_map["GUILD_UPDATE"] = std::bind(&discord::Bot::GuildUpdateEvent, this, std::placeholders::_1);
+		internal_event_map["GUILD_DELETE"] = std::bind(&discord::Bot::GuildDeleteEvent, this, std::placeholders::_1);
+		internal_event_map["GUILD_BAN_ADD"] = std::bind(&discord::Bot::GuildBanAddEvent, this, std::placeholders::_1);
+		internal_event_map["GUILD_BAN_REMOVE"] = std::bind(&discord::Bot::GuildBanRemoveEvent, this, std::placeholders::_1);
+		internal_event_map["GUILD_EMOJIS_UPDATE"] = std::bind(&discord::Bot::GuildEmojisUpdateEvent, this, std::placeholders::_1);
+		internal_event_map["GUILD_INTEGRATIONS_UPDATE"] = std::bind(&discord::Bot::GuildIntegrationsUpdateEvent, this, std::placeholders::_1);
+		internal_event_map["GUILD_MEMBER_ADD"] = std::bind(&discord::Bot::GuildMemberAddEvent, this, std::placeholders::_1);
+		internal_event_map["GUILD_MEMBER_REMOVE"] = std::bind(&discord::Bot::GuildMemberRemoveEvent, this, std::placeholders::_1);
+		internal_event_map["GUILD_MEMBER_UPDATE"] = std::bind(&discord::Bot::GuildMemberUpdateEvent, this, std::placeholders::_1);
+		internal_event_map["GUILD_MEMBERS_CHUNK"] = std::bind(&discord::Bot::GuildMembersChunkEvent, this, std::placeholders::_1);
+		internal_event_map["GUILD_ROLE_CREATE"] = std::bind(&discord::Bot::GuildRoleCreateEvent, this, std::placeholders::_1);
+		internal_event_map["GUILD_ROLE_UPDATE"] = std::bind(&discord::Bot::GuildRoleUpdateEvent, this, std::placeholders::_1);
+		internal_event_map["GUILD_ROLE_DELETE"] = std::bind(&discord::Bot::GuildRoleDeleteEvent, this, std::placeholders::_1);
+		internal_event_map["MESSAGE_CREATE"] = std::bind(&discord::Bot::MessageCreateEvent, this, std::placeholders::_1);
+		internal_event_map["MESSAGE_UPDATE"] = std::bind(&discord::Bot::MessageUpdateEvent, this, std::placeholders::_1);
+		internal_event_map["MESSAGE_DELETE"] = std::bind(&discord::Bot::MessageDeleteEvent, this, std::placeholders::_1);
+		internal_event_map["MESSAGE_DELETE_BULK"] = std::bind(&discord::Bot::MessageDeleteBulkEvent, this, std::placeholders::_1);
+		internal_event_map["MESSAGE_REACTION_ADD"] = std::bind(&discord::Bot::MessageReactionAddEvent, this, std::placeholders::_1);
+		internal_event_map["MESSAGE_REACTION_REMOVE"] = std::bind(&discord::Bot::MessageReactionRemoveEvent, this, std::placeholders::_1);
+		internal_event_map["MESSAGE_REACTION_REMOVE_ALL"] = std::bind(&discord::Bot::MessageReactionRemoveAllEvent, this, std::placeholders::_1);
+		internal_event_map["PRESENCE_UPDATE"] = std::bind(&discord::Bot::PresenceUpdateEvent, this, std::placeholders::_1);
+		internal_event_map["TYPING_START"] = std::bind(&discord::Bot::TypingStartEvent, this, std::placeholders::_1);
+		internal_event_map["USER_UPDATE"] = std::bind(&discord::Bot::UserUpdateEvent, this, std::placeholders::_1);
+		internal_event_map["VOICE_STATE_UPDATE"] = std::bind(&discord::Bot::VoiceStateUpdateEvent, this, std::placeholders::_1);
+		internal_event_map["VOICE_SERVER_UPDATE"] = std::bind(&discord::Bot::VoiceServerUpdateEvent, this, std::placeholders::_1);
+		internal_event_map["WEBHOOKS_UPDATE"] = std::bind(&discord::Bot::WebhooksUpdateEvent, this, std::placeholders::_1);
 	}
 
 	void Bot::WebSocketStart() {
@@ -79,18 +128,16 @@ namespace discord {
 
 			bindthread.join();
 		} else {
-			//throw std::runtime_error{ "Improper token, failed to connect to discord gateway!" };
 			std::cout << "Improper token, failed to connect to discord gateway!" << std::endl;
 		}
 	}
 
 	void Bot::HandleDiscordDisconnect(websocket_close_status close_status, utility::string_t reason, std::error_code error_code) {
-		std::cout << "Websocket was closed with error: " << error_code << " - " << reason.c_str() << std::endl;
+		std::cout << "Websocket was closed with error: 400" << error_code.value() << "!" << std::endl;
 	}
 
 	void Bot::OnWebSocketPacket(websocket_incoming_message msg) {
 		std::string packet_raw = msg.extract_string().get();
-		//std::cout << "Packet recieved: " << packet_raw << std::endl;
 
 		nlohmann::json result = nlohmann::json::parse(packet_raw);
 
@@ -169,16 +216,50 @@ namespace discord {
 		heartbeat_thread = std::thread{ &Bot::HandleHeartbeat, this };
 		ready = true;
 		session_id = result["session_id"];
+
+		discord_event_func_holder.call<events::ready>(futures, ready);
+	}
+
+	void Bot::ResumedEvent(nlohmann::json result) {
+		discord_event_func_holder.call<events::resumed>(futures, ready);
+	}
+
+	void Bot::ReconectEvent(nlohmann::json result) {
+		discord_event_func_holder.call<events::reconnect>(futures, ready);
+	}
+
+	void Bot::InvalidSesionEvent(nlohmann::json result) {
+		discord_event_func_holder.call<events::invalid_session>(futures, ready);
 	}
 
 	void Bot::ChannelCreateEvent(nlohmann::json result) {
 		discord::Channel new_channel = discord::Channel(result, result["id"].get<snowflake>());
 		channels.push_back(new_channel);
+
+		discord_event_func_holder.call<events::channel_create>(futures, ready, new_channel);
 	}
 
-	void Bot::MessageCreateEvent(nlohmann::json result) {
-		discord::Message message(result);
-		futures.push_back(std::async(std::launch::async, fire_command_method, this, message));
+	void Bot::ChannelUpdateEvent(nlohmann::json result) {
+		discord::Channel new_channel = discord::Channel(result);
+		std::replace_if(channels.begin(), channels.end(), [new_channel](discord::Channel a) { return new_channel.id == a.id; }, new_channel);
+
+		discord_event_func_holder.call<events::channel_create>(futures, ready, new_channel);
+	}
+
+	void Bot::ChannelDeleteEvent(nlohmann::json result) {
+		std::remove_if(channels.begin(), channels.end(), [&](discord::Channel& channel) { return channel.id == result["id"].get<snowflake>(); });
+
+		discord_event_func_holder.call<events::channel_delete>(futures, ready, discord::Channel(result));
+	}
+
+	void Bot::ChannelPinsUpdateEvent(nlohmann::json result) {
+		discord::Channel new_channel = discord::Channel(result["channel_id"].get<snowflake>());
+		new_channel.last_pin_timestamp = result["last_pin_timestamp"];
+		new_channel.guild_id = result["guild_id"].get<snowflake>();
+
+		std::replace_if(channels.begin(), channels.end(), [new_channel](discord::Channel a) { return new_channel.id == a.id; }, new_channel);
+
+		discord_event_func_holder.call<events::channel_pins_update>(futures, ready, discord::Channel(result));
 	}
 
 	void Bot::GuildCreateEvent(nlohmann::json result) {
@@ -192,6 +273,232 @@ namespace discord {
 			channels.push_back(discord::Channel(channel, guild_id));
 		}
 
-		guilds.push_back(discord::Guild(result));
+		discord::Guild guild(result);
+		guilds.push_back(guild);
+
+		discord_event_func_holder.call<events::guild_create>(futures, ready, guild);
+	}
+
+	void Bot::GuildUpdateEvent(nlohmann::json result) {
+		discord::Guild guild(result);
+		std::replace_if(guilds.begin(), guilds.end(), [guild](discord::Guild gild) { return gild.id == guild.id; }, guild);
+
+		discord_event_func_holder.call<events::guild_update>(futures, ready, guild);
+	}
+
+	void Bot::GuildDeleteEvent(nlohmann::json result) {
+		discord::Guild guild;
+		guild.id = result["id"].get<snowflake>();
+		guild.unavailable = true;
+		std::remove_if(guilds.begin(), guilds.end(), [guild](discord::Guild gild) {return gild.id == guild.id; });
+
+		discord_event_func_holder.call<events::guild_delete>(futures, ready, guild);
+	}
+
+	void Bot::GuildBanAddEvent(nlohmann::json result) {
+		discord::Guild guild(result["guild_id"].get<snowflake>());
+		discord::User user(result["user"]);
+
+		discord_event_func_holder.call<events::guild_ban_add>(futures, ready, guild, user);
+	}
+
+	void Bot::GuildBanRemoveEvent(nlohmann::json result) {
+		discord::Guild guild(result["guild_id"].get<snowflake>());
+		discord::User user(result["user"]);
+
+		discord_event_func_holder.call<events::guild_ban_remove>(futures, ready, guild, user);
+	}
+
+	void Bot::GuildEmojisUpdateEvent(nlohmann::json result) {
+		discord::Guild guild(result["guild_id"].get<snowflake>());
+		std::vector<discord::Emoji> emojis;
+		for (auto emoji : result["emojis"]) {
+			emojis.push_back({ emoji });
+		}
+		guild.emojis = emojis;
+		std::replace_if(guilds.begin(), guilds.end(), [guild](discord::Guild gild) { return gild.id == guild.id; }, guild);
+
+		discord_event_func_holder.call<events::guild_emojis_update>(futures, ready, guild);
+	}
+
+	void Bot::GuildIntegrationsUpdateEvent(nlohmann::json result) {
+		discord_event_func_holder.call<events::guild_integrations_update>(futures, ready, discord::Guild(result["guild_id"].get<snowflake>()));
+	}
+
+	void Bot::GuildMemberAddEvent(nlohmann::json result) {
+		std::cout << result << std::endl;
+		discord::Member member(result);
+		discord::Guild guild(result["guild_id"].get<snowflake>());
+
+		discord_event_func_holder.call<events::guild_member_add>(futures, ready, guild, member);
+	}
+
+	void Bot::GuildMemberRemoveEvent(nlohmann::json result) {
+		discord::Guild guild(result["guild_id"].get<snowflake>());
+		discord::User user(result["user"]);
+		std::remove_if(members.begin(), members.end(), [user](discord::Member member) { return member.user.id == user.id; });
+
+		discord_event_func_holder.call<events::guild_member_remove>(futures, ready, guild, user);
+	}
+
+	void Bot::GuildMemberUpdateEvent(nlohmann::json result) {
+		discord::Guild guild(result["guild_id"].get<snowflake>());
+		discord::Member member = GetIf(guild.members, [result](discord::Member& member) { return member.user.id == result["user"]["id"]; });
+		member.roles.clear();
+		for (auto role : result["roles"]) {
+			member.roles.push_back(role.get<snowflake>());
+		}
+		member.nick = result["nick"];
+
+		discord_event_func_holder.call<events::guild_member_update>(futures, ready, member);
+	}
+
+	void Bot::GuildMembersChunkEvent(nlohmann::json result) {
+		discord_event_func_holder.call<events::guild_members_chunk>(futures, ready);
+	}
+
+	void Bot::GuildRoleCreateEvent(nlohmann::json result) {
+		discord::Role role(result["role"]);
+
+		discord_event_func_holder.call<events::guild_role_create>(futures, ready, role);
+	}
+
+	void Bot::GuildRoleUpdateEvent(nlohmann::json result) {
+		discord::Role role(result["role"]);
+
+		discord_event_func_holder.call<events::guild_role_create>(futures, ready, role);
+	}
+
+	void Bot::GuildRoleDeleteEvent(nlohmann::json result) {
+		discord::Guild guild(result["guild_id"].get<snowflake>());
+		discord::Role role = GetIf(guild.roles, [result](discord::Role& role) {return role.id == result["role_id"].get<snowflake>(); });
+		std::replace_if(guild.roles.begin(), guild.roles.end(), [role](discord::Role& r) { return r.id == role.id; }, role);
+
+		discord_event_func_holder.call<events::guild_role_delete>(futures, ready, role);
+	}
+
+	void Bot::MessageCreateEvent(nlohmann::json result) {
+		discord::Message message(result);
+		if (messages.size() >= message_cache_count) {
+			messages.erase(messages.begin());
+		}
+		messages.push_back(message);
+
+		discord_event_func_holder.call<events::message_create>(futures, ready, message);
+		DoFunctionLater(fire_command_method, this, message);
+	}
+
+	void Bot::MessageUpdateEvent(nlohmann::json result) {
+		discord::Message message(result);
+		if (messages.size() >= message_cache_count) {
+			messages.erase(messages.begin());
+		}
+		std::replace_if(messages.begin(), messages.end(), [message](discord::Message& msg) { return msg.id == message.id; }, message);
+
+		discord_event_func_holder.call<events::message_update>(futures, ready, message);
+	}
+
+	void Bot::MessageDeleteEvent(nlohmann::json result) {
+		discord::Message message = GetIf(messages, [result](discord::Message& msg) { return msg.id == result["id"].get<snowflake>(); });
+		std::remove_if(messages.begin(), messages.end(), [message](discord::Message& msg) { return msg.id == message.id; });
+
+		discord_event_func_holder.call<events::message_delete>(futures, ready, message);
+	}
+
+	void Bot::MessageDeleteBulkEvent(nlohmann::json result) {
+		std::vector<discord::Message> msgs;
+		for (auto id : result["ids"]) {
+			discord::Message message = GetIf(messages, [id](discord::Message& msg) { return msg.id == id.get<snowflake>(); });
+			message.channel = discord::Channel(result["channel_id"].get<snowflake>());
+			if (result.contains("guild_id")) message.guild = discord::Guild(result["guild_id"].get<snowflake>());
+
+			msgs.push_back(message);
+		}
+
+		auto ib = std::begin(msgs);
+		auto iter = std::remove_if(std::begin(messages), std::end(messages),
+			[&ib, &msgs](discord::Message x) -> bool {
+				while (ib != std::end(msgs) && ib->id < x.id) ++ib;
+				return (ib != std::end(msgs) && ib->id == x.id);
+			});
+
+		discord_event_func_holder.call<events::message_delete_bulk>(futures, ready, msgs);
+	}
+
+	void Bot::MessageReactionAddEvent(nlohmann::json result) {
+		discord::Message message = GetIf(messages, [result](discord::Message& msg) { return msg.id == result["message_id"].get<snowflake>(); });
+		discord::Channel channel = GetIf(channels, [result](discord::Channel& channel) { return channel.id == result["channel_id"].get<snowflake>(); });
+		message.channel = channel;
+
+		if (result.contains("guild_id")) {
+			message.guild = discord::Guild(result["guild_id"].get<snowflake>());
+			channel.guild_id = result["guild_id"].get<snowflake>();
+		}
+
+		discord::Emoji emoji(result["emoji"]);
+		discord::User user(result["user_id"].get<snowflake>());
+
+		discord_event_func_holder.call<events::message_reaction_add>(futures, ready, message, emoji, user);
+	}
+
+	void Bot::MessageReactionRemoveEvent(nlohmann::json result) {
+		discord::Message message = GetIf(messages, [result](discord::Message& msg) { return msg.id == result["message_id"].get<snowflake>(); });
+		discord::Channel channel = GetIf(channels, [result](discord::Channel& channel) { return channel.id == result["channel_id"].get<snowflake>(); });
+		message.channel = channel;
+
+		if (result.contains("guild_id")) {
+			channel.guild_id = result["guild_id"].get<snowflake>();
+		}
+
+		discord::Emoji emoji(result["emoji"]);
+		discord::User user(result["user_id"].get<snowflake>());
+
+		discord_event_func_holder.call<events::message_reaction_remove>(futures, ready, message, emoji, user);
+	}
+
+	void Bot::MessageReactionRemoveAllEvent(nlohmann::json result) {
+		discord::Message message = GetIf(messages, [result](discord::Message& msg) { return msg.id == result["message_id"].get<snowflake>(); });
+		discord::Channel channel = GetIf(channels, [result](discord::Channel& channel) { return channel.id == result["channel_id"].get<snowflake>(); });
+		message.channel = channel;
+
+		if (result.contains("guild_id")) {
+			channel.guild_id = result["guild_id"].get<snowflake>();
+		}
+
+		discord_event_func_holder.call<events::message_reaction_remove_all>(futures, ready, message);
+	}
+
+	void Bot::PresenceUpdateEvent(nlohmann::json result) {
+		discord_event_func_holder.call<events::presence_update>(futures, ready, discord::Member(result["user"]["id"].get<snowflake>()));
+	}
+
+	void Bot::TypingStartEvent(nlohmann::json result) {
+		discord::User user(result["user_id"].get<snowflake>());
+		discord::Channel channel(result["channel_id"].get<snowflake>());
+		if (result.contains("guild_id")) channel.guild_id = result["guild_id"].get<snowflake>();
+		int timestamp = result["timestamp"].get<int>();
+
+		discord_event_func_holder.call<events::typing_start>(futures, ready, user, channel, timestamp);
+	}
+
+	void Bot::UserUpdateEvent(nlohmann::json result) {
+		discord::User user(result);
+
+		discord_event_func_holder.call<events::user_update>(futures, ready, user);
+	}
+
+	void Bot::VoiceStateUpdateEvent(nlohmann::json result) {
+		discord_event_func_holder.call<events::voice_state_update>(futures, ready, result);
+	}
+
+	void Bot::VoiceServerUpdateEvent(nlohmann::json result) {
+		discord_event_func_holder.call<events::voice_server_update>(futures, ready, result);
+	}
+
+	void Bot::WebhooksUpdateEvent(nlohmann::json result) {
+		discord::Channel channel(result["channel_id"].get<snowflake>());
+		channel.guild_id = result["guild_id"].get<snowflake>();
+
+		discord_event_func_holder.call<events::webhooks_update>(futures, ready, channel);
 	}
 }
