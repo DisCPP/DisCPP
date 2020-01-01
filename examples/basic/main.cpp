@@ -23,7 +23,11 @@ int main(int argc, const char* argv[]) {
 	}, {});
 
 	bot.HandleEvent<discord::events::ready>([&bot]() {
-		std::cout << "Ready, updating presence!" << std::endl;
+		std::cout << "Ready!" << std::endl
+				  << "Logged in as: " << bot.bot_user.username << "#" << bot.bot_user.discriminator << std::endl
+				  << "ID: " << bot.bot_user.id << std::endl
+				  << "-----------------------------" << std::endl;
+
 		discord::Activity activity = discord::Activity("With Crashes!", discord::presence::ActivityType::GAME, discord::presence::Status::idle);
 		bot.UpdatePresence(activity);
 	});

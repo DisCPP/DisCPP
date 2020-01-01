@@ -58,14 +58,14 @@ namespace discord {
 	discord::Message Channel::Send(std::string text, bool tts) {
 		std::string raw_text = "{\"content\":\"" + text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
 		cpr::Body body = cpr::Body(raw_text);
-		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), { }, body);
+		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
 		return discord::Message(result);
 	}
 
 	discord::Message Channel::Send(discord::EmbedBuilder embed, std::string text) {
 		cpr::Body body = cpr::Body(Format("{\"embed\": %%}", embed.ToJson(), ( (!text.empty()) ? Format(", \"content\": \"%\"", text) : "") ));
-		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ {"Content-Type", "application/json"} }), { }, body);
+		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
 
 		return discord::Message(result);
 	}
@@ -78,9 +78,12 @@ namespace discord {
 		}
 
 		multipart_data.parts.emplace_back("payload_json", Format("{\"content\": \"%\"}", text));
-		std::string response = cpr::Post(cpr::Url{ Endpoint("/channels/%/messages", id) }, DefaultHeaders({ {"Content-Type", "multipart/form-data"} }), multipart_data).text;
 
-		return discord::Message(nlohmann::json::parse(response));
+		WaitForRateLimits(id, RateLimitBucketType::CHANNEL);
+		cpr::Response response = cpr::Post(cpr::Url{ Endpoint("/channels/%/messages", id) }, DefaultHeaders({ {"Content-Type", "multipart/form-data"} }), multipart_data);
+		HandleRateLimits(response.header, id, RateLimitBucketType::CHANNEL);
+
+		return discord::Message(nlohmann::json::parse(response.text));
 	}
 
 	discord::Channel Channel::Modify(ModifyRequest modify_request) {
@@ -117,20 +120,20 @@ namespace discord {
 		}
 
 		cpr::Body body = cpr::Body("{\"" + field + "\": \"" + modify_request.value + "\"}");
-		nlohmann::json result = SendPatchRequest(Endpoint("/channels/%", id), headers, body);
+		nlohmann::json result = SendPatchRequest(Endpoint("/channels/%", id), headers, id, RateLimitBucketType::CHANNEL, body);
 		
 		*this = discord::Channel(result);
 		return *this;
 	}
 
 	discord::Channel Channel::Delete() {
-		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/%", id), DefaultHeaders());
+		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/%", id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 		*this = discord::Channel();
 		return *this;
 	}
 
 	discord::Message Channel::FindMessage(snowflake message_id) {
-		nlohmann::json result = SendGetRequest(Endpoint("/channels/%/messages/%", id, message_id), DefaultHeaders(), {}, {});
+		nlohmann::json result = SendGetRequest(Endpoint("/channels/%/messages/%", id, message_id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 		return discord::Message(result);
 	}
 
@@ -148,7 +151,7 @@ namespace discord {
 		}
 
 		cpr::Body body("{\"messages\": [" + combined_message + "]}");
-		nlohmann::json result = SendPostRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), {}, body);
+		nlohmann::json result = SendPostRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 	}
 
 	std::vector<discord::GuildInvite> Channel::GetInvites() {
@@ -163,7 +166,7 @@ namespace discord {
 
 	discord::GuildInvite Channel::CreateInvite(int max_age, int max_uses, bool temporary, bool unique) {
 		cpr::Body body("{\"max_age\": " + std::to_string(max_age) + ", \"max_uses\": " + std::to_string(max_uses) + ", \"temporary\": " + std::to_string(temporary) + ", \"unique\": " + std::to_string(unique) + "}");
-		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/invites", id), DefaultHeaders({ {"Content-Type", "application/json" } }), {}, body);
+		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/invites", id), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 		discord::GuildInvite invite(result);
 
 		return invite;
@@ -185,10 +188,10 @@ namespace discord {
 	}
 
 	void Channel::GroupDMAddRecipient(discord::User user) {
-		nlohmann::json result = SendPutRequest(Endpoint("/channels/%/recipients/%", id, user.id), DefaultHeaders(), {});
+		nlohmann::json result = SendPutRequest(Endpoint("/channels/%/recipients/%", id, user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 
 	void Channel::GroupDMRemoveRecipient(discord::User user) {
-		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/%/recipients/%", id, user.id), DefaultHeaders());
+		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/%/recipients/%", id, user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 }

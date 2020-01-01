@@ -30,6 +30,8 @@ namespace discord {
 		std::string prefix;
 		std::string token;
 
+		discord::User bot_user;
+
 		std::vector<discord::Channel> channels;
 		std::vector<discord::Member> members;
 		std::vector<discord::Guild> guilds;
@@ -51,7 +53,7 @@ namespace discord {
 		Bot(std::string token, std::string prefix);
 		int Run();
 		discord::Guild GetGuild(snowflake guild_id);
-		discord::User GetCurrentUser();
+		// discord::User GetCurrentUser();
 		// discord::User ModifyCurrentUser(std::string username); // https://discordapp.com/developers/docs/resources/user#modify-current-user
 		void LeaveGuild(discord::Guild guild);
 		void UpdatePresence(discord::Activity activity);

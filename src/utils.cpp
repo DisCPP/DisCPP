@@ -21,29 +21,39 @@ std::string discord::GetOsName() {
 	#endif
 }
 
-nlohmann::json discord::SendGetRequest(std::string url, cpr::Header headers, cpr::Parameters parameters, cpr::Body body) {
-	auto result = cpr::Get(cpr::Url{ url }, headers, parameters, body);
-	return nlohmann::json::parse((!result.text.empty()) ? result.text : "{}");
+nlohmann::json discord::HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket) {
+	HandleRateLimits(response.header, object, ratelimit_bucket);
+	return nlohmann::json::parse((!response.text.empty()) ? response.text : "{}");
 }
 
-nlohmann::json discord::SendPostRequest(std::string url, cpr::Header headers, cpr::Parameters parameters, cpr::Body body) {
-	auto result = cpr::Post(cpr::Url{ url }, headers, parameters, body);
-	return nlohmann::json::parse( (!result.text.empty()) ? result.text : "{}");
+nlohmann::json discord::SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+	WaitForRateLimits(object, ratelimit_bucket);
+	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
+	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-nlohmann::json discord::SendPutRequest(std::string url, cpr::Header headers, cpr::Body body) {
-	auto result = cpr::Put(cpr::Url{ url }, headers, body);
-	return nlohmann::json::parse((!result.text.empty()) ? result.text : "{}");
+nlohmann::json discord::SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+	WaitForRateLimits(object, ratelimit_bucket);
+	cpr::Response result = cpr::Post(cpr::Url{ url }, headers, body);
+	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-nlohmann::json discord::SendPatchRequest(std::string url, cpr::Header headers, cpr::Body body) {
-	auto result = cpr::Patch(cpr::Url{ url }, headers, body);
-	return nlohmann::json::parse((!result.text.empty()) ? result.text : "{}");
+nlohmann::json discord::SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+	WaitForRateLimits(object, ratelimit_bucket);
+	cpr::Response result = cpr::Put(cpr::Url{ url }, headers, body);
+	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-nlohmann::json discord::SendDeleteRequest(std::string url, cpr::Header headers) {
-	auto result = cpr::Delete(cpr::Url{ url }, headers);
-	return nlohmann::json::parse((!result.text.empty()) ? result.text : "{}");
+nlohmann::json discord::SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+	WaitForRateLimits(object, ratelimit_bucket);
+	cpr::Response result = cpr::Patch(cpr::Url{ url }, headers, body);
+	return HandleResponse(result, object, ratelimit_bucket);
+}
+
+nlohmann::json discord::SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket) {
+	WaitForRateLimits(object, ratelimit_bucket);
+	cpr::Response result = cpr::Delete(cpr::Url{ url }, headers);
+	return HandleResponse(result, object, ratelimit_bucket);
 }
 
 cpr::Header discord::DefaultHeaders(cpr::Header add) {
@@ -79,4 +89,78 @@ std::string discord::CombineVectorWithSpaces(std::vector<std::string> vector, in
 
 std::string discord::ReadEntireFile(std::ifstream& file) {
 	return std::string((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
+}
+
+int discord::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bucket) {
+	RateLimit* rlmt = nullptr;
+
+	if (global_ratelimit.remaining_limit == 0) {
+		rlmt = &global_ratelimit;
+	}
+	else {
+		switch (ratelimit_bucket) {
+		case RateLimitBucketType::CHANNEL:
+			rlmt = &channel_ratelimit[object];
+			break;
+		case RateLimitBucketType::GUILD:
+			rlmt = &guild_ratelimit[object];
+			break;
+		case RateLimitBucketType::WEBHOOK:
+			rlmt = &webhook_ratelimit[object];
+			break;
+		case RateLimitBucketType::GLOBAL:
+			rlmt = &global_ratelimit;
+			break;
+		default:
+			throw std::runtime_error("RateLimitBucketType is invalid!");
+			break;
+		}
+	}
+
+	if (rlmt->remaining_limit == 0) {
+		auto current_time = boost::posix_time::second_clock::universal_time() - rlmt->ratelimit_reset;
+		while (current_time.is_negative()) {
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+			current_time = boost::posix_time::second_clock::universal_time() - rlmt->ratelimit_reset;
+		}
+		return current_time.seconds();
+	}
+	return 0;
+}
+
+bool HeaderContains(cpr::Header header, std::string key) {
+	for (auto head : header) {
+		if (head.first == key) return true;
+	}
+	return false;
+}
+
+void discord::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBucketType ratelimit_bucket) {
+	RateLimit* obj = nullptr;
+	if (HeaderContains(header, "X-RateLimit-Global")) {
+		obj = &global_ratelimit;
+	} else if (HeaderContains(header, "X-RateLimit-Limit")) {
+		if (ratelimit_bucket == RateLimitBucketType::CHANNEL) {
+			obj = &channel_ratelimit[object];
+		}
+		else if (ratelimit_bucket == RateLimitBucketType::GUILD) {
+			obj = &guild_ratelimit[object];
+		}
+		else if (ratelimit_bucket == RateLimitBucketType::WEBHOOK) {
+			obj = &webhook_ratelimit[object];
+		}
+		else if (ratelimit_bucket == RateLimitBucketType::GLOBAL) {
+			obj = &global_ratelimit;
+		}
+		else {
+			throw std::runtime_error("RateLimitBucketType is invalid!");
+		}
+	}
+	else {
+		return;
+	}
+
+	obj->limit = std::stoi(header["X-RateLimit-Limit"]);
+	obj->remaining_limit = std::stoi(header["X-RateLimit-Remaining"]);
+	obj->ratelimit_reset = boost::posix_time::from_time_t(std::stoi(header["X-RateLimit-Reset"]));
 }

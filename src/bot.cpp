@@ -42,13 +42,13 @@ namespace discord {
 		throw std::runtime_error("Guild not found!");
 	}
 
-	discord::User Bot::GetCurrentUser() {
+	/*discord::User Bot::GetCurrentUser() {
 		nlohmann::json result = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
 		return discord::User(result);
-	}
+	}*/
 
 	void Bot::LeaveGuild(discord::Guild guild) {
-		SendDeleteRequest(Endpoint("/users/@me/guilds/%", guild.id), DefaultHeaders());
+		SendDeleteRequest(Endpoint("/users/@me/guilds/%", guild.id), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
 	}
 
 	void Bot::UpdatePresence(discord::Activity activity) {
@@ -120,7 +120,7 @@ namespace discord {
 			std::thread bindthread{ &Bot::BindEvents, this };
 
 			utility::string_t stringt = utility::conversions::to_string_t(gateway_endpoint);
-			websocket_client.connect(web::uri(stringt)).then([]() { std::cout << "Connected" << std::endl; });
+			websocket_client.connect(web::uri(stringt));
 			websocket_client.set_message_handler(std::bind(&Bot::OnWebSocketPacket, this, std::placeholders::_1));
 			websocket_client.set_close_handler(std::bind(&Bot::HandleDiscordDisconnect, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
@@ -159,7 +159,7 @@ namespace discord {
 	}
 
 	void Bot::HandleDiscordEvent(nlohmann::json const j, std::string event_name) {
-		std::cout << "Handling discord event (" << event_name << ")" << std::endl;
+		// std::cout << "Handling discord event (" << event_name << ")" << std::endl;
 
 		const nlohmann::json data = j["d"];
 		last_sequence_number = (j.contains("s") && j["s"].is_number()) ? j["s"].get<int>() : -1;
@@ -216,6 +216,9 @@ namespace discord {
 		heartbeat_thread = std::thread{ &Bot::HandleHeartbeat, this };
 		ready = true;
 		session_id = result["session_id"];
+
+		nlohmann::json user_json = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
+		bot_user = discord::User(user_json);
 
 		discord_event_func_holder.call<events::ready>(futures, ready);
 	}

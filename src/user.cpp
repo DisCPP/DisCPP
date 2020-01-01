@@ -41,12 +41,12 @@ namespace discord {
 
 	discord::Channel User::CreateDM() {
 		cpr::Body body(Format("{\"recipient_id\": \"%\"}", id));
-		nlohmann::json result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders(), {}, body);
+		nlohmann::json result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders(), id, RateLimitBucketType::CHANNEL, body);
 		return discord::Channel(result);
 	}
 
 	std::vector<Connection> User::GetUserConnections() {
-		nlohmann::json result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), {}, {});
+		nlohmann::json result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
 
 		std::vector<Connection> connections;
 		for (auto& connection : result) {

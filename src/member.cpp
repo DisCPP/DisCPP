@@ -37,6 +37,6 @@ namespace discord {
 		json_roles += "]";
 
 		cpr::Body body("{\"nick\": \"" + nick + "\", \"roles\": " + json_roles + ", \"mute\": " + std::to_string(mute) + ", \"deaf\": " + std::to_string(deaf) + "\"channel_id\": \"" + channel_id + "\"" + "}");
-		SendPatchRequest(Endpoint("/guilds/" + this->id + "/members/" + id), DefaultHeaders(), body);
+		SendPatchRequest(Endpoint("/guilds/" + this->id + "/members/" + id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 	}
 }

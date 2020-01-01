@@ -7,11 +7,14 @@
 
 #include <cpr/cpr.h>
 
+#include <boost/date_time.hpp>
+
+#include <unordered_map>
+
 namespace discord {
 	class Bot;
 
 	namespace globals {
-		//class Bot* bot_instance;
 		inline discord::Bot* bot_instance;
 	}
 
@@ -106,11 +109,35 @@ namespace discord {
 		return type();
 	}
 
-	nlohmann::json SendGetRequest(std::string url, cpr::Header headers, cpr::Parameters parameters, cpr::Body body);
-	nlohmann::json SendPostRequest(std::string url, cpr::Header headers, cpr::Parameters parameters, cpr::Body body);
-	nlohmann::json SendPutRequest(std::string url, cpr::Header headers, cpr::Body body);
-	nlohmann::json SendPatchRequest(std::string url, cpr::Header headers, cpr::Body body);
-	nlohmann::json SendDeleteRequest(std::string url, cpr::Header headers);
+	// Rate limits
+	struct RateLimit {
+		int limit = 500;
+		int remaining_limit = 500;
+		boost::posix_time::ptime ratelimit_reset = boost::posix_time::ptime{};
+	};
+
+	enum RateLimitBucketType : int {
+		CHANNEL,
+		GUILD,
+		WEBHOOK,
+		GLOBAL
+	};
+
+	inline std::unordered_map<snowflake, RateLimit> guild_ratelimit;
+	inline std::unordered_map<snowflake, RateLimit> channel_ratelimit;
+	inline std::unordered_map<snowflake, RateLimit> webhook_ratelimit;
+	inline RateLimit global_ratelimit;
+
+	inline int WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bucket);
+	inline void HandleRateLimits(cpr::Header header, snowflake object, RateLimitBucketType ratelimit_bucket);
+	// End of rate limits
+
+	extern nlohmann::json HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket);
+	extern nlohmann::json SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
+	extern nlohmann::json SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
+	extern nlohmann::json SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
+	extern nlohmann::json SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
+	extern nlohmann::json SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket);
 	cpr::Header DefaultHeaders(cpr::Header add = {});
 	bool StartsWith(std::string string, std::string prefix);
 	std::vector<std::string> SplitString(std::string str, char delimter);
