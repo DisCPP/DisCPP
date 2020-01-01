@@ -129,11 +129,13 @@ namespace discord {
 			bindthread.join();
 		} else {
 			std::cout << "Improper token, failed to connect to discord gateway!" << std::endl;
+			throw std::runtime_error("Improper token, failed to connect to discord gateway!");
 		}
 	}
 
 	void Bot::HandleDiscordDisconnect(websocket_close_status close_status, utility::string_t reason, std::error_code error_code) {
 		std::cout << "Websocket was closed with error: 400" << error_code.value() << "!" << std::endl;
+		throw std::runtime_error("Websocket was closed with error: 400" + std::to_string(error_code.value()) + "!");
 	}
 
 	void Bot::OnWebSocketPacket(websocket_incoming_message msg) {
@@ -329,7 +331,6 @@ namespace discord {
 	}
 
 	void Bot::GuildMemberAddEvent(nlohmann::json result) {
-		std::cout << result << std::endl;
 		discord::Member member(result);
 		discord::Guild guild(result["guild_id"].get<snowflake>());
 

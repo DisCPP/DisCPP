@@ -1,10 +1,9 @@
-#include <bot.h>
-#include <context.h>
-#include <command_handler.h>
-#include <channel.h>
-#include <embed_builder.h>
-#include <events.h>
-#include <activity.h>
+#include <discordpp/bot.h>
+#include <discordpp/context.h>
+#include <discordpp/command_handler.h>
+#include <discordpp/channel.h>
+#include <discordpp/events.h>
+#include <discordpp/activity.h>
 
 #include <iostream>
 #include <fstream>

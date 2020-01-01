@@ -230,7 +230,6 @@ namespace discord {
 			break;
 		}
 		cpr::Body body(Format("{\"style\": %}", style));
-		std::cout << Endpoint("/guilds/%/widget.png", id) << std::endl;
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/widget.png", id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 		return std::string();
 	}

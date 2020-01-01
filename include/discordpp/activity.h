@@ -35,7 +35,7 @@ namespace discord {
 		std::string text;
 		presence::ActivityType type;
 		std::string url;
-		// end
+		// end of discord activity
 		std::string status;
 		bool afk;
 

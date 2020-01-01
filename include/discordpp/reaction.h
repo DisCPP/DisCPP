@@ -7,7 +7,6 @@
 #include <nlohmann/json.hpp>
 
 namespace discord {
-	//class Emoji;
 
 	class Reaction : DiscordObject {
 	public:

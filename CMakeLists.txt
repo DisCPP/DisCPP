@@ -12,7 +12,7 @@ find_package(Boost COMPONENTS system date_time REQUIRED)
 file(GLOB_RECURSE source_list src/*.cpp)
 add_library(discordpp STATIC ${source_list})
 
-target_include_directories(discordpp PUBLIC include)
+target_include_directories(discordpp PUBLIC include PRIVATE include/discordpp)
 
 target_link_libraries(discordpp PRIVATE cpr)
 target_link_libraries(discordpp PUBLIC nlohmann_json::nlohmann_json)

@@ -1,5 +1,3 @@
-#include "..\include\channel.h"
-#include "..\include\channel.h"
 #include "channel.h"
 #include "utils.h"
 #include "bot.h"
