@@ -12,12 +12,12 @@ namespace discord {
 		if (json.contains("guild_id")) {
 			guild = discord::Guild(json["guild_id"].get<snowflake>());
 		}
-		author = discord::User(json["author"]);
-		content = json["content"];
-		timestamp = json["timestamp"];
+		author = (json.contains("author")) ? discord::User(json["author"]) : discord::User();
+		content = GetDataSafely<std::string>(json, "content");
+		timestamp = GetDataSafely<std::string>(json, "timestamp");
 		edited_timestamp = GetDataSafely<std::string>(json, "edited_timestamp");
-		tts = json["tts"].get<bool>();
-		mention_everyone = json["mention_everyone"].get<bool>();
+		tts = GetDataSafely<bool>(json, "tts");
+		mention_everyone = GetDataSafely<bool>(json, "mention_everyone");
 		for (auto& mention : json["mentions"]) { // This has a weird layout, thats why theres so much json stuff. 
 												 // The API docs says this type is an, "array of user objects, with an additional partial member field"
 			nlohmann::json new_member_json = {
@@ -59,9 +59,9 @@ namespace discord {
 				reactions.push_back(discord::Reaction(reaction));
 			}
 		}
-		pinned = json["pinned"].get<bool>();
+		pinned = GetDataSafely<bool>(json, "pinned");
 		webhook_id = GetDataSafely<snowflake>(json, "webhook_id");
-		type = json["type"].get<int>();
+		type = GetDataSafely<int>(json, "type");
 		if (json.contains("activity")) {
 			activity = discord::MessageActivity(json["activity"]);
 		}
@@ -71,7 +71,7 @@ namespace discord {
 		if (json.contains("message_reference")) {
 			message_reference = discord::MessageReference(json["message_reference"]);
 		}
-		flags = json["flags"].get<int>();
+		flags = GetDataSafely<int>(json, "flags");
 	}
 
 	void Message::AddReaction(discord::Emoji emoji) {
