@@ -1,7 +1,8 @@
+#include "guild.h"
+#include "role.h"
 #include "member.h"
 #include "utils.h"
 #include "bot.h"
-#include "role.h"
 
 namespace discord {
 	Member::Member(snowflake id) : discord::DiscordObject(id) {
@@ -12,11 +13,12 @@ namespace discord {
 		}
 	}
 
-	Member::Member(nlohmann::json json) {
+	Member::Member(nlohmann::json json, snowflake guild_id) : guild_id(guild_id){
 		user = discord::User(json["user"]);
 		nick = GetDataSafely<std::string>(json, "nick");
+		discord::Guild guild(guild_id);
 		for (auto& role : json["roles"]) {
-			roles.push_back(role.get<snowflake>());
+			roles.push_back(discord::Role(role, guild));
 		}
 		joined_at = json["joined_at"];
 		premium_since = GetDataSafely<std::string>(json, "premium_since");

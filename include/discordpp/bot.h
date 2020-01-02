@@ -138,7 +138,7 @@ namespace discord {
 			void(discord::Message const, discord::Emoji const, discord::User const),   // MESSAGE_REACTION_ADD
 			void(discord::Message const, discord::Emoji const, discord::User const),   // MESSAGE_REACTION_REMOVE
 			void(discord::Message const),											   // MESSAGE_REACTION_REMOVE_ALL
-			void(discord::Member const),											   // PRECENSE_UPDATE
+			void(discord::User const),												   // PRECENSE_UPDATE
 			void(discord::User const, discord::Channel const, int const),			   // TYPING_START (user, channel, timestamp)
 			void(discord::User const),												   // USER_UPDATE
 			void(nlohmann::json const),												   // VOICE_STATE_UPDATE (raw_json)

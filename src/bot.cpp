@@ -271,7 +271,7 @@ namespace discord {
 		snowflake guild_id = result["id"].get<snowflake>();
 
 		for (auto& member : result["members"]) {
-			members.push_back(discord::Member(member));
+			members.push_back(discord::Member(member, guild_id));
 		}
 
 		for (auto& channel : result["channels"]) {
@@ -331,8 +331,8 @@ namespace discord {
 	}
 
 	void Bot::GuildMemberAddEvent(nlohmann::json result) {
-		discord::Member member(result);
 		discord::Guild guild(result["guild_id"].get<snowflake>());
+		discord::Member member(result, guild.id);
 
 		discord_event_func_holder.call<events::guild_member_add>(futures, ready, guild, member);
 	}
@@ -350,7 +350,7 @@ namespace discord {
 		discord::Member member = GetIf(guild.members, [result](discord::Member& member) { return member.user.id == result["user"]["id"]; });
 		member.roles.clear();
 		for (auto role : result["roles"]) {
-			member.roles.push_back(role.get<snowflake>());
+			member.roles.push_back(discord::Role(role, guild));
 		}
 		member.nick = result["nick"];
 
@@ -473,7 +473,7 @@ namespace discord {
 	}
 
 	void Bot::PresenceUpdateEvent(nlohmann::json result) {
-		discord_event_func_holder.call<events::presence_update>(futures, ready, discord::Member(result["user"]["id"].get<snowflake>()));
+		discord_event_func_holder.call<events::presence_update>(futures, ready, discord::User(result["user"]));
 	}
 
 	void Bot::TypingStartEvent(nlohmann::json result) {

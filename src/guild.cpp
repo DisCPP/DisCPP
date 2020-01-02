@@ -48,7 +48,7 @@ namespace discord {
 		member_count = GetDataSafely<int>(json, "member_count");
 		// voice_states
 		for (auto& member : json["members"]) {
-			members.push_back(discord::Member(member));
+			members.push_back(discord::Member(member, id));
 		}
 		for (auto& channel : json["channels"]) {
 			channels.push_back(discord::Channel(channel));
@@ -99,7 +99,7 @@ namespace discord {
 
 		cpr::Body body("{\"access_token\": \"" + access_token + "\", \"nick\": \"" + nick + "\", \"roles\": " + json_roles + ", \"mute\": " + std::to_string(mute) + ", \"deaf\": " + std::to_string(deaf) + "}");
 		nlohmann::json result = SendPutRequest(Endpoint("/guilds/%/members/%", this->id, id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
-		return (result == "{}") ? discord::Member(id) : discord::Member(result);
+		return (result == "{}") ? discord::Member(id) : discord::Member(result, id); // If the member is already added, return it.
 	}
 
 	void Guild::AddRoleToMember(discord::Member member, discord::Role role) {

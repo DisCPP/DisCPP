@@ -34,7 +34,7 @@ namespace discord {
 				{"roles", mention["member"]["roles"]}
 			};
 
-			mentions.push_back(discord::Member(new_member_json));
+			mentions.push_back(discord::Member(new_member_json, guild.id));
 		}
 		for (auto& mentioned_role : json["mentioned_roles"]) {
 			mentioned_roles.push_back(mentioned_role.get<snowflake>());

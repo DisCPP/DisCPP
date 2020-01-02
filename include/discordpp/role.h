@@ -7,9 +7,12 @@
 #include <nlohmann/json.hpp>
 
 namespace discord {
+	class Guild;
+
 	class Role : DiscordObject {
 	public:
 		Role() = default;
+		Role(snowflake role_id, discord::Guild guild);
 		Role(nlohmann::json json);
 
 		snowflake id;
