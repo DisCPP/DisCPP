@@ -133,8 +133,12 @@ namespace discord {
 			throw std::runtime_error("Embed field values can only be up to 0-1024 characters");
 		}
 
-		std::string string_json = Format("{\"name\": \"%\", \"value\": \"%\", \"inline\": %}", name, value, is_inline);
-		embed_json["fields"].push_back(nlohmann::json::parse(string_json));
+		nlohmann::json field = nlohmann::json({
+				{"name", name},
+				{"value", value},
+				{"inline", is_inline}
+			});
+		embed_json["fields"].push_back(field);
 		return *this;
 	}
 
