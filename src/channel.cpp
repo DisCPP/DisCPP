@@ -16,14 +16,11 @@ namespace discord {
 	}
 
 	Channel::Channel(nlohmann::json json) : discord::DiscordObject(json["id"].get<snowflake>()) {
-		id = json["id"].get<snowflake>();
-		type = json["type"].get<int>();
+		id = GetDataSafely<snowflake>(json, "id");
+		type = GetDataSafely<int>(json, "type");
 		if (json.contains("guild_id")) { // Can't use GetDataSafely so it doesn't over write the other constructor.
 			guild_id = json["guild_id"].get<snowflake>();
 		}
-		/*if (json.contains("guild_id")) {
-			guild = discord::Guild(json["guild_id"].get<snowflake>());
-		}*/
 		position = GetDataSafely<int>(json, "position");
 		if (json.contains("permission_overwrites")) {
 			for (auto permission_overwrite : json["permission_overwrites"]) {

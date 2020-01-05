@@ -12,13 +12,13 @@ namespace discord {
 	}
 
 	Role::Role(nlohmann::json json) {
-		id = json["id"].get<snowflake>();
-		name = json["name"];
-		color = json["color"].get<int>();
-		hoist = json["hoist"].get<bool>();
-		position = json["position"].get<int>();
-		permissions = Permissions(PermissionType::ROLE, json["permissions"].get<int>());
-		managed = json["managed"].get<bool>();
-		mentionable = json["mentionable"].get<bool>();
+		id = GetDataSafely<snowflake>(json, "id");
+		name = GetDataSafely<std::string>(json, "name");
+		color = GetDataSafely<int>(json, "color");
+		hoist = GetDataSafely<bool>(json, "hoist");
+		position = GetDataSafely<int>(json, "position");
+		permissions = (json.contains("permissions")) ? Permissions(PermissionType::ROLE, json["permissions"].get<int>()) : Permissions();
+		managed = GetDataSafely<bool>(json, "manages");
+		mentionable = GetDataSafely<bool>(json, "mentionable");
 	}
 }

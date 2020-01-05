@@ -15,43 +15,51 @@ namespace discord {
 	}
 
 	Guild::Guild(nlohmann::json json) {
-		id = json["id"].get<snowflake>();
-		name = json["name"];
-		icon = json["icon"];
+		id = GetDataSafely<snowflake>(json, "id");
+		name = GetDataSafely<std::string>(json, "name");
+		icon = GetDataSafely<std::string>(json, "icon");
 		splash = GetDataSafely<std::string>(json, "splash");
 		owner = GetDataSafely<bool>(json, owner);
-		owner_id = json["owner_id"].get<snowflake>();
+		owner_id = GetDataSafely<snowflake>(json, "owner_id");
 		permissions = GetDataSafely<int>(json, "permissions");
-		region = json["region"];
+		region = GetDataSafely<std::string>(json, "region");
 		afk_channel_id = GetDataSafely<snowflake>(json, "afk_channel_id");
-		afk_timeout = json["afk_timeout"].get<int>();
+		afk_timeout = GetDataSafely<int>(json, "afk_timeout");
 		embed_enabled = GetDataSafely<bool>(json, "embed_enabled");
 		embed_channel_id = GetDataSafely<snowflake>(json, "embed_channel_id");
-		verification_level = static_cast<discord::specials::VerificationLevel>(json["verification_level"].get<int>());
-		default_message_notifications = static_cast<discord::specials::DefaultMessageNotificationLevel>(json["default_message_notifications"].get<int>());
-		explicit_content_filter = static_cast<discord::specials::ExplicitContentFilterLevel>(json["explicit_content_filter"].get<int>());
-		for (auto& role : json["roles"]) {
-			roles.push_back(discord::Role(role));
+		verification_level = (json.contains("verification_level")) ? static_cast<discord::specials::VerificationLevel>(json["verification_level"].get<int>()) : discord::specials::VerificationLevel::NO_VERIFICATION;
+		default_message_notifications = (json.contains("default_message_notifications")) ? static_cast<discord::specials::DefaultMessageNotificationLevel>(json["default_message_notifications"].get<int>()) : discord::specials::DefaultMessageNotificationLevel::ALL_MESSAGES;
+		explicit_content_filter = (json.contains("explicit_content_filter")) ? static_cast<discord::specials::ExplicitContentFilterLevel>(json["explicit_content_filter"].get<int>()) : discord::specials::ExplicitContentFilterLevel::DISABLED;
+		if (json.contains("roles")) {
+			for (auto& role : json["roles"]) {
+				roles.push_back(discord::Role(role));
+			}
 		}
-		for (auto& emoji : json["emojis"]) {
-			emojis.push_back(discord::Emoji(emoji));
+		if (json.contains("emojis")) {
+			for (auto& emoji : json["emojis"]) {
+				emojis.push_back(discord::Emoji(emoji));
+			}
 		}
 		// features
-		mfa_level = static_cast<discord::specials::MFALevel>(json["mfa_level"].get<int>());
+		mfa_level = (json.contains("mfa_level")) ? static_cast<discord::specials::MFALevel>(json["mfa_level"].get<int>()) : discord::specials::MFALevel::NO_MFA;
 		application_id = GetDataSafely<snowflake>(json, "application_id");
 		widget_enabled = GetDataSafely<bool>(json, "widget_enabled");
 		widget_channel_id = GetDataSafely<snowflake>(json, "widget_channel_id");
-		system_channel_id = json["system_channel_id"].get<snowflake>();
+		system_channel_id = GetDataSafely<snowflake>(json, "system_channel_id");
 		joined_at = GetDataSafely<std::string>(json, "joined_at");
 		large = GetDataSafely<bool>(json, "large");
 		unavailable = GetDataSafely<bool>(json, "unavailable");
 		member_count = GetDataSafely<int>(json, "member_count");
 		// voice_states
-		for (auto& member : json["members"]) {
-			members.push_back(discord::Member(member, id));
+		if (json.contains("members")) {
+			for (auto& member : json["members"]) {
+				members.push_back(discord::Member(member, id));
+			}
 		}
-		for (auto& channel : json["channels"]) {
-			channels.push_back(discord::Channel(channel));
+		if (json.contains("channels")) {
+			for (auto& channel : json["channels"]) {
+				channels.push_back(discord::Channel(channel));
+			}
 		}
 		// presences
 		max_presences = GetDataSafely<int>(json, "max_presences");
@@ -59,9 +67,9 @@ namespace discord {
 		vanity_url_code = GetDataSafely<std::string>(json, "vanity_url_code");
 		description = GetDataSafely<std::string>(json, "description");
 		banner = GetDataSafely<std::string>(json, "banner");
-		premium_tier = static_cast<discord::specials::NitroTier>(json["premium_tier"].get<int>());
+		premium_tier = (json.contains("premium_tier")) ? static_cast<discord::specials::NitroTier>(json["premium_tier"].get<int>()) : discord::specials::NitroTier::NO_TIER;
 		premium_subscription_count = GetDataSafely<int>(json, "premium_subscription_count");
-		preferred_locale = json["preferred_locale"];
+		preferred_locale = GetDataSafely<std::string>(json, "preferred_locale");
 	}
 
 	void Guild::DeleteGuild() {

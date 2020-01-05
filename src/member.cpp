@@ -14,16 +14,18 @@ namespace discord {
 	}
 
 	Member::Member(nlohmann::json json, snowflake guild_id) : guild_id(guild_id){
-		user = discord::User(json["user"]);
+		user = (json.contains("user")) ? discord::User(json["user"]) : discord::User();
 		nick = GetDataSafely<std::string>(json, "nick");
 		discord::Guild guild(guild_id);
-		for (auto& role : json["roles"]) {
-			roles.push_back(discord::Role(role, guild));
+		if (json.contains("roles")) {
+			for (auto& role : json["roles"]) {
+				roles.push_back(discord::Role(role, guild));
+			}
 		}
-		joined_at = json["joined_at"];
+		joined_at = GetDataSafely<std::string>(json, "joined_at");
 		premium_since = GetDataSafely<std::string>(json, "premium_since");
-		deaf = json["deaf"].get<bool>();
-		mute = json["mute"].get<bool>();
+		deaf = GetDataSafely<bool>(json, "deaf");
+		mute = GetDataSafely<bool>(json, "mute");
 	}
 
 	void Member::ModifyMember(std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf, snowflake channel_id) {

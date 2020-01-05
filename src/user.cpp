@@ -12,9 +12,9 @@ namespace discord {
 	}
 
 	User::User(nlohmann::json json) {
-		id = json["id"].get<snowflake>();
-		username = json["username"];
-		discriminator = json["discriminator"];
+		id = GetDataSafely<snowflake>(json, "id");
+		username = GetDataSafely<std::string>(json, "username");
+		discriminator = GetDataSafely<std::string>(json, "discriminator");
 		avatar = GetDataSafely<std::string>(json, "avatar");
 		bot = GetDataSafely<bool>(json, "bot");
 		system = GetDataSafely<bool>(json, "system");
@@ -22,21 +22,23 @@ namespace discord {
 		locale = GetDataSafely<std::string>(json, "locale");
 		verified = GetDataSafely<bool>(json, "verified");
 		flags = GetDataSafely<int>(json, "flags");
-		premium_type = static_cast<discord::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type"));
+		premium_type = (json.contains("premium_type")) ? static_cast<discord::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type")) : discord::specials::NitroSubscription::NO_NITRO;
 	}
 
 	Connection::Connection(nlohmann::json json) {
-		id = json["id"];
-		name = json["name"];
-		type = json["tpye"];
-		revoked = json["revoked"].get<bool>();
-		for (auto& integration : json["integrations"]) {
-			integrations.push_back(discord::GuildIntegration(integration));
+		id = GetDataSafely<snowflake>(json, "id");
+		name = GetDataSafely<std::string>(json, "name");
+		type = GetDataSafely<std::string>(json, "type");
+		revoked = GetDataSafely<bool>(json, "revoked");
+		if (json.contains("integrations")) {
+			for (auto& integration : json["integrations"]) {
+				integrations.push_back(discord::GuildIntegration(integration));
+			}
 		}
-		verified = json["verified"].get<bool>();
-		friend_sync = json["friend_sync"].get<bool>();
-		show_activity = json["show_activity"].get<bool>();
-		visibility = static_cast<ConnectionVisibility>(GetDataSafely<int>(json, "visibility"));
+		verified = GetDataSafely<bool>(json, "verified");
+		friend_sync = GetDataSafely<bool>(json, "friend_sync");
+		show_activity = GetDataSafely<bool>(json, "show_activity");
+		visibility = (json.contains("visibility")) ? static_cast<ConnectionVisibility>(GetDataSafely<int>(json, "visibility")) : ConnectionVisibility::NONE;
 	}
 
 	discord::Channel User::CreateDM() {

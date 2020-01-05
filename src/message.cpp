@@ -7,8 +7,8 @@ namespace discord {
 	}
 
 	Message::Message(nlohmann::json json) {
-		id = json["id"].get<snowflake>();
-		channel = discord::Channel(json["channel_id"].get<snowflake>());
+		id = GetDataSafely<snowflake>(json, "id");
+		channel = (json.contains("channel_id")) ? discord::Channel(json["channel_id"].get<snowflake>()) : discord::Channel();
 		if (json.contains("guild_id")) {
 			guild = discord::Guild(json["guild_id"].get<snowflake>());
 		}
