@@ -269,6 +269,8 @@ namespace discord {
 
 	void Bot::GuildCreateEvent(nlohmann::json result) {
 		snowflake guild_id = result["id"].get<snowflake>();
+		discord::Guild guild(result);
+		guilds.push_back(guild);
 
 		for (auto& member : result["members"]) {
 			members.push_back(discord::Member(member, guild_id));
@@ -277,9 +279,6 @@ namespace discord {
 		for (auto& channel : result["channels"]) {
 			channels.push_back(discord::Channel(channel, guild_id));
 		}
-
-		discord::Guild guild(result);
-		guilds.push_back(guild);
 
 		discord_event_func_holder.call<events::guild_create>(futures, ready, guild);
 	}

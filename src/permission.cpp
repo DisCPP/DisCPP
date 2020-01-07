@@ -13,6 +13,15 @@ namespace discord {
 		deny_perms = PermissionOverwrite(json["deny"].get<int>());
 	}
 
+	nlohmann::json Permissions::ToJson() {
+		return nlohmann::json({
+			{"id", role_user_id},
+			{"type", (permission_type == PermissionType::ROLE) ? "role" : "member"},
+			{"allow", allow_perms.value},
+			{"deny", deny_perms.value}
+		});
+	}
+
 	PermissionOverwrite::PermissionOverwrite(int value) : value(value) { }
 
 	bool PermissionOverwrite::HasPermission(Permission permission) {

@@ -109,6 +109,16 @@ namespace discord {
 		BANNER4
 	};
 
+	enum GuildChannelType : int {
+		GUILD_TEXT,
+		DM,
+		GUILD_VOICE,
+		GROUP_DM,
+		GROUP_CATEGORY,
+		GROUP_NEWS,
+		GROUP_STORE
+	};
+
 	class Guild : DiscordObject {
 	public:
 		Guild() = default;
@@ -118,7 +128,7 @@ namespace discord {
 		// discord::Guild ModifyGuild(); // https://discordapp.com/developers/docs/resources/guild#modify-guild
 		void DeleteGuild();
 		std::vector<discord::Channel> GetChannels();
-		// discord::Channel CreateChannel(std::string name, GuildChannelType type, std::string topic, int bitrate, int user_limit, int rate_limit_per_user, int position, discord::PermissionOverwrites permission_overwrites, discord::Channel category_id, bool nsfw);
+		discord::Channel CreateChannel(std::string name, GuildChannelType type, std::string topic, int bitrate, int user_limit, int rate_limit_per_user, int position, std::vector<discord::Permissions> permission_overwrites, discord::Channel category, bool nsfw);
 		// void ModifyChannelPositions(std::vector<discord::Channel> channels, std::vector<int> positiion); // https://discordapp.com/developers/docs/resources/guild#modify-guild-channel-positions
 		discord::Member GetMember(snowflake id);
 		discord::Member AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf);
@@ -131,9 +141,9 @@ namespace discord {
 		void BanMember(discord::Member member, std::string reason = "");
 		void UnbanMember(discord::Member member);
 		//std::vector<discord::Role> GetRoles(); // Not needed due to variable
-		discord::Role CreateRole(std::string name, Permissions permissions, int color, bool hoist, bool mentionable);
+		discord::Role CreateRole(std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
 		// std::vector<discord::Role> ModifyRolePositions(std::vector<snowflake> ids, std::vector<int> positions); // https://discordapp.com/developers/docs/resources/guild#modify-guild-role-positions
-		discord::Role ModifyRole(discord::Role role, std::string name, Permissions permissions, int color, bool hoist, bool mentionable);
+		discord::Role ModifyRole(discord::Role role, std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
 		void DeleteRole(discord::Role role);
 		// void GetPruneAmount(); // https://discordapp.com/developers/docs/resources/guild#get-guild-prune-count
 		// void BeginPrune(int days, bool comptute_prune_count = false); // https://discordapp.com/developers/docs/resources/guild#begin-guild-prune

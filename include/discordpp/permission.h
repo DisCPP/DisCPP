@@ -13,7 +13,7 @@ namespace discord {
 		MEMBER
 	};
 
-	enum Permission : int64_t {
+	enum Permission : int {
 		CREATE_INSTANT_INVITE = 0x00000001,
 		KICK_MEMBERS = 0x00000002,
 		BAN_MEMBERS = 0x00000004,
@@ -54,7 +54,7 @@ namespace discord {
 		bool HasPermission(Permission permission);
 		void AddPermission(Permission permission);
 
-		int value;
+		int value = 0;
 	};
 
 	class Permissions {
@@ -62,6 +62,7 @@ namespace discord {
 		Permissions() = default;
 		Permissions(PermissionType permission_type, int byte_set);
 		Permissions(nlohmann::json json);
+		nlohmann::json ToJson();
 
 		snowflake role_user_id;
 		PermissionOverwrite allow_perms;

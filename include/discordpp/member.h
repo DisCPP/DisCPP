@@ -16,6 +16,7 @@ namespace discord {
 		Member(nlohmann::json json, snowflake guild_id);
 
 		void ModifyMember(std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf, snowflake channel_id);
+		bool HasRole(discord::Role role);
 
 		discord::User user;
 		snowflake guild_id; // TODO: Convert this to discord::Guild instead of snowflakes

@@ -60,9 +60,9 @@ namespace discord {
 
 		void SetCommandHandler(std::function<void(discord::Bot*, discord::Message)> command_handler);
 
-		template <size_t discord_event, typename FType>
-		void HandleEvent(FType&& func) {
-			std::get<discord_event>(discord_event_func_holder.tuple).push_back(std::forward<FType>(func));
+		template <size_t discord_event, typename Func>
+		void HandleEvent(Func&& func, int run_amount = -1) {
+			std::get<discord_event>(discord_event_func_holder.tuple).push_back({ std::forward<Func>(func), { run_amount, 0 } });
 		}
 
 		template <typename FType, typename... T>

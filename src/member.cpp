@@ -41,6 +41,10 @@ namespace discord {
 		json_roles += "]";
 
 		cpr::Body body("{\"nick\": \"" + nick + "\", \"roles\": " + json_roles + ", \"mute\": " + std::to_string(mute) + ", \"deaf\": " + std::to_string(deaf) + "\"channel_id\": \"" + channel_id + "\"" + "}");
-		SendPatchRequest(Endpoint("/guilds/" + this->id + "/members/" + id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
+		SendPatchRequest(Endpoint("/guilds/" + this->id + "/members/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::GUILD, body);
+	}
+
+	bool Member::HasRole(discord::Role role) {
+		return count_if(roles.begin(), roles.end(), [role](discord::Role r) { return role.id == r.id; }) != 0;
 	}
 }
