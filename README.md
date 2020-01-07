@@ -1,12 +1,12 @@
 <h1 align="center">DiscordPP</h1>
-<p1 align="center">
-    <a href="https://ci.appveyor.com/project/SeanOMik/discordpp">
-	<img src="https://ci.appveyor.com/api/projects/status/8e23w925eqahmub6?svg=true">   
-    </a>
+<p align="center">
+  <a href="https://ci.appveyor.com/project/SeanOMik/discordpp">
+    <img src="https://ci.appveyor.com/api/projects/status/8e23w925eqahmub6?svg=true">
+  </a>
 </p>
 
-# State
-In a pretty good state for people to use, I could just use some help on documenting everything
+## State
+Good to use for some smaller projects. Not sure how it would work on larger scale projects.
 
 ## Contributing
 Please follow [Google's styling guide](https://google.github.io/styleguide/cppguide.html#Naming) for naming convention.
@@ -65,7 +65,8 @@ int main(int argc, const char* argv[]) {
 	});
 
 	return bot.Run();
-}```
+}
+```
 
 ### License 
 See [LICENSE](LICENSE)
