@@ -2,7 +2,7 @@
 cmake_minimum_required (VERSION 3.6)
 project(dpp)
 
-set(CMAKE_TOOLCHAIN_FILE C:/vcpkg/scripts/buildsystems/vcpkg.cmake)
+#set(CMAKE_TOOLCHAIN_FILE C:/vcpkg/scripts/buildsystems/vcpkg.cmake)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(cpr REQUIRED)
