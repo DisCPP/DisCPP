@@ -1,4 +1,11 @@
-# DiscordPP
+<h1 align="center">DiscordPP</h1>
+<p1 align="center">
+    <a href="https://ci.appveyor.com/project/SeanOMik/discordpp">
+	<img src="https://ci.appveyor.com/api/projects/status/8e23w925eqahmub6?svg=true">   
+    </a>
+</p>
+
+# State
 In a pretty good state for people to use, I could just use some help on documenting everything
 
 ## Contributing
