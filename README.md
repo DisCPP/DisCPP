@@ -4,6 +4,9 @@
     <img src="https://ci.appveyor.com/api/projects/status/8e23w925eqahmub6?svg=true">
   </a>
 </p>
+<p align="center">
+Discord API Wrapper Written in C++  
+</p>
 
 ## State
 Good to use for some smaller projects. Not sure how it would work on larger scale projects.
@@ -69,4 +72,4 @@ int main(int argc, const char* argv[]) {
 ```
 
 ### License 
-See [LICENSE](LICENSE)
+See [LICENSE](LICENSE.md)
