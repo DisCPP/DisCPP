@@ -11,19 +11,53 @@ Discord API Wrapper Written in C++
 ## State
 Good to use for some smaller projects. Not sure how it would work on larger scale projects.
 
-## Contributing
-Please follow [Google's styling guide](https://google.github.io/styleguide/cppguide.html#Naming) for naming convention.
-
 ## Dependencies
 - [Nlohmann JSON](https://github.com/nlohmann/json)
 - [cpr](https://github.com/whoshuu/cpr)
 - [cpprestsdk](https://github.com/microsoft/cpprestsdk.git)
 
+## Contributing
+Please follow [Google's styling guide](https://google.github.io/styleguide/cppguide.html#Naming) for naming convention.
+
 ## Building
-- Install vcpkg onto the root of your C drive (if you dont you'll need to modify the cmake file).
-- Install dependencies by running command: `vcpkg install nlohmann-json cpr cpprestsdk`.
-- Then run `vcpkg integrate install`.
-- Open the CMake project in Visual Studio.
+1. Install vcpkg onto the root of your C drive.
+2. Install dependencies by running command: `vcpkg install nlohmann-json cpr cpprestsdk`.
+3. Then run `vcpkg integrate install`.
+    * Should get an output similar to: `"-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"`.
+    * Save the directory that was given (Ex. `C:/vcpkg/scripts/buildsystems/vcpkg.cmake`).
+4. Clone this repository.
+5. Open the CMake project in Visual Studio.
+    * On the welcome screen under the create a project or open project buttons, click `Continue without code`
+    * Open the CMakeLists.txt by `File > Open > Cmake`
+    * Browse to where you cloned the repository and double click on CMakeLists.txt file.
+6. Go into CMake settings and set the CMake toolchain to the directory you saved above.
+    * Click on `Project > CMake Settings`
+    * Scroll to the CMake toolchain file text box and enter the directory you saved.
+## Setting up a Bot Project
+First follow the [building](##Building) steps above to make sure DiscordPP will compile.
+1. Currently you need to create a thirdparty folder in the root of your bot project directory.
+2. Inside the thirdparty folder, clone this repository.
+3. Open your CMake file and add `add_subdirectory(thirdparty/DiscordPP)` near the top.
+4. Where ever you link your libraries, add this: `target_link_libraries(main PRIVATE discordpp)` (usually at, or near, the end of the file)
+5. Your finished CMakefile should be similar to this:
+```cmake
+#CMakeLists.txt
+cmake_minimum_required(VERSION 3.6)
+project(bot)
+
+add_subdirectory(thirdparty/DiscordPP)
+
+add_executable(main src/main.cpp)
+
+target_include_directories(main PUBLIC include)
+
+file(GLOB_RECURSE source_list src/*.cpp)
+target_sources(main PRIVATE ${source_list})
+
+target_link_libraries(main PRIVATE discordpp)
+```
+6. Edit your cmake settings to reflect how it was edited in [building](##Building) steps.
+7. You're done, enjoy!
 
 ## Examples
 There may be more inside the [Examples](examples) folder.
