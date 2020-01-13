@@ -59,6 +59,11 @@ target_link_libraries(main PRIVATE discordpp)
 6. Edit your cmake settings to reflect how it was edited in [building](#Building) steps.
 7. You're done, enjoy!
 
+## Todo:
+- [ ] Finish tons of unimplemented methods in certain classes.
+- [ ] Move the delete methods to the class type that it actually deletes. Like `DeleteMessage()` inside `Message` class.
+- [ ] Convert `std::bind` to lambdas.
+
 ## Examples
 There may be more inside the [Examples](examples) folder.
 ```cpp
