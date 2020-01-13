@@ -26,7 +26,7 @@ Please follow [Google's styling guide](https://google.github.io/styleguide/cppgu
 - Open the CMake project in Visual Studio.
 
 ## Examples
-There may be more inside the [Examples](exmaples) folder.
+There may be more inside the [Examples](examples) folder.
 ```cpp
 #include <bot.h>
 #include <context.h>
