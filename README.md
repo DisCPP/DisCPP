@@ -34,7 +34,7 @@ Please follow [Google's styling guide](https://google.github.io/styleguide/cppgu
     * Click on `Project > CMake Settings`
     * Scroll to the CMake toolchain file text box and enter the directory you saved.
 ## Setting up a Bot Project
-First follow the [building](##Building) steps above to make sure DiscordPP will compile.
+First follow the [building](#Building) steps above to make sure DiscordPP will compile.
 1. Currently you need to create a thirdparty folder in the root of your bot project directory.
 2. Inside the thirdparty folder, clone this repository.
 3. Open your CMake file and add `add_subdirectory(thirdparty/DiscordPP)` near the top.
@@ -56,7 +56,7 @@ target_sources(main PRIVATE ${source_list})
 
 target_link_libraries(main PRIVATE discordpp)
 ```
-6. Edit your cmake settings to reflect how it was edited in [building](##Building) steps.
+6. Edit your cmake settings to reflect how it was edited in [building](#Building) steps.
 7. You're done, enjoy!
 
 ## Examples
