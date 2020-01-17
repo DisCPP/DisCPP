@@ -8,18 +8,22 @@
 #include <iostream>
 #include <fstream>
 
+#include "ping_command.h"
+
 int main(int argc, const char* argv[]) {
-	std::ifstream token_file("D:\\Code\\cpp\\discord\\discordpp\\token.txt", std::ios::out);
+	std::ifstream token_file("token.txt", std::ios::out);
 	std::string token;
 	std::getline(token_file, token);
 
 	discord::Bot bot{ token, "!" };
 
-	discord::RegisterCommand("ping", "", { }, [&](discord::Context ctx) {
+	PingCommand();
+
+	/*discord::RegisterCommand("ping", "", { }, [&](discord::Context ctx) {
 		ctx.channel.TriggerTypingIndicator();
 		std::this_thread::sleep_for(std::chrono::milliseconds(750));
 		ctx.Send("Pong!");
-	}, {});
+	}, {});*/
 
 	bot.HandleEvent<discord::events::ready>([&bot]() {
 		std::cout << "Ready!" << std::endl
