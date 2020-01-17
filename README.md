@@ -63,6 +63,7 @@ target_link_libraries(main PRIVATE discordpp)
 - [ ] Finish tons of unimplemented methods in certain classes.
 - [ ] Move the delete methods to the class type that it actually deletes. Like `DeleteMessage()` inside `Message` class.
 - [ ] Convert `std::bind` to lambdas.
+- [ ] Convert the default command handler to use command classes.
 
 ## Examples
 There may be more inside the [Examples](examples) folder.
