@@ -10,6 +10,7 @@
 namespace discord {
 	class Command {
 	public:
+
 		Command() = default;
 		Command(std::string name);
 		Command(std::string name, std::string desc, std::vector<std::string> hint_args, std::function<void(discord::Context)> function, std::vector<std::function<bool(discord::Context)>> requirements);

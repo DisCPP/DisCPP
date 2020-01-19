@@ -22,11 +22,5 @@ void discord::FireCommand(discord::Bot* bot, discord::Message message) {
 
 	if (!found_command->second->CanRun(context)) return;
 
-	//bot->DoFunctionLater(found_command->second->CommandBody, context);
 	found_command->second->CommandBody(context);
 }
-
-//void discord::RegisterCommand(std::string name, std::string description, std::vector<std::string> hint_args, std::function<void(Context)> function, std::vector<std::function<bool(Context)>> requirements) {
-//	Command command = { function, name, description, hint_args, requirements };
-//	registered_commands.emplace(name, command);
-//}

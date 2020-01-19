@@ -7,7 +7,7 @@
 class PingCommand : public discord::Command {
 public:
 	PingCommand();
-	void CommandBody(discord::Context ctx);
+	virtual void CommandBody(discord::Context ctx) override;
 };
 
 #endif

@@ -4,16 +4,14 @@
 #include "bot.h"
 #include "context.h"
 #include "message.h"
+#include "command.h"
 
 #include <memory>
 
 namespace discord {
-	class Command;
-
-	inline std::unordered_map<std::string, std::shared_ptr<Command>> registered_commands;
+	inline std::unordered_map<std::string, Command*> registered_commands;
 
 	void FireCommand(discord::Bot* bot, discord::Message message);
-	//void RegisterCommand(std::string name, std::string description, std::vector<std::string> hint_args, std::function<void(Context)> function, std::vector<std::function<bool(Context)>> requirements);
 }
 
 #endif
