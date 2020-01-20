@@ -4,29 +4,33 @@
 #include <discordpp/channel.h>
 #include <discordpp/events.h>
 #include <discordpp/activity.h>
+#include <discordpp/command.h>
 
 #include <iostream>
 #include <fstream>
 
+#include "ping_command.h"
+
 int main(int argc, const char* argv[]) {
-	std::ifstream token_file("D:\\Code\\cpp\\discord\\discordpp\\token.txt", std::ios::out);
+	std::ifstream token_file("token.txt", std::ios::out);
 	std::string token;
 	std::getline(token_file, token);
 
 	discord::Bot bot{ token, "!" };
 
-	discord::RegisterCommand("ping", "", { }, [&](discord::Context ctx) {
-		ctx.channel.TriggerTypingIndicator();
-		std::this_thread::sleep_for(std::chrono::milliseconds(750));
-		ctx.Send("Pong!");
+	PingCommand(); // This runs the constructor which would actually register the command
+
+	// You can still register a command like you did before
+	discord::Command("test", "Quick example of a quick command", {}, [](discord::Context ctx) {
+		ctx.Send("Quick new command handler test");
 	}, {});
 
 	bot.HandleEvent<discord::events::ready>([&bot]() {
 		std::cout << "Ready!" << std::endl
 				  << "Logged in as: " << bot.bot_user.username << "#" << bot.bot_user.discriminator << std::endl
-				  << "ID: " << bot.bot_user.id << std::endl
-				  << "-----------------------------" << std::endl;
+				  << "ID: " << bot.bot_user.id << std::endl << "-----------------------------" << std::endl;
 
+		// Will show "Playing With Crashes!"
 		discord::Activity activity = discord::Activity("With Crashes!", discord::presence::ActivityType::GAME, discord::presence::Status::idle);
 		bot.UpdatePresence(activity);
 	});
