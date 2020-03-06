@@ -3,6 +3,15 @@
 #include "utils.h"
 
 void discord::FireCommand(discord::Bot* bot, discord::Message message) {
+	/**
+	 * @brief Detects if a command has ran, and if it has then execute it.
+	 *
+	 * @param[in] bot A reference to the discord bot.
+	 * @param[in] message The message that was sent.
+	 *
+	 * @return void
+	 */
+
 	if (!StartsWith(message.content, bot->prefix) || message.author.bot) {
 		return;
 	}
