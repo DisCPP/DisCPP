@@ -62,11 +62,42 @@ namespace discord {
 
 		template <size_t discord_event, typename Func>
 		void HandleEvent(Func&& func, int run_amount = -1) {
+			/**
+			 * @brief Register an event listener
+			 *
+			 * ```cpp
+			 *      bot.HandleEvent<discord::events::ready>([&bot]() {
+			 *  		std::cout << "Ready!" << std::endl
+			 *  			<< "Logged in as: " << bot.bot_user.username << "#" << bot.bot_user.discriminator << std::endl
+			 *  			<< "ID: " << bot.bot_user.id << std::endl
+			 *  			<< "-----------------------------" << std::endl;
+			 *		});
+			 * ```
+			 *
+			 * @param[in] func The method that will run when the event is triggered.
+			 * @param[in] run_amount The amount of times the method will run before it is removed from the internal event map so it wont run again.
+			 *
+			 * @return void
+			 */
+
 			std::get<discord_event>(discord_event_func_holder.tuple).push_back({ std::forward<Func>(func), { run_amount, 0 } });
 		}
 
 		template <typename FType, typename... T>
 		void DoFunctionLater(FType&& func, T&&... args) {
+			/**
+			 * @brief Do a function async so it wont hold the bot up.
+			 *
+			 * ```cpp
+			 *      bot.DoFunctionLater(method, this, message);
+			 * ```
+			 *
+			 * @param[in] func The method that will run when the event is triggered.
+			 * @param[in] args The arguments for the method.
+			 *
+			 * @return void
+			 */
+
 			futures.push_back(std::async(std::launch::async, func, std::forward<T>(args)...));
 		}
 	private:
@@ -105,7 +136,8 @@ namespace discord {
 		// Commands
 		std::function<void(discord::Bot*, discord::Message)> fire_command_method;
 
-#ifdef __INTELLISENSE__ // This is here due to some issues with intellisense thinking there was something wrong with all of this.
+		// This is here due to some issues with intellisense thinking there was something wrong with all of this.
+#ifdef __INTELLISENSE__ 
 		Events<> discord_event_func_holder;
 #else
 		Events<
@@ -146,6 +178,7 @@ namespace discord {
 			void(discord::Channel const)											   // WEBHOOKS_UPDATE
 		> discord_event_func_holder;
 #endif
+
 		// Events
 		void ReadyEvent(nlohmann::json result);
 		void ResumedEvent(nlohmann::json result);
