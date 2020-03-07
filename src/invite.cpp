@@ -6,6 +6,18 @@
 
 namespace discord {
 	Invite::Invite(nlohmann::json json) {
+		/**
+		 * @brief Constructs a discord::Emoji object by parsing json.
+		 *
+		 * ```cpp
+		 *      discord::Invite invite(json);
+		 * ```
+		 *
+		 * @param[in] json The that makes up the invite object.
+		 *
+		 * @return discord::Invite, this is a constructor.
+		 */
+
 		code = json["code"];
 		guild = (json.contains("guild")) ? discord::Guild(json["guild"]["id"].get<snowflake>()) : discord::Guild();
 		channel = discord::Channel(json["channel"]["id"].get<snowflake>());

@@ -1,6 +1,7 @@
 # Don't track content of these folders
 .vs/*
 out/*
+html/*
 
 # Compiled source #
 ###################

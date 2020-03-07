@@ -6,6 +6,20 @@
 
 namespace discord {
 	Member::Member(snowflake id) : discord::DiscordObject(id) {
+		/**
+		 * @brief Constructs a discord::Member object using its id.
+		 *
+		 * This constructor searches the member cache to get a member object.
+		 *
+		 * ```cpp
+		 *      discord::Member member(657246994997444614);
+		 * ```
+		 *
+		 * @param[in] id The id of the member.
+		 *
+		 * @return discord::Member, this is a constructor.
+		 */
+
 		auto member = std::find_if(discord::globals::bot_instance->members.begin(), discord::globals::bot_instance->members.end(), [id](discord::Member a) { return id == a.user.id; });
 
 		if (member != discord::globals::bot_instance->members.end()) {
@@ -14,6 +28,19 @@ namespace discord {
 	}
 
 	Member::Member(nlohmann::json json, snowflake guild_id) : guild_id(guild_id){
+		/**
+		 * @brief Constructs a discord::Member object by parsing json and stores the guild_id.
+		 *
+		 * ```cpp
+		 *      discord::Member member(json, 657246994997444614);
+		 * ```
+		 *
+		 * @param[in] json The json that makes up of member object.
+		 * @param[in] json guild_id The guild id.
+		 *
+		 * @return discord::Member, this is a constructor.
+		 */
+
 		user = (json.contains("user")) ? discord::User(json["user"]) : discord::User();
 		nick = GetDataSafely<std::string>(json, "nick");
 		discord::Guild guild(guild_id);
@@ -29,6 +56,22 @@ namespace discord {
 	}
 
 	void Member::ModifyMember(std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf, snowflake channel_id) {
+		/**
+		 * @brief Modifies this guild member.
+		 *
+		 * ```cpp
+		 *      member.ModifyMember("Member nick", roles, true, false, 657246994997444614);
+		 * ```
+		 *
+		 * @param[in] nick The new member nickname.
+		 * @param[in] roles The new member role.
+		 * @param[in] mute Whether or not the member is muted in voice channels.
+		 * @param[in] deaf Whether or not the member is deafened in voice channels.
+		 * @param[in] channel_id The voice channel to move them to if they're connected to one.
+		 *
+		 * @return void
+		 */
+
 		std::string json_roles = "[";
 		for (discord::Role role : roles) {
 			if (&role == &roles.front()) {
@@ -45,6 +88,18 @@ namespace discord {
 	}
 
 	bool Member::HasRole(discord::Role role) {
+		/**
+		 * @brief Check if this member is a role.
+		 *
+		 * ```cpp
+		 *      bool has_role = member.HasRole(role);
+		 * ```
+		 *
+		 * @param[in] role The role to check if the member has it.
+		 *
+		 * @return bool
+		 */
+
 		return count_if(roles.begin(), roles.end(), [role](discord::Role r) { return role.id == r.id; }) != 0;
 	}
 }

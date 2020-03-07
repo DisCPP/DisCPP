@@ -7,6 +7,20 @@
 
 namespace discord {
 	Guild::Guild(snowflake id) {
+		/**
+		 * @brief Constructs a discord::Guild object from an id.
+		 *
+		 * This constructor searches the guild cache to get a guild object.
+		 *
+		 * ```cpp
+		 *      discord::Guild guild(583251190591258624);
+		 * ```
+		 *
+		 * @param[in] id The id of the guild
+		 *
+		 * @return discord::Guild, this is a constructor.
+		 */
+
 		auto guild = std::find_if(discord::globals::bot_instance->guilds.begin(), discord::globals::bot_instance->guilds.end(), [id](discord::Guild a) { return id == a.id; });
 
 		if (guild != discord::globals::bot_instance->guilds.end()) {
@@ -15,6 +29,18 @@ namespace discord {
 	}
 
 	Guild::Guild(nlohmann::json json) {
+		/**
+		 * @brief Constructs a discord::Guild object by parsing json
+		 *
+		 * ```cpp
+		 *      discord::Guild guild(json);
+		 * ```
+		 *
+		 * @param[in] json The json that makes up the guild.
+		 *
+		 * @return discord::Guild, this is a constructor.
+		 */
+
 		id = GetDataSafely<snowflake>(json, "id");
 		name = GetDataSafely<std::string>(json, "name");
 		icon = GetDataSafely<std::string>(json, "icon");
@@ -73,10 +99,30 @@ namespace discord {
 	}
 
 	void Guild::DeleteGuild() {
+		/**
+		 * @brief Deletes this guild.
+		 *
+		 * ```cpp
+		 *      guild.DeleteGuild();
+		 * ```
+		 *
+		 * @return void
+		 */
+
 		SendDeleteRequest(Endpoint("/guilds/%", id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
 	std::vector<discord::Channel> Guild::GetChannels() {
+		/**
+		 * @brief Gets a list of channels in this guild.
+		 *
+		 * ```cpp
+		 *      std::vector<discord::Channel> guild.GetChannels();
+		 * ```
+		 *
+		 * @return std::vector<discord::Channel>
+		 */
+
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/channels", id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 		std::vector<discord::Channel> channels;
 		for (auto& channel : result) {
@@ -86,6 +132,27 @@ namespace discord {
 	}
 
 	discord::Channel Guild::CreateChannel(std::string name, GuildChannelType type, std::string topic, int bitrate, int user_limit, int rate_limit_per_user, int position, std::vector<discord::Permissions> permission_overwrites, discord::Channel category, bool nsfw) {
+		/**
+		 * @brief Creates a channel for this Guild.
+		 *
+		 * ```cpp
+		 *      discord::Channel channel = guild.CreateChannel("Test", discord::GuildChannelType::GUILD_TEXT, "Just a test channel", 0, 0, 0, 0, overwrites, category_channel, false);
+		 * ```
+		 *
+		 * @param[in] name The name of the new channel.
+		 * @param[in] type The type of the new channel.
+		 * @param[in] topic The topic of the new channel.
+		 * @param[in] bitrate The bitrate of the new channel (only for voice channels).
+		 * @param[in] user_limit The user limit of the new channel (only for voice channels).
+		 * @param[in] rate_limit_per_user The chat delay for a user of the new channel.
+		 * @param[in] position The sorting position of the new channel.
+		 * @param[in] permission_overwrites Array of permission overwrite objects.
+		 * @param[in] parent_id The parent id of the new channel.
+		 * @param[in] nsfw Wheather the new channel is marked as nsfw.
+		 *
+		 * @return discord::Channel
+		 */
+
 		if (bitrate < 8000) bitrate = 8000;
 
 		nlohmann::json permission_json = nlohmann::json::array();
@@ -115,6 +182,18 @@ namespace discord {
 	}
 
 	discord::Member Guild::GetMember(snowflake id) {
+		/**
+		 * @brief Gets a discord::Member from this guild.
+		 *
+		 * ```cpp
+		 *      discord::Member member = guild.GetMember(228846961774559232);
+		 * ```
+		 *
+		 * @param[in] id The member's id
+		 *
+		 * @return discord::Member
+		 */
+
 		auto member = std::find_if(discord::globals::bot_instance->members.begin(), discord::globals::bot_instance->members.end(), [id](discord::Member a) { return id == a.user.id; });
 
 		if (member != discord::globals::bot_instance->members.end()) {
@@ -124,6 +203,23 @@ namespace discord {
 	}
 
 	discord::Member Guild::AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf) {
+		/**
+		 * @brief Adds a discord::Member to this guild.
+		 *
+		 * ```cpp
+		 *      discord::Member added_member =  guild.AddMember(119886831578775554, access_token, "New User is here", roles, false, false);
+		 * ```
+		 *
+		 * @param[in] id The id of this member.
+		 * @param[in] access_token The oauth2 token granted witht he guilds.join to the bot's application for the member.
+		 * @param[in] nick The user nick name.
+		 * @param[in] roles The users role.
+		 * @param[in] mute Whether the user is muted in voice channels.
+		 * @param[in] deaf Whether the user is deafened in voice channels.
+		 *
+		 * @return discord::Member
+		 */
+
 		std::string json_roles = "[";
 		for (discord::Role role : roles) {
 			if (&role == &roles.front()) {
@@ -140,18 +236,66 @@ namespace discord {
 	}
 
 	void Guild::AddRoleToMember(discord::Member member, discord::Role role) {
+		/**
+		 * @brief Adds a role to a guild member.
+		 *
+		 * ```cpp
+		 *      guild.AddRoleMember(member, role);
+		 * ```
+		 *
+		 * @param[in] member The member to add the role to.
+		 * @param[in] role The role to add.
+		 *
+		 * @return void
+		 */
+
 		SendPutRequest(Endpoint("/guilds/" + id + "/members/" + member.user.id + "/roles/" + role.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
 	void Guild::RemoveRoleToMember(discord::Member member, discord::Role role) {
+		/**
+		 * @brief Removes a role to a guild member.
+		 *
+		 * ```cpp
+		 *      guild.RemoveRoleToMember(member, role);
+		 * ```
+		 *
+		 * @param[in] member The member to remove the role from.
+		 * @param[in] role The role to remove.
+		 *
+		 * @return void
+		 */
+
 		SendDeleteRequest(Endpoint("/guilds/" + id + "/members/" + member.user.id + "/roles/" + role.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
 	void Guild::RemoveMember(discord::Member member) {
+		/**
+		 * @brief Remove a member from the guild.
+		 *
+		 * ```cpp
+		 *      guild.RemoveMember(member);
+		 * ```
+		 *
+		 * @param[in] member The member to remove from the guild.
+		 *
+		 * @return void
+		 */
+
 		SendDeleteRequest(Endpoint("/guilds/" + id + "/members/" + member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
 	std::vector<discord::GuildBan> Guild::GetBans() {
+		/**
+		 * @brief Get all guild bans
+		 *
+		 * ```cpp
+		 *      std::vector<discord::GuildBan> bans = guild.GetBans();
+		 * ```
+		 *
+		 * @return std::vector<discord::GuildBan>
+		 */
+
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + id + "/bans"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 
 		std::vector<discord::GuildBan> guild_bans;
@@ -163,26 +307,92 @@ namespace discord {
 	}
 
 	std::optional<std::string> Guild::GetMemberBanReason(discord::Member member) {
+		/**
+		 * @brief Get ban reasons if they are any.
+		 *
+		 * ```cpp
+		 *      std::optional<std::string> reason = guild.GetMemberBanReason(member);
+		 * ```
+		 *
+		 * @param[in] member The member to get a ban remove of.
+		 *
+		 * @return std::optional<std::string>
+		 */
+
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/bans/%", id, member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 		if (result.contains("reason")) return result["reason"];
+
 		return std::nullopt;
 	}
 
 	bool Guild::IsMemberBanned(discord::Member member) {
+		/**
+		 * @brief Check if a member is banned.
+		 *
+		 * ```cpp
+		 *      bool is_banned = guild.IsMemberBanned(member);
+		 * ```
+		 *
+		 * @param[in] member The member to check if banned.
+		 *
+		 * @return bool
+		 */
+
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/bans/%", id, member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 		return result.contains("reason");
 	}
 
 	void Guild::BanMember(discord::Member member, std::string reason) {
+		/**
+		 * @brief Ban a guild member.
+		 *
+		 * ```cpp
+		 *      guild.BanMember(member, "Reason");
+		 * ```
+		 *
+		 * @param[in] member The member to ban.
+		 * @param[in] reason The reason to ban them.
+		 *
+		 * @return void
+		 */
+
 		cpr::Body body(Format("{\"reason\": \"%\"}", reason));
 		SendPutRequest(Endpoint("/guilds/%/bans/%", id, member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 	}
 
 	void Guild::UnbanMember(discord::Member member) {
+		/**
+		 * @brief Unban a guild member.
+		 *
+		 * ```cpp
+		 *      std::optional<std::string> reason = guild.GetMemberBanReason(member);
+		 * ```
+		 *
+		 * @param[in] member The member to unban.
+		 *
+		 * @return void
+		 */
+
 		SendDeleteRequest(Endpoint("/guilds/%/bans/%", id, member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
 	discord::Role Guild::CreateRole(std::string name, Permissions permissions, int color, bool hoist, bool mentionable) {
+		/**
+		 * @brief Create a guild role.
+		 *
+		 * ```cpp
+		 *      discord::Role new_role = guild.CreateRole("New Role", permissions, 0xffffff, false, true);
+		 * ```
+		 *
+		 * @param[in] name The new role name.
+		 * @param[in] permissions The new role permissions.
+		 * @param[in] color The new role color.
+		 * @param[in] hoist Whether or not to hoist the role.
+		 * @param[in] mentionable Whether or not the role is mentionable.
+		 *
+		 * @return discord::Role
+		 */
+
 		nlohmann::json json_body = nlohmann::json({
 			{"name", name},
 			{"permissions", permissions.allow_perms.value},
@@ -200,6 +410,22 @@ namespace discord {
 	}
 
 	discord::Role Guild::ModifyRole(discord::Role role, std::string name, Permissions permissions, int color, bool hoist, bool mentionable) {
+		/**
+		 * @brief Create a guild role.
+		 *
+		 * ```cpp
+		 *      discord::Role modified_role = guild.ModifyRole(role, "New Role", permissions, 0xffffff, false, true);
+		 * ```
+		 *
+		 * @param[in] name The new role name.
+		 * @param[in] permissions The new role permissions.
+		 * @param[in] color The new role color.
+		 * @param[in] hoist Whether or not to hoist the role.
+		 * @param[in] mentionable Whether or not the role is mentionable.
+		 *
+		 * @return discord::Role
+		 */
+
 		nlohmann::json json_body = nlohmann::json({
 			{"name", name},
 			{"permissions", permissions.allow_perms.value},
@@ -217,11 +443,33 @@ namespace discord {
 	}
 
 	void Guild::DeleteRole(discord::Role role) {
+		/**
+		 * @brief Deleted a guild role.
+		 *
+		 * ```cpp
+		 *      guild.DeleteRole(role);
+		 * ```
+		 *
+		 * @param[in] role The role to delete.
+		 *
+		 * @return void
+		 */
+
 		nlohmann::json result = SendDeleteRequest(Endpoint("/guilds/%/roles/%", id, role.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 		roles.erase(std::remove_if(roles.begin(), roles.end(), [role](discord::Role r) { return r.id == role.id; }));
 	}
 
 	std::vector<discord::GuildInvite> Guild::GetInvites() {
+		/**
+		 * @brief Get guild invites.
+		 *
+		 * ```cpp
+		 *      std::vector<discord::GuildInvite> invites = guild.GetInvites();
+		 * ```
+		 *
+		 * @return std::vector<discord::GuildInvite>
+		 */
+
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/invites", id), DefaultHeaders(), {}, {});
 
 		std::vector<discord::GuildInvite> guild_invites;
@@ -233,6 +481,16 @@ namespace discord {
 	}
 
 	std::vector<discord::GuildIntegration> Guild::GetIntegrations() {
+		/**
+		 * @brief Get guild integrations.
+		 *
+		 * ```cpp
+		 *      std::vector<discord::GuildIntegration> itegration = guild.GetIntegrations();
+		 * ```
+		 *
+		 * @return std::vector<discord::GuildIntegration>
+		 */
+
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/integrations", id), DefaultHeaders(), {}, {});
 
 		std::vector<discord::GuildIntegration> guild_integrations;
@@ -244,29 +502,101 @@ namespace discord {
 	}
 
 	void Guild::CreateIntegration(snowflake id, std::string type) {
+		/**
+		 * @brief Create a guild integration.
+		 *
+		 * ```cpp
+		 *      guild.CreateIntegration(integration_id, integration_type);
+		 * ```
+		 *
+		 * @param[in] id The integration id.
+		 * @param[in] type The integration type.
+		 *
+		 * @return void
+		 */
+
 		cpr::Body body(Format("{\"type\": \"%\", \"id\": \"%\"}", type, id));
 		SendPostRequest(Endpoint("/guilds/%/integrations", this->id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 	}
 
 	void Guild::ModifyIntegration(discord::GuildIntegration guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons) {
+		/**
+		 * @brief Modify a guild integration.
+		 *
+		 * ```cpp
+		 *      guild.ModifyIntegration(integration, 0, 2, true);
+		 * ```
+		 *
+		 * @param[in] guild_integration The guild integration to modify.
+		 * @param[in] expire_behavior The behavior when an integration subscription lapses.
+		 * @param[in] expire_grace_period Period (in days) where the integration will ignore lapsed subscriptions.
+		 * @param[in] enable_emoticons Whether emoticons should be synced for this integration (twitch only currently).
+		 *
+		 * @return void
+		 */
+
 		cpr::Body body(Format("{\"expire_behavior\": %, \"expire_grace_period\": %, \"enable_emoticons\": %}", expire_behavior, expire_grace_period, enable_emoticons));
 		SendPostRequest(Endpoint("/guilds/%/integrations/%", id, guild_integration.id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 	}
 
 	void Guild::DeleteIntegration(discord::GuildIntegration guild_integration) {
+		/**
+		 * @brief Delete a guild integration.
+		 *
+		 * ```cpp
+		 *      guild.DeleteIntegration(integration);
+		 * ```
+		 *
+		 * @param[in] guild_integration The guild integration to delete.
+		 *
+		 * @return void
+		 */
+
 		SendDeleteRequest(Endpoint("/guilds/%/integrations/%", id, guild_integration.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
 	void Guild::SyncIntegration(discord::GuildIntegration guild_integration) {
+		/**
+		 * @brief Sync a guild integration.
+		 *
+		 * ```cpp
+		 *      guild.SyncIntegration(integration);
+		 * ```
+		 *
+		 * @param[in] guild_integration The guild integration to sync.
+		 *
+		 * @return void
+		 */
+
 		SendPostRequest(Endpoint("/guilds/%/integrations/%/sync", id, guild_integration.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
 	discord::GuildEmbed Guild::GetGuildEmbed() {
+		/**
+		 * @brief Get a guild embed.
+		 *
+		 * ```cpp
+		 *      discord::GuildEmbed guild_embed = guild.GetGuildEmbed();
+		 * ```
+		 *
+		 * @return discord::GuildEmbed
+		 */
+
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/embed", id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 		return discord::GuildEmbed(result);
 	}
 
 	discord::GuildEmbed Guild::ModifyGuildEmbed(snowflake channel_id, bool enabled) {
+		/**
+		 * @brief Modify a guild embed.
+		 *
+		 * ```cpp
+		 *      discord::GuildEmbed modified_guild_embed = guild.ModifyGuildEmbed(381871767846780928, true);
+		 * ```
+		 *
+		 * @return discord::GuildEmbed
+		 */
+
 		cpr::Body body(Format("{\"channel_id\": \"%\", \"enabled\": %}", channel_id, enabled));
 		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/%/embed", id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 
@@ -274,6 +604,16 @@ namespace discord {
 	}
 
 	std::string Guild::GetWidgetImageURL(WidgetStyle widget_style) {
+		/**
+		 * @brief Get a widget image url.
+		 *
+		 * ```cpp
+		 *      std::string widget_image_url = guild.GetWidgetImageURL(style);
+		 * ```
+		 *
+		 * @return std::string
+		 */
+
 		std::string style;
 		switch (widget_style) {
 		case WidgetStyle::SHIELD:
@@ -299,6 +639,16 @@ namespace discord {
 	}
 
 	std::vector<discord::Emoji> Guild::GetEmojis() {
+		/**
+		 * @brief Get all guild emojis.
+		 *
+		 * ```cpp
+		 *      std::vector<discord::Emoji> guild_emojis = guild.GetEmojis();
+		 * ```
+		 *
+		 * @return std::vector<discord::Emoji>
+		 */
+
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/emojis", id), DefaultHeaders(), {}, {});
 
 		std::vector<discord::Emoji> emojis;
@@ -311,12 +661,38 @@ namespace discord {
 	}
 
 	discord::Emoji Guild::GetEmoji(snowflake id) {
+		/**
+		 * @brief Get a guild emoji.
+		 *
+		 * ```cpp
+		 *      discord::Emoji emoji = guild.GetEmoji(685895680115605543);
+		 * ```
+		 *
+		 * @param[in] id The emoji's id.
+		 *
+		 * @return discord::Emoji
+		 */
+
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/emojis/%", this->id, id), DefaultHeaders(), {}, {});
 
 		return discord::Emoji(result);
 	}
 
 	discord::Emoji Guild::ModifyEmoji(discord::Emoji emoji, std::string name, std::vector<discord::Role> roles) {
+		/**
+		 * @brief Modify a guild emoji.
+		 *
+		 * ```cpp
+		 *      discord::Emoji modified_emoji = guild.ModifyEmoji(emoji, "New emoji", roles);
+		 * ```
+		 *
+		 * @param[in] emoji The emoji to modfy.
+		 * @param[in] name The emoji's name.
+		 * @param[in] role The emoji's roles.
+		 *
+		 * @return discord::Emoji
+		 */
+
 		std::string json_roles = "[";
 		for (discord::Role role : roles) {
 			if (&role == &roles.front()) {
@@ -337,6 +713,16 @@ namespace discord {
 	}
 
 	void Guild::DeleteEmoji(discord::Emoji emoji) {
+		/**
+		 * @brief Delete a guild emoji.
+		 *
+		 * ```cpp
+		 *      guild.DeleteEmoji(emoji);
+		 * ```
+		 *
+		 * @return void
+		 */
+
 		nlohmann::json result = SendDeleteRequest(Endpoint("/guilds/%/emojis/%", this->id, id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 		emojis.erase(std::remove_if(emojis.begin(), emojis.end(), [emoji](discord::Emoji e) { return e.id == emoji.id; }));
 	}

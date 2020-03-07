@@ -132,12 +132,12 @@ namespace discord {
 		// void ModifyChannelPositions(std::vector<discord::Channel> channels, std::vector<int> positiion); // https://discordapp.com/developers/docs/resources/guild#modify-guild-channel-positions
 		discord::Member GetMember(snowflake id);
 		discord::Member AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf);
-		void AddRoleToMember(discord::Member member, discord::Role role);
-		void RemoveRoleToMember(discord::Member member, discord::Role role);
+		void AddRoleToMember(discord::Member member, discord::Role role); // @TODO: Move to discord::Member
+		void RemoveRoleToMember(discord::Member member, discord::Role role); // @TODO: Move to discord::Member
 		void RemoveMember(discord::Member member);
 		std::vector<discord::GuildBan> GetBans();
 		std::optional<std::string> GetMemberBanReason(discord::Member member);
-		bool IsMemberBanned(discord::Member member);
+		bool IsMemberBanned(discord::Member member); // @TODO: Move to discord::Member
 		void BanMember(discord::Member member, std::string reason = "");
 		void UnbanMember(discord::Member member);
 		//std::vector<discord::Role> GetRoles(); // Not needed due to variable
