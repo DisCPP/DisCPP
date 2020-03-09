@@ -66,7 +66,7 @@ target_link_libraries(main PRIVATE discordpp)
 - [ ] Convert the default command handler to use command classes.
 
 ## Documentation
-Currently the only documentation is from Doxygen, but its currently completely up to date. To generate documentation, install Doxygen and run doxygen in the root DiscordPP directory.
+Currently the only documentation is from Doxygen; its currently completely up to date. To generate documentation, install Doxygen and run doxygen in the root DiscordPP directory.
 
 ## Examples
 There may be more inside the [Examples](examples) folder.
