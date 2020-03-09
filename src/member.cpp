@@ -87,6 +87,53 @@ namespace discord {
 		SendPatchRequest(Endpoint("/guilds/" + this->id + "/members/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::GUILD, body);
 	}
 
+	void Member::AddRole(discord::Role role) {
+		/**
+		 * @brief Adds a role to a guild member.
+		 *
+		 * ```cpp
+		 *      guild.AddRole(role);
+		 * ```
+		 *
+		 * @param[in] role The role to add.
+		 *
+		 * @return void
+		 */
+
+		SendPutRequest(Endpoint("/guilds/" + guild_id + "/members/" + id + "/roles/" + role.id), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
+	}
+
+	void Member::RemoveRole(discord::Role role) {
+		/**
+		 * @brief Removes a role to a guild member.
+		 *
+		 * ```cpp
+		 *      guild.RemoveRole(role);
+		 * ```
+		 *
+		 * @param[in] role The role to remove.
+		 *
+		 * @return void
+		 */
+
+		SendDeleteRequest(Endpoint("/guilds/" + guild_id + "/members/" + id + "/roles/" + role.id), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
+	}
+
+	bool Member::IsBanned() {
+		/**
+		 * @brief Check if a member is banned.
+		 *
+		 * ```cpp
+		 *      bool is_banned = guild.IsBanned(member);
+		 * ```
+		 *
+		 * @return bool
+		 */
+
+		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/bans/%", guild_id, id), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
+		return result.contains("reason");
+	}
+
 	bool Member::HasRole(discord::Role role) {
 		/**
 		 * @brief Check if this member is a role.

@@ -11,6 +11,7 @@ namespace discord {
 	class Message;
 	class GuildInvite;
 	class User;
+	class Guild;
 
 	enum ModifyChannelValue : int {
 		NAME,
@@ -33,7 +34,7 @@ namespace discord {
 		};
 	};
 
-	enum GetChannelsMessagesFields {
+	enum GetChannelsMessagesMethod {
 		AROUND,
 		BEFORE,
 		AFTER,
@@ -57,21 +58,21 @@ namespace discord {
 		discord::Message Send(std::vector<File> files, std::string text = "");
 		discord::Channel Modify(ModifyRequest modify_request);
 		discord::Channel Delete();
-		// std::vector<discord::Message> GetChannelMessages(GetChannelsMessagesFields messages_fields = GetChannelsMessagesFields::LIMIT); // TODO: https://discordapp.com/developers/docs/resources/channel#get-channel-messages
+		std::vector<discord::Message> GetChannelMessages(int amount, GetChannelsMessagesMethod get_method = GetChannelsMessagesMethod::LIMIT);
 		discord::Message FindMessage(snowflake message_id);
 		void BulkDeleteMessage(std::vector<snowflake> messages);
 		// void EditPermissions() // TODO: https://discordapp.com/developers/docs/resources/channel#edit-channel-permissions
 		std::vector<discord::GuildInvite> GetInvites();
 		discord::GuildInvite CreateInvite(int max_age, int max_uses, bool temporary, bool unique);
-		// void deletePermission() // TODO: https://discordapp.com/developers/docs/resources/channel#edit-channel-permissions
+		// void deletePermission() // TODO: https://discordapp.com/developers/docs/resources/channel#delete-channel-permission
 		void TriggerTypingIndicator();
 		std::vector<discord::Message> GetPinnedMessages();
-		void GroupDMAddRecipient(discord::User user); // TODO: Test
-		void GroupDMRemoveRecipient(discord::User user); // TODO: Test
+		void GroupDMAddRecipient(discord::User user);
+		void GroupDMRemoveRecipient(discord::User user);
 
 		snowflake id;
 		int type;
-		snowflake guild_id; // TODO: Convert to discord::Guild
+		snowflake guild_id;
 		int position;
 		std::vector<discord::Permissions> permissions;
 		std::string name;

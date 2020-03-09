@@ -7,6 +7,7 @@
 #include "channel.h"
 #include "utils.h"
 #include "role.h"
+#include "image.h"
 
 #include <nlohmann/json.hpp>
 
@@ -125,28 +126,39 @@ namespace discord {
 		Guild(snowflake id);
 		Guild(nlohmann::json json);
 
-		// discord::Guild ModifyGuild(); // https://discordapp.com/developers/docs/resources/guild#modify-guild
+		discord::Guild ModifyGuildName(std::string name);
+		discord::Guild ModifyGuildRegion(discord::snowflake region_id);
+		discord::Guild ModifyGuildVerificationLevel(discord::specials::VerificationLevel verification_level);
+		discord::Guild ModifyGuildDefaultMessageNotifications(discord::specials::DefaultMessageNotificationLevel notification_level);
+		discord::Guild ModifyGuildExplicitContentFilter(discord::specials::ExplicitContentFilterLevel explicit_content_filter);
+		discord::Guild ModifyGuildAFKChannelID(discord::snowflake afk_channel_id);
+		discord::Guild ModifyGuildAFKTimeout(int timeout);
+		// discord::Guild ModifyGuild(icon); // https://discordapp.com/developers/docs/resources/guild#modify-guild
+		discord::Guild ModifyGuildOwnerID(discord::snowflake owner_id);
+		// discord::Guild ModifyGuildSplash(); // https://discordapp.com/developers/docs/resources/guild#modify-guild
+		// discord::Guild ModifyGuildBanner(); // https://discordapp.com/developers/docs/resources/guild#modify-guild
+		discord::Guild ModifyGuildSystemChannelID(discord::snowflake system_channel_id);
+		discord::Guild ModifyGuildRulesChannelID(discord::snowflake rules_channel_id);
+		discord::Guild ModifyGuildPublicUpdatesChannelID(discord::snowflake public_updates_channel_id);
+		discord::Guild ModifyGuildPreferredLocale(std::string preferred_locale);
+
 		void DeleteGuild();
 		std::vector<discord::Channel> GetChannels();
 		discord::Channel CreateChannel(std::string name, GuildChannelType type, std::string topic, int bitrate, int user_limit, int rate_limit_per_user, int position, std::vector<discord::Permissions> permission_overwrites, discord::Channel category, bool nsfw);
-		// void ModifyChannelPositions(std::vector<discord::Channel> channels, std::vector<int> positiion); // https://discordapp.com/developers/docs/resources/guild#modify-guild-channel-positions
+		void ModifyChannelPositions(std::vector<discord::Channel> new_channel_positions);
 		discord::Member GetMember(snowflake id);
 		discord::Member AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf);
-		void AddRoleToMember(discord::Member member, discord::Role role); // @TODO: Move to discord::Member
-		void RemoveRoleToMember(discord::Member member, discord::Role role); // @TODO: Move to discord::Member
 		void RemoveMember(discord::Member member);
 		std::vector<discord::GuildBan> GetBans();
 		std::optional<std::string> GetMemberBanReason(discord::Member member);
-		bool IsMemberBanned(discord::Member member); // @TODO: Move to discord::Member
 		void BanMember(discord::Member member, std::string reason = "");
 		void UnbanMember(discord::Member member);
-		//std::vector<discord::Role> GetRoles(); // Not needed due to variable
 		discord::Role CreateRole(std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
-		// std::vector<discord::Role> ModifyRolePositions(std::vector<snowflake> ids, std::vector<int> positions); // https://discordapp.com/developers/docs/resources/guild#modify-guild-role-positions
+		void ModifyRolePositions(std::vector<discord::Role> new_role_positions); // https://discordapp.com/developers/docs/resources/guild#modify-guild-role-positions
 		discord::Role ModifyRole(discord::Role role, std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
 		void DeleteRole(discord::Role role);
-		// void GetPruneAmount(); // https://discordapp.com/developers/docs/resources/guild#get-guild-prune-count
-		// void BeginPrune(int days, bool comptute_prune_count = false); // https://discordapp.com/developers/docs/resources/guild#begin-guild-prune
+		int GetPruneAmount(int days);
+		void BeginPrune(int days);
 		std::vector<discord::GuildInvite> GetInvites();
 		std::vector<discord::GuildIntegration> GetIntegrations();
 		void CreateIntegration(snowflake id, std::string type);
@@ -155,13 +167,13 @@ namespace discord {
 		void SyncIntegration(discord::GuildIntegration guild_integration);
 		GuildEmbed GetGuildEmbed();
 		GuildEmbed ModifyGuildEmbed(snowflake channel_id, bool enabled);
-		// void GetVanityURL() // https://discordapp.com/developers/docs/resources/guild#get-guild-vanity-url
+		// discord::GuildInvite GetVanityURL(); // https://discordapp.com/developers/docs/resources/guild#get-guild-vanity-url - Doesn't work.
 		std::string GetWidgetImageURL(WidgetStyle widget_style = WidgetStyle::SHIELD);
 
 		std::vector<discord::Emoji> GetEmojis();
 		discord::Emoji GetEmoji(snowflake id);
-		// discord::Emoji CreateEmoji(std::string name, std::string image, std::vector<discord::Role> roles); // https://discordapp.com/developers/docs/resources/emoji#create-guild-emoji
-		discord::Emoji ModifyEmoji(discord::Emoji emoji, std::string name, std::vector<discord::Role> roles); // https://discordapp.com/developers/docs/resources/emoji#modify-guild-emoji
+		discord::Emoji CreateEmoji(std::string name, discord::Image image, std::vector<discord::Role> roles);
+		discord::Emoji ModifyEmoji(discord::Emoji emoji, std::string name, std::vector<discord::Role> roles);
 		void DeleteEmoji(discord::Emoji emoji);
 
 		snowflake id;

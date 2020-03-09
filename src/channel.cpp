@@ -72,7 +72,7 @@ namespace discord {
 
 	Channel::Channel(nlohmann::json json, snowflake guild_id) : Channel(json) {
 		/**
-		 * @brief Constructs a discord::Channel object from json.
+		 * @brief Constructs a discord::Channel object from json with a guild id.
 		 *
 		 * ```cpp
 		 *      discord::Channel channel(json, 583251190591258624);
@@ -227,6 +227,31 @@ namespace discord {
 		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/%", id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 		*this = discord::Channel();
 		return *this;
+	}
+
+	std::vector<discord::Message> Channel::GetChannelMessages(int amount, GetChannelsMessagesMethod get_method) {
+		/**
+		 * @brief Get channel's messages depending on the given method.
+		 *
+		 * ```cpp
+		 *      std::vector<discord::Message> messages = channel.GetChannelMessages(50);
+		 * ```
+		 *
+		 * @param[in] amount The amount of the messages to get unless the method is not "limit".
+		 * @param[in] get_method The method of how to get the messages.
+		 *
+		 * @return std::vector<discord::Message>
+		 */
+		
+		nlohmann::json result = SendGetRequest(Endpoint("/channels/{}/messages", id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+
+		std::vector<discord::Message> messages;
+
+		for (nlohmann::json message : result) {
+			messages.push_back(discord::Message(message));
+		}
+
+		return messages;
 	}
 
 	discord::Message Channel::FindMessage(snowflake message_id) {

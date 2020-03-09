@@ -1,10 +1,10 @@
 #include "bot.h"
 #include "utils.h"
 #include "command_handler.h"
+#include "guild.h"
 #include "channel.h"
 #include "message.h"
 #include "member.h"
-#include "guild.h"
 #include "role.h"
 #include "events.h"
 #include "activity.h"
@@ -26,6 +26,7 @@ namespace discord {
 		 *
 		 * @return discord::Bot, this is a constructor.
 		 */
+
 		fire_command_method = std::bind(&discord::FireCommand, std::placeholders::_1, std::placeholders::_2);
 
 		discord::globals::bot_instance = this;
@@ -78,10 +79,25 @@ namespace discord {
 		throw std::runtime_error("Guild not found!");
 	}
 
-	/*discord::User Bot::GetCurrentUser() {
-		nlohmann::json result = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
-		return discord::User(result);
-	}*/
+	discord::User Bot::ModifyCurrentUser(std::string username) {
+		/**
+		 * @brief Modify the bot's username.
+		 *
+		 * ```cpp
+		 *      discord::User user = bot.ModifyCurrent("New bot name!");
+		 * ```
+		 *
+		 * @param[in] username The new username.
+		 *
+		 * @return discord::User
+		 */
+
+		nlohmann::json result = SendPatchRequest(Endpoint("/users/@me"), DefaultHeaders(), 0, discord::RateLimitBucketType::GLOBAL);
+
+		bot_user = discord::User(result);
+
+		return bot_user;
+	}
 
 	void Bot::LeaveGuild(discord::Guild guild) {
 		/**
@@ -159,14 +175,6 @@ namespace discord {
 	}
 	
 	void Bot::BindEvents() {
-		/**
-		 * @brief Bind all the discord events with the correct methods.
-		 *
-		 * Private bot method
-		 *
-		 * @return void
-		 */
-
 		internal_event_map["READY"] = std::bind(&Bot::ReadyEvent, this, std::placeholders::_1);
 		internal_event_map["RESUMED"] = std::bind(&discord::Bot::ResumedEvent, this, std::placeholders::_1);
 		internal_event_map["INVALID_SESSION"] = std::bind(&discord::Bot::InvalidSesionEvent, this, std::placeholders::_1);
@@ -204,14 +212,6 @@ namespace discord {
 	}
 
 	void Bot::WebSocketStart() {
-		/**
-		 * @brief Starts the web socket.
-		 *
-		 * Private bot method
-		 *
-		 * @return void
-		 */
-
 		nlohmann::json gateway_request = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", Format("Bot %", token) }, { "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" } }, {},{});
 		
 		if (gateway_request.contains("url")) {
@@ -238,33 +238,11 @@ namespace discord {
 	}
 
 	void Bot::HandleDiscordDisconnect(websocket_close_status close_status, utility::string_t reason, std::error_code error_code) {
-		/**
-		 * @brief Handle a websocket disconnection.
-		 *
-		 * Private bot method
-		 *
-		 * @param[in] close_status The close status.
-		 * @param[in] reason The reason for closing the connection.
-		 * @param[in] error_code The error code.
-		 *
-		 * @return void
-		 */
-
 		std::cout << "Websocket was closed with error: 400" << error_code.value() << "!" << std::endl;
 		throw std::runtime_error("Websocket was closed with error: 400" + std::to_string(error_code.value()) + "!");
 	}
 
 	void Bot::OnWebSocketPacket(websocket_incoming_message msg) {
-		/**
-		 * @brief Receive a websocket packet and find out what to do with it.
-		 *
-		 * Private bot method
-		 *
-		 * @param[in] msg The incomming websocket msg.
-		 *
-		 * @return void
-		 */
-
 		std::string packet_raw = msg.extract_string().get();
 
 		nlohmann::json result = nlohmann::json::parse(packet_raw);
@@ -287,17 +265,6 @@ namespace discord {
 	}
 
 	void Bot::HandleDiscordEvent(nlohmann::json const j, std::string event_name) {
-		/**
-		 * @brief Handle a received event.
-		 *
-		 * Private bot method
-		 *
-		 * @param[in] json The received json from the websocket.
-		 * @param[in] event_name The event name.
-		 *
-		 * @return void
-		 */
-
 		const nlohmann::json data = j["d"];
 		last_sequence_number = (j.contains("s") && j["s"].is_number()) ? j["s"].get<int>() : -1;
 
@@ -311,14 +278,6 @@ namespace discord {
 	}
 
 	void Bot::HandleHeartbeat() {
-		/**
-		 * @brief Handle the gateway heartbeat
-		 *
-		 * Private bot method
-		 *
-		 * @return void
-		 */
-
 		while (true) {
 			nlohmann::json data = { { "op", packet_opcode::heartbeat }, { "d", nullptr } };
 			if (last_sequence_number != -1) {
@@ -345,14 +304,6 @@ namespace discord {
 	}
 
 	nlohmann::json Bot::GetIdentifyPacket() {
-		/**
-		 * @brief Get the identify packet for the gateway.
-		 *
-		 * Private bot method
-		 *
-		 * @return json
-		 */
-
 		nlohmann::json obj = { { "op", packet_opcode::identify },
 							   { "d",
 								 { { "token", token },

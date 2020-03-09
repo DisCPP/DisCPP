@@ -53,7 +53,7 @@ namespace discord {
 		Bot(std::string token, std::string prefix);
 		int Run();
 		discord::Guild GetGuild(snowflake guild_id);
-		// discord::User ModifyCurrentUser(std::string username); // https://discordapp.com/developers/docs/resources/user#modify-current-user
+		discord::User ModifyCurrentUser(std::string username);
 		void LeaveGuild(discord::Guild guild);
 		void UpdatePresence(discord::Activity activity);
 		void CreateWebsocketRequest(nlohmann::json json);
