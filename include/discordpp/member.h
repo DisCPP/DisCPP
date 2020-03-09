@@ -22,7 +22,7 @@ namespace discord {
 		bool HasRole(discord::Role role);
 
 		discord::User user;
-		snowflake guild_id; // TODO: Convert this to discord::Guild instead of snowflakes
+		snowflake guild_id;
 		std::string nick;
 		std::vector<discord::Role> roles;
 		std::string joined_at; // TODO: Convert to iso8601Time

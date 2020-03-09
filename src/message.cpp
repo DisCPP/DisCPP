@@ -61,7 +61,7 @@ namespace discord {
 			mentions.push_back(discord::Member(new_member_json, guild.id));
 		}
 		for (auto& mentioned_role : json["mentioned_roles"]) {
-			mentioned_roles.push_back(mentioned_role.get<snowflake>());
+			mentioned_roles.push_back(discord::Role(mentioned_role.get<snowflake>()));
 		}
 		if (json.contains("mention_channels")) {
 			for (auto& mention_channel : json["mention_channels"]) {
