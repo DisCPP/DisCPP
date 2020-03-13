@@ -4,6 +4,7 @@
 #include <discordpp/channel.h>
 #include <discordpp/activity.h>
 #include <discordpp/command.h>
+
 // Events
 #include <discordpp/event_handler.h>
 #include <discordpp/events/ready_event.h>
@@ -20,11 +21,12 @@ int main(int argc, const char* argv[]) {
 	std::string token;
 	std::getline(token_file, token);
 
-	discord::Bot bot{ token, "!" };
+	discord::Bot bot{ token, "!" }; // Token, command prefix.
 
-	PingCommand(); // This runs the constructor which would actually register the command
+	PingCommand(); // This runs the constructor which will register the command.
 
-	// You can still register a command like you did before
+	// I would recommend creating a class for the commands, you can check that in the examples folder
+	// But, you can still register a command like you did before
 	discord::Command("test", "Quick example of a quick command", {}, [](discord::Context ctx) {
 		ctx.Send("Quick new command handler test");
 	}, {});
