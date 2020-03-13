@@ -12,16 +12,60 @@ namespace discord {
 		using IdType = unsigned int;
 
 		static EventListenerHandle RegisterListener(std::function<bool(const T&)> listener) {
+			/**
+			 * @brief Registers an event listener.
+			 *
+			 * ```cpp
+			 *      discord::EventHandler<discord::ChannelPinsUpdateEvent>::RegisterListener([](discord::ChannelPinsUpdateEvent event)->bool {
+			 *			event.channel.Send("Detected a pin update!");
+			 *			return false;
+			 *		});
+			 * ```
+			 *
+			 * @param[in] listener The code to execute when the event gets dispatched.
+			 *
+			 * @return discord::EventListenerhandle
+			 */
+
 			auto id = GetNextId();
 			GetHandlers()[id] = listener;
 			return EventListenerHandle{ id };
 		}
 
 		static void RemoveListener(EventListenerHandle handle) {
+			/**
+			 * @brief Removes an event listener.
+			 *
+			 * ```cpp
+			 *      auto eventListen = discord::EventHandler<discord::ChannelPinsUpdateEvent>::RegisterListener([](discord::ChannelPinsUpdateEvent event)->bool {
+			 *			event.channel.Send("Detected a pin update!");
+			 *			return false;
+			 *		});
+			 *
+			 *		discord::EventHandler<discord::ChannelPinsUpdateEvent>::RemoveListener(eventListen);
+			 * ```
+			 *
+			 * @param[in] handle The event listener to remove.
+			 *
+			 * @return void
+			 */
+
 			GetHandlers().erase(handle.id);
 		}
 
 		static void TriggerEvent(T e) {
+			/**
+			 * @brief Triggers an event.
+			 *
+			 * ```cpp
+			 *      discord::EventHandler<discord::MessageCreateEvent>::TriggerEvent(discord::MessageCreateEvent(created_message));
+			 * ```
+			 *
+			 * @param[in] e The event to trigger.
+			 *
+			 * @return void
+			 */
+
 			for (const auto& h : GetHandlers())
 			{
 				h.second(e);
@@ -52,12 +96,36 @@ namespace discord {
 	// For convenience
 	template <typename T>
 	void DispatchEvent(const T& t) {
+		/**
+		 * @brief Dispatches an event, shorter than using TriggerEvent.
+		 *
+		 * ```cpp
+		 *      DispatchEvent(discord::MessageCreateEvent(created_message));
+		 * ```
+		 *
+		 * @param[in] t The event to dispatch.
+		 *
+		 * @return void
+		 */
+
 		EventHandler<T>::TriggerEvent(t);
 	}
 
 	// To let the caller pass pointers as the event object
 	template <typename T>
 	void DispatchEvent(T* t) {
+		/**
+		 * @brief Dispatches an event pointer, shorter than using TriggerEvent.
+		 *
+		 * ```cpp
+		 *      DispatchEvent(&discord::MessageCreateEvent(created_message));
+		 * ```
+		 *
+		 * @param[in] t The event to dispatch.
+		 *
+		 * @return void
+		 */
+
 		DispatchEvent<T>(*t);
 	}
 }
