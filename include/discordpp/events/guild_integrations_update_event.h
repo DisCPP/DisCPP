@@ -1,16 +1,16 @@
-#ifndef DISCORDPP_GUILD_GUILD_INTEGRATIONS_UPDATE_EVENT_H
-#define DISCORDPP_GUILD_GUILD_INTEGRATIONS_UPDATE_EVENT_H
+#ifndef DISCORDPP_GUILD_INTEGRATIONS_UPDATE_EVENT_H
+#define DISCORDPP_GUILD_INTEGRATIONS_UPDATE_EVENT_H
 
-#include "event.h"
-#include "guild.h"
+#include "../event.h"
+#include "../guild.h"
 
 #include <nlohmann/json.hpp>
 
 namespace discord {
-	class GuildGuildIntegrationsUpdateEvent : public Event {
+	class GuildIntegrationsUpdateEvent : public Event {
 	public:
-		inline GuildGuildIntegrationsUpdateEvent(nlohmann::json json) : guild(discord::Guild(json)) {}
-		inline GuildGuildIntegrationsUpdateEvent(discord::Guild guild) : guild(guild) {}
+		inline GuildIntegrationsUpdateEvent(nlohmann::json json) : guild(discord::Guild(json)) {}
+		inline GuildIntegrationsUpdateEvent(discord::Guild guild) : guild(guild) {}
 
 		discord::Guild guild;
 	};

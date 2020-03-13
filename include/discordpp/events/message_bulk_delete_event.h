@@ -1,9 +1,9 @@
 #ifndef DISCORDPP_MESSAGE_BULK_DELETE_EVENT_H
 #define DISCORDPP_MESSAGE_BULK_DELETE_EVENT_H
 
-#include "event.h"
-#include "message.h"
-#include "bot.h"
+#include "../event.h"
+#include "../message.h"
+#include "../bot.h"
 
 #include <vector>
 

@@ -1,8 +1,8 @@
 #ifndef DISCORDPP_CHANNEL_DELETE_EVENT_H
 #define DISCORDPP_CHANNEL_DELETE_EVENT_H
 
-#include "event.h"
-#include "channel.h"
+#include "../event.h"
+#include "../channel.h"
 
 #include <nlohmann/json.hpp>
 

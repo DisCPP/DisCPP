@@ -1,12 +1,12 @@
 #ifndef DISCORDPP_INVALID_SESSION_EVENT_H
 #define DISCORDPP_INVALID_SESSION_EVENT_H
 
-#include "event.h"
+#include "../event.h"
 
 namespace discord {
-	class InvalidSessionsEvent : public Event {
+	class InvalidSessionEvent : public Event {
 	public:
-		InvalidSessionsEvent() = default;
+		InvalidSessionEvent() = default;
 	};
 }
 

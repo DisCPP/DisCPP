@@ -1,9 +1,9 @@
 #ifndef DISCORDPP_GUILD_MEMBER_REMOVE_EVENT_H
 #define DISCORDPP_GUILD_MEMBER_REMOVE_EVENT_H
 
-#include "event.h"
-#include "guild.h"
-#include "member.h"
+#include "../event.h"
+#include "../guild.h"
+#include "../member.h"
 
 #include <nlohmann/json.hpp>
 

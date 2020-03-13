@@ -1,8 +1,8 @@
 #ifndef DISCORDPP_MESSAGE_REACTION_REMOVE_ALL_EVENT_H
 #define DISCORDPP_MESSAGE_REACTION_REMOVE_ALL_EVENT_H
 
-#include "event.h"
-#include "message.h"
+#include "../event.h"
+#include "../message.h"
 
 #include <nlohmann/json.hpp>
 

@@ -9,11 +9,10 @@ find_package(Boost COMPONENTS system date_time serialization REQUIRED)
 
 # Add source files
 file(GLOB_RECURSE source_list src/*.cpp)
-file(GLOB_RECURSE events_source_list src/events/*.cpp)
 add_library(discordpp STATIC ${source_list} ${events_source_list})
 
 target_include_directories(discordpp PUBLIC include PRIVATE include/discordpp)
-target_include_directories(discordpp PUBLIC include PRIVATE include/discordpp/events)
+#target_include_directories(discordpp PRIVATE include/discordpp/events)
 
 target_link_libraries(discordpp PRIVATE cpr)
 target_link_libraries(discordpp PUBLIC nlohmann_json::nlohmann_json)

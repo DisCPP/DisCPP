@@ -1,10 +1,10 @@
 #ifndef DISCORDPP_MESSAGE_REACTION_REMOVE_EVENT_H
 #define DISCORDPP_MESSAGE_REACTION_REMOVE_EVENT_H
 
-#include "event.h"
-#include "message.h"
-#include "emoji.h"
-#include "user.h"
+#include "../event.h"
+#include "../message.h"
+#include "../emoji.h"
+#include "../user.h"
 
 #include <nlohmann/json.hpp>
 
@@ -20,7 +20,7 @@ namespace discord {
 			}
 
 			emoji = discord::Emoji(json["emoji"]);
-			user = discord::Emoji(json["user_id"].get<snowflake>());
+			user = discord::User(json["user_id"].get<snowflake>());
 		}
 
 		inline MessageReactionRemoveEvent(discord::Message message, discord::Emoji emoji, discord::User user) : message(message), emoji(emoji), user(user) {}
