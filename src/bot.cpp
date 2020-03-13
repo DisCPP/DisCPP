@@ -8,8 +8,7 @@
 #include "role.h"
 #include "events.h"
 #include "activity.h"
-#include "event.h"
-#include "message_created_event.h"
+#include "message_create_event.h"
 #include "event_handler.h"
 
 #include <iostream>
@@ -485,14 +484,13 @@ namespace discord {
 		discord_event_func_holder.call<events::guild_role_delete>(futures, ready, role);
 	}
 
-	//KDFA_DEFINE_VOID_EVENT(MESSAGE_CREATED);
 	void Bot::MessageCreateEvent(nlohmann::json result) {
-		auto lid = EventHandler<MessageCreatedEvent>::RegisterListener([](const MessageCreatedEvent& event)->bool {
+		auto lid = EventHandler<discord::MessageCreateEvent>::RegisterListener([](const discord::MessageCreateEvent& event)->bool {
 			std::cout << "Got event: " << event.message.author.username << std::endl;
 			return false;
 		});
 
-		MessageCreatedEvent event(result);
+		discord::MessageCreateEvent event(result);
 
 		discord::Message message = event.message;
 		if (messages.size() >= message_cache_count) {
