@@ -5,7 +5,7 @@ project(dpp)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(cpr REQUIRED)
 find_package(cpprestsdk CONFIG REQUIRED NAMES)
-find_package(Boost COMPONENTS system date_time REQUIRED)
+find_package(Boost COMPONENTS system date_time serialization REQUIRED)
 
 # Add source files
 file(GLOB_RECURSE source_list src/*.cpp)
@@ -18,6 +18,7 @@ target_include_directories(discordpp PUBLIC include PRIVATE include/discordpp/ev
 target_link_libraries(discordpp PRIVATE cpr)
 target_link_libraries(discordpp PUBLIC nlohmann_json::nlohmann_json)
 target_link_libraries(discordpp PUBLIC Boost::date_time)
+target_link_libraries(discordpp PUBLIC Boost::serialization)
 target_link_libraries(discordpp PRIVATE cpprestsdk::cpprest cpprestsdk::cpprestsdk_zlib_internal cpprestsdk::cpprestsdk_boost_internal)
 
 set_target_properties(discordpp PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS OFF)
