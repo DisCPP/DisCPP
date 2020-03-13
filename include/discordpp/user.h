@@ -10,7 +10,7 @@ namespace discord {
 	class Channel;
 	class GuildIntegration;
 
-	enum ConnectionVisibility : int {
+	enum class ConnectionVisibility : int {
 		NONE = 0,
 		EVERYONE = 1
 	};

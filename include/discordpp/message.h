@@ -12,13 +12,13 @@
 #include "attachment.h"
 
 namespace discord {
-	enum GetReactionsMethod : int {
+	enum class GetReactionsMethod : int {
 		BEFORE_USER,
 		AFTER_USER
 	};
 
 	struct MessageActivity {
-		enum ActivityType : int {
+		enum class ActivityType : int {
 			NONE = 0,
 			JOIN = 1,
 			SPECTATE = 2,

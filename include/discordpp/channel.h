@@ -13,7 +13,7 @@ namespace discord {
 	class User;
 	class Guild;
 
-	enum ModifyChannelValue : int {
+	enum class ModifyChannelValue : int {
 		NAME,
 		POSITION,
 		TOPIC,
@@ -34,7 +34,7 @@ namespace discord {
 		};
 	};
 
-	enum GetChannelsMessagesMethod {
+	enum class GetChannelsMessagesMethod {
 		AROUND,
 		BEFORE,
 		AFTER,

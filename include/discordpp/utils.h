@@ -19,13 +19,13 @@ namespace discord {
 	}
 
 	namespace specials {
-		enum NitroSubscription : int {
+		enum class NitroSubscription : int {
 			NO_NITRO = 0,
 			NITRO_CLASSIC = 1,
 			NITRO = 2
 		};
 
-		enum NitroTier : int {
+		enum class NitroTier : int {
 			NO_TIER = 0,
 			TIER_1 = 1,
 			TIER_2 = 2,
@@ -45,13 +45,13 @@ namespace discord {
 			ONLY_MENTIONS = 1
 		};
 
-		enum ExplicitContentFilterLevel : int {
+		enum class ExplicitContentFilterLevel : int {
 			DISABLED = 0,
 			MEMBERS_WITHOUT_ROLES = 1,
 			ALL_MEMBERS = 2
 		};
 
-		enum MFALevel : int {
+		enum class MFALevel : int {
 			NO_MFA = 0,
 			ELEVATED = 1
 		};

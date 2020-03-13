@@ -8,7 +8,7 @@
 namespace discord {
 	typedef std::string snowflake;
 
-	enum PermissionType : int {
+	enum class PermissionType : int {
 		ROLE,
 		MEMBER
 	};
