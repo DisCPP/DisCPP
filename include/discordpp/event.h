@@ -3,10 +3,7 @@
 
 namespace discord {
 	class Event {
-	private:
-
-	public:
-		
+	
 	};
 }
 

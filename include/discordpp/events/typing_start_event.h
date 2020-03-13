@@ -1,9 +1,9 @@
 #ifndef DISCORDPP_TYPING_START_EVENT_H
 #define DISCORDPP_TYPING_START_EVENT_H
 
-#include "event.h"
-#include "User.h"
-#include "channel.h"
+#include "../event.h"
+#include "../User.h"
+#include "../channel.h"
 
 #include <nlohmann/json.hpp>
 

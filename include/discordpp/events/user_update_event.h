@@ -1,8 +1,8 @@
 #ifndef DISCORDPP_USER_UPDATE_EVENT_H
 #define DISCORDPP_USER_UPDATE_EVENT_H
 
-#include "event.h"
-#include "user.h"
+#include "../event.h"
+#include "../user.h"
 
 #include <nlohmann/json.hpp>
 
