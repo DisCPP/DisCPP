@@ -15,13 +15,14 @@ Good to use for some smaller projects. Not sure how it would work on larger scal
 - [Nlohmann JSON](https://github.com/nlohmann/json)
 - [cpr](https://github.com/whoshuu/cpr)
 - [cpprestsdk](https://github.com/microsoft/cpprestsdk.git)
+- [Boost Serialization](https://www.boost.org/doc/libs/1_72_0/libs/serialization/doc/index.html)
 
 ## Contributing
 Please follow [Google's styling guide](https://google.github.io/styleguide/cppguide.html#Naming) for naming convention.
 
 ## Building
 1. Install vcpkg onto the root of your C drive.
-2. Install dependencies by running command: `vcpkg install nlohmann-json cpr cpprestsdk`.
+2. Install dependencies by running command: `vcpkg install nlohmann-json cpr cpprestsdk boost-serialization`.
 3. Then run `vcpkg integrate install`.
     * Should get an output similar to: `"-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"`.
     * Save the directory that was given (Ex. `C:/vcpkg/scripts/buildsystems/vcpkg.cmake`).
