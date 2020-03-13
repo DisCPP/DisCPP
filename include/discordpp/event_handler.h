@@ -6,7 +6,7 @@ namespace discord {
 		unsigned int id;
 	};
 
-	template <typename T>
+	template<typename T, typename = std::enable_if_t<std::is_base_of_v<Event, T>>>
 	class EventHandler {
 	public:
 		using IdType = unsigned int;
@@ -85,16 +85,16 @@ namespace discord {
 	};
 
 	template<typename T>
-	class EventHandler<T*> {};
+	class EventHandler<T*, std::enable_if_t<std::is_base_of_v<Event, T>>> {};
 
 	template<typename T>
-	class EventHandler<T&> {};
+	class EventHandler<T&, std::enable_if_t<std::is_base_of_v<Event, T>>> {};
 
-	template <typename T>
-	class EventHandler<const T> {};
+	template<typename T>
+	class EventHandler<const T, std::enable_if_t<std::is_base_of_v<Event, T>>> {};
 
 	// For convenience
-	template <typename T>
+	template<typename T>
 	void DispatchEvent(const T& t) {
 		/**
 		 * @brief Dispatches an event, shorter than using TriggerEvent.
@@ -112,7 +112,7 @@ namespace discord {
 	}
 
 	// To let the caller pass pointers as the event object
-	template <typename T>
+	template<typename T, typename = std::enable_if_t<std::is_base_of_v<Event, T>>>
 	void DispatchEvent(T* t) {
 		/**
 		 * @brief Dispatches an event pointer, shorter than using TriggerEvent.
@@ -125,7 +125,7 @@ namespace discord {
 		 *
 		 * @return void
 		 */
-
+		//static_assert(std::is_base_of_v<Event, T>, "T must derive from Event");
 		DispatchEvent<T>(*t);
 	}
 }
