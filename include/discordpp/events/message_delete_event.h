@@ -10,6 +10,7 @@ namespace discord {
 	class MessageDeleteEvent : public Event {
 	public:
 		inline MessageDeleteEvent(nlohmann::json json) : message(discord::Message(json)) { }
+		inline MessageDeleteEvent(discord::Message message) : message(message) {}
 
 		discord::Message message;
 	};

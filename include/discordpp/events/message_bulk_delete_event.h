@@ -22,6 +22,8 @@ namespace discord {
 			}
 		}
 
+		inline MessageBulkDeleteEvent(std::vector<discord::Message> message) : messages(messages) {}
+
 		std::vector<discord::Message> messages;
 	};
 }

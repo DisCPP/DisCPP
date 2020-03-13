@@ -10,6 +10,7 @@ namespace discord {
 	class WebhooksUpdateEvent : public Event {
 	public:
 		inline WebhooksUpdateEvent(nlohmann::json json) : channel(discord::Channel(json["channel_id"].get<snowflake>())) {}
+		inline WebhooksUpdateEvent(discord::Channel channel) : channel(channel) {}
 
 		discord::Channel channel;
 	};

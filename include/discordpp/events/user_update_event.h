@@ -10,6 +10,7 @@ namespace discord {
 	class UserUpdateEvent : public Event {
 	public:
 		inline UserUpdateEvent(nlohmann::json json) : user(discord::User(json)) { }
+		inline UserUpdateEvent(discord::User user) : user(user) {}
 
 		discord::User user;
 	};

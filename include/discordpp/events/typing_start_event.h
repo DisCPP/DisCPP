@@ -14,6 +14,8 @@ namespace discord {
 			if (json.contains("guild_id")) channel.guild_id = json["guild_id"].get<snowflake>();
 		}
 
+		inline TypingStartEvent(discord::User user, discord::Channel channel, int timestamp) : user(user), channel(channel), timestamp(timestamp) {}
+
 		discord::User user;
 		discord::Channel channel;
 		int timestamp;

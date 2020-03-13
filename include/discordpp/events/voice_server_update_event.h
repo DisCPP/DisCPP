@@ -11,7 +11,7 @@ namespace discord {
 	public:
 		inline VoiceServerUpdateEvent(nlohmann::json json) : json(json) { }
 
-		nlohmann::json json
+		nlohmann::json json;
 	};
 }
 

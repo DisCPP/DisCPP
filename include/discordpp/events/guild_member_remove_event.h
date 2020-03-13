@@ -11,6 +11,7 @@ namespace discord {
 	class GuildMemberRemoveEvent : public Event {
 	public:
 		inline GuildMemberRemoveEvent(nlohmann::json json) : guild(discord::Guild(json["guild_id"].get<snowflake>())), member(discord::Member(json["user"]["id"].get<snowflake>())) {}
+		inline GuildMemberRemoveEvent(discord::Guild guild, discord::Member member) : guild(guild), member(member) {}
 
 		discord::Guild guild;
 		discord::Member member;

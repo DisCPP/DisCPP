@@ -10,6 +10,7 @@ namespace discord {
 	class GuildGuildIntegrationsUpdateEvent : public Event {
 	public:
 		inline GuildGuildIntegrationsUpdateEvent(nlohmann::json json) : guild(discord::Guild(json)) {}
+		inline GuildGuildIntegrationsUpdateEvent(discord::Guild guild) : guild(guild) {}
 
 		discord::Guild guild;
 	};

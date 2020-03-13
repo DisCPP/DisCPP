@@ -10,6 +10,7 @@ namespace discord {
 	class ChannelUpdateEvent : public Event {
 	public:
 		inline ChannelUpdateEvent(nlohmann::json json) : channel(discord::Channel(json)) {}
+		inline ChannelUpdateEvent(discord::Channel channel) : channel(channel) {}
 
 		discord::Channel channel;
 	};

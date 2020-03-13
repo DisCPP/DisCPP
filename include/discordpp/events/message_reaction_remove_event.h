@@ -23,6 +23,8 @@ namespace discord {
 			user = discord::Emoji(json["user_id"].get<snowflake>());
 		}
 
+		inline MessageReactionRemoveEvent(discord::Message message, discord::Emoji emoji, discord::User user) : message(message), emoji(emoji), user(user) {}
+
 		discord::Message message;
 		discord::Emoji emoji;
 		discord::User user;

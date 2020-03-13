@@ -9,7 +9,8 @@
 namespace discord {
 	class GuildCreateEvent : public Event {
 	public:
-		inline ChannelCreateEvent(nlohmann::json json) : guild(discord::Guild(json)) {}
+		inline GuildCreateEvent(nlohmann::json json) : guild(discord::Guild(json)) {}
+		inline GuildCreateEvent(discord::Guild guild) : guild(guild) {}
 
 		discord::Guild guild;
 	};
