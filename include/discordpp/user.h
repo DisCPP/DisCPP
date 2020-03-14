@@ -31,7 +31,7 @@ namespace discord {
 		Connection(nlohmann::json json);
 	};
 
-	class User : DiscordObject {
+	class User : public DiscordObject {
 	public:
 		User() = default;
 		User(snowflake id);
@@ -40,7 +40,7 @@ namespace discord {
 		discord::Channel CreateDM();
 		std::vector<Connection> GetUserConnections();
 
-		snowflake id;
+		//snowflake id;
 		std::string username;
 		std::string discriminator;
 		std::string avatar;

@@ -9,7 +9,7 @@
 #include <nlohmann/json.hpp>
 
 namespace discord {
-	class Invite : DiscordObject {
+	class Invite : public DiscordObject {
 	public:
 		Invite() = default;
 		Invite(nlohmann::json json);

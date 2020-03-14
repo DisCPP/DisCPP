@@ -11,14 +11,14 @@ namespace discord {
 	class Guild;
 	class User;
 
-	class Emoji : DiscordObject {
+	class Emoji : public DiscordObject {
 	public:
 		Emoji() = default;
 		Emoji(std::string name, snowflake id);
 		Emoji(discord::Guild guild, snowflake id);
 		Emoji(nlohmann::json json);
 
-		snowflake id;
+		//snowflake id;
 		std::string name;
 		std::vector<discord::Role> roles;
 		discord::User user;

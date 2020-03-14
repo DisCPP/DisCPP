@@ -46,7 +46,7 @@ namespace discord {
 		std::string file_path;
 	};
 
-	class Channel : DiscordObject {
+	class Channel : public DiscordObject {
 	public:
 		Channel() = default;
 		Channel(snowflake id);
@@ -70,7 +70,7 @@ namespace discord {
 		void GroupDMAddRecipient(discord::User user);
 		void GroupDMRemoveRecipient(discord::User user);
 
-		snowflake id;
+		//snowflake id;
 		int type;
 		snowflake guild_id;
 		int position;

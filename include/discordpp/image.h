@@ -6,7 +6,7 @@
 #include <nlohmann/json.hpp>
 
 namespace discord {
-	class Image : DiscordObject {
+	class Image : public DiscordObject {
 	public:
 		Image() = default;
 		Image(std::ifstream* image, std::string location);

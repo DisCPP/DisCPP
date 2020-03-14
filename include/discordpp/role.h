@@ -9,13 +9,13 @@
 namespace discord {
 	class Guild;
 
-	class Role : DiscordObject {
+	class Role : public DiscordObject {
 	public:
 		Role() = default;
 		Role(snowflake role_id, discord::Guild guild);
 		Role(nlohmann::json json);
 
-		snowflake id;
+		//snowflake id;
 		std::string name;
 		int color;
 		bool hoist;

@@ -406,13 +406,13 @@ namespace discord {
 
 	void Bot::ChannelPinsUpdateEvent(nlohmann::json result) {
 		discord::Channel new_channel = discord::Channel(result["channel_id"].get<snowflake>());
-		new_channel.last_pin_timestamp = result["last_pin_timestamp"];
+		new_channel.last_pin_timestamp = GetDataSafely<std::string>(result, "last_pin_timestamp");
 		new_channel.guild_id = result["guild_id"].get<snowflake>();
 
 		std::replace_if(channels.begin(), channels.end(), [new_channel](discord::Channel a) { return new_channel.id == a.id; }, new_channel);
 
 		//discord_event_func_holder.call<events::channel_pins_update>(futures, ready, discord::Channel(result));
-		discord::DispatchEvent(discord::ChannelPinsUpdateEvent(discord::Channel(result)));
+		discord::DispatchEvent(discord::ChannelPinsUpdateEvent(new_channel));
 	}
 
 	void Bot::GuildCreateEvent(nlohmann::json result) {
