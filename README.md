@@ -105,7 +105,7 @@ int main(int argc, const char* argv[]) {
 	}, {});
 
 	// New event system
-	discord::EventHandler<discord::ReadyEvent>::RegisterListener([&bot](discord::ReadyEvent event)->bool {
+	discord::EventHandler<discord::ReadyEvent>::RegisterListener([&bot](discord::ReadyEvent event) {
 		std::cout << "Ready!" << std::endl
 			<< "Logged in as: " << bot.bot_user.username << "#" << bot.bot_user.discriminator << std::endl
 			<< "ID: " << bot.bot_user.id << std::endl << "-----------------------------" << std::endl;
@@ -113,22 +113,16 @@ int main(int argc, const char* argv[]) {
 		// Will show "Playing With Crashes!"
 		discord::Activity activity = discord::Activity("With Crashes!", discord::presence::ActivityType::GAME, discord::presence::Status::idle);
 		bot.UpdatePresence(activity);
-
-		return false;
 	});
 
-	discord::EventHandler<discord::GuildMemberAddEvent>::RegisterListener([](discord::GuildMemberAddEvent event)->bool {
+	discord::EventHandler<discord::GuildMemberAddEvent>::RegisterListener([](discord::GuildMemberAddEvent event) {
 		discord::Channel channel((discord::snowflake) "638156895953223714");
 
 		channel.Send("Welcome <@" + event.member.user.id + ">, hope you enjoy!");
-
-		return false;
 	});
 
-	discord::EventHandler<discord::ChannelPinsUpdateEvent>::RegisterListener([](discord::ChannelPinsUpdateEvent event)->bool {
+	discord::EventHandler<discord::ChannelPinsUpdateEvent>::RegisterListener([](discord::ChannelPinsUpdateEvent event) {
 		event.channel.Send("Detected a pin update!");
-
-		return false;
 	});
 
 	return bot.Run();
