@@ -12,13 +12,13 @@
 #include "attachment.h"
 
 namespace discord {
-	enum GetReactionsMethod : int {
+	enum class GetReactionsMethod : int {
 		BEFORE_USER,
 		AFTER_USER
 	};
 
 	struct MessageActivity {
-		enum ActivityType : int {
+		enum class ActivityType : int {
 			NONE = 0,
 			JOIN = 1,
 			SPECTATE = 2,
@@ -36,8 +36,8 @@ namespace discord {
 		}
 	};
 
-	struct MessageApplication {
-		snowflake id;
+	struct MessageApplication : public DiscordObject {
+		//snowflake id;
 		std::string cover_image;
 		std::string description;
 		std::string icon;
@@ -66,7 +66,7 @@ namespace discord {
 		}
 	};
 
-	class Message : DiscordObject {
+	class Message : public DiscordObject {
 	public:
 		Message() = default;
 		Message(snowflake id);
@@ -85,7 +85,7 @@ namespace discord {
 		void PinMessage();
 		void UnpinMessage();
 
-		snowflake id;
+		//snowflake id;
 		discord::Channel channel;
 		discord::Guild guild;
 		discord::User author;

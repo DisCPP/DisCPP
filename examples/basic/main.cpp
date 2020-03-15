@@ -2,9 +2,14 @@
 #include <discordpp/context.h>
 #include <discordpp/command_handler.h>
 #include <discordpp/channel.h>
-#include <discordpp/events.h>
 #include <discordpp/activity.h>
 #include <discordpp/command.h>
+
+// Events
+#include <discordpp/event_handler.h>
+#include <discordpp/events/ready_event.h>
+#include <discordpp/events/guild_member_add_event.h>
+#include <discordpp/events/channel_pins_update_event.h>
 
 #include <iostream>
 #include <fstream>
@@ -16,34 +21,37 @@ int main(int argc, const char* argv[]) {
 	std::string token;
 	std::getline(token_file, token);
 
-	discord::Bot bot{ token, "!" };
+	discord::Bot bot{ token, "!" }; // Token, command prefix.
 
-	PingCommand(); // This runs the constructor which would actually register the command
+	PingCommand(); // This runs the constructor which will register the command.
 
-	// You can still register a command like you did before
+	// I would recommend creating a class for the commands, you can check that in the examples folder
+	// But, you can still register a command like you did before
 	discord::Command("test", "Quick example of a quick command", {}, [](discord::Context ctx) {
 		ctx.Send("Quick new command handler test");
 	}, {});
 
-	bot.HandleEvent<discord::events::ready>([&bot]() {
+	// New event system
+	discord::EventHandler<discord::ReadyEvent>::RegisterListener([&bot](discord::ReadyEvent event) {
 		std::cout << "Ready!" << std::endl
-				  << "Logged in as: " << bot.bot_user.username << "#" << bot.bot_user.discriminator << std::endl
-				  << "ID: " << bot.bot_user.id << std::endl << "-----------------------------" << std::endl;
+			<< "Logged in as: " << bot.bot_user.username << "#" << bot.bot_user.discriminator << std::endl
+			<< "ID: " << bot.bot_user.id << std::endl << "-----------------------------" << std::endl;
 
 		// Will show "Playing With Crashes!"
 		discord::Activity activity = discord::Activity("With Crashes!", discord::presence::ActivityType::GAME, discord::presence::Status::idle);
 		bot.UpdatePresence(activity);
 	});
 
-	bot.HandleEvent<discord::events::guild_member_add>([&bot](discord::Guild const guild, discord::Member const member) {
+	discord::EventHandler<discord::GuildMemberAddEvent>::RegisterListener([](discord::GuildMemberAddEvent event) {
 		discord::Channel channel((discord::snowflake) "638156895953223714");
-		
-		channel.Send("Welcome <@" + member.user.id + ">, hope you enjoy!");
+
+		channel.Send("Welcome <@" + event.member.user.id + ">, hope you enjoy!");
 	});
 
-	bot.HandleEvent<discord::events::channel_pins_update>([&bot](discord::Channel const channel) {
-		discord::Channel _channel = channel;
-		_channel.Send("Detected a pin update!");
+	discord::EventHandler<discord::ChannelPinsUpdateEvent>::RegisterListener([](discord::ChannelPinsUpdateEvent event)->bool {
+		event.channel.Send("Detected a pin update!");
+
+		return false;
 	});
 
 	return bot.Run();

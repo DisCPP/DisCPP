@@ -8,20 +8,21 @@
 Discord API Wrapper Written in C++  
 </p>
 
-## State
-Good to use for some smaller projects. Not sure how it would work on larger scale projects.
+## DiscordPP
+DiscordPP is a Discord API wrapper written in C++. This is one of the few that can compile on Windows and Linux. Its also focused on being multi threaded so commands and event listeners are ran on seperate threads, this means you dont have to worry about slowing the bot down with a certain command.
 
 ## Dependencies
 - [Nlohmann JSON](https://github.com/nlohmann/json)
 - [cpr](https://github.com/whoshuu/cpr)
 - [cpprestsdk](https://github.com/microsoft/cpprestsdk.git)
+- [Boost Serialization](https://www.boost.org/doc/libs/1_72_0/libs/serialization/doc/index.html)
 
 ## Contributing
 Please follow [Google's styling guide](https://google.github.io/styleguide/cppguide.html#Naming) for naming convention.
 
 ## Building
 1. Install vcpkg onto the root of your C drive.
-2. Install dependencies by running command: `vcpkg install nlohmann-json cpr cpprestsdk`.
+2. Install dependencies by running command: `vcpkg install nlohmann-json cpr cpprestsdk boost-serialization`.
 3. Then run `vcpkg integrate install`.
     * Should get an output similar to: `"-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"`.
     * Save the directory that was given (Ex. `C:/vcpkg/scripts/buildsystems/vcpkg.cmake`).
@@ -74,9 +75,14 @@ There may be more inside the [Examples](examples) folder.
 #include <discordpp/context.h>
 #include <discordpp/command_handler.h>
 #include <discordpp/channel.h>
-#include <discordpp/events.h>
 #include <discordpp/activity.h>
 #include <discordpp/command.h>
+
+// Events
+#include <discordpp/event_handler.h>
+#include <discordpp/events/ready_event.h>
+#include <discordpp/events/guild_member_add_event.h>
+#include <discordpp/events/channel_pins_update_event.h>
 
 #include <iostream>
 #include <fstream>
@@ -88,7 +94,9 @@ int main(int argc, const char* argv[]) {
 	std::string token;
 	std::getline(token_file, token);
 
-	discord::Bot bot{ token, "!" }; // token, command prefix
+	discord::Bot bot{ token, "!" }; // Token, command prefix.
+
+	PingCommand(); // This runs the constructor which will register the command.
 
 	// I would recommend creating a class for the commands, you can check that in the examples folder
 	// But, you can still register a command like you did before
@@ -96,25 +104,25 @@ int main(int argc, const char* argv[]) {
 		ctx.Send("Quick new command handler test");
 	}, {});
 
-	bot.HandleEvent<discord::events::ready>([&bot]() {
+	// New event system
+	discord::EventHandler<discord::ReadyEvent>::RegisterListener([&bot](discord::ReadyEvent event) {
 		std::cout << "Ready!" << std::endl
-				  << "Logged in as: " << bot.bot_user.username << "#" << bot.bot_user.discriminator << std::endl
-				  << "ID: " << bot.bot_user.id << std::endl << "-----------------------------" << std::endl;
+			<< "Logged in as: " << bot.bot_user.username << "#" << bot.bot_user.discriminator << std::endl
+			<< "ID: " << bot.bot_user.id << std::endl << "-----------------------------" << std::endl;
 
 		// Will show "Playing With Crashes!"
 		discord::Activity activity = discord::Activity("With Crashes!", discord::presence::ActivityType::GAME, discord::presence::Status::idle);
 		bot.UpdatePresence(activity);
 	});
 
-	bot.HandleEvent<discord::events::guild_member_add>([&bot](discord::Guild const guild, discord::Member const member) {
+	discord::EventHandler<discord::GuildMemberAddEvent>::RegisterListener([](discord::GuildMemberAddEvent event) {
 		discord::Channel channel((discord::snowflake) "638156895953223714");
-		
-		channel.Send("Welcome <@" + member.user.id + ">, hope you enjoy!");
+
+		channel.Send("Welcome <@" + event.member.user.id + ">, hope you enjoy!");
 	});
 
-	bot.HandleEvent<discord::events::channel_pins_update>([&bot](discord::Channel const channel) {
-		discord::Channel _channel = channel;
-		_channel.Send("Detected a pin update!");
+	discord::EventHandler<discord::ChannelPinsUpdateEvent>::RegisterListener([](discord::ChannelPinsUpdateEvent event) {
+		event.channel.Send("Detected a pin update!");
 	});
 
 	return bot.Run();

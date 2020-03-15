@@ -9,7 +9,7 @@
 namespace discord {
 	class Role;
 
-	class Member : DiscordObject{
+	class Member : public DiscordObject{
 	public:
 		Member() = default;
 		Member(snowflake id);

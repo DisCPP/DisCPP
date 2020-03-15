@@ -27,7 +27,7 @@ namespace discord {
 		}
 	}
 
-	Channel::Channel(nlohmann::json json) : discord::DiscordObject(json["id"].get<snowflake>()) {
+	Channel::Channel(nlohmann::json json) {
 		/**
 		 * @brief Constructs a discord::Channel object from json.
 		 *
@@ -104,6 +104,8 @@ namespace discord {
 		std::string raw_text = "{\"content\":\"" + text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
 		cpr::Body body = cpr::Body(raw_text);
 		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+
+		std::cout << result.dump() << std::endl;
 
 		return discord::Message(result);
 	}

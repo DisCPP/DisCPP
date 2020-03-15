@@ -8,7 +8,7 @@
 
 namespace discord {
 
-	class Reaction : DiscordObject {
+	class Reaction : public DiscordObject {
 	public:
 		Reaction() = default;
 		Reaction(nlohmann::json json);

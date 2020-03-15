@@ -60,9 +60,9 @@ namespace discord {
 		}
 	};
 
-	class GuildIntegration : DiscordObject {
+	class GuildIntegration : public DiscordObject {
 	public:
-		snowflake id;
+		//snowflake id;
 		std::string name;
 		std::string type;
 		bool enabled;
@@ -90,7 +90,7 @@ namespace discord {
 		}
 	};
 
-	class GuildEmbed : DiscordObject {
+	class GuildEmbed : public DiscordObject {
 	public:
 		snowflake channel_id;
 		bool enabled;
@@ -120,7 +120,7 @@ namespace discord {
 		GROUP_STORE
 	};
 
-	class Guild : DiscordObject {
+	class Guild : public DiscordObject {
 	public:
 		Guild() = default;
 		Guild(snowflake id);
@@ -176,7 +176,7 @@ namespace discord {
 		discord::Emoji ModifyEmoji(discord::Emoji emoji, std::string name, std::vector<discord::Role> roles);
 		void DeleteEmoji(discord::Emoji emoji);
 
-		snowflake id;
+		//snowflake id;
 		std::string name;
 		std::string icon;
 		std::string splash;

@@ -10,7 +10,7 @@ namespace discord {
 	class Channel;
 	class GuildIntegration;
 
-	enum ConnectionVisibility : int {
+	enum class ConnectionVisibility : int {
 		NONE = 0,
 		EVERYONE = 1
 	};
@@ -31,7 +31,7 @@ namespace discord {
 		Connection(nlohmann::json json);
 	};
 
-	class User : DiscordObject {
+	class User : public DiscordObject {
 	public:
 		User() = default;
 		User(snowflake id);
@@ -40,7 +40,7 @@ namespace discord {
 		discord::Channel CreateDM();
 		std::vector<Connection> GetUserConnections();
 
-		snowflake id;
+		//snowflake id;
 		std::string username;
 		std::string discriminator;
 		std::string avatar;
