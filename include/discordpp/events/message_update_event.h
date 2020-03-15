@@ -9,7 +9,6 @@
 namespace discord {
 	class MessageUpdateEvent : public Event {
 	public:
-		inline MessageUpdateEvent(nlohmann::json json) : message(discord::Message(json)) { }
 		inline MessageUpdateEvent(discord::Message message) : message(message) {}
 
 		discord::Message message;

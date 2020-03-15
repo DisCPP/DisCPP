@@ -9,7 +9,6 @@
 namespace discord {
 	class ChannelCreateEvent : public Event {
 	public:
-		inline ChannelCreateEvent(nlohmann::json json) : channel(discord::Channel(json)) {}
 		inline ChannelCreateEvent(discord::Channel channel) : channel(channel) {}
 
 		discord::Channel channel;

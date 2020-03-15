@@ -9,7 +9,6 @@
 namespace discord {
 	class ChannelDeleteEvent : public Event {
 	public:
-		inline ChannelDeleteEvent(nlohmann::json json) : channel(discord::Channel(json)) {}
 		inline ChannelDeleteEvent(discord::Channel channel) : channel(channel) {}
 
 		discord::Channel channel;

@@ -9,7 +9,7 @@ Discord API Wrapper Written in C++
 </p>
 
 ## DiscordPP
-DiscordPP is a Discord API wrapper written in C++. One of the few that can compile on Windows and Linux. Its also somewhat focused on being multi threaded. Commands and event listeners are ran on seperate threads so dont worry about slowing the bot down with a certain command. 
+DiscordPP is a Discord API wrapper written in C++; one of the few that can compile on Windows and Linux. Its also somewhat focused on being multi threaded. Commands and event listeners are ran on seperate threads so dont worry about slowing the bot down with a certain command. 
 
 ## Dependencies
 - [Nlohmann JSON](https://github.com/nlohmann/json)

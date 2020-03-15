@@ -9,7 +9,6 @@
 namespace discord {
 	class GuildRoleUpdateEvent : public Event {
 	public:
-		inline GuildRoleUpdateEvent(nlohmann::json json) : role(discord::Role(json["role"])) {}
 		inline GuildRoleUpdateEvent(discord::Role role) : role(role) {}
 
 		discord::Role role;

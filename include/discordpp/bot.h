@@ -34,6 +34,8 @@ namespace discord {
 		std::vector<discord::Member> members;
 		std::vector<discord::Guild> guilds;
 
+		std::vector<std::future<void>> futures;
+
 		enum packet_opcode : int {
 			dispatch = 0,				// Receive
 			heartbeat = 1,				// Send/Receive
@@ -90,8 +92,6 @@ namespace discord {
 		bool heartbeat_acked;
 		int last_sequence_number;
 		long long packet_counter;
-
-		std::vector<std::future<void>> futures;
 
 		int message_cache_count = 10000;
 		std::vector<discord::Message> messages;

@@ -362,22 +362,18 @@ namespace discord {
 		nlohmann::json user_json = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
 		bot_user = discord::User(user_json);
 
-		//discord_event_func_holder.call<events::ready>(futures, ready);
 		discord::DispatchEvent(discord::ReadyEvent());
 	}
 
 	void Bot::ResumedEvent(nlohmann::json result) {
-		//discord_event_func_holder.call<events::resumed>(futures, ready);
 		discord::DispatchEvent(discord::ResumedEvent());
 	}
 
 	void Bot::ReconectEvent(nlohmann::json result) {
-		//discord_event_func_holder.call<events::reconnect>(futures, ready);
 		discord::DispatchEvent(discord::ReconnectEvent());
 	}
 
 	void Bot::InvalidSesionEvent(nlohmann::json result) {
-		//discord_event_func_holder.call<events::invalid_session>(futures, ready);
 		discord::DispatchEvent(discord::InvalidSessionEvent());
 	}
 
@@ -385,7 +381,6 @@ namespace discord {
 		discord::Channel new_channel = discord::Channel(result, result["id"].get<snowflake>());
 		channels.push_back(new_channel);
 
-		//discord_event_func_holder.call<events::channel_create>(futures, ready, new_channel);
 		discord::DispatchEvent(discord::ChannelCreateEvent(new_channel));
 	}
 
@@ -393,14 +388,12 @@ namespace discord {
 		discord::Channel new_channel = discord::Channel(result);
 		std::replace_if(channels.begin(), channels.end(), [new_channel](discord::Channel a) { return new_channel.id == a.id; }, new_channel);
 
-		//discord_event_func_holder.call<events::channel_create>(futures, ready, new_channel);
 		discord::DispatchEvent(discord::ChannelUpdateEvent(new_channel));
 	}
 
 	void Bot::ChannelDeleteEvent(nlohmann::json result) {
 		std::remove_if(channels.begin(), channels.end(), [&](discord::Channel& channel) { return channel.id == result["id"].get<snowflake>(); });
 
-		//discord_event_func_holder.call<events::channel_delete>(futures, ready, discord::Channel(result));
 		discord::DispatchEvent(discord::ChannelDeleteEvent(discord::Channel(result)));
 	}
 
@@ -411,7 +404,6 @@ namespace discord {
 
 		std::replace_if(channels.begin(), channels.end(), [new_channel](discord::Channel a) { return new_channel.id == a.id; }, new_channel);
 
-		//discord_event_func_holder.call<events::channel_pins_update>(futures, ready, discord::Channel(result));
 		discord::DispatchEvent(discord::ChannelPinsUpdateEvent(new_channel));
 	}
 
@@ -428,7 +420,6 @@ namespace discord {
 			channels.push_back(discord::Channel(channel, guild_id));
 		}
 
-		//discord_event_func_holder.call<events::guild_create>(futures, ready, guild);
 		discord::DispatchEvent(discord::GuildCreateEvent(guild));
 	}
 
@@ -436,7 +427,6 @@ namespace discord {
 		discord::Guild guild(result);
 		std::replace_if(guilds.begin(), guilds.end(), [guild](discord::Guild gild) { return gild.id == guild.id; }, guild);
 
-		//discord_event_func_holder.call<events::guild_update>(futures, ready, guild);
 		discord::DispatchEvent(discord::GuildUpdateEvent(guild));
 	}
 
@@ -446,7 +436,6 @@ namespace discord {
 		guild.unavailable = true;
 		std::remove_if(guilds.begin(), guilds.end(), [guild](discord::Guild gild) {return gild.id == guild.id; });
 
-		//discord_event_func_holder.call<events::guild_delete>(futures, ready, guild);
 		discord::DispatchEvent(discord::GuildDeleteEvent(guild));
 	}
 
@@ -454,7 +443,6 @@ namespace discord {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
 		discord::User user(result["user"]);
 
-		//discord_event_func_holder.call<events::guild_ban_add>(futures, ready, guild, user);
 		discord::DispatchEvent(discord::GuildBanAddEvent(guild, user));
 	}
 
@@ -462,7 +450,6 @@ namespace discord {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
 		discord::User user(result["user"]);
 
-		//discord_event_func_holder.call<events::guild_ban_remove>(futures, ready, guild, user);
 		discord::DispatchEvent(discord::GuildBanRemoveEvent(guild, user));
 	}
 
@@ -475,12 +462,10 @@ namespace discord {
 		guild.emojis = emojis;
 		std::replace_if(guilds.begin(), guilds.end(), [guild](discord::Guild gild) { return gild.id == guild.id; }, guild);
 
-		//discord_event_func_holder.call<events::guild_emojis_update>(futures, ready, guild);
 		discord::DispatchEvent(discord::GuildEmojisUpdateEvent(guild));
 	}
 
 	void Bot::GuildIntegrationsUpdateEvent(nlohmann::json result) {
-		//discord_event_func_holder.call<events::guild_integrations_update>(futures, ready, discord::Guild(result["guild_id"].get<snowflake>()));
 		discord::DispatchEvent(discord::GuildIntegrationsUpdateEvent(discord::Guild(result["guild_id"].get<snowflake>())));
 	}
 
@@ -488,7 +473,6 @@ namespace discord {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
 		discord::Member member(result, guild.id);
 
-		//discord_event_func_holder.call<events::guild_member_add>(futures, ready, guild, member);
 		discord::DispatchEvent(discord::GuildMemberAddEvent(guild, member));
 	}
 
@@ -497,7 +481,6 @@ namespace discord {
 		discord::Member member(result["user"]["id"].get<snowflake>());
 		std::remove_if(members.begin(), members.end(), [member](discord::Member member) { return member.user.id == member.user.id; });
 
-		//discord_event_func_holder.call<events::guild_member_remove>(futures, ready, guild, user);
 		discord::DispatchEvent(discord::GuildMemberRemoveEvent(guild, member));
 	}
 
@@ -510,26 +493,22 @@ namespace discord {
 		}
 		member.nick = result["nick"];
 
-		//discord_event_func_holder.call<events::guild_member_update>(futures, ready, member);
 		discord::DispatchEvent(discord::GuildMemberUpdateEvent(guild, member));
 	}
 
 	void Bot::GuildMembersChunkEvent(nlohmann::json result) {
-		//discord_event_func_holder.call<events::guild_members_chunk>(futures, ready);
 		discord::DispatchEvent(discord::GuildMembersChunkEvent());
 	}
 
 	void Bot::GuildRoleCreateEvent(nlohmann::json result) {
 		discord::Role role(result["role"]);
 
-		//discord_event_func_holder.call<events::guild_role_create>(futures, ready, role);
 		discord::DispatchEvent(discord::GuildRoleCreateEvent(role));
 	}
 
 	void Bot::GuildRoleUpdateEvent(nlohmann::json result) {
 		discord::Role role(result["role"]);
 
-		//discord_event_func_holder.call<events::guild_role_create>(futures, ready, role);
 		discord::DispatchEvent(discord::GuildRoleUpdateEvent(role));
 	}
 
@@ -538,7 +517,6 @@ namespace discord {
 		discord::Role role = GetIf(guild.roles, [result](discord::Role& role) {return role.id == result["role_id"].get<snowflake>(); });
 		std::replace_if(guild.roles.begin(), guild.roles.end(), [role](discord::Role& r) { return r.id == role.id; }, role);
 
-		//discord_event_func_holder.call<events::guild_role_delete>(futures, ready, role);
 		discord::DispatchEvent(discord::GuildRoleDeleteEvent(role));
 	}
 
@@ -549,7 +527,6 @@ namespace discord {
 		}
 		messages.push_back(message);
 
-		//discord_event_func_holder.call<events::message_create>(futures, ready, message);
 		DoFunctionLater(fire_command_method, this, message);
 		DispatchEvent(discord::MessageCreateEvent(message));
 	}
@@ -561,7 +538,6 @@ namespace discord {
 		}
 		std::replace_if(messages.begin(), messages.end(), [message](discord::Message& msg) { return msg.id == message.id; }, message);
 
-		//discord_event_func_holder.call<events::message_update>(futures, ready, message);
 		discord::DispatchEvent(discord::MessageUpdateEvent(message));
 	}
 
@@ -569,7 +545,6 @@ namespace discord {
 		discord::Message message = GetIf(messages, [result](discord::Message& msg) { return msg.id == result["id"].get<snowflake>(); });
 		std::remove_if(messages.begin(), messages.end(), [message](discord::Message& msg) { return msg.id == message.id; });
 
-		//discord_event_func_holder.call<events::message_delete>(futures, ready, message);
 		discord::DispatchEvent(discord::MessageDeleteEvent(message));
 	}
 
@@ -590,7 +565,6 @@ namespace discord {
 				return (ib != std::end(msgs) && ib->id == x.id);
 			});
 
-		//discord_event_func_holder.call<events::message_delete_bulk>(futures, ready, msgs);
 		discord::DispatchEvent(discord::MessageBulkDeleteEvent(msgs));
 	}
 
@@ -607,7 +581,6 @@ namespace discord {
 		discord::Emoji emoji(result["emoji"]);
 		discord::User user(result["user_id"].get<snowflake>());
 
-		//discord_event_func_holder.call<events::message_reaction_add>(futures, ready, message, emoji, user);
 		discord::DispatchEvent(discord::MessageReactionAddEvent(message, emoji, user));
 	}
 
@@ -623,7 +596,6 @@ namespace discord {
 		discord::Emoji emoji(result["emoji"]);
 		discord::User user(result["user_id"].get<snowflake>());
 
-		//discord_event_func_holder.call<events::message_reaction_remove>(futures, ready, message, emoji, user);
 		discord::DispatchEvent(discord::MessageReactionRemoveEvent(message, emoji, user));
 	}
 
@@ -636,12 +608,10 @@ namespace discord {
 			channel.guild_id = result["guild_id"].get<snowflake>();
 		}
 
-		//discord_event_func_holder.call<events::message_reaction_remove_all>(futures, ready, message);
 		discord::DispatchEvent(discord::MessageReactionRemoveAllEvent(message));
 	}
 
 	void Bot::PresenceUpdateEvent(nlohmann::json result) {
-		//discord_event_func_holder.call<events::presence_update>(futures, ready, discord::User(result["user"]));
 		discord::DispatchEvent(discord::PresenseUpdateEvent(discord::User(result["user"])));
 	}
 
@@ -651,24 +621,20 @@ namespace discord {
 		if (result.contains("guild_id")) channel.guild_id = result["guild_id"].get<snowflake>();
 		int timestamp = result["timestamp"].get<int>();
 
-		//discord_event_func_holder.call<events::typing_start>(futures, ready, user, channel, timestamp);
 		discord::DispatchEvent(discord::TypingStartEvent(user, channel, timestamp));
 	}
 
 	void Bot::UserUpdateEvent(nlohmann::json result) {
 		discord::User user(result);
 
-		//discord_event_func_holder.call<events::user_update>(futures, ready, user);
 		discord::DispatchEvent(discord::UserUpdateEvent(user));
 	}
 
 	void Bot::VoiceStateUpdateEvent(nlohmann::json result) {
-		//discord_event_func_holder.call<events::voice_state_update>(futures, ready, result);
 		discord::DispatchEvent(discord::VoiceStateUpdateEvent(result));
 	}
 
 	void Bot::VoiceServerUpdateEvent(nlohmann::json result) {
-		//discord_event_func_holder.call<events::voice_server_update>(futures, ready, result);
 		discord::DispatchEvent(discord::VoiceServerUpdateEvent(result));
 	}
 
@@ -676,7 +642,6 @@ namespace discord {
 		discord::Channel channel(result["channel_id"].get<snowflake>());
 		channel.guild_id = result["guild_id"].get<snowflake>();
 
-		//discord_event_func_holder.call<events::webhooks_update>(futures, ready, channel);
 		discord::DispatchEvent(discord::WebhooksUpdateEvent(channel));
 	}
 }

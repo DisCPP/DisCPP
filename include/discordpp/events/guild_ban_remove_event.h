@@ -10,7 +10,6 @@
 namespace discord {
 	class GuildBanRemoveEvent : public Event {
 	public:
-		inline GuildBanRemoveEvent(nlohmann::json json) : guild(discord::Guild(json["guild_id"].get<snowflake>())), user(discord::User(json["user"])) {}
 		inline GuildBanRemoveEvent(discord::Guild guild, discord::User user) : guild(guild), user(user) {}
 
 		discord::Guild guild;

@@ -9,7 +9,6 @@
 namespace discord {
 	class GuildEmojisUpdateEvent : public Event {
 	public:
-		inline GuildEmojisUpdateEvent(nlohmann::json json) : guild(discord::Guild(json)) {}
 		inline GuildEmojisUpdateEvent(discord::Guild guild) : guild(guild) {}
 
 		discord::Guild guild;

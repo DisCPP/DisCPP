@@ -9,7 +9,6 @@
 namespace discord {
 	class MessageReactionRemoveAllEvent : public Event {
 	public:
-		inline MessageReactionRemoveAllEvent(nlohmann::json json) : message(discord::Message(json)) { }
 		inline MessageReactionRemoveAllEvent(discord::Message message) {}
 
 		discord::Message message;
