@@ -2,6 +2,7 @@
 #define DISCORD_EVENT_LISTENER_H
 
 #include "event.h"
+#include "utils.h"
 
 namespace discord {
 	struct EventListenerHandle {
@@ -13,7 +14,7 @@ namespace discord {
 	public:
 		using IdType = unsigned int;
 
-		static EventListenerHandle RegisterListener(std::function<bool(const T&)> listener) {
+		static EventListenerHandle RegisterListener(std::function<void(const T&)> listener) {
 			/**
 			 * @brief Registers an event listener.
 			 *
@@ -68,7 +69,7 @@ namespace discord {
 			/**
 			 * @brief Triggers an event.
 			 *
-			 * The given event class must derive from discord::Event.
+			 * The given event class must derive from discord::Event. The event will be thrown on another thread.
 			 *
 			 * ```cpp
 			 *      discord::EventHandler<discord::MessageCreateEvent>::TriggerEvent(discord::MessageCreateEvent(created_message));
@@ -81,8 +82,8 @@ namespace discord {
 
 			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discord::Event");
 
-			for (const auto& h : GetHandlers()) {
-				h.second(e);
+			for (std::pair<IdType, std::function<void(const T&)>> handler : GetHandlers()) {
+				discord::globals::bot_instance->futures.push_back(std::async(std::launch::async, handler.second, e));
 			}
 		}
 
@@ -94,10 +95,10 @@ namespace discord {
 			return ++id;
 		}
 
-		static std::unordered_map<IdType, std::function<bool(const T&)>>& GetHandlers() {
+		static std::unordered_map<IdType, std::function<void(const T&)>>& GetHandlers() {
 			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discord::Event");
 
-			static std::unordered_map<IdType, std::function<bool(const T&)>> handlers;
+			static std::unordered_map<IdType, std::function<void(const T&)>> handlers;
 			return handlers;
 		}
 	};
