@@ -22,7 +22,7 @@ Please follow [Google's styling guide](https://google.github.io/styleguide/cppgu
 
 ## Building
 1. Install vcpkg onto the root of your C drive.
-2. Install dependencies by running command: `vcpkg install nlohmann-json cpr cpprestsdk boost-serialization`.
+2. Install dependencies by running command: `vcpkg install nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization`.
 3. Then run `vcpkg integrate install`.
     * Should get an output similar to: `"-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"`.
     * Save the directory that was given (Ex. `C:/vcpkg/scripts/buildsystems/vcpkg.cmake`).
