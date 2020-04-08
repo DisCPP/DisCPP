@@ -18,7 +18,7 @@ target_link_libraries(discordpp PRIVATE cpr)
 target_link_libraries(discordpp PUBLIC nlohmann_json::nlohmann_json)
 target_link_libraries(discordpp PUBLIC Boost::date_time)
 target_link_libraries(discordpp PUBLIC Boost::serialization)
-target_link_libraries(discordpp PRIVATE cpprestsdk::cpprest cpprestsdk::cpprestsdk_zlib_internal cpprestsdk::cpprestsdk_boost_internal)
+target_link_libraries(discordpp PRIVATE cpprestsdk::cpprest cpprestsdk::cpprestsdk_zlib_internal cpprestsdk::cpprestsdk_brotli_internal)
 
 set_target_properties(discordpp PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS OFF)
 
