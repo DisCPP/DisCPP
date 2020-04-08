@@ -62,8 +62,8 @@ target_link_libraries(main PRIVATE discordpp)
 
 ## Todo:
 - [x] Finish tons of unimplemented methods in certain classes.
-- [ ] Convert `std::bind` to lambdas.
-- [ ] Convert the default command handler to use command classes.
+- [x] Convert the default command handler to use command classes.
+- [x] Convert the event system to use a more object oriented system, similar to the new command handler.
 
 ## Documentation
 Currently the only documentation is from Doxygen; its currently completely up to date. To generate documentation, install Doxygen and run doxygen in the root DiscordPP directory.
