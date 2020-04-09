@@ -491,7 +491,9 @@ namespace discord {
 		for (auto role : result["roles"]) {
 			member.roles.push_back(discord::Role(role, guild));
 		}
-		member.nick = result["nick"];
+		if (result.contains("nick") && !result["nick"].is_null()) {
+			member.nick = result["nick"];
+		}
 
 		discord::DispatchEvent(discord::GuildMemberUpdateEvent(guild, member));
 	}
