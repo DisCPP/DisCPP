@@ -1,3 +1,4 @@
+#include "..\include\discordpp\utils.h"
 #include "utils.h"
 #include "bot.h"
 
@@ -281,6 +282,56 @@ std::string discord::Base64Encode(std::string text) {
 	return tmp.append((3 - text.size() % 3) % 3, '=');
 }
 
+std::string discord::ReplaceAll(std::string data, std::string toSearch, std::string replaceStr) {
+	/**
+	 * @brief Replace all occurences of sub strings
+	 *
+	 * ```cpp
+	 *      std::string raw_text = FindAndReplaceAll("discord text", " ", "_");
+	 * ```
+	 *
+	 * @param[in] string The string to escape.
+	 *
+	 * @return std::string
+	 */
+
+	boost::replace_all(data, toSearch, replaceStr);
+
+	return data;
+}
+
+std::string discord::EscapeString(std::string string) {
+	/**
+	 * @brief Escape strings for discord json endpoints and cpr body
+	 *
+	 * ```cpp
+	 *      std::string raw_text = "{\"content\":\"" + EscapeString(text) + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
+	 *		cpr::Body body = cpr::Body(raw_text);
+	 *		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+	 * ```
+	 *
+	 * @param[in] string The string to escape.
+	 *
+	 * @return std::string
+	 */
+
+	string = ReplaceAll(string, "\\", "\\\\");
+	string = ReplaceAll(string, "\"", "\\\"");
+	string = ReplaceAll(string, "\'", "\\\'");
+	string = ReplaceAll(string, "\?", "\\?");
+	string = ReplaceAll(string, "\a", "\\a");
+	string = ReplaceAll(string, "\b", "\\b");
+	string = ReplaceAll(string, "\f", "\\f");
+	string = ReplaceAll(string, "\n", "\\n");
+	string = ReplaceAll(string, "\r", "\\r");
+	string = ReplaceAll(string, "\t", "\\t");
+	string = ReplaceAll(string, "\v", "\\v");
+
+	std::cout << string << std::endl;
+
+	return string;
+}
+
 int discord::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bucket) {
 	/**
 	 * @brief Wait for rate limits.
@@ -393,14 +444,4 @@ void discord::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBu
 	obj->limit = std::stoi(header["X-RateLimit-Limit"]);
 	obj->remaining_limit = std::stoi(header["X-RateLimit-Remaining"]);
 	obj->ratelimit_reset = boost::posix_time::from_time_t(std::stoi(header["X-RateLimit-Reset"]));
-}
-
-std::string EscapeString(std::string string) {
-	CURL* curl;
-
-	if (curl) {
-		return curl_easy_escape(curl, string.c_str(), string.length());
-	}
-
-	throw std::runtime_error("Curl failed to initialize!");
 }

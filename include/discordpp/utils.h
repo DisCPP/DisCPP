@@ -144,6 +144,7 @@ namespace discord {
 	std::string CombineVectorWithSpaces(std::vector<std::string> vector, int offset = 0);
 	std::string ReadEntireFile(std::ifstream& file);
 	std::string Base64Encode(std::string text);
+	std::string ReplaceAll(std::string data, std::string toSearch, std::string replaceStr);
 	std::string EscapeString(std::string string);
 }
 
