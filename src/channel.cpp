@@ -105,8 +105,6 @@ namespace discord {
 		cpr::Body body = cpr::Body(raw_text);
 		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
-		std::cout << result.dump() << std::endl;
-
 		return discord::Message(result);
 	}
 
