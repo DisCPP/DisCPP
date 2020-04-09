@@ -327,8 +327,6 @@ std::string discord::EscapeString(std::string string) {
 	string = ReplaceAll(string, "\t", "\\t");
 	string = ReplaceAll(string, "\v", "\\v");
 
-	std::cout << string << std::endl;
-
 	return string;
 }
 
