@@ -15,11 +15,9 @@ namespace discord {
 		snowflake id;
 
 		bool operator==(DiscordObject& other) const;
-		//bool operator==(DiscordObject other) const;
 		bool operator==(snowflake& other) const;
 
 		bool operator!=(DiscordObject& other) const;
-		//bool operator!=(DiscordObject other) const;
 		bool operator!=(snowflake& other) const;
 	};
 }

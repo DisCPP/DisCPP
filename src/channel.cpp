@@ -101,7 +101,7 @@ namespace discord {
 		 * @return discord::Message
 		 */
 
-		std::string raw_text = "{\"content\":\"" + text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
+		std::string raw_text = "{\"content\":\"" + EscapeString(text) + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
 		cpr::Body body = cpr::Body(raw_text);
 		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
@@ -122,7 +122,7 @@ namespace discord {
 		 * @return discord::Message
 		 */
 
-		cpr::Body body = cpr::Body(Format("{\"embed\": %%}", embed.ToJson(), ( (!text.empty()) ? Format(", \"content\": \"%\"", text) : "") ));
+		cpr::Body body = cpr::Body(Format("{\"embed\": %%}", embed.ToJson(), ( (!text.empty()) ? Format(", \"content\": \"%\"", EscapeString(text)) : "") ));
 		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
 
 		return discord::Message(result);
@@ -148,7 +148,7 @@ namespace discord {
 			multipart_data.parts.emplace_back("file" + std::to_string(i), cpr::File(files[i].file_path), "application/octet-stream");
 		}
 
-		multipart_data.parts.emplace_back("payload_json", Format("{\"content\": \"%\"}", text));
+		multipart_data.parts.emplace_back("payload_json", Format("{\"content\": \"%\"}", EscapeString(text)));
 
 		WaitForRateLimits(id, RateLimitBucketType::CHANNEL);
 		cpr::Response response = cpr::Post(cpr::Url{ Endpoint("/channels/%/messages", id) }, DefaultHeaders({ {"Content-Type", "multipart/form-data"} }), multipart_data);

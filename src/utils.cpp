@@ -6,6 +6,8 @@
 #include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
 
+#include <curl/curl.h>
+
 std::string discord::GetOsName() {
 	/**
 	 * @brief Get the OS name this application is running on.
@@ -391,4 +393,14 @@ void discord::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBu
 	obj->limit = std::stoi(header["X-RateLimit-Limit"]);
 	obj->remaining_limit = std::stoi(header["X-RateLimit-Remaining"]);
 	obj->ratelimit_reset = boost::posix_time::from_time_t(std::stoi(header["X-RateLimit-Reset"]));
+}
+
+std::string EscapeString(std::string string) {
+	CURL* curl;
+
+	if (curl) {
+		return curl_easy_escape(curl, string.c_str(), string.length());
+	}
+
+	throw std::runtime_error("Curl failed to initialize!");
 }

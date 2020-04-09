@@ -233,7 +233,7 @@ namespace discord {
 		 */
 
 		std::string endpoint = Endpoint("/channels/%/messages/%", channel.id, id);
-		cpr::Body body("{\"content\": \"" + text + "\"}");
+		cpr::Body body("{\"content\": \"" + EscapeString(text) + "\"}");
 		nlohmann::json result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL);
 
 		*this = { result };

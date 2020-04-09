@@ -111,7 +111,7 @@ namespace discord {
 		 * @return discord::Guild
 		 */
 
-		cpr::Body body("{\"name\": \"" + name + "\"}");
+		cpr::Body body("{\"name\": \"" + EscapeString(name) + "\"}");
 
 		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/%", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discord::RateLimitBucketType::GUILD, body);
 
@@ -401,7 +401,7 @@ namespace discord {
 		}
 
 		nlohmann::json json_raw = nlohmann::json({
-			{"name", name},
+			{"name", EscapeString(name)},
 			{"type", type},
 			{"topic", topic},
 			{"bitrate", bitrate},
@@ -568,8 +568,8 @@ namespace discord {
 		 * @return void
 		 */
 
-		cpr::Body body(Format("{\"reason\": \"%\"}", reason));
-		SendPutRequest(Endpoint("/guilds/%/bans/%", id, member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
+		cpr::Body body(Format("{\"reason\": \"%\"}", EscapeString(reason)));
+		nlohmann::json json = SendPutRequest(Endpoint("/guilds/%/bans/%", id, member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 	}
 
 	void Guild::UnbanMember(discord::Member member) {
@@ -586,6 +586,22 @@ namespace discord {
 		 */
 
 		SendDeleteRequest(Endpoint("/guilds/%/bans/%", id, member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
+	}
+
+	void Guild::KickMember(discord::Member member) {
+		/**
+		 * @brief Kick a guild member.
+		 *
+		 * ```cpp
+		 *      guild.KickMember(member);
+		 * ```
+		 *
+		 * @param[in] member The member to ban.
+		 *
+		 * @return void
+		 */
+
+		SendDeleteRequest(Endpoint("guilds/%/members/%", id, member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
 	discord::Role Guild::CreateRole(std::string name, Permissions permissions, int color, bool hoist, bool mentionable) {
@@ -606,7 +622,7 @@ namespace discord {
 		 */
 
 		nlohmann::json json_body = nlohmann::json({
-			{"name", name},
+			{"name", EscapeString(name)},
 			{"permissions", permissions.allow_perms.value},
 			{"color", color},
 			{"hoist", hoist},
@@ -975,7 +991,7 @@ namespace discord {
 		}
 
 		nlohmann::json body_raw = nlohmann::json({
-			{"name", name},
+			{"name", EscapeString(name)},
 			{"image", image.ToDataURI()},
 			{"roles", role_json}
 		});

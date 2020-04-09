@@ -4,7 +4,7 @@
 #include "user.h"
 
 namespace discord {
-	Emoji::Emoji(std::string name, snowflake id) : name(name) {
+	Emoji::Emoji(std::string name, snowflake id) : name(EscapeString(name)) {
 		/**
 		 * @brief Constructs a discord::Emoji object with a name and id.
 		 *

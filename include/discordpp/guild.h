@@ -153,6 +153,7 @@ namespace discord {
 		std::optional<std::string> GetMemberBanReason(discord::Member member);
 		void BanMember(discord::Member member, std::string reason = "");
 		void UnbanMember(discord::Member member);
+		void KickMember(discord::Member member);
 		discord::Role CreateRole(std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
 		void ModifyRolePositions(std::vector<discord::Role> new_role_positions); // https://discordapp.com/developers/docs/resources/guild#modify-guild-role-positions
 		discord::Role ModifyRole(discord::Role role, std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);

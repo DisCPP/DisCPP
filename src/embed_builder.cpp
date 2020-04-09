@@ -19,7 +19,7 @@ namespace discord {
 		 * @return discord::EmbedBuilder, this is a constructor.
 		 */
 
-		SetTitle(title);
+		SetTitle(EscapeString(title));
 		SetDescription(description);
 		SetColor(color);
 	}
@@ -54,7 +54,7 @@ namespace discord {
 		if (title.size() < 0 || title.size() > 256) {
 			throw std::runtime_error("Embed title can only be 0-256 characters");
 		}
-		embed_json["title"] = title;
+		embed_json["title"] = EscapeString(title);
 		return *this;
 	}
 
@@ -71,7 +71,7 @@ namespace discord {
 		 * @return discord::EmbedBuilder, just returns an object of this.
 		 */
 
-		embed_json["type"] = type;
+		embed_json["type"] = EscapeString(type);
 		return *this;
 	}
 	EmbedBuilder& EmbedBuilder::SetDescription(std::string description) {
@@ -90,7 +90,7 @@ namespace discord {
 		if (description.size() < 0 || description.size() > 2048) {
 			throw std::runtime_error("Embed descriptions can only be 0-2048 characters");
 		}
-		embed_json["description"] = description;
+		embed_json["description"] = EscapeString(description);
 		return *this;
 	}
 	
@@ -107,7 +107,7 @@ namespace discord {
 		 * @return discord::EmbedBuilder, just returns an object of this.
 		 */
 
-		embed_json["url"] = url;
+		embed_json["url"] = EscapeString(url);
 		return *this;
 	}
 
@@ -163,7 +163,7 @@ namespace discord {
 		if (text.size() > 2048) {
 			throw std::runtime_error("Embed footer text can only be up to 0-2048 characters");
 		}
-		embed_json["footer"]["text"] = text;
+		embed_json["footer"]["text"] = EscapeString(text);
 		if (!icon_url.empty()) {
 			embed_json["footer"]["icon_url"] = icon_url;
 		}
@@ -186,7 +186,7 @@ namespace discord {
 		 */
 
 		embed_json["image"] = nlohmann::json({});
-		embed_json["image"]["url"] = url;
+		embed_json["image"]["url"] = EscapeString(url);
 		if (height != -1) {
 			embed_json["image"]["height"] = height;
 		}
@@ -212,7 +212,7 @@ namespace discord {
 		 */
 
 		embed_json["thumbnail"] = nlohmann::json({});
-		embed_json["thumbnail"]["url"] = url;
+		embed_json["thumbnail"]["url"] = EscapeString(url);
 		if (height != -1) {
 			embed_json["thumbnail"]["height"] = height;
 		}
@@ -238,7 +238,7 @@ namespace discord {
 		 */
 
 		embed_json["video"] = nlohmann::json({});
-		embed_json["video"]["url"] = url;
+		embed_json["video"]["url"] = EscapeString(url);
 		if (height != -1) {
 			embed_json["video"]["height"] = height;
 		}
@@ -263,8 +263,8 @@ namespace discord {
 		 */
 
 		embed_json["provider"] = nlohmann::json({});
-		embed_json["provider"]["name"] = name;
-		embed_json["provider"]["url"] = url;
+		embed_json["provider"]["name"] = EscapeString(name);
+		embed_json["provider"]["url"] = EscapeString(url);
 		return *this;
 	}
 
@@ -287,13 +287,13 @@ namespace discord {
 		if (name.size() > 256) {
 			throw std::runtime_error("Embed author names can only be up to 0-256 characters");
 		}
-		embed_json["author"]["name"] = name;
+		embed_json["author"]["name"] = EscapeString(name);
 
 		if (!url.empty()) {
-			embed_json["author"]["url"] = url;
+			embed_json["author"]["url"] = EscapeString(url);
 		}
 		if (!icon_url.empty()) {
-			embed_json["author"]["icon_url"] = icon_url;
+			embed_json["author"]["icon_url"] = EscapeString(icon_url);
 		}
 		return *this;
 	}
@@ -327,8 +327,8 @@ namespace discord {
 		}
 
 		nlohmann::json field = nlohmann::json({
-				{"name", name},
-				{"value", value},
+				{"name", EscapeString(name)},
+				{"value", EscapeString(value)},
 				{"inline", is_inline}
 			});
 		embed_json["fields"].push_back(field);
