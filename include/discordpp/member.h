@@ -3,6 +3,7 @@
 
 #include "discord_object.h"
 #include "user.h"
+#include "activity.h"
 
 #include <vector>
 
@@ -31,6 +32,7 @@ namespace discord {
 		bool deaf;
 		bool mute;
 		discord::Permissions permissions;
+		discord::Activity activity;
 	};
 }
 

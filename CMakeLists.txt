@@ -12,7 +12,6 @@ file(GLOB_RECURSE source_list src/*.cpp)
 add_library(discordpp STATIC ${source_list} ${events_source_list})
 
 target_include_directories(discordpp PUBLIC include PRIVATE include/discordpp)
-#target_include_directories(discordpp PRIVATE include/discordpp/events)
 
 target_link_libraries(discordpp PRIVATE cpr)
 target_link_libraries(discordpp PUBLIC nlohmann_json::nlohmann_json)

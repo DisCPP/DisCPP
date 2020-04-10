@@ -20,6 +20,7 @@ namespace discord {
 		};
 
 		enum ActivityType : int {
+			NONE = -1,
 			GAME = 0,
 			STREAMING = 1,
 			LISTENING = 2,
@@ -32,9 +33,11 @@ namespace discord {
 		Activity() = default;
 
 		// Discord activity object:
-		std::string text;
+		std::string text;// name
 		presence::ActivityType type;
 		std::string url;
+		std::string created_at;
+		std::string application_id;
 		// end of discord activity
 		std::string status;
 		bool afk;
