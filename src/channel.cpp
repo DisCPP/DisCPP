@@ -91,6 +91,8 @@ namespace discord {
 		/**
 		 * @brief Send a message in this channel.
 		 *
+		 * If the message is over 2000 characters, then it will write the message to a temporary file and send that. It will then delete the file after its sent.
+		 *
 		 * ```cpp
 		 *      channel.Send("Test");
 		 * ```
@@ -101,8 +103,36 @@ namespace discord {
 		 * @return discord::Message
 		 */
 
-		std::string raw_text = "{\"content\":\"" + EscapeString(text) + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
-		cpr::Body body = cpr::Body(raw_text);
+		std::string escaped_text = EscapeString(text);
+		nlohmann::json message_json = nlohmann::json::parse("{\"content\":\"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}");
+
+		if (escaped_text.size() >= 2000) {
+			// Write message to file
+			std::ofstream message("message.txt", std::ios::out, std::ios::binary);
+			message << message_json["content"];
+			message.close();
+
+			// Ensure the file will be deleted even if it runs into an exception sending the file.
+			discord::Message sent_message;
+			try {
+				// Send the message
+				std::vector<discord::File> files;
+				files.push_back({ "message.txt", "message.txt" });
+				sent_message = Send(files, "Message was too large to fit in 2000 characters");
+
+				// Delete the temporary message file
+				remove("message.txt");
+			} catch (std::exception e) {
+				// Delete the temporary message file
+				remove("message.txt");
+
+				throw std::exception(e);
+			}
+
+			return sent_message;
+		}
+
+		cpr::Body body = cpr::Body(message_json.dump());
 		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
 		return discord::Message(result);
