@@ -550,10 +550,11 @@ namespace discord {
 		 */
 
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + id + "/bans"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
-
+		
 		std::vector<discord::GuildBan> guild_bans;
 		for (auto& guild_ban : result) {
-			guild_bans.push_back(discord::GuildBan(guild_ban["reason"], discord::User(guild_ban["user"])));
+			std::string reason = (!guild_ban["reason"].is_null()) ? guild_ban["reason"] : "";
+			guild_bans.push_back(discord::GuildBan(reason, discord::User(guild_ban["user"])));
 		}
 
 		return guild_bans;
