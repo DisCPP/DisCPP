@@ -163,7 +163,7 @@ namespace discord {
 		 * @brief Send a file(s) through the channel.
 		 *
 		 * ```cpp
-		 *      channel.Send({file_1});
+		 *      channel.Send({ discord::File{file_1} });
 		 * ```
 		 *
 		 * @param[in] files The file(s) to send.
