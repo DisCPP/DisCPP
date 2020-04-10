@@ -117,7 +117,7 @@ namespace discord {
 		return connections;
 	}
 	
-	std::string User::GetAvatarURL(ImageType imgType) {
+	std::string User::GetAvatarURL(ImageType imgType = ImageType::AUTO) {
 		std::string idString = this->id.c_str();
 		if (this->avatar.empty()) {
 			return cpr::Url("https://cdn.discordapp.com/avatars/" + idString + "/" + discriminator);
