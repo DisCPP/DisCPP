@@ -119,8 +119,8 @@ namespace discord {
 	
 	std::string User::GetAvatarURL(ImageType imgType) {
 		std::string idString = this->id.c_str();
-		if (this->avatar.empty()) {
-			return cpr::Url("https://cdn.discordapp.com/avatars/" + idString + "/" + discriminator);
+		if (this->avatar == "") {
+			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(std::stoi(this->discriminator) % 5) + ".png");
 		}
 		else {
 			std::string url = "https://cdn.discordapp.com/avatars/" + idString + "/" + this->avatar;
