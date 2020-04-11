@@ -3,6 +3,7 @@
 
 #include "discord_object.h"
 #include "user.h"
+#include "activity.h"
 
 #include <vector>
 
@@ -20,6 +21,7 @@ namespace discord {
 		void RemoveRole(discord::Role role);
 		bool IsBanned();
 		bool HasRole(discord::Role role);
+		bool HasPermission(discord::Permission perm);
 
 		discord::User user;
 		snowflake guild_id;
@@ -29,6 +31,9 @@ namespace discord {
 		std::string premium_since; // TODO: Convert to iso8601Time
 		bool deaf;
 		bool mute;
+		discord::Permissions permissions;
+		discord::Activity activity;
+		std::string created_at;
 	};
 }
 

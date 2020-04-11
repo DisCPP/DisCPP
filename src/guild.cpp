@@ -90,6 +90,30 @@ namespace discord {
 			}
 		}
 		// presences
+		if (json.contains("presences") && json.contains("members")) {
+			for (auto const& presence : json["presences"]) {
+				auto member = std::find_if(members.begin(), members.end(), [presence](discord::Member a) { return presence["user"]["id"] == a.user.id;});
+
+				if (member != members.end()) {
+					nlohmann::json activity = presence["game"];
+					
+					if (!activity.is_null()) {
+						discord::Activity act;
+
+						act.text = activity["name"];
+						act.type = static_cast<presence::ActivityType>(activity["type"].get<int>());
+						act.status = presence["status"];
+						if (activity.contains("url")) {
+							act.url = activity["url"];
+						}
+						act.application_id = activity["id"];
+						act.created_at = std::to_string(activity["created_at"].get<int>());
+
+						member->activity = act;
+					}
+				}
+			}
+		}
 		max_presences = GetDataSafely<int>(json, "max_presences");
 		max_members = GetDataSafely<int>(json, "max_members");
 		vanity_url_code = GetDataSafely<std::string>(json, "vanity_url_code");
@@ -98,6 +122,7 @@ namespace discord {
 		premium_tier = (json.contains("premium_tier")) ? static_cast<discord::specials::NitroTier>(json["premium_tier"].get<int>()) : discord::specials::NitroTier::NO_TIER;
 		premium_subscription_count = GetDataSafely<int>(json, "premium_subscription_count");
 		preferred_locale = GetDataSafely<std::string>(json, "preferred_locale");
+		created_at = FormatTimeFromSnowflake(id);
 	}
 
 	discord::Guild Guild::ModifyGuildName(std::string name) {
@@ -528,6 +553,7 @@ namespace discord {
 		 */
 
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + id + "/bans"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
+		
 		std::vector<discord::GuildBan> guild_bans;
 		for (auto& guild_ban : result) {
 			std::string reason = (!guild_ban["reason"].is_null()) ? guild_ban["reason"] : "";

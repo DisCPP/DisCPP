@@ -146,6 +146,8 @@ namespace discord {
 	std::string Base64Encode(std::string text);
 	std::string ReplaceAll(std::string data, std::string toSearch, std::string replaceStr);
 	std::string EscapeString(std::string string);
+	time_t TimeFromSnowflake(snowflake snow);
+	std::string FormatTimeFromSnowflake(snowflake snow);
 }
 
 #endif

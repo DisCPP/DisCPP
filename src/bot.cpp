@@ -413,9 +413,7 @@ namespace discord {
 		discord::Guild guild(result);
 		guilds.push_back(guild);
 
-		for (auto& member : result["members"]) {
-			members.push_back(discord::Member(member, guild_id));
-		}
+		members.insert(members.end(), guild.members.begin(), guild.members.end());
 
 		for (auto& channel : result["channels"]) {
 			channels.push_back(discord::Channel(channel, guild_id));

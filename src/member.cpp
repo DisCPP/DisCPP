@@ -27,7 +27,7 @@ namespace discord {
 		}
 	}
 
-	Member::Member(nlohmann::json json, snowflake guild_id) : guild_id(guild_id){
+	Member::Member(nlohmann::json json, snowflake guild_id) : guild_id(guild_id) {
 		/**
 		 * @brief Constructs a discord::Member object by parsing json and stores the guild_id.
 		 *
@@ -41,18 +41,39 @@ namespace discord {
 		 * @return discord::Member, this is a constructor.
 		 */
 
-		user = (json.contains("user")) ? discord::User(json["user"]) : discord::User();
+		if (json.contains("user")) {
+			user = discord::User(json["user"]);
+			id = user.id;
+		} else {
+			user = discord::User();
+		}
+		
 		nick = GetDataSafely<std::string>(json, "nick");
 		discord::Guild guild(guild_id);
 		if (json.contains("roles")) {
+			discord::Permissions permissions;
 			for (auto& role : json["roles"]) {
-				roles.push_back(discord::Role(role, guild));
+				discord::Role r(role, guild);
+
+				// Save permissions
+				if (json["roles"][0] == role) {
+					permissions.allow_perms.value = r.permissions.allow_perms.value;
+					permissions.deny_perms.value = r.permissions.deny_perms.value;
+				} else {
+					permissions.allow_perms.value |= r.permissions.allow_perms.value;
+					permissions.deny_perms.value |= r.permissions.deny_perms.value;
+				}
+
+				roles.push_back(r);
 			}
+
+			this->permissions = permissions;
 		}
 		joined_at = GetDataSafely<std::string>(json, "joined_at");
 		premium_since = GetDataSafely<std::string>(json, "premium_since");
 		deaf = GetDataSafely<bool>(json, "deaf");
 		mute = GetDataSafely<bool>(json, "mute");
+		created_at = FormatTimeFromSnowflake(id);
 	}
 
 	void Member::ModifyMember(std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf, snowflake channel_id) {
@@ -82,6 +103,19 @@ namespace discord {
 			}
 		}
 		json_roles += "]";
+
+		// Update permissions variable.
+		discord::Permissions permissions;
+		if (roles.size() != 0) {
+			permissions.allow_perms.value = roles.front().permissions.allow_perms.value;
+			permissions.deny_perms.value = roles.front().permissions.deny_perms.value;
+			roles.erase(roles.begin());
+
+			for (discord::Role role : roles) {
+				permissions.allow_perms.value |= role.permissions.allow_perms.value;
+				permissions.deny_perms.value |= role.permissions.deny_perms.value;
+			}
+		}
 
 		cpr::Body body("{\"nick\": \"" + EscapeString(nick) + "\", \"roles\": " + json_roles + ", \"mute\": " + std::to_string(mute) + ", \"deaf\": " + std::to_string(deaf) + "\"channel_id\": \"" + channel_id + "\"" + "}");
 		SendPatchRequest(Endpoint("/guilds/" + this->id + "/members/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::GUILD, body);
@@ -148,5 +182,37 @@ namespace discord {
 		 */
 
 		return count_if(roles.begin(), roles.end(), [role](discord::Role r) { return role.id == r.id; }) != 0;
+	}
+
+	bool Member::HasPermission(discord::Permission perm) {
+		/**
+		 * @brief Check if this member has a permission
+		 *
+		 * ```cpp
+		 *      bool has_perm = member.HasPermission(discord::Permission::ADMINISTRATOR);
+		 * ```
+		 *
+		 * @param[in] perm The permission to check that the member has.
+		 *
+		 * @return bool
+		 */
+
+		discord::Permissions permissions;
+
+		if (roles.size() > 0) {
+			for (discord::Role role : roles) {
+				if (roles.front() == role) {
+					permissions.allow_perms.value = role.permissions.allow_perms.value;
+					permissions.deny_perms.value = role.permissions.deny_perms.value;
+				} else {
+					permissions.allow_perms.value |= role.permissions.allow_perms.value;
+					permissions.deny_perms.value |= role.permissions.deny_perms.value;
+				}
+			}
+		}
+
+		this->permissions = permissions;
+
+		return permissions.allow_perms.HasPermission(perm) && !permissions.deny_perms.HasPermission(perm);
 	}
 }
