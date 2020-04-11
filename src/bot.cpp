@@ -51,16 +51,18 @@
 #include <vector>
 
 namespace discord {
-	Bot::Bot(std::string token, std::vector<std::string> prefix) : token(token), prefix(prefix) {
+	Bot::Bot(std::string token, std::vector<std::string> prefixes, int logger_flags, std::string logger_path) : token(token), prefixes(prefixes) {
 		/**
 		 * @brief Constructs a discord::Bot object.
 		 *
 		 * ```cpp
-		 *      discord::Bot bot(TOKEN, ".", 5000);
+		 *      discord::Bot bot(TOKEN, {"+", "bot "}, discord::logger_flags::ERROR_SEVERITY | discord::logger_flags::WARNING_SEVERITY, "log.txt");
 		 * ```
 		 *
 		 * @param[in] token The discord token the bot needs to run.
-		 * @param[in] prefix The bot's prefix that will be used for command handling.
+		 * @param[in] prefixes The bot's prefixes that will be used for command handling.
+		 * @param[in] logger_flags The flags that will be passed to the logger.
+		 * @param[in] logger_path The file path for the logger, doesn't need one as it can just log to console/terminal instead.
 		 *
 		 * @return discord::Bot, this is a constructor.
 		 */
@@ -68,6 +70,13 @@ namespace discord {
 		fire_command_method = std::bind(&discord::FireCommand, std::placeholders::_1, std::placeholders::_2);
 
 		discord::globals::bot_instance = this;
+
+		if (logger_path.empty()) {
+			logger = discord::Logger(logger_flags);
+		}
+		else {
+			logger = discord::Logger(logger_path, logger_flags);
+		}
 	}
 
 	int Bot::Run() {
@@ -75,7 +84,7 @@ namespace discord {
 		 * @brief Executes the discord bot.
 		 *
 		 * ```cpp
-		 *      discord::Bot bot(TOKEN, ".", 5000);
+		 *      discord::Bot bot(TOKEN, {"+", "bot ", discord::logger_flags::ERROR_SEVERITY | discord::logger_flags::WARNING_SEVERITY, "log.txt");
 		 *		bot.Run();
 		 * ```
 		 *
@@ -169,7 +178,7 @@ namespace discord {
 		nlohmann::json payload = nlohmann::json({
 			{"op", 3},
 			{"d", activity.ToJson()}
-		});
+			});
 
 		CreateWebsocketRequest(payload);
 	}
@@ -188,6 +197,8 @@ namespace discord {
 		 *
 		 * @return void
 		 */
+
+		logger.Log(LogSeverity::SEV_DEBUG, "Sending gateway payload: " + json.dump());
 
 		websocket_outgoing_message msg;
 		msg.set_utf8_message(json.dump());
@@ -211,7 +222,7 @@ namespace discord {
 
 		fire_command_method = command_handler;
 	}
-	
+
 	void Bot::BindEvents() {
 		internal_event_map["READY"] = std::bind(&Bot::ReadyEvent, this, std::placeholders::_1);
 		internal_event_map["RESUMED"] = std::bind(&discord::Bot::ResumedEvent, this, std::placeholders::_1);
@@ -250,15 +261,18 @@ namespace discord {
 	}
 
 	void Bot::WebSocketStart() {
-		nlohmann::json gateway_request = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", Format("Bot %", token) }, { "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" } }, {},{});
-		
+		nlohmann::json gateway_request = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", Format("Bot %", token) }, { "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" } }, {}, {});
+
 		if (gateway_request.contains("url")) {
+			logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::WHITE + "Connecting to gateway...");
+
 			if (gateway_request["session_start_limit"]["remaining"].get<int>() == 0) {
+				logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "GATEWAY ERROR: Maximum start limit reached");
 				throw std::runtime_error{ "GATEWAY ERROR: Maximum start limit reached" };
 			}
 
 			gateway_endpoint = gateway_request["url"];
-			
+
 			std::thread bindthread{ &Bot::BindEvents, this };
 
 			utility::string_t stringt = utility::conversions::to_string_t(gateway_endpoint);
@@ -268,15 +282,18 @@ namespace discord {
 
 			disconnected = false;
 
+			logger.Log(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Connected to gateway!");
 			bindthread.join();
-		} else {
-			std::cout << "Improper token, failed to connect to discord gateway!" << std::endl;
+		}
+		else {
+			logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Improper token, failed to connect to discord gateway!");
 			throw std::runtime_error("Improper token, failed to connect to discord gateway!");
 		}
 	}
 
 	void Bot::HandleDiscordDisconnect(websocket_close_status close_status, utility::string_t reason, std::error_code error_code) {
-		std::cout << "Websocket was closed with error: 400" << error_code.value() << "!" << std::endl;
+		//std::cout << "Websocket was closed with error: 400" << error_code.value() << "!" << std::endl;
+		logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Websocket was closed with error: 400" + std::to_string(error_code.value()) + "!");
 		throw std::runtime_error("Websocket was closed with error: 400" + std::to_string(error_code.value()) + "!");
 	}
 
@@ -284,9 +301,12 @@ namespace discord {
 		std::string packet_raw = msg.extract_string().get();
 
 		nlohmann::json result = nlohmann::json::parse(packet_raw);
+		logger.Log(LogSeverity::SEV_DEBUG, "Received payload: " + result.dump());
 
 		switch (result["op"].get<int>()) {
 		case (hello): {
+			logger.Log(LogSeverity::SEV_DEBUG, "Sending gateway payload: " + GetIdentifyPacket().dump());
+
 			hello_packet = result;
 			websocket_outgoing_message identify_msg;
 			identify_msg.set_utf8_message(GetIdentifyPacket().dump());
@@ -310,7 +330,8 @@ namespace discord {
 		if (internal_event_map.find(event_name) != internal_event_map.end()) {
 			if (ready) {
 				internal_event_map[event_name](data);
-			} else {
+			}
+			else {
 				futures.push_back(std::async(std::launch::async, internal_event_map[event_name], data));
 			}
 		}
@@ -323,6 +344,7 @@ namespace discord {
 				data["d"] = last_sequence_number;
 			}
 
+			logger.Log(LogSeverity::SEV_DEBUG, "Sending heartbeat payload: " + data.dump());
 			websocket_outgoing_message msg;
 			msg.set_utf8_message(data.dump());
 			websocket_client.send(msg);
@@ -332,9 +354,10 @@ namespace discord {
 			// Wait for the required heartbeat interval, while waiting it should be acked from another thread.
 			std::this_thread::sleep_for(std::chrono::milliseconds(hello_packet["d"]["heartbeat_interval"].get<int>() - 5));
 			if (!heartbeat_acked) {
-				std::cout << "Heartbeat wasn't acked, trying to reconnect..." << std::endl;
+				logger.Log(LogSeverity::SEV_WARNING, LogTextColor::YELLOW + "Heartbeat wasn't acked, trying to reconnect...");
 				disconnected = true;
 
+				logger.Log(LogSeverity::SEV_DEBUG, "Sending gateway payload: " + discord::Format("{\"token\": \"%\", \"session_id\": \"%\", \"seq\": %}", token, session_id, last_sequence_number));
 				websocket_outgoing_message resume_msg;
 				resume_msg.set_utf8_message(discord::Format("{\"token\": \"%\", \"session_id\": \"%\", \"seq\": %}", token, session_id, last_sequence_number));
 				websocket_client.send(resume_msg);

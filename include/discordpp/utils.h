@@ -60,8 +60,7 @@ namespace discord {
 	std::string GetOsName();
 
 	template <typename S>
-	inline void FormatSlice(std::string const& input_str, std::stringstream& output_str, int& start_index,
-		S var) {
+	inline void FormatSlice(std::string const& input_str, std::stringstream& output_str, int& start_index, S var) {
 		long unsigned int index = input_str.find('%', start_index);
 		if (index == std::string::npos) {
 			return;
