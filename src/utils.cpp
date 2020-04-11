@@ -455,7 +455,7 @@ time_t discord::TimeFromSnowflake(snowflake snow) {
 std::string discord::FormatTimeFromSnowflake(snowflake snow) {
 	time_t unix_time = TimeFromSnowflake(snow);
 
-	tm* n = std::localtime(&unix_time);
+	tm* n = std::gmtime(&unix_time);
 	tm now = *n;
 	char buffer[256];
 	strftime(buffer, sizeof(buffer), "%Y-%m-%d @ %H:%M:%S GMT", &now);
