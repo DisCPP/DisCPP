@@ -73,7 +73,6 @@ namespace discord {
 		premium_since = GetDataSafely<std::string>(json, "premium_since");
 		deaf = GetDataSafely<bool>(json, "deaf");
 		mute = GetDataSafely<bool>(json, "mute");
-		created_at = FormatTimeFromSnowflake(id);
 	}
 
 	void Member::ModifyMember(std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf, snowflake channel_id) {
