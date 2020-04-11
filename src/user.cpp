@@ -116,7 +116,7 @@ namespace discord {
 		}
 		return connections;
 	}
-
+	
 	std::string User::GetAvatarURL(ImageType imgType) {
 		std::string idString = this->id.c_str();
 		if (this->avatar == "") {

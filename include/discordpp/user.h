@@ -41,7 +41,6 @@ namespace discord {
 		discord::Channel CreateDM();
 		std::vector<Connection> GetUserConnections();
 		std::string GetAvatarURL(ImageType imgType = ImageType::AUTO);
-		
 		//snowflake id;
 		std::string username;
 		std::string discriminator;

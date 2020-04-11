@@ -1053,6 +1053,7 @@ namespace discord {
 		emojis.erase(std::remove_if(emojis.begin(), emojis.end(), [emoji](discord::Emoji e) { return e.id == emoji.id; }));
 	}
 
+	
 	std::string Guild::GetIconURL(discord::ImageType imgType) {
 		std::string idString = this->id.c_str();
 		std::string url = "https://cdn.discordapp.com/icons/" + idString +  "/" + this->icon;
