@@ -1050,4 +1050,20 @@ namespace discord {
 		nlohmann::json result = SendDeleteRequest(Endpoint("/guilds/%/emojis/%", this->id, id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 		emojis.erase(std::remove_if(emojis.begin(), emojis.end(), [emoji](discord::Emoji e) { return e.id == emoji.id; }));
 	}
+	
+	std::string Guild::GetIconURL(discord::ImageType imgType) {
+		std::string idString = this->id.c_str();
+		std::string url = "https://cdn.discordapp.com/icons/" + idString +  "/" + this->icon;
+		if (imgType == ImageType::AUTO) imgType = StartsWith(this->icon, "a_") ? ImageType::GIF : ImageType::PNG;
+		switch (imgType) {
+		case ImageType::GIF:
+			return cpr::Url(url + ".gif");
+		case ImageType::JPEG:
+			return cpr::Url(url + ".jpeg");
+		case ImageType::PNG:
+			return cpr::Url(url + ".png");
+		case ImageType::WEBP:
+			return cpr::Url(url + ".webp");
+		}
+	}
 }
