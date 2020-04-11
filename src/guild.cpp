@@ -120,6 +120,7 @@ namespace discord {
 		premium_tier = (json.contains("premium_tier")) ? static_cast<discord::specials::NitroTier>(json["premium_tier"].get<int>()) : discord::specials::NitroTier::NO_TIER;
 		premium_subscription_count = GetDataSafely<int>(json, "premium_subscription_count");
 		preferred_locale = GetDataSafely<std::string>(json, "preferred_locale");
+		created_at = FormatTimeFromSnowflake(id);
 	}
 
 	discord::Guild Guild::ModifyGuildName(std::string name) {

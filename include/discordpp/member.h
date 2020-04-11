@@ -33,6 +33,7 @@ namespace discord {
 		bool mute;
 		discord::Permissions permissions;
 		discord::Activity activity;
+		std::string created_at;
 	};
 }
 

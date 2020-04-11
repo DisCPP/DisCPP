@@ -207,7 +207,6 @@ namespace discord {
 		//voice_states
 		std::vector<discord::Member> members;
 		std::vector<discord::Channel> channels;
-		//presences
 		int max_presences;
 		int max_members;
 		std::string vanity_url_code;
@@ -216,6 +215,7 @@ namespace discord {
 		discord::specials::NitroTier premium_tier;
 		int premium_subscription_count;
 		std::string preferred_locale;
+		std::string created_at;
 	};
 }
 

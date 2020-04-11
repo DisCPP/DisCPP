@@ -444,3 +444,21 @@ void discord::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBu
 	obj->remaining_limit = std::stoi(header["X-RateLimit-Remaining"]);
 	obj->ratelimit_reset = boost::posix_time::from_time_t(std::stoi(header["X-RateLimit-Reset"]));
 }
+
+time_t discord::TimeFromSnowflake(snowflake snow) {
+	int64_t unix = ((std::strtoll(snow.c_str(), NULL, 10) >> 22) + 1420070400000) / 1000;
+	time_t unix_time = unix;
+
+	return unix_time;
+}
+
+std::string discord::FormatTimeFromSnowflake(snowflake snow) {
+	time_t unix_time = TimeFromSnowflake(snow);
+
+	tm* n = std::localtime(&unix_time);
+	tm now = *n;
+	char buffer[256];
+	strftime(buffer, sizeof(buffer), "%Y-%m-%d @ %H:%M:%S GMT", &now);
+
+	return buffer;
+}
