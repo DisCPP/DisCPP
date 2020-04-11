@@ -4,6 +4,8 @@
 #include "utils.h"
 #include "emoji.h"
 #include "bot.h"
+#include <string>
+#include <iostream>
 
 namespace discord {
 	Guild::Guild(snowflake id) {
@@ -42,8 +44,8 @@ namespace discord {
 		 */
 
 		id = GetDataSafely<snowflake>(json, "id");
-		name = GetDataSafely<std::string>(json, "name");
 		icon = GetDataSafely<std::string>(json, "icon");
+		name = GetDataSafely<std::string>(json, "name");
 		splash = GetDataSafely<std::string>(json, "splash");
 		owner = GetDataSafely<bool>(json, owner);
 		owner_id = GetDataSafely<snowflake>(json, "owner_id");
@@ -1076,6 +1078,7 @@ namespace discord {
 		nlohmann::json result = SendDeleteRequest(Endpoint("/guilds/%/emojis/%", this->id, id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 		emojis.erase(std::remove_if(emojis.begin(), emojis.end(), [emoji](discord::Emoji e) { return e.id == emoji.id; }));
 	}
+
 	
 	std::string Guild::GetIconURL(discord::ImageType imgType) {
 		std::string idString = this->id.c_str();

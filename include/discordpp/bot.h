@@ -25,8 +25,8 @@ namespace discord {
 
 	class Bot {
 	public:
-		std::string prefix;
 		std::string token;
+		std::vector<std::string> prefix;
 
 		discord::User bot_user;
 
@@ -50,7 +50,7 @@ namespace discord {
 			heartbeat_ack = 11			// Receive
 		};
 
-		Bot(std::string token, std::string prefix);
+		Bot(std::string token, std::vector<std::string> prefix);
 		int Run();
 		discord::Guild GetGuild(snowflake guild_id);
 		discord::User ModifyCurrentUser(std::string username);

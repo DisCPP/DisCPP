@@ -1,6 +1,7 @@
 #include "context.h"
+#include <string>
 
-discord::Context::Context(discord::Bot* bot, discord::Channel channel, discord::Member author, discord::Message message, std::vector<std::string> arguments) : bot(bot), channel(channel), author(author), user(author.user), message(message), guild(message.guild), arguments(arguments) {
+discord::Context::Context(discord::Bot* bot, discord::Channel channel, discord::Member author, discord::Message message, std::string remainder, std::vector<std::string> arguments) : bot(bot), guild(discord::Guild(author.guild_id)), channel(channel), author(author), user(author.user), message(message), remainder(remainder), arguments(arguments) {
 	/**
 	 * @brief Constructs a discord::Context object.
 	 *
