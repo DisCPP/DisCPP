@@ -4,6 +4,8 @@
 #include "utils.h"
 #include "emoji.h"
 #include "bot.h"
+#include <string>
+#include <iostream>
 
 namespace discord {
 	Guild::Guild(snowflake id) {
@@ -42,8 +44,8 @@ namespace discord {
 		 */
 
 		id = GetDataSafely<snowflake>(json, "id");
-		name = GetDataSafely<std::string>(json, "name");
 		icon = GetDataSafely<std::string>(json, "icon");
+		name = GetDataSafely<std::string>(json, "name");
 		splash = GetDataSafely<std::string>(json, "splash");
 		owner = GetDataSafely<bool>(json, owner);
 		owner_id = GetDataSafely<snowflake>(json, "owner_id");
@@ -526,10 +528,10 @@ namespace discord {
 		 */
 
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + id + "/bans"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
-
 		std::vector<discord::GuildBan> guild_bans;
 		for (auto& guild_ban : result) {
-			guild_bans.push_back(discord::GuildBan(guild_ban["reason"], discord::User(guild_ban["user"])));
+			std::string reason = (!guild_ban["reason"].is_null()) ? guild_ban["reason"] : "";
+			guild_bans.push_back(discord::GuildBan(reason, discord::User(guild_ban["user"])));
 		}
 
 		return guild_bans;
@@ -1049,5 +1051,21 @@ namespace discord {
 
 		nlohmann::json result = SendDeleteRequest(Endpoint("/guilds/%/emojis/%", this->id, id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 		emojis.erase(std::remove_if(emojis.begin(), emojis.end(), [emoji](discord::Emoji e) { return e.id == emoji.id; }));
+	}
+
+	std::string Guild::GetIconURL(discord::ImageType imgType) {
+		std::string idString = this->id.c_str();
+		std::string url = "https://cdn.discordapp.com/icons/" + idString +  "/" + this->icon;
+		if (imgType == ImageType::AUTO) imgType = StartsWith(this->icon, "a_") ? ImageType::GIF : ImageType::PNG;
+		switch (imgType) {
+		case ImageType::GIF:
+			return cpr::Url(url + ".gif");
+		case ImageType::JPEG:
+			return cpr::Url(url + ".jpeg");
+		case ImageType::PNG:
+			return cpr::Url(url + ".png");
+		case ImageType::WEBP:
+			return cpr::Url(url + ".webp");
+		}
 	}
 }

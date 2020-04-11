@@ -7,6 +7,7 @@
 #include <nlohmann/json.hpp>
 
 namespace discord {
+	enum ImageType : int { AUTO, WEBP, PNG, JPEG, GIF };
 	class Channel;
 	class GuildIntegration;
 
@@ -39,7 +40,8 @@ namespace discord {
 
 		discord::Channel CreateDM();
 		std::vector<Connection> GetUserConnections();
-
+		std::string GetAvatarURL(ImageType imgType = ImageType::AUTO);
+		
 		//snowflake id;
 		std::string username;
 		std::string discriminator;

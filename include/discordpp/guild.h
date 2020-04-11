@@ -176,6 +176,7 @@ namespace discord {
 		discord::Emoji CreateEmoji(std::string name, discord::Image image, std::vector<discord::Role> roles);
 		discord::Emoji ModifyEmoji(discord::Emoji emoji, std::string name, std::vector<discord::Role> roles);
 		void DeleteEmoji(discord::Emoji emoji);
+		std::string GetIconURL(discord::ImageType imgType = discord::ImageType::AUTO);
 
 		//snowflake id;
 		std::string name;

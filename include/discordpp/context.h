@@ -23,9 +23,10 @@ namespace discord {
 		discord::User user;
 		discord::Member author;
 		discord::Message message;
+		std::string remainder;
 		std::vector<std::string> arguments;
 
-		Context(discord::Bot* bot, discord::Channel channel, discord::Member author, discord::Message message, std::vector<std::string> arguments);
+		Context(discord::Bot* bot, discord::Channel channel, discord::Member author, discord::Message message, std::string remainder, std::vector<std::string> arguments);
 
 		discord::Message Send(std::string text, bool tts = false);
 		discord::Message Send(discord::EmbedBuilder embed, std::string text = "");

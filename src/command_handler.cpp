@@ -1,35 +1,53 @@
 #include "command.h"
 #include "command_handler.h"
 #include "utils.h"
+#include <iostream>
 
 void discord::FireCommand(discord::Bot* bot, discord::Message message) {
-	/**
-	 * @brief Detects if a command has ran, and if it has then execute it.
-	 *
-	 * @param[in] bot A reference to the discord bot.
-	 * @param[in] message The message that was sent.
-	 *
-	 * @return void
-	 */
+    /**
+     * @brief Detects if a command has ran, and if it has then execute it.
+     *
+     * @param[in] bot A reference to the discord bot.
+     * @param[in] message The message that was sent.
+     *
+     * @return void
+     */
 
-	if (!StartsWith(message.content, bot->prefix) || message.author.bot) {
-		return;
-	}
+    int prefixSize = 0;
+    bool trigger = false;
+    for (std::string const& prefix : bot->prefix) {
+        prefixSize = prefix.size();
+        if (message.author.bot) {
+            return;
+        }
+        if (StartsWith(message.content, prefix)) {
+            trigger = true;
+            break;
+        }
+    }
+    if (!trigger) {
+        return;
+    }
 
-	std::vector<std::string> argument_vec = SplitString(message.content, ' ');
-	if (!argument_vec.size()) return;
+    std::string messageContent = message.content;
+    messageContent = messageContent.substr(prefixSize);
 
-	auto found_command = registered_commands.find(argument_vec[0].substr(bot->prefix.size()));
-	if (found_command == registered_commands.end()) return;
+    std::vector<std::string> argument_vec = SplitString(messageContent, ' ');
+    if (!argument_vec.size()) return;
 
-	auto command_name = argument_vec.front().erase(0, bot->prefix.size());
-	argument_vec.erase(argument_vec.begin()); // Erase the command from the arguments
+    auto found_command = registered_commands.find(argument_vec[0]);
+    if (found_command == registered_commands.end()) return;
 
-	discord::Member member(message.author.id);
+    argument_vec.erase(argument_vec.begin()); // Erase the command from the arguments
 
-	Context context = Context(bot, message.channel, member, message, argument_vec);
+    discord::Member member(message.author.id);
 
-	if (!found_command->second->CanRun(context)) return;
+    std::string remainder = "d";
+    if (!argument_vec.empty()) remainder = CombineVectorWithSpaces(argument_vec, 0);
 
-	found_command->second->CommandBody(context);
+    Context context = Context(bot, message.channel, member, message, remainder, argument_vec);
+
+    if (!found_command->second->CanRun(context)) return;
+
+    found_command->second->CommandBody(context);
 }

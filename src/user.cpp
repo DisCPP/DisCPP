@@ -1,6 +1,8 @@
 #include "user.h"
 #include "bot.h"
 #include "member.h"
+#include "utils.h"
+#include "cpr/cpr.h"
 
 namespace discord {
 	User::User(snowflake id) : discord::DiscordObject(id) {
@@ -115,4 +117,24 @@ namespace discord {
 		return connections;
 	}
 
+	std::string User::GetAvatarURL(ImageType imgType) {
+		std::string idString = this->id.c_str();
+		if (this->avatar == "") {
+			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(std::stoi(this->discriminator) % 5) + ".png");
+		}
+		else {
+			std::string url = "https://cdn.discordapp.com/avatars/" + idString + "/" + this->avatar;
+			if (imgType == ImageType::AUTO) imgType = StartsWith(this->avatar, "a_") ? ImageType::GIF : ImageType::PNG;
+			switch (imgType) {
+			case ImageType::GIF:
+				return cpr::Url(url + ".gif");
+			case ImageType::JPEG:
+				return cpr::Url(url + ".jpeg");
+			case ImageType::PNG:
+				return cpr::Url(url + ".png");
+			case ImageType::WEBP:
+				return cpr::Url(url + ".webp");
+			}
+		}
+	}
 }

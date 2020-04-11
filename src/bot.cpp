@@ -48,9 +48,10 @@
 
 #include <iostream>
 #include <algorithm>
+#include <vector>
 
 namespace discord {
-	Bot::Bot(std::string token, std::string prefix) : token(token), prefix(prefix) {
+	Bot::Bot(std::string token, std::vector<std::string> prefix) : token(token), prefix(prefix) {
 		/**
 		 * @brief Constructs a discord::Bot object.
 		 *
