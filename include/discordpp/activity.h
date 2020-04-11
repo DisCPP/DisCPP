@@ -42,9 +42,7 @@ namespace discord {
 		std::string status;
 		bool afk;
 
-		Activity(std::string text, presence::ActivityType type, std::string status = "online", bool afk = false, std::string url = "") : text(text), type(type), status(status), afk(afk), url(url) {
-
-		}
+		Activity(std::string text, presence::ActivityType type, std::string status = "online", bool afk = false, std::string url = "") : text(text), type(type), status(status), afk(afk), url(url) {}
 
 		nlohmann::json ToJson() {
 			nlohmann::json json = nlohmann::json({

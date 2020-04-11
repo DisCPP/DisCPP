@@ -3,6 +3,7 @@
 #include "member.h"
 #include "utils.h"
 #include "cpr/cpr.h"
+#include "activity.h"
 
 namespace discord {
 	User::User(snowflake id) : discord::DiscordObject(id) {
@@ -51,6 +52,7 @@ namespace discord {
 		verified = GetDataSafely<bool>(json, "verified");
 		flags = GetDataSafely<int>(json, "flags");
 		premium_type = (json.contains("premium_type")) ? static_cast<discord::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type")) : discord::specials::NitroSubscription::NO_NITRO;
+		created_at = FormatTimeFromSnowflake(id);
 	}
 
 	Connection::Connection(nlohmann::json json) {
