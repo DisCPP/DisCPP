@@ -15,6 +15,7 @@
 #include "message.h"
 #include "member.h"
 #include "guild.h"
+#include "log.h"
 
 namespace discord {
 	class Role;
@@ -26,9 +27,10 @@ namespace discord {
 	class Bot {
 	public:
 		std::string token;
-		std::vector<std::string> prefix;
+		std::vector<std::string> prefixes;
 
 		discord::User bot_user;
+		discord::Logger logger;
 
 		std::vector<discord::Channel> channels;
 		std::vector<discord::Member> members;
@@ -50,7 +52,7 @@ namespace discord {
 			heartbeat_ack = 11			// Receive
 		};
 
-		Bot(std::string token, std::vector<std::string> prefix);
+		Bot(std::string token, std::vector<std::string> prefixes, int logger_flags = logger_flags::ERROR_SEVERITY | logger_flags::WARNING_SEVERITY, std::string logger_path = "");
 		int Run();
 		discord::Guild GetGuild(snowflake guild_id);
 		discord::User ModifyCurrentUser(std::string username);

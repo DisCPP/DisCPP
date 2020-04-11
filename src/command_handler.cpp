@@ -15,7 +15,7 @@ void discord::FireCommand(discord::Bot* bot, discord::Message message) {
 
     int prefixSize = 0;
     bool trigger = false;
-    for (std::string const& prefix : bot->prefix) {
+    for (std::string const& prefix : bot->prefixes) {
         prefixSize = prefix.size();
         if (message.author.bot) {
             return;

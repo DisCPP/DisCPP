@@ -52,8 +52,17 @@ nlohmann::json discord::HandleResponse(cpr::Response response, snowflake object,
 	 * @return nlohmann::json
 	 */
 
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Received requested payload: " + response.text);
 	HandleRateLimits(response.header, object, ratelimit_bucket);
 	return nlohmann::json::parse((!response.text.empty()) ? response.text : "{}");
+}
+
+std::string CprBodyToString(cpr::Body body) {
+	if (body.empty()) {
+		return "Empty";
+	}
+	
+	return body;
 }
 
 nlohmann::json discord::SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
@@ -73,6 +82,7 @@ nlohmann::json discord::SendGetRequest(std::string url, cpr::Header headers, sno
 	 * @return nlohmann::json
 	 */
 
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending get request, URL: %, body: %", url, CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -95,6 +105,7 @@ nlohmann::json discord::SendPostRequest(std::string url, cpr::Header headers, sn
 	 * @return nlohmann::json
 	 */
 
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending post request, URL: %, body: %", url, CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Post(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -117,6 +128,7 @@ nlohmann::json discord::SendPutRequest(std::string url, cpr::Header headers, sno
 	 * @return nlohmann::json
 	 */
 
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending put request, URL: %, body: %", url, CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Put(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -139,6 +151,7 @@ nlohmann::json discord::SendPatchRequest(std::string url, cpr::Header headers, s
 	 * @return nlohmann::json
 	 */
 
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending patch request, URL: %, body: %", url, CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Patch(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -160,6 +173,7 @@ nlohmann::json discord::SendDeleteRequest(std::string url, cpr::Header headers, 
 	 * @return nlohmann::json
 	 */
 
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending delete request, URL: %", url);
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Delete(cpr::Url{ url }, headers);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -317,15 +331,12 @@ std::string discord::EscapeString(std::string string) {
 
 	string = ReplaceAll(string, "\\", "\\\\");
 	string = ReplaceAll(string, "\"", "\\\"");
-	//string = ReplaceAll(string, "\'", "\\\'");
-	//string = ReplaceAll(string, "\?", "\\?");
 	string = ReplaceAll(string, "\a", "\\a");
 	string = ReplaceAll(string, "\b", "\\b");
 	string = ReplaceAll(string, "\f", "\\f");
 	string = ReplaceAll(string, "\n", "\\n");
 	string = ReplaceAll(string, "\r", "\\r");
 	string = ReplaceAll(string, "\t", "\\t");
-	//string = ReplaceAll(string, "\v", "\\v");
 	// \u + four-hex-digits
 
 	return string;
@@ -455,7 +466,7 @@ time_t discord::TimeFromSnowflake(snowflake snow) {
 std::string discord::FormatTimeFromSnowflake(snowflake snow) {
 	time_t unix_time = TimeFromSnowflake(snow);
 
-	tm* n = std::localtime(&unix_time);
+	tm* n = std::gmtime(&unix_time);
 	tm now = *n;
 	char buffer[256];
 	strftime(buffer, sizeof(buffer), "%Y-%m-%d @ %H:%M:%S GMT", &now);
