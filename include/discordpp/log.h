@@ -173,10 +173,10 @@ namespace discord {
 			 */
 
 			if (log_file.is_open()) {
-				LogToFile(LogSeverity::SEV_INFO, "Logger \"%s\" is closing", file_path);
+				LogToFile(LogSeverity::SEV_INFO, "Logger \"%\" is closing", file_path);
 				log_file.close();
 			} else {
-				LogToConsole(LogSeverity::SEV_INFO, "Logger \"%s\" is closing", file_path);
+				LogToConsole(LogSeverity::SEV_INFO, "Logger \"%\" is closing", file_path);
 			}
 		}
 
@@ -186,7 +186,7 @@ namespace discord {
 			 * @brief Logs to console.
 			 *
 			 * ```cpp
-			 *      bot->logger.LogToConsole(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Got response from gateway: %s", response.text);
+			 *      bot->logger.LogToConsole(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Got response from gateway: %", response.text);
 			 * ```
 			 *
 			 * @param sev The severity of the log.

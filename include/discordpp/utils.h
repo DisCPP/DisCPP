@@ -71,7 +71,7 @@ namespace discord {
 
 	template <typename... T>
 	inline std::string Format(std::string const& str, T... args) {
-		assert(sizeof...(args) == std::count(str.begin(), str.end(), '%s') && "Amount of %s does not match amount of arguments");
+		assert(sizeof...(args) == std::count(str.begin(), str.end(), '%') && "Amount of % does not match amount of arguments");
 		std::stringstream output_str;
 		int start_index = 0;
 		((FormatSlice(str, output_str, start_index, std::forward<T>(args))), ...);
