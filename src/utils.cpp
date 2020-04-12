@@ -301,7 +301,7 @@ std::string discord::ReplaceAll(std::string data, std::string toSearch, std::str
 	 * @brief Replace all occurences of sub strings
 	 *
 	 * ```cpp
-	 *      std::string raw_text = FindAndReplaceAll("discord text", " ", "_");
+	 *      std::string raw_text = ReplaceAll("discord text", " ", "_");
 	 * ```
 	 *
 	 * @param[in] string The string to escape.

@@ -1,10 +1,11 @@
 #include "embed_builder.h"
+#include "color.h"
 #include "utils.h"
 
 namespace discord {
 	EmbedBuilder::EmbedBuilder() : embed_json(nlohmann::json({})) { }
 
-	EmbedBuilder::EmbedBuilder(std::string title, std::string description, int color) {
+	EmbedBuilder::EmbedBuilder(std::string title, std::string description, discord::Color color) {
 		/**
 		 * @brief Constructs a discord::EmbedBuilder object with a title, description, and color.
 		 *
@@ -128,7 +129,7 @@ namespace discord {
 		return *this;
 	}
 
-	EmbedBuilder& EmbedBuilder::SetColor(int color) {
+	EmbedBuilder& EmbedBuilder::SetColor(Color color) {
 		/**
 		 * @brief Set the color of the embed.
 		 *
@@ -141,7 +142,7 @@ namespace discord {
 		 * @return discord::EmbedBuilder, just returns an object of this.
 		 */
 
-		embed_json["color"] = color;
+		embed_json["color"] = color.color_hex;
 		return *this;
 	}
 

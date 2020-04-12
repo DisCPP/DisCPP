@@ -6,10 +6,12 @@
 #include <nlohmann/json.hpp>
 
 namespace discord {
+	class Color;
+
 	class EmbedBuilder {
 	public:
 		EmbedBuilder();
-		EmbedBuilder(std::string title, std::string description, int color);
+		EmbedBuilder(std::string title, std::string description, Color color);
 		EmbedBuilder(nlohmann::json json);
 
 		EmbedBuilder& SetTitle(std::string title);
@@ -17,7 +19,7 @@ namespace discord {
 		EmbedBuilder& SetDescription(std::string description);
 		EmbedBuilder& SetUrl(std::string url);
 		EmbedBuilder& SetTimestamp(std::string timestamp);
-		EmbedBuilder& SetColor(int color);
+		EmbedBuilder& SetColor(Color color);
 		EmbedBuilder& SetFooter(std::string text, std::string icon_url = "");
 		EmbedBuilder& SetImage(std::string url, int height = -1, int width = -1);
 		EmbedBuilder& SetThumbnail(std::string url, int height = -1, int width = -1);
