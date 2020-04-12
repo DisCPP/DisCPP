@@ -27,7 +27,7 @@ namespace discord {
 		}
 	}
 
-	Member::Member(nlohmann::json json, snowflake guild_id) : guild_id(guild_id) {
+	Member::Member(nlohmann::json json, discord::Guild guild) : guild_id(guild.id) {
 		/**
 		 * @brief Constructs a discord::Member object by parsing json and stores the guild_id.
 		 *
@@ -49,11 +49,10 @@ namespace discord {
 		}
 		
 		nick = GetDataSafely<std::string>(json, "nick");
-		discord::Guild guild(guild_id);
 		if (json.contains("roles")) {
 			discord::Permissions permissions;
 			for (auto& role : json["roles"]) {
-				discord::Role r(role, guild);
+				discord::Role r(role.get<snowflake>(), guild);
 
 				// Save permissions
 				if (json["roles"][0] == role) {
