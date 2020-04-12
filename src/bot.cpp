@@ -434,6 +434,7 @@ namespace discord {
 	void Bot::GuildCreateEvent(nlohmann::json result) {
 		snowflake guild_id = result["id"].get<snowflake>();
 		discord::Guild guild(result);
+		logger.LogToConsole(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Connected to %s", guild.name);
 		guilds.push_back(guild);
 
 		members.insert(members.end(), guild.members.begin(), guild.members.end());
