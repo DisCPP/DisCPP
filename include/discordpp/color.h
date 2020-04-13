@@ -33,9 +33,9 @@ namespace discord {
 			 * @param[in] color_hex The combined hex value
 			 */
 
-			red = (color_hex & 0xFF000000) >> 24;
-			green = (color_hex & 0x00FF0000) >> 16;
-			blue = (color_hex & 0x0000FF00) >> 8;
+			red = (color_hex >> 16) & 0xFF;
+			green = (color_hex >> 8) & 0xFF;
+			blue = color_hex & 0xFF;
 		}
 
 		int color_hex; // Combined RGB value
