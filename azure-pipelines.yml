@@ -5,17 +5,41 @@
 
 variables:
   CCACHE_DIR: $(Pipeline.Workspace)/ccache
+  #2020.1
+  vcpkgGitRef: 7aebb481085de7387f8a9975652c26f9053f66df
 
 trigger:
 - master
 - development
 
-strategy:
-  matrix:
-    linux:
-      imageName: 'ubuntu-16.04'
-    windows:
-      imageName: 'windows-2019'
+jobs:
+  - template: azure-devops/build-windows.yml
+    parameters:
+      name: 'Windows_VS2019_x86'
+      targetPlatform: x86
+      image: 'windows-latest'
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - script: git clone https://github.com/Microsoft/vcpkg.git vcpkg
+      displayName: Clone vcpkg git
+    - script: .\vcpkg\bootstrap-vcpkg.bat
+      displayName: Bootstrap vcpkg
+    - script: .\vcpkg\vcpkg.exe install nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization
+      displayName: Install vcpkg dependencies
+    - script: mkdir build
+      displayName: Make Build Directory
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build'
+        cmakeArgs: '-A x86 -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_SYSTEM_NAME=WindowsStore'
+    - task: MSBuild@1
+      inputs:
+        solution: 'build/ALL_BUILD.vcxproj'
+        maximumCpuCount: true
+        platform: 'x86'
+
+  #-job: Windows_VS2019_UWP
 
 steps:
 - bash: |
@@ -28,12 +52,13 @@ steps:
     path: $(CCACHE_DIR)
   displayName: 'ccache'
 - task: Cache@2
+  displayName: Cache vcpkg
   inputs:
-    key: 'vcpkg | "$(Agent.OS)"'
-    path: 'vcpkg'
+    key: $(Build.SourcesDirectory)/cmakelists.txt/vcpkg_x64-windows.txt | $(Build.SourcesDirectory)/.git/modules/vcpkg/HEAD | "$(Agent.OS)" | "VS2019"
+    path: '$(Build.SourcesDirectory)/vcpkg'
 - script: |
-    git clone https://github.com/Microsoft/vcpkg.git
-    cd vcpkg
+    git clone https://github.com/Microsoft/vcpkg.git $(Build.SourcesDirectory)/vcpkg
+    cd $(Build.SourcesDirectory)/vcpkg
     ./bootstrap-vcpkg.sh
     ./vcpkg integrate install
     ./vcpkg update
