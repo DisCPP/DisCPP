@@ -23,7 +23,7 @@ jobs:
       displayName: Cache vcpkg
       inputs:
         key: $(vcpkgArgs) | "$(vcpkgGitRef)"" | "$(Agent.OS)"
-        path: '$(Build.BinariesDirectory)/vcpkg'
+        path: '$(vcpkgLocation)'
     - task: run-vcpkg@0
       displayName: 'Run vcpkg'
       inputs:
