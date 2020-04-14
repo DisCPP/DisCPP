@@ -7,7 +7,7 @@ variables:
   CCACHE_DIR: $(Pipeline.Workspace)/ccache
   #2020.1
   vcpkgGitRef: 7aebb481085de7387f8a9975652c26f9053f66df
-  vcpkgDepends: nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization
+  vcpkgDepends: nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization --triplet x86
 
 trigger:
 - master
@@ -23,24 +23,25 @@ jobs:
     - task: Cache@2
       displayName: Cache vcpkg
       inputs:
-        #key: $(Build.SourcesDirectory)/cmakelists.txt/vcpkg_x64-windows.txt | $(Build.SourcesDirectory)/.git/modules/vcpkg/HEAD | "$(Agent.OS)" | "VS2019"
-        key: $(vcpkgDepends) | vcpkg/HEAD | "$(Agent.OS)" | "VS2019"
-        path: 'vcpkg'
+        key: $(vcpkgDepends) | "$(vcpkgGitRef)" | "$(Agent.OS)"
+        path: '$(Build.BinariesDirectory)/vcpkg'
     - task: run-vcpkg@0
       displayName: 'Run vcpkg'
       inputs:
-        vcpkgArguments: '@$(vcpkgResponseFile)'
-        vcpkgDirectory: '$(vcpkgLocation)'
-        vcpkgTriplet: ${{ parameters.targetPlatform }}-windows
+        vcpkgDirectory: vcpkg
+        vcpkgArguments: $(vcpkgDepends)
+        # Specify the exact commit id to fetch.
+        vcpkgGitCommitId: $(vcpkgGitRef)
+        # URL to fetch vcpkg from (default is the official one).
+        vcpkgGitURL: https://github.com/microsoft/vcpkg.git
+
     - task: run-cmake@0
       displayName: 'Run CMake with Ninja (Debug)'
       enabled: true
       inputs:
         cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-        cmakeBuildType: 'Debug'
         useVcpkgToolchainFile: true
-        buildDirectory: $(Build.ArtifactStagingDirectory)/Windows_VS2019_x86_Debug
-        cmakeAppendedArgs: '-DCPPREST_EXCLUDE_BROTLI=OFF'
+        buildDirectory: $(Build.ArtifactStagingDirectory)/Windows_VS2019_x86
 #    - task: MSBuild@1
 #      inputs:
 #        solution: 'build/ALL_BUILD.vcxproj'
