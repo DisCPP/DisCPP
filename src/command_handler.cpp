@@ -32,7 +32,7 @@ void discord::FireCommand(discord::Bot* bot, discord::Message message) {
     std::string messageContent = message.content;
     messageContent = messageContent.substr(prefixSize);
 
-    std::vector<std::string> argument_vec = SplitString(messageContent, ' ');
+    std::vector<std::string> argument_vec = SplitString(messageContent, " ");
     if (!argument_vec.size()) return;
 
     auto found_command = registered_commands.find(argument_vec[0]);
@@ -43,7 +43,7 @@ void discord::FireCommand(discord::Bot* bot, discord::Message message) {
     discord::Member member(message.author.id);
 
     std::string remainder = "d";
-    if (!argument_vec.empty()) remainder = CombineVectorWithSpaces(argument_vec, 0);
+    if (!argument_vec.empty()) remainder = CombineStringVector(argument_vec);
 
     Context context = Context(bot, message.channel, member, message, remainder, argument_vec);
 
