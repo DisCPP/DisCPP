@@ -116,7 +116,7 @@ namespace discord {
 		 */
 
 		std::string endpointstr = Endpoint("channels/%/messages/%/reactions/%/@me", channel.id, id, emoji.ToString()); 
-		nlohmann::json result = SendPutRequest(endpointstr, DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		nlohmann::json result = SendPutRequest(endpointstr, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
 	void Message::RemoveBotReaction(discord::Emoji emoji) {
@@ -133,7 +133,7 @@ namespace discord {
 		 */
 
 		std::string endpoint = Endpoint("/channels/%/messages/%/reactions/%:%/@me", channel.id, id, emoji.name, emoji.id);
-		nlohmann::json result = SendDeleteRequest(endpoint, DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		nlohmann::json result = SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
 	void Message::RemoveReaction(discord::User user, discord::Emoji emoji) {
@@ -151,7 +151,7 @@ namespace discord {
 		 */
 
 		std::string endpoint = Endpoint("/channels/%/messages/%/reactions/%:%/%", channel.id, id, emoji.name, emoji.id, user.id);
-		nlohmann::json result = SendDeleteRequest(endpoint, DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		nlohmann::json result = SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
 	std::vector<discord::User> Message::GetReactorsOfEmoji(discord::Emoji emoji, int amount) {
@@ -170,7 +170,7 @@ namespace discord {
 
 		std::string endpoint = Endpoint("/channels/%/messages/%/reactions/%:%", channel.id, id, emoji.name, emoji.id);
 		cpr::Body body("{\"limit\": " + std::to_string(amount) + "}");
-		nlohmann::json result = SendGetRequest(endpoint, DefaultHeaders(), id, RateLimitBucketType::CHANNEL, body);
+		nlohmann::json result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
 		
 		std::vector<discord::User> users;
 		for (auto& user : result) {
@@ -198,7 +198,7 @@ namespace discord {
 		std::string endpoint = Endpoint("/channels/%/messages/%/reactions/%:%", channel.id, id, emoji.name, emoji.id);
 		std::string method_str = (method == GetReactionsMethod::BEFORE_USER) ? "before" : "after";
 		cpr::Body body("{\"" + method_str + "\": " + user.id + "}");
-		nlohmann::json result = SendGetRequest(endpoint, DefaultHeaders(), id, RateLimitBucketType::CHANNEL, body);
+		nlohmann::json result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
 		
 		std::vector<discord::User> users;
 		for (auto& user : result) {
@@ -220,7 +220,7 @@ namespace discord {
 		 */
 
 		std::string endpoint = Endpoint("/channels/%/messages/%/reactions", channel.id, id);
-		nlohmann::json result = SendDeleteRequest(endpoint, DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		nlohmann::json result = SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
 	discord::Message Message::EditMessage(std::string text) {

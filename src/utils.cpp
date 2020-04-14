@@ -330,8 +330,9 @@ std::string discord::EscapeString(std::string string) {
 	 * @return std::string
 	 */
 
-	string = ReplaceAll(string, "\\", "\\\\");
+	//string = ReplaceAll(string, "\\", "\\\\");
 	string = ReplaceAll(string, "\"", "\\\"");
+	string = ReplaceAll(string, "\'", "\\\'");
 	/*string = ReplaceAll(string, "\a", "\\a");
 	string = ReplaceAll(string, "\b", "\\b");
 	string = ReplaceAll(string, "\f", "\\f");
