@@ -7,7 +7,7 @@ variables:
   CCACHE_DIR: $(Pipeline.Workspace)/ccache
   #2020.1
   vcpkgGitRef: 7aebb481085de7387f8a9975652c26f9053f66df
-  vcpkgDepends: nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization --triplet x86-windows
+  vcpkgArgs: nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization
 
 trigger:
 - master
@@ -23,16 +23,14 @@ jobs:
     - task: Cache@2
       displayName: Cache vcpkg
       inputs:
-        key: $(vcpkgDepends) | "$(vcpkgGitRef)" | "$(Agent.OS)"
+        key: $(vcpkgArgs) | $(Build.SourcesDirectory)/.git/modules/vcpkg/HEAD | "$(Agent.OS)"
         path: '$(Build.BinariesDirectory)/vcpkg'
     - task: run-vcpkg@0
       displayName: 'Run vcpkg'
       inputs:
-        vcpkgDirectory: vcpkg
-        vcpkgArguments: $(vcpkgDepends)
-        # Specify the exact commit id to fetch.
+        vcpkgArguments: $(vcpkgArgs)
         vcpkgGitCommitId: $(vcpkgGitRef)
-        # URL to fetch vcpkg from (default is the official one).
+        vcpkgTriplet: x86-windows
         vcpkgGitURL: https://github.com/microsoft/vcpkg.git
 
     - task: run-cmake@0
@@ -40,8 +38,11 @@ jobs:
       enabled: true
       inputs:
         cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
+        cmakeListsTxtPath: 'CMakeLists.txt'
         useVcpkgToolchainFile: true
+        cmakeGenerator: 'Ninja'
         buildDirectory: $(Build.ArtifactStagingDirectory)/Windows_VS2019_x86
+        buildWithCMakeArgs: '-- -v -A x86'
 #    - task: MSBuild@1
 #      inputs:
 #        solution: 'build/ALL_BUILD.vcxproj'
