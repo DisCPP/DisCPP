@@ -5,20 +5,12 @@ sudo: required
 #services:
 #- docker
 
-matrix:
-  include:
-    # works on Precise and Trusty
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.8
-          packages:
-            - clang-3.8
-      env:
-        - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
-    -os: windows
+os:
+  - linux
+  - windows
+
+# Set the linux distribution to one with updated compilers
+dist: bionic
 
 compiler:
 - clang
