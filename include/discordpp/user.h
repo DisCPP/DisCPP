@@ -53,6 +53,7 @@ namespace discord {
 		std::string email;
 		int flags;
 		discord::specials::NitroSubscription premium_type;
+		std::string created_at;
 	};
 }
 

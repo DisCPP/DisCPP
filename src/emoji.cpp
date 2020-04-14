@@ -4,7 +4,7 @@
 #include "user.h"
 
 namespace discord {
-	Emoji::Emoji(std::string name, snowflake id) : name(EscapeString(name)) {
+	Emoji::Emoji(std::string name, snowflake id) : name(EscapeString(name)), DiscordObject(id) {
 		/**
 		 * @brief Constructs a discord::Emoji object with a name and id.
 		 *
@@ -17,10 +17,9 @@ namespace discord {
 		 *
 		 * @return discord::Emoji, this is a constructor.
 		 */
-		this->id = id;
 	}
 
-	Emoji::Emoji(discord::Guild guild, snowflake id) {
+	Emoji::Emoji(discord::Guild guild, snowflake id) : DiscordObject(id) {
 		/**
 		 * @brief Constructs a discord::Emoji object using a guild object and id.
 		 *
@@ -69,5 +68,19 @@ namespace discord {
 		require_colons = GetDataSafely<bool>(json, "require_colons");
 		managed = GetDataSafely<bool>(json, "managed");
 		animated = GetDataSafely<bool>(json, "animated");
+	}
+
+	Emoji::Emoji(std::wstring unicode) : unicode(unicode) {
+		/**
+		 * @brief Constructs a discord::Emoji object with a name and id.
+		 *
+		 * ```cpp
+		 *      discord::Emoji emoji("\u0030");
+		 * ```
+		 *
+		 * @param[in] unicode The unicode representation of this emoji.
+		 *
+		 * @return discord::Emoji, this is a constructor.
+		 */
 	}
 }

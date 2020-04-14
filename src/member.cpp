@@ -27,7 +27,7 @@ namespace discord {
 		}
 	}
 
-	Member::Member(nlohmann::json json, snowflake guild_id) : guild_id(guild_id) {
+	Member::Member(nlohmann::json json, discord::Guild guild) : guild_id(guild.id) {
 		/**
 		 * @brief Constructs a discord::Member object by parsing json and stores the guild_id.
 		 *
@@ -49,11 +49,10 @@ namespace discord {
 		}
 		
 		nick = GetDataSafely<std::string>(json, "nick");
-		discord::Guild guild(guild_id);
 		if (json.contains("roles")) {
 			discord::Permissions permissions;
 			for (auto& role : json["roles"]) {
-				discord::Role r(role, guild);
+				discord::Role r(role.get<snowflake>(), guild);
 
 				// Save permissions
 				if (json["roles"][0] == role) {
@@ -73,7 +72,6 @@ namespace discord {
 		premium_since = GetDataSafely<std::string>(json, "premium_since");
 		deaf = GetDataSafely<bool>(json, "deaf");
 		mute = GetDataSafely<bool>(json, "mute");
-		created_at = FormatTimeFromSnowflake(id);
 	}
 
 	void Member::ModifyMember(std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf, snowflake channel_id) {
@@ -118,7 +116,7 @@ namespace discord {
 		}
 
 		cpr::Body body("{\"nick\": \"" + EscapeString(nick) + "\", \"roles\": " + json_roles + ", \"mute\": " + std::to_string(mute) + ", \"deaf\": " + std::to_string(deaf) + "\"channel_id\": \"" + channel_id + "\"" + "}");
-		SendPatchRequest(Endpoint("/guilds/" + this->id + "/members/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::GUILD, body);
+		SendPatchRequest(Endpoint("/guilds/" + this->id + "/members/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), guild_id, RateLimitBucketType::GUILD, body);
 	}
 
 	void Member::AddRole(discord::Role role) {

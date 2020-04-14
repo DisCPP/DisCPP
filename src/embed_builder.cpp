@@ -1,10 +1,13 @@
 #include "embed_builder.h"
+#include "color.h"
 #include "utils.h"
+
+#include <discordpp/bot.h>
 
 namespace discord {
 	EmbedBuilder::EmbedBuilder() : embed_json(nlohmann::json({})) { }
 
-	EmbedBuilder::EmbedBuilder(std::string title, std::string description, int color) {
+	EmbedBuilder::EmbedBuilder(std::string title, std::string description, discord::Color color) {
 		/**
 		 * @brief Constructs a discord::EmbedBuilder object with a title, description, and color.
 		 *
@@ -52,6 +55,7 @@ namespace discord {
 		 */
 
 		if (title.size() < 0 || title.size() > 256) {
+			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Embed title can only be 0-256 characters!");
 			throw std::runtime_error("Embed title can only be 0-256 characters");
 		}
 		embed_json["title"] = EscapeString(title);
@@ -88,7 +92,8 @@ namespace discord {
 		 */
 
 		if (description.size() < 0 || description.size() > 2048) {
-			throw std::runtime_error("Embed descriptions can only be 0-2048 characters");
+			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Embed descriptions can only be 0-2048 characters!");
+			throw std::runtime_error("Embed descriptions can only be 0-2048 characters!");
 		}
 		embed_json["description"] = EscapeString(description);
 		return *this;
@@ -128,7 +133,7 @@ namespace discord {
 		return *this;
 	}
 
-	EmbedBuilder& EmbedBuilder::SetColor(int color) {
+	EmbedBuilder& EmbedBuilder::SetColor(Color color) {
 		/**
 		 * @brief Set the color of the embed.
 		 *
@@ -141,7 +146,7 @@ namespace discord {
 		 * @return discord::EmbedBuilder, just returns an object of this.
 		 */
 
-		embed_json["color"] = color;
+		embed_json["color"] = color.color_hex;
 		return *this;
 	}
 
@@ -161,7 +166,8 @@ namespace discord {
 
 		embed_json["footer"] = nlohmann::json({});
 		if (text.size() > 2048) {
-			throw std::runtime_error("Embed footer text can only be up to 0-2048 characters");
+			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Embed footer text can only be up to 0-2048 characters!");
+			throw std::runtime_error("Embed footer text can only be up to 0-2048 characters!");
 		}
 		embed_json["footer"]["text"] = EscapeString(text);
 		if (!icon_url.empty()) {
@@ -285,6 +291,7 @@ namespace discord {
 
 		embed_json["author"] = nlohmann::json({});
 		if (name.size() > 256) {
+			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Embed author names can only be up to 0-256 characters!");
 			throw std::runtime_error("Embed author names can only be up to 0-256 characters");
 		}
 		embed_json["author"]["name"] = EscapeString(name);
@@ -312,18 +319,29 @@ namespace discord {
 		 * @return discord::EmbedBuilder, just returns an object of this.
 		 */
 
+		if (name.empty()) {
+			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "You can not have an empty or null field name!");
+			throw std::runtime_error("You can not have an empty or null field title!");
+		} else if (value.empty()) {
+			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "You can not have an empty or null field value!");
+			throw std::runtime_error("You can not have an empty or null field value!");
+		}
+
 		if (!embed_json.contains("fields")) {
 			embed_json["fields"] = nlohmann::json::array();
 		} else if (embed_json["fields"].size() > 25) {
-			throw std::runtime_error("Embeds can only have 25 field objects");
+			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Embeds can only have 25 field objects!");
+			throw std::runtime_error("Embeds can only have 25 field objects!");
 		}
 
 		if (name.size() > 256) {
-			throw std::runtime_error("Embed field names can only be up to 0-256 characters");
+			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Embed field names can only be up to 1-256 characters!");
+			throw std::runtime_error("Embed field names can only be up to 1-256 characters!");
 		}
 
 		if (value.size() > 1024) {
-			throw std::runtime_error("Embed field values can only be up to 0-1024 characters");
+			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Embed field values can only be up to 1-1024 characters!");
+			throw std::runtime_error("Embed field values can only be up to 1-1024 characters!");
 		}
 
 		nlohmann::json field = nlohmann::json({
