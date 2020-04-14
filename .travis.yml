@@ -25,5 +25,5 @@ script:
 - cd ../
 - mkdir build
 - cd build
-- cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/appveyor/projects/discordpp/vcpkg/scripts/buildsystems/vcpkg.cmake
+- cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/travis/build/SeanOMik/DiscordPP/vcpkg/scripts/buildsystems/vcpkg.cmake
 - make
