@@ -1,0 +1,22 @@
+version: 1.0.{build}
+pull_requests:
+  do_not_increment_build_number: true
+image:
+- Visual Studio 2019
+- Ubuntu1804
+platform: x86
+build_script:
+  - git clone https://github.com/Microsoft/vcpkg.git
+  - cd vcpkg
+  - ./bootstrap-vcpkg.sh
+  - ./vcpkg integrate install
+  - ./vcpkg update
+  - ./vcpkg install nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization
+  - cd ../
+  - mkdir build
+  - cd build
+  - cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/appveyor/projects/discordpp/vcpkg/scripts/buildsystems/vcpkg.cmake
+  - make
+
+cache:
+  - vcpkg
