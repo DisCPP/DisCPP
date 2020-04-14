@@ -5,9 +5,9 @@ sudo: required
 #services:
 #- docker
 
-os:
-  - linux
-  - windows
+#os:
+  #- linux
+  #- windows
 
 # Set the linux distribution to one with updated compilers
 dist: bionic
