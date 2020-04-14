@@ -13,11 +13,12 @@ trigger:
 - development
 
 jobs:
-  - template: azure-devops/build-windows.yml
-    parameters:
-      name: 'Windows_VS2019_x86'
-      targetPlatform: x86
-      image: 'windows-latest'
+#  - template: azure-devops/build-windows.yml
+#    parameters:
+#      name: 'Windows_VS2019_x86'
+#      targetPlatform: x86
+#      image: 'windows-latest'
+  - job: Windows_VS2019_x86
     pool:
       vmImage: 'windows-latest'
     steps:
