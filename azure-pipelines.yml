@@ -36,15 +36,15 @@ jobs:
         vcpkgGitURL: https://github.com/microsoft/vcpkg.git
 
     - task: run-cmake@0
-      displayName: 'Run CMake with Ninja (Debug)'
+      displayName: 'Run CMake with Ninja'
       enabled: true
       inputs:
         cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-        cmakeListsTxtPath: 'CMakeLists.txt'
+        cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
         useVcpkgToolchainFile: true
-        cmakeGenerator: 'Ninja'
-        buildDirectory: $(Build.ArtifactStagingDirectory)/Windows_VS2019_x86
-        buildWithCMakeArgs: '-- -v -A x86'
+        vcpkgTriplet: 'x86-windows'
+        buildDirectory: '$(Build.ArtifactStagingDirectory)'
+        buildWithCMakeArgs: '-- -v'
 #    - task: MSBuild@1
 #      inputs:
 #        solution: 'build/ALL_BUILD.vcxproj'
