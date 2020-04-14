@@ -7,7 +7,7 @@ variables:
   CCACHE_DIR: $(Pipeline.Workspace)/ccache
   #2020.1
   vcpkgGitRef: 7aebb481085de7387f8a9975652c26f9053f66df
-  vcpkgDepends: nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization --triplet x86
+  vcpkgDepends: nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization --triplet x86-windows
 
 trigger:
 - master
