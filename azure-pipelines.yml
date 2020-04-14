@@ -8,6 +8,7 @@ variables:
   #2020.1
   vcpkgGitRef: 7aebb481085de7387f8a9975652c26f9053f66df
   vcpkgArgs: nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization
+  vcpkgLocation: '$(Build.SourcesDirectory)/vcpkg'
 
 trigger:
 - master
@@ -28,6 +29,7 @@ jobs:
     - task: run-vcpkg@0
       displayName: 'Run vcpkg'
       inputs:
+        vcpkgDirectory: '$(vcpkgLocation)'
         vcpkgArguments: $(vcpkgArgs)
         vcpkgGitCommitId: $(vcpkgGitRef)
         vcpkgTriplet: x86-windows
