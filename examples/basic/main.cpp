@@ -21,7 +21,7 @@ int main(int argc, const char* argv[]) {
 	std::string token;
 	std::getline(token_file, token);
 
-	discord::Bot bot{ token, "!" }; // Token, command prefix.
+	discord::Bot bot{ token, {"!"} }; // Token, command prefix.
 
 	PingCommand(); // This runs the constructor which will register the command.
 
