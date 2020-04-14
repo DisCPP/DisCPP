@@ -7,69 +7,81 @@ variables:
   CCACHE_DIR: $(Pipeline.Workspace)/ccache
   #2020.1
   vcpkgGitRef: 7aebb481085de7387f8a9975652c26f9053f66df
+  vcpkgDepends: nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization
 
 trigger:
 - master
 - development
 
 jobs:
-#  - template: azure-devops/build-windows.yml
-#    parameters:
-#      name: 'Windows_VS2019_x86'
-#      targetPlatform: x86
-#      image: 'windows-latest'
-  - job: Windows_VS2019_x86
+  - template: azure-devops/build-windows.yml
+    parameters:
+      name: 'Windows_VS2019_x86'
+      targetPlatform: x86
+      image: 'windows-latest'
+  - job: Windows_VS2019_UWP
     pool:
       vmImage: 'windows-latest'
     steps:
     - script: git clone https://github.com/Microsoft/vcpkg.git vcpkg
       displayName: Clone vcpkg git
-    - script: .\vcpkg\bootstrap-vcpkg.bat
-      displayName: Bootstrap vcpkg
-    - script: .\vcpkg\vcpkg.exe install nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization
-      displayName: Install vcpkg dependencies
-    - script: mkdir build
-      displayName: Make Build Directory
-    - task: CMake@1
+    - task: Cache@2
+      displayName: Cache vcpkg
       inputs:
-        workingDirectory: 'build'
-        cmakeArgs: '-A x86 -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_SYSTEM_NAME=WindowsStore'
-    - task: MSBuild@1
+        #key: $(Build.SourcesDirectory)/cmakelists.txt/vcpkg_x64-windows.txt | $(Build.SourcesDirectory)/.git/modules/vcpkg/HEAD | "$(Agent.OS)" | "VS2019"
+        key: $(vcpkgDepends) | vcpkg/HEAD | "$(Agent.OS)" | "VS2019"
+        path: 'vcpkg'
+    - task: run-vcpkg@0
+      displayName: 'Run vcpkg'
       inputs:
-        solution: 'build/ALL_BUILD.vcxproj'
-        maximumCpuCount: true
-        platform: 'x86'
+        vcpkgArguments: '@$(vcpkgResponseFile)'
+        vcpkgDirectory: '$(vcpkgLocation)'
+        vcpkgTriplet: ${{ parameters.targetPlatform }}-windows
+    - task: run-cmake@0
+      displayName: 'Run CMake with Ninja (Debug)'
+      enabled: true
+      inputs:
+        cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
+        cmakeBuildType: 'Debug'
+        useVcpkgToolchainFile: true
+        buildDirectory: $(Build.ArtifactStagingDirectory)/Windows_VS2019_x86_Debug
+        cmakeAppendedArgs: '-DCPPREST_EXCLUDE_BROTLI=OFF'
+#    - task: MSBuild@1
+#      inputs:
+#        solution: 'build/ALL_BUILD.vcxproj'
+#        maximumCpuCount: true
+#        platform: 'x86'
 
   #-job: Windows_VS2019_UWP
 
-steps:
-- bash: |
-    sudo apt-get install ccache -y
-    echo "##vso[task.prependpath]/usr/libccache"
-  displayName: 'Install ccache and update PATH to use linked versions of gcc, cc, etc'
-- task: Cache@2
-  inputs:
-    key: 'ccache | "$(Agent.OS)"'
-    path: $(CCACHE_DIR)
-  displayName: 'ccache'
-- task: Cache@2
-  displayName: Cache vcpkg
-  inputs:
-    key: $(Build.SourcesDirectory)/cmakelists.txt/vcpkg_x64-windows.txt | $(Build.SourcesDirectory)/.git/modules/vcpkg/HEAD | "$(Agent.OS)" | "VS2019"
-    path: '$(Build.SourcesDirectory)/vcpkg'
-- script: |
-    git clone https://github.com/Microsoft/vcpkg.git $(Build.SourcesDirectory)/vcpkg
-    cd $(Build.SourcesDirectory)/vcpkg
-    ./bootstrap-vcpkg.sh
-    ./vcpkg integrate install
-    ./vcpkg update
-    ./vcpkg install nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization
-    cd ../
-    mkdir build
-    cd build
-    cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/appveyor/projects/discordpp/vcpkg/scripts/buildsystems/vcpkg.cmake
-    make
-  displayName: 'Compile'
+#steps:
+#- bash: |
+#    sudo apt-get install ccache -y
+#    echo "##vso[task.prependpath]/usr/libccache"
+#  displayName: 'Install ccache and update PATH to use linked versions of gcc, cc, etc'
+#- task: Cache@2
+#  inputs:
+#    key: 'ccache | "$(Agent.OS)"'
+#    path: $(CCACHE_DIR)
+#  displayName: 'ccache'
+#- task: Cache@2
+#  displayName: Cache vcpkg
+#  inputs:
+#    key: $(Build.SourcesDirectory)/cmakelists.txt/vcpkg_x64-windows.txt | $(Build.SourcesDirectory)/.git/modules/vcpkg/HEAD | "$(Agent.OS)" | "VS2019"
+#    path: '$(Build.SourcesDirectory)/vcpkg'
+#- script: |
+#    git clone https://github.com/Microsoft/vcpkg.git $(Build.SourcesDirectory)/vcpkg
+#    cd $(Build.SourcesDirectory)/vcpkg
+#    ./bootstrap-vcpkg.sh
+#    ./vcpkg integrate install
+#    ./vcpkg update
+#    ./vcpkg install nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization
+#    cd ../
+#    mkdir build
+#    cd build
+#    cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/appveyor/projects/discordpp/vcpkg/scripts/buildsystems/vcpkg.cmake
+#    make
+#  displayName: 'Compile'
 
 #- script: |
 #    echo Add other tasks to build, test, and deploy your project.
