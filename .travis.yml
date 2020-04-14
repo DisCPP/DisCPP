@@ -1,0 +1,19 @@
+language: bash
+
+sudo: required
+
+#services:
+#- docker
+
+script:
+- git clone https://github.com/Microsoft/vcpkg.git
+- cd vcpkg
+- ./bootstrap-vcpkg.sh
+- ./vcpkg integrate install
+- ./vcpkg update
+- ./vcpkg install nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization
+- cd ../
+- mkdir build
+- cd build
+- cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/appveyor/projects/discordpp/vcpkg/scripts/buildsystems/vcpkg.cmake
+- make
