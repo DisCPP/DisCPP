@@ -224,10 +224,6 @@ namespace discord {
 		fire_command_method = command_handler;
 	}
 
-	/*void Bot::DisconnectWebsocket() {
-		websocket_client.close(web::websockets::client::websocket_close_status::normal);
-	}*/
-
 	void Bot::BindEvents() {
 		internal_event_map["READY"] = std::bind(&Bot::ReadyEvent, this, std::placeholders::_1);
 		internal_event_map["RESUMED"] = std::bind(&discord::Bot::ResumedEvent, this, std::placeholders::_1);
@@ -276,7 +272,8 @@ namespace discord {
 				throw std::runtime_error{ "GATEWAY ERROR: Maximum start limit reached" };
 			}
 
-			gateway_endpoint = gateway_request["url"];
+			// Specify version and encoding just ot be safe
+			gateway_endpoint = gateway_request["url"].get<std::string>() + "?v=6&encoding=json";
 
 			// Recreate a websocket client just incase we're trying to reconnect.
 			if (reconnecting) {

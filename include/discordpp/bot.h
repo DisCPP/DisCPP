@@ -60,7 +60,6 @@ namespace discord {
 		void UpdatePresence(discord::Activity activity);
 		void CreateWebsocketRequest(nlohmann::json json);
 		void SetCommandHandler(std::function<void(discord::Bot*, discord::Message)> command_handler);
-		//void DisconnectWebsocket();
 
 		template <typename FType, typename... T>
 		void DoFunctionLater(FType&& func, T&&... args) {
