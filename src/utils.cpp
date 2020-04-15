@@ -1,4 +1,3 @@
-#include "..\include\discordpp\utils.h"
 #include "utils.h"
 #include "bot.h"
 
@@ -8,6 +7,8 @@
 #include <boost/archive/iterators/transform_width.hpp>
 
 #include <curl/curl.h>
+
+#include <cpprest/uri.h>
 
 std::string discord::GetOsName() {
 	/**
@@ -52,8 +53,17 @@ nlohmann::json discord::HandleResponse(cpr::Response response, snowflake object,
 	 * @return nlohmann::json
 	 */
 
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Received requested payload: " + response.text);
 	HandleRateLimits(response.header, object, ratelimit_bucket);
 	return nlohmann::json::parse((!response.text.empty()) ? response.text : "{}");
+}
+
+std::string CprBodyToString(cpr::Body body) {
+	if (body.empty()) {
+		return "Empty";
+	}
+	
+	return body;
 }
 
 nlohmann::json discord::SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
@@ -73,6 +83,7 @@ nlohmann::json discord::SendGetRequest(std::string url, cpr::Header headers, sno
 	 * @return nlohmann::json
 	 */
 
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending get request, URL: %, body: %", url, CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -95,6 +106,7 @@ nlohmann::json discord::SendPostRequest(std::string url, cpr::Header headers, sn
 	 * @return nlohmann::json
 	 */
 
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending post request, URL: %, body: %", url, CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Post(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -117,6 +129,7 @@ nlohmann::json discord::SendPutRequest(std::string url, cpr::Header headers, sno
 	 * @return nlohmann::json
 	 */
 
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending put request, URL: %, body: %", url, CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Put(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -139,6 +152,7 @@ nlohmann::json discord::SendPatchRequest(std::string url, cpr::Header headers, s
 	 * @return nlohmann::json
 	 */
 
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending patch request, URL: %, body: %", url, CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Patch(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -160,6 +174,7 @@ nlohmann::json discord::SendDeleteRequest(std::string url, cpr::Header headers, 
 	 * @return nlohmann::json
 	 */
 
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending delete request, URL: %", url);
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Delete(cpr::Url{ url }, headers);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -204,7 +219,7 @@ bool discord::StartsWith(std::string string, std::string prefix) {
 	return string.substr(0, prefix.size()) == prefix;
 }
 
-std::vector<std::string> discord::SplitString(std::string str, char delimiter) {
+std::vector<std::string> discord::SplitString(std::string str, std::string delimiter) {
 	/**
 	 * @brief Split a string into a vector.
 	 *
@@ -219,18 +234,12 @@ std::vector<std::string> discord::SplitString(std::string str, char delimiter) {
 	 */
 
 	std::vector<std::string> out;
-	size_t start;
-	size_t end = 0;
-
-	while ((start = str.find_first_not_of(delimiter, end)) != std::string::npos) {
-		end = str.find(delimiter, start);
-		out.push_back(str.substr(start, end - start));
-	}
+	boost::split(out, str, boost::is_any_of(delimiter), boost::token_compress_on);
 
 	return out;
 }
 
-std::string discord::CombineVectorWithSpaces(std::vector<std::string> vector, int offset) {
+std::string discord::CombineStringVector(std::vector<std::string> vector, std::string delimiter, int offset) {
 	/**
 	 * @brief Combine a vector into a string with spaces between each element.
 	 *
@@ -239,12 +248,13 @@ std::string discord::CombineVectorWithSpaces(std::vector<std::string> vector, in
 	 * ```
 	 *
 	 * @param[in] vector The vector to combine.
+	 * @param[in] delmiter The delimiter to combine the vector by.
 	 * @param[in] offset The vector element offset to start at (if you wanted to skip the first 2 elements, set this offset to "2").
 	 *
 	 * @return std::string
 	 */
 
-	return std::accumulate(vector.begin() + offset, vector.end(), std::string(""), [](std::string s0, std::string const& s1) { return s0 += " " + s1; }).substr(1);
+	return std::accumulate(vector.begin() + offset, vector.end(), std::string(""), [delimiter](std::string s0, std::string const& s1) { return s0 += delimiter + s1; }).substr(1);
 }
 
 std::string discord::ReadEntireFile(std::ifstream& file) {
@@ -287,7 +297,7 @@ std::string discord::ReplaceAll(std::string data, std::string toSearch, std::str
 	 * @brief Replace all occurences of sub strings
 	 *
 	 * ```cpp
-	 *      std::string raw_text = FindAndReplaceAll("discord text", " ", "_");
+	 *      std::string raw_text = ReplaceAll("discord text", " ", "_");
 	 * ```
 	 *
 	 * @param[in] string The string to escape.
@@ -315,17 +325,15 @@ std::string discord::EscapeString(std::string string) {
 	 * @return std::string
 	 */
 
-	string = ReplaceAll(string, "\\", "\\\\");
+	//string = ReplaceAll(string, "\\", "\\\\");
 	string = ReplaceAll(string, "\"", "\\\"");
-	//string = ReplaceAll(string, "\'", "\\\'");
-	//string = ReplaceAll(string, "\?", "\\?");
-	string = ReplaceAll(string, "\a", "\\a");
+	string = ReplaceAll(string, "\'", "\\\'");
+	/*string = ReplaceAll(string, "\a", "\\a");
 	string = ReplaceAll(string, "\b", "\\b");
 	string = ReplaceAll(string, "\f", "\\f");
 	string = ReplaceAll(string, "\n", "\\n");
 	string = ReplaceAll(string, "\r", "\\r");
-	string = ReplaceAll(string, "\t", "\\t");
-	//string = ReplaceAll(string, "\v", "\\v");
+	string = ReplaceAll(string, "\t", "\\t");*/
 	// \u + four-hex-digits
 
 	return string;
@@ -455,7 +463,7 @@ time_t discord::TimeFromSnowflake(snowflake snow) {
 std::string discord::FormatTimeFromSnowflake(snowflake snow) {
 	time_t unix_time = TimeFromSnowflake(snow);
 
-	tm* n = std::localtime(&unix_time);
+	tm* n = std::gmtime(&unix_time);
 	tm now = *n;
 	char buffer[256];
 	strftime(buffer, sizeof(buffer), "%Y-%m-%d @ %H:%M:%S GMT", &now);

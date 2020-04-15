@@ -1,0 +1,74 @@
+language: bash
+
+sudo: required
+
+#services:
+#- docker
+
+#os:
+  #- linux
+  #- windows
+
+# Set the linux distribution to one with updated compilers
+dist: bionic
+
+compiler:
+- clang
+
+env:
+  global:
+    - MAX_TIME_MIN=80
+
+matrix:
+  fast_finish: true
+
+  include:
+  - os: linux
+    name: linux
+    dist: bionic
+    script:
+      - git clone https://github.com/Microsoft/vcpkg.git
+      - cd vcpkg
+      - ./bootstrap-vcpkg.sh
+      - ./vcpkg integrate install
+      - ./vcpkg update
+      - ./vcpkg install nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization
+      - cd ../
+      - mkdir build
+      - cd build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/travis/build/SeanOMik/DiscordPP/vcpkg/scripts/buildsystems/vcpkg.cmake
+      - make
+  - os: windows
+    name: windows
+    install:
+#      - choco upgrade cmake.install
+#      - choco install ninja visualstudio2019-workload-vctools -y
+      # Install vcpkg and dependencies
+      - travis_wait ${MAX_TIME_MIN} bin/sh/install-vcpkg.sh
+      #- git clone https://github.com/Microsoft/vcpkg.git
+      #- cd vcpkg
+      #- ./bootstrap-vcpkg.sh
+      #- ./vcpkg integrate install
+      #- ./vcpkg update
+      #- ./vcpkg install nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization
+      #- cd ../
+    script:
+      - mkdir build
+      - cd build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/travis/build/SeanOMik/DiscordPP/vcpkg/scripts/buildsystems/vcpkg.cmake
+      - make
+
+
+
+#script:
+#- git clone https://github.com/Microsoft/vcpkg.git
+#- cd vcpkg
+#- ./bootstrap-vcpkg.sh
+#- ./vcpkg integrate install
+#- ./vcpkg update
+#- ./vcpkg install nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization
+#- cd ../
+#- mkdir build
+#- cd build
+#- cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/travis/build/SeanOMik/DiscordPP/vcpkg/scripts/buildsystems/vcpkg.cmake
+#- make

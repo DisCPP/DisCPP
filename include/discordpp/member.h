@@ -9,12 +9,13 @@
 
 namespace discord {
 	class Role;
+	class Guild;
 
 	class Member : public DiscordObject{
 	public:
 		Member() = default;
 		Member(snowflake id);
-		Member(nlohmann::json json, snowflake guild_id);
+		Member(nlohmann::json json, discord::Guild guild);
 
 		void ModifyMember(std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf, snowflake channel_id);
 		void AddRole(discord::Role role);
@@ -33,7 +34,6 @@ namespace discord {
 		bool mute;
 		discord::Permissions permissions;
 		discord::Activity activity;
-		std::string created_at;
 	};
 }
 

@@ -79,17 +79,11 @@ namespace discord {
 		unavailable = GetDataSafely<bool>(json, "unavailable");
 		member_count = GetDataSafely<int>(json, "member_count");
 		// voice_states
-		if (json.contains("members")) {
-			for (auto& member : json["members"]) {
-				members.push_back(discord::Member(member, id));
-			}
-		}
 		if (json.contains("channels")) {
 			for (auto& channel : json["channels"]) {
 				channels.push_back(discord::Channel(channel));
 			}
 		}
-		// presences
 		if (json.contains("presences") && json.contains("members")) {
 			for (auto const& presence : json["presences"]) {
 				auto member = std::find_if(members.begin(), members.end(), [presence](discord::Member a) { return presence["user"]["id"] == a.user.id;});
@@ -123,6 +117,11 @@ namespace discord {
 		premium_subscription_count = GetDataSafely<int>(json, "premium_subscription_count");
 		preferred_locale = GetDataSafely<std::string>(json, "preferred_locale");
 		created_at = FormatTimeFromSnowflake(id);
+		if (json.contains("members")) {
+			for (auto& member : json["members"]) {
+				members.push_back(discord::Member(member, *this));
+			}
+		}
 	}
 
 	discord::Guild Guild::ModifyGuildName(std::string name) {

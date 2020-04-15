@@ -108,7 +108,7 @@ namespace discord {
 
 		if (escaped_text.size() >= 2000) {
 			// Write message to file
-			std::ofstream message("message.txt", std::ios::out, std::ios::binary);
+			std::ofstream message("message.txt", std::ios::out | std::ios::binary);
 			message << message_json["content"];
 			message.close();
 
