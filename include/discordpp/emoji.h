@@ -48,10 +48,9 @@ namespace discord {
 				emoji = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(name) + L":" + std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(id);
 			}
 
-			utility::string_t stringt = utility::conversions::to_string_t(emoji);
-			stringt = web::uri::encode_uri(stringt);
+			emoji = web::uri::encode_uri(emoji);
 
-			return utility::conversions::to_utf8string(stringt);
+			return utility::conversions::to_utf8string(emoji);
 		}
 
 		//snowflake id;
