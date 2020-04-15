@@ -23,42 +23,42 @@ namespace discord {
 
 	class LogTextColor {
 	public:
+		inline static std::string RED = "\033[91m";
+		inline static std::string GREEN = "\033[92m";
+		inline static std::string YELLOW = "\033[93m";
+		inline static std::string BLUE = "\033[94m";
+		inline static std::string MAGENTA = "\033[95m";
+		inline static std::string CYAN = "\033[96m";
+		inline static std::string WHITE = "\033[97m";
 		inline static std::string BLACK = "\033[30m";
-		inline static std::string RED = "\033[31m";
-		inline static std::string GREEN = "\033[32m";
-		inline static std::string YELLOW = "\033[33m";
-		inline static std::string BLUE = "\033[34m";
-		inline static std::string MAGENTA = "\033[35m";
-		inline static std::string CYAN = "\033[36m";
-		inline static std::string WHITE = "\033[37m";
-		inline static std::string GRAY = "\033[90m";
-		inline static std::string BRIGHT_RED = "\033[91m";
-		inline static std::string BRIGHT_GREEN = "\033[92m";
-		inline static std::string BRIGHT_YELLOW = "\033[93m";
-		inline static std::string BRIGHT_BLUE = "\033[94m";
-		inline static std::string BRIGHT_MAGENTA = "\033[95m";
-		inline static std::string BRIGHT_CYAN = "\033[96m";
-		inline static std::string BRIGHT_WHITE = "\033[97m";
+		inline static std::string DARK_RED = "\033[31m";
+		inline static std::string DARK_GREEN = "\033[32m";
+		inline static std::string DARK_YELLOW = "\033[33m";
+		inline static std::string DARK_BLUE = "\033[34m";
+		inline static std::string DARK_MAGENTA = "\033[35m";
+		inline static std::string DARK_CYAN = "\033[36m";
+		inline static std::string DARK_WHITE = "\033[37m";
+		inline static std::string DARK_GRAY = "\033[90m"
 	};
 
 	class LogHighlightColor {
 	public:
+		inline static std::string RED = "\033[101m";
+		inline static std::string GREEN = "\033[102m";
+		inline static std::string YELLOW = "\033[103m";
+		inline static std::string BLUE = "\033[104m";
+		inline static std::string MAGENTA = "\033[105m";
+		inline static std::string CYAN = "\033[106m";
+		inline static std::string WHITE = "\033[107m";
 		inline static std::string BLACK = "\033[40m";
-		inline static std::string RED = "\033[41m";
-		inline static std::string GREEN = "\033[42m";
-		inline static std::string YELLOW = "\033[43m";
-		inline static std::string BLUE = "\033[44m";
-		inline static std::string MAGENTA = "\033[45m";
-		inline static std::string CYAN = "\033[46m";
-		inline static std::string WHITE = "\033[47m";
-		inline static std::string GRAY = "\033[100m";
-		inline static std::string BRIGHT_RED = "\033[101m";
-		inline static std::string BRIGHT_GREEN = "\033[102m";
-		inline static std::string BRIGHT_YELLOW = "\033[103m";
-		inline static std::string BRIGHT_BLUE = "\033[104m";
-		inline static std::string BRIGHT_MAGENTA = "\033[105m";
-		inline static std::string BRIGHT_CYAN = "\033[106m";
-		inline static std::string BRIGHT_WHITE = "\033[107m";
+		inline static std::string DARK_RED = "\033[41m";
+		inline static std::string DARK_GREEN = "\033[42m";
+		inline static std::string DARK_YELLOW = "\033[43m";
+		inline static std::string DARK_BLUE = "\033[44m";
+		inline static std::string DARK_MAGENTA = "\033[45m";
+		inline static std::string DARK_CYAN = "\033[46m";
+		inline static std::string DARK_WHITE = "\033[47m";
+		inline static std::string DARK_GRAY = "\033[100m";
 	};
 
 	class LogTextEffect {
