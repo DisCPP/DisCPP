@@ -84,7 +84,6 @@ namespace discord {
 				channels.push_back(discord::Channel(channel));
 			}
 		}
-		// presences
 		if (json.contains("presences") && json.contains("members")) {
 			for (auto const& presence : json["presences"]) {
 				auto member = std::find_if(members.begin(), members.end(), [presence](discord::Member a) { return presence["user"]["id"] == a.user.id;});

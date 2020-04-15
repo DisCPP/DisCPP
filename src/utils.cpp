@@ -219,7 +219,7 @@ bool discord::StartsWith(std::string string, std::string prefix) {
 	return string.substr(0, prefix.size()) == prefix;
 }
 
-std::vector<std::string> discord::SplitString(std::string str, char delimiter) {
+std::vector<std::string> discord::SplitString(std::string str, std::string delimiter) {
 	/**
 	 * @brief Split a string into a vector.
 	 *
@@ -234,18 +234,12 @@ std::vector<std::string> discord::SplitString(std::string str, char delimiter) {
 	 */
 
 	std::vector<std::string> out;
-	size_t start;
-	size_t end = 0;
-
-	while ((start = str.find_first_not_of(delimiter, end)) != std::string::npos) {
-		end = str.find(delimiter, start);
-		out.push_back(str.substr(start, end - start));
-	}
+	boost::split(out, str, boost::is_any_of(delimiter), boost::token_compress_on);
 
 	return out;
 }
 
-std::string discord::CombineVectorWithSpaces(std::vector<std::string> vector, int offset) {
+std::string discord::CombineStringVector(std::vector<std::string> vector, std::string delimiter, int offset) {
 	/**
 	 * @brief Combine a vector into a string with spaces between each element.
 	 *
@@ -254,12 +248,13 @@ std::string discord::CombineVectorWithSpaces(std::vector<std::string> vector, in
 	 * ```
 	 *
 	 * @param[in] vector The vector to combine.
+	 * @param[in] delmiter The delimiter to combine the vector by.
 	 * @param[in] offset The vector element offset to start at (if you wanted to skip the first 2 elements, set this offset to "2").
 	 *
 	 * @return std::string
 	 */
 
-	return std::accumulate(vector.begin() + offset, vector.end(), std::string(""), [](std::string s0, std::string const& s1) { return s0 += " " + s1; }).substr(1);
+	return std::accumulate(vector.begin() + offset, vector.end(), std::string(""), [delimiter](std::string s0, std::string const& s1) { return s0 += delimiter + s1; }).substr(1);
 }
 
 std::string discord::ReadEntireFile(std::ifstream& file) {
@@ -330,8 +325,9 @@ std::string discord::EscapeString(std::string string) {
 	 * @return std::string
 	 */
 
-	string = ReplaceAll(string, "\\", "\\\\");
+	//string = ReplaceAll(string, "\\", "\\\\");
 	string = ReplaceAll(string, "\"", "\\\"");
+	string = ReplaceAll(string, "\'", "\\\'");
 	/*string = ReplaceAll(string, "\a", "\\a");
 	string = ReplaceAll(string, "\b", "\\b");
 	string = ReplaceAll(string, "\f", "\\f");

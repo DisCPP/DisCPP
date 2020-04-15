@@ -139,8 +139,8 @@ namespace discord {
 	extern nlohmann::json SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket);
 	cpr::Header DefaultHeaders(cpr::Header add = {});
 	bool StartsWith(std::string string, std::string prefix);
-	std::vector<std::string> SplitString(std::string str, char delimter);
-	std::string CombineVectorWithSpaces(std::vector<std::string> vector, int offset = 0);
+	std::vector<std::string> SplitString(std::string str, std::string delimter);
+	std::string CombineStringVector(std::vector<std::string> v, std::string delimiter = " ", int offset = 0);
 	std::string ReadEntireFile(std::ifstream& file);
 	std::string Base64Encode(std::string text);
 	std::string ReplaceAll(std::string data, std::string toSearch, std::string replaceStr);
