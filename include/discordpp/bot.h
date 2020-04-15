@@ -59,7 +59,6 @@ namespace discord {
 		void LeaveGuild(discord::Guild guild);
 		void UpdatePresence(discord::Activity activity);
 		void CreateWebsocketRequest(nlohmann::json json);
-
 		void SetCommandHandler(std::function<void(discord::Bot*, discord::Message)> command_handler);
 
 		template <typename FType, typename... T>
@@ -81,7 +80,9 @@ namespace discord {
 		}
 	private:
 		bool ready = false;
-		bool disconnected =true;
+		bool disconnected = true;
+		bool reconnecting = false;
+
 		std::string session_id;
 		std::string gateway_endpoint;
 
@@ -107,6 +108,7 @@ namespace discord {
 		void HandleDiscordDisconnect(websocket_close_status close_status, utility::string_t reason, std::error_code error_code);
 		void HandleHeartbeat();
 		nlohmann::json GetIdentifyPacket();
+		void ReconnectToWebsocket();
 
 		void BindEvents();
 
