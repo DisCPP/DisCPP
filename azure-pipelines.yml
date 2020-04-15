@@ -28,9 +28,9 @@ jobs:
       displayName: 'Run vcpkg'
       inputs:
         vcpkgDirectory: '$(vcpkgLocation)'
-        vcpkgArguments: $(vcpkgArgs)
+        vcpkgArguments: $(vcpkgArgs) --triplet x86-windows
         vcpkgGitCommitId: $(vcpkgGitRef)
-        vcpkgTriplet: x86-windows
+        vcpkgTriplet: 'x86-windows'
         vcpkgGitURL: https://github.com/microsoft/vcpkg.git
     - task: run-cmake@0
       displayName: 'Run CMake with Ninja'
@@ -42,9 +42,9 @@ jobs:
         vcpkgTriplet: 'x86-windows'
         buildDirectory: '$(Build.ArtifactStagingDirectory)'
         buildWithCMakeArgs: '-- -v'
-  - job: Linux_x86
+  - job: Linux_Latest
     pool:
-      vmImage: 'Ubuntu 16.04'
+      vmImage: 'ubuntu-latest'
     steps:
     - task: Cache@2
       displayName: Cache vcpkg
@@ -55,9 +55,9 @@ jobs:
       displayName: 'Run vcpkg'
       inputs:
         vcpkgDirectory: '$(vcpkgLocation)'
-        vcpkgArguments: $(vcpkgArgs)
+        vcpkgArguments: $(vcpkgArgs) --triplet x64-linux
         vcpkgGitCommitId: $(vcpkgGitRef)
-        vcpkgTriplet: x86-linux
+        vcpkgTriplet: 'x64-linux'
         vcpkgGitURL: https://github.com/microsoft/vcpkg.git
     - task: run-cmake@0
       displayName: 'Run CMake'
@@ -66,6 +66,6 @@ jobs:
         cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
         cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
         useVcpkgToolchainFile: true
-        vcpkgTriplet: 'x86-linux'
+        vcpkgTriplet: 'x64-linux'
         buildDirectory: '$(Build.ArtifactStagingDirectory)'
         buildWithCMakeArgs: '-- -v'
