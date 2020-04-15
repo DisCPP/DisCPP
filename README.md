@@ -1,7 +1,7 @@
 <h1 align="center">DiscordPP</h1>
 <p align="center">
-  <a href="https://ci.appveyor.com/project/SeanOMik/discordpp">
-    <img src="https://ci.appveyor.com/api/projects/status/8e23w925eqahmub6?svg=true">
+  <a href="https://dev.azure.com/seanomik/DiscordPP/_build">
+    <img src="https://dev.azure.com/seanomik/DiscordPP/_apis/build/status/SeanOMik.DiscordPP?branchName=master">
   </a>
 </p>
 <p align="center">
