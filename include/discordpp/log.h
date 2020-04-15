@@ -38,7 +38,7 @@ namespace discord {
 		inline static std::string DARK_MAGENTA = "\033[35m";
 		inline static std::string DARK_CYAN = "\033[36m";
 		inline static std::string DARK_WHITE = "\033[37m";
-		inline static std::string DARK_GRAY = "\033[90m"
+		inline static std::string DARK_GRAY = "\033[90m";
 	};
 
 	class LogHighlightColor {
