@@ -15,7 +15,7 @@ trigger:
 - development
 
 jobs:
-  - job: Windows_VS2019_UWP
+  - job: Windows_VS2019_x86
     pool:
       vmImage: 'windows-latest'
     steps:
@@ -32,7 +32,6 @@ jobs:
         vcpkgGitCommitId: $(vcpkgGitRef)
         vcpkgTriplet: x86-windows
         vcpkgGitURL: https://github.com/microsoft/vcpkg.git
-
     - task: run-cmake@0
       displayName: 'Run CMake with Ninja'
       enabled: true
@@ -43,44 +42,30 @@ jobs:
         vcpkgTriplet: 'x86-windows'
         buildDirectory: '$(Build.ArtifactStagingDirectory)'
         buildWithCMakeArgs: '-- -v'
-#    - task: MSBuild@1
-#      inputs:
-#        solution: 'build/ALL_BUILD.vcxproj'
-#        maximumCpuCount: true
-#        platform: 'x86'
-
-  #-job: Windows_VS2019_UWP
-
-#steps:
-#- bash: |
-#    sudo apt-get install ccache -y
-#    echo "##vso[task.prependpath]/usr/libccache"
-#  displayName: 'Install ccache and update PATH to use linked versions of gcc, cc, etc'
-#- task: Cache@2
-#  inputs:
-#    key: 'ccache | "$(Agent.OS)"'
-#    path: $(CCACHE_DIR)
-#  displayName: 'ccache'
-#- task: Cache@2
-#  displayName: Cache vcpkg
-#  inputs:
-#    key: $(Build.SourcesDirectory)/cmakelists.txt/vcpkg_x64-windows.txt | $(Build.SourcesDirectory)/.git/modules/vcpkg/HEAD | "$(Agent.OS)" | "VS2019"
-#    path: '$(Build.SourcesDirectory)/vcpkg'
-#- script: |
-#    git clone https://github.com/Microsoft/vcpkg.git $(Build.SourcesDirectory)/vcpkg
-#    cd $(Build.SourcesDirectory)/vcpkg
-#    ./bootstrap-vcpkg.sh
-#    ./vcpkg integrate install
-#    ./vcpkg update
-#    ./vcpkg install nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization
-#    cd ../
-#    mkdir build
-#    cd build
-#    cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/appveyor/projects/discordpp/vcpkg/scripts/buildsystems/vcpkg.cmake
-#    make
-#  displayName: 'Compile'
-
-#- script: |
-#    echo Add other tasks to build, test, and deploy your project.
-#    echo See https://aka.ms/yaml
-#  displayName: 'Compile'
+  - job: Linux_x86
+    pool:
+      vmImage: 'Ubuntu 16.04'
+    steps:
+    - task: Cache@2
+      displayName: Cache vcpkg
+      inputs:
+        key: $(vcpkgArgs) | "$(vcpkgGitRef)"" | "$(Agent.OS)"
+        path: '$(vcpkgLocation)'
+    - task: run-vcpkg@0
+      displayName: 'Run vcpkg'
+      inputs:
+        vcpkgDirectory: '$(vcpkgLocation)'
+        vcpkgArguments: $(vcpkgArgs)
+        vcpkgGitCommitId: $(vcpkgGitRef)
+        vcpkgTriplet: x86-linux
+        vcpkgGitURL: https://github.com/microsoft/vcpkg.git
+    - task: run-cmake@0
+      displayName: 'Run CMake'
+      enabled: true
+      inputs:
+        cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
+        cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
+        useVcpkgToolchainFile: true
+        vcpkgTriplet: 'x86-linux'
+        buildDirectory: '$(Build.ArtifactStagingDirectory)'
+        buildWithCMakeArgs: '-- -v'
