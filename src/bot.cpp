@@ -302,7 +302,9 @@ namespace discord {
 		disconnected = true;
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-		DoFunctionLater(&Bot::ReconnectToWebsocket, this);
+		if (disconnected) {
+			DoFunctionLater(&Bot::ReconnectToWebsocket, this);
+		}
 	}
 
 	void Bot::OnWebSocketPacket(websocket_incoming_message msg) {
@@ -554,7 +556,7 @@ namespace discord {
 	void Bot::GuildMemberRemoveEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
 		discord::Member member(result["user"]["id"].get<snowflake>());
-		std::remove_if(members.begin(), members.end(), [member](discord::Member member) { return member.user.id == member.user.id; });
+		std::remove_if(members.begin(), members.end(), [member](discord::Member m) { return m.user.id == member.user.id; });
 
 		discord::DispatchEvent(discord::GuildMemberRemoveEvent(guild, member));
 	}
@@ -613,9 +615,12 @@ namespace discord {
 		if (messages.size() >= message_cache_count) {
 			messages.erase(messages.begin());
 		}
-		std::replace_if(messages.begin(), messages.end(), [message](discord::Message& msg) { return msg.id == message.id; }, message);
 
-		discord::DispatchEvent(discord::MessageUpdateEvent(message));
+		discord::Message old_message(result["id"].get<snowflake>());
+		std::replace_if(messages.begin(), messages.end(), [message](discord::Message& msg) { return msg.id == message.id; }, message);
+		bool is_edited = !result["edited_timestamp"].empty();
+
+		discord::DispatchEvent(discord::MessageUpdateEvent(message, old_message, is_edited));
 	}
 
 	void Bot::MessageDeleteEvent(nlohmann::json result) {

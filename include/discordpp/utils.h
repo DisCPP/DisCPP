@@ -112,7 +112,7 @@ namespace discord {
 	struct RateLimit {
 		int limit = 500;
 		int remaining_limit = 500;
-		boost::posix_time::ptime ratelimit_reset = boost::posix_time::ptime{};
+		double ratelimit_reset = 0;
 	};
 
 	enum RateLimitBucketType : int {
