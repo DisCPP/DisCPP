@@ -358,7 +358,7 @@ namespace discord {
 		 * @brief Convert the embed to json.
 		 *
 		 * ```cpp
-		 *      embed.SetColor(0xffbb00);
+		 *      embed.ToJson();
 		 * ```
 		 *
 		 * @return nlohmann::json

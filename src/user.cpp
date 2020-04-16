@@ -93,7 +93,7 @@ namespace discord {
 		 * @return discord::Channel
 		 */
 
-		cpr::Body body(Format("{\"recipient_id\": \"%\"}", id));
+		cpr::Body body("{\"recipient_id\": \"" + id + "\"}");
 		nlohmann::json result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders(), id, RateLimitBucketType::CHANNEL, body);
 		return discord::Channel(result);
 	}

@@ -124,6 +124,29 @@ namespace discord {
 				return false;
 			}
 		}
+
+		template <typename S>
+		inline void format_slice(std::string const& input_str,
+			std::stringstream& output_str, int& start_index,
+			S var) {
+			long unsigned int index = input_str.find('%', start_index);
+			if (index == std::string::npos) {
+				return;
+			}
+			output_str << input_str.substr(start_index, index - start_index) << var;
+			start_index = index + 1;
+		}
+
+		template <typename... T>
+		inline std::string Format(std::string const& str, T... args) {
+			assert(sizeof...(args) == std::count(str.begin(), str.end(), '%') &&
+				"Amount of % does not match amount of arguments");
+			std::stringstream output_str;
+			int start_index = 0;
+			((format_slice(str, output_str, start_index, std::forward<T>(args))), ...);
+			output_str << str.substr(start_index, str.length());
+			return output_str.str();
+		}
 	public:
 		inline Logger(std::string file_path, int logger_flags = logger_flags::ALL_SEVERITY) : flags(logger_flags) {
 			/**
@@ -197,7 +220,7 @@ namespace discord {
 			 */
 
 			if (CanLog(sev)) {
-				text = discord::Format(text, std::forward<Tys>(args)...);
+				text = Format(text, std::forward<Tys>(args)...);
 
 				std::cout << "[" << LogSeverityToString(sev) << "] " << text << LogTextEffect::RESET << std::endl;
 			}
@@ -220,7 +243,7 @@ namespace discord {
 			 */
 
 			if (CanLog(sev) && log_file.is_open()) {
-				text = discord::Format(text, std::forward<Tys>(args)...);
+				text = Format(text, std::forward<Tys>(args)...);
 
 				log_file << "[" << LogSeverityToString(sev) << "] " << text << LogTextEffect::RESET << std::endl;
 			}

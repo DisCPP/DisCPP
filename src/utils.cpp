@@ -193,7 +193,7 @@ cpr::Header discord::DefaultHeaders(cpr::Header add) {
 	 * @return nlohmann::json
 	 */
 
-	cpr::Header headers = { { "Authorization", Format("Bot %", discord::globals::bot_instance->token) },
+	cpr::Header headers = { { "Authorization", "Bot " + discord::globals::bot_instance->token },
 							{ "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" },
 							{ "X-RateLimit-Precision", "millisecond"} };
 	for (auto head : add) {

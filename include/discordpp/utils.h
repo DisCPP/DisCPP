@@ -59,30 +59,9 @@ namespace discord {
 
 	std::string GetOsName();
 
-	template <typename S>
-	inline void FormatSlice(std::string const& input_str, std::stringstream& output_str, int& start_index, S var) {
-		long unsigned int index = input_str.find('%', start_index);
-		if (index == std::string::npos) {
-			return;
-		}
-		output_str << input_str.substr(start_index, index - start_index) << var;
-		start_index = index + 1;
-	}
-
-	template <typename... T>
-	inline std::string Format(std::string const& str, T... args) {
-		assert(sizeof...(args) == std::count(str.begin(), str.end(), '%') && "Amount of % does not match amount of arguments");
-		std::stringstream output_str;
-		int start_index = 0;
-		((FormatSlice(str, output_str, start_index, std::forward<T>(args))), ...);
-		output_str << str.substr(start_index, str.length());
-		return output_str.str();
-	}
-
-	template <typename... Tys>
-	inline std::string Endpoint(std::string endpoint_format, Tys&&... args) {
+	inline std::string Endpoint(std::string endpoint_format) {
 		endpoint_format = endpoint_format[0] == '/' ? endpoint_format : '/' + endpoint_format;
-		return Format(std::string("https://discordapp.com/api/v6") + endpoint_format, std::forward<Tys>(args)...);
+		return "https://discordapp.com/api/v6" + endpoint_format;
 	}
 
 	template <typename type>

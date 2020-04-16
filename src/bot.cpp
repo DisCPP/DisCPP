@@ -159,7 +159,7 @@ namespace discord {
 		 * @return void
 		 */
 
-		SendDeleteRequest(Endpoint("/users/@me/guilds/%", guild.id), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+		SendDeleteRequest(Endpoint("/users/@me/guilds/" + guild.id), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
 	}
 
 	void Bot::UpdatePresence(discord::Activity activity) {
@@ -262,7 +262,7 @@ namespace discord {
 	}
 
 	void Bot::WebSocketStart() {
-		nlohmann::json gateway_request = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", Format("Bot %", token) }, { "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" } }, {}, {});
+		nlohmann::json gateway_request = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token }, { "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" } }, {}, {});
 
 		if (gateway_request.contains("url")) {
 			logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::YELLOW + "Connecting to gateway...");
@@ -319,7 +319,7 @@ namespace discord {
 				std::this_thread::sleep_for(std::chrono::milliseconds(1200));
 				logger.Log(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Reconnected!");
 
-				std::string resume = discord::Format("{ \"op\": 6, \"d\": { \"token\": \"%\", \"session_id\": \"%\", \"seq\": % } }", token, session_id, last_sequence_number);
+				std::string resume = "{ \"op\": 6, \"d\": { \"token\": \"" + token + "\", \"session_id\": \"" + session_id + "\", \"seq\": " + std::to_string(last_sequence_number) +"} }";
 				CreateWebsocketRequest(nlohmann::json::parse(resume));
 
 				// Heartbeat just to be safe
@@ -350,7 +350,7 @@ namespace discord {
 		case invalid_session:
 			// Check if the session is resumable
 			if (result["d"].get<bool>()) {
-				std::string resume = discord::Format("{ \"op\": 6, \"d\": { \"token\": \"%\", \"session_id\": \"%\", \"seq\": % } }", token, session_id, last_sequence_number);
+				std::string resume = "{ \"op\": 6, \"d\": { \"token\": \"" + token + "\", \"session_id\": \"" + session_id + "\", \"seq\": " + std::to_string(last_sequence_number) + "} }";
 				CreateWebsocketRequest(nlohmann::json::parse(resume));
 			} else {
 				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
