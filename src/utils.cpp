@@ -194,7 +194,8 @@ cpr::Header discord::DefaultHeaders(cpr::Header add) {
 	 */
 
 	cpr::Header headers = { { "Authorization", Format("Bot %", discord::globals::bot_instance->token) },
-							{ "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" } };
+							{ "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" },
+							{ "X-RateLimit-Precision", "millisecond"} };
 	for (auto head : add) {
 		headers.insert(headers.end(), head);
 	}
@@ -373,18 +374,19 @@ int discord::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_b
 			rlmt = &global_ratelimit;
 			break;
 		default:
+			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "RateLimitBucketType is invalid!");
 			throw std::runtime_error("RateLimitBucketType is invalid!");
 			break;
 		}
 	}
 
 	if (rlmt->remaining_limit == 0) {
-		auto current_time = boost::posix_time::second_clock::universal_time() - rlmt->ratelimit_reset;
-		while (current_time.is_negative()) {
-			std::this_thread::sleep_for(std::chrono::seconds(1));
-			current_time = boost::posix_time::second_clock::universal_time() - rlmt->ratelimit_reset;
+		double milisecond_time = rlmt->ratelimit_reset * 1000 - time(NULL) * 1000 + 15;
+
+		if (milisecond_time > 0) {
+			globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Rate limit wait time: % miliseconds", std::to_string(milisecond_time));
+			std::this_thread::sleep_for(std::chrono::milliseconds((int)milisecond_time));
 		}
-		return current_time.seconds();
 	}
 	return 0;
 }
@@ -443,10 +445,9 @@ void discord::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBu
 		return;
 	}
 
-	discord::globals::bot_instance->logger.Log(discord::LogSeverity::SEV_DEBUG, "Ratelimit wait time: %", header["x-ratelimit-reset"]);
 	obj->limit = std::stoi(header["x-ratelimit-limit"]);
 	obj->remaining_limit = std::stoi(header["x-ratelimit-remaining"]);
-	obj->ratelimit_reset = boost::posix_time::from_time_t(std::stoi(header["x-ratelimit-reset"]));
+	obj->ratelimit_reset = std::stod(header["x-ratelimit-reset"]);
 }
 
 time_t discord::TimeFromSnowflake(snowflake snow) {
