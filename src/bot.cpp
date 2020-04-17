@@ -501,7 +501,7 @@ namespace discord {
 
 	void Bot::GuildUpdateEvent(nlohmann::json result) {
 		discord::Guild guild(result);
-		std::replace_if(guilds.begin(), guilds.end(), [guild](discord::Guild gild) { return gild.id == guild.id; }, guild);
+		std::replace_if(guilds.begin(), guilds.end(), [guild](discord::Guild _guild) { return guild.id == guild.id; }, guild);
 
 		discord::DispatchEvent(discord::GuildUpdateEvent(guild));
 	}
@@ -510,7 +510,7 @@ namespace discord {
 		discord::Guild guild;
 		guild.id = result["id"].get<snowflake>();
 		guild.unavailable = true;
-		std::remove_if(guilds.begin(), guilds.end(), [guild](discord::Guild gild) {return gild.id == guild.id; });
+		std::remove_if(guilds.begin(), guilds.end(), [guild](discord::Guild _guild) {return _guild.id == guild.id; });
 
 		discord::DispatchEvent(discord::GuildDeleteEvent(guild));
 	}
@@ -536,7 +536,7 @@ namespace discord {
 			emojis.push_back({ emoji });
 		}
 		guild.emojis = emojis;
-		std::replace_if(guilds.begin(), guilds.end(), [guild](discord::Guild gild) { return gild.id == guild.id; }, guild);
+		std::replace_if(guilds.begin(), guilds.end(), [guild](discord::Guild _guild) { return _guild.id == guild.id; }, guild);
 
 		discord::DispatchEvent(discord::GuildEmojisUpdateEvent(guild));
 	}
@@ -555,7 +555,7 @@ namespace discord {
 	void Bot::GuildMemberRemoveEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
 		discord::Member member(result["user"]["id"].get<snowflake>());
-		std::remove_if(members.begin(), members.end(), [member](discord::Member member) { return member.user.id == member.user.id; });
+		std::remove_if(members.begin(), members.end(), [member](discord::Member _member) { return _member.user.id == member.user.id; });
 
 		discord::DispatchEvent(discord::GuildMemberRemoveEvent(guild, member));
 	}
