@@ -169,7 +169,7 @@ namespace discord {
 			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Embed footer text can only be up to 0-2048 characters!");
 			throw std::runtime_error("Embed footer text can only be up to 0-2048 characters!");
 		}
-		embed_json["footer"]["text"] = EscapeString(text);
+		embed_json["footer"]["text"] = text;
 		if (!icon_url.empty()) {
 			embed_json["footer"]["icon_url"] = icon_url;
 		}
@@ -358,7 +358,7 @@ namespace discord {
 		 * @brief Convert the embed to json.
 		 *
 		 * ```cpp
-		 *      embed.SetColor(0xffbb00);
+		 *      embed.ToJson();
 		 * ```
 		 *
 		 * @return nlohmann::json

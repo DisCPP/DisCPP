@@ -193,8 +193,9 @@ cpr::Header discord::DefaultHeaders(cpr::Header add) {
 	 * @return nlohmann::json
 	 */
 
-	cpr::Header headers = { { "Authorization", Format("Bot %", discord::globals::bot_instance->token) },
-							{ "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" } };
+	cpr::Header headers = { { "Authorization", "Bot " + discord::globals::bot_instance->token },
+							{ "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" },
+							{ "X-RateLimit-Precision", "millisecond"} };
 	for (auto head : add) {
 		headers.insert(headers.end(), head);
 	}
@@ -373,18 +374,19 @@ int discord::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_b
 			rlmt = &global_ratelimit;
 			break;
 		default:
+			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "RateLimitBucketType is invalid!");
 			throw std::runtime_error("RateLimitBucketType is invalid!");
 			break;
 		}
 	}
 
 	if (rlmt->remaining_limit == 0) {
-		auto current_time = boost::posix_time::second_clock::universal_time() - rlmt->ratelimit_reset;
-		while (current_time.is_negative()) {
-			std::this_thread::sleep_for(std::chrono::seconds(1));
-			current_time = boost::posix_time::second_clock::universal_time() - rlmt->ratelimit_reset;
+		double milisecond_time = rlmt->ratelimit_reset * 1000 - time(NULL) * 1000 + 15;
+
+		if (milisecond_time > 0) {
+			globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Rate limit wait time: % miliseconds", std::to_string(milisecond_time));
+			std::this_thread::sleep_for(std::chrono::milliseconds((int)milisecond_time));
 		}
-		return current_time.seconds();
 	}
 	return 0;
 }
@@ -425,32 +427,27 @@ void discord::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBu
 	 */
 
 	RateLimit* obj = nullptr;
-	if (HeaderContains(header, "X-RateLimit-Global")) {
+	if (HeaderContains(header, "x-ratelimit-global")) {
 		obj = &global_ratelimit;
-	} else if (HeaderContains(header, "X-RateLimit-Limit")) {
+	} else if (HeaderContains(header, "x-ratelimit-limit")) {
 		if (ratelimit_bucket == RateLimitBucketType::CHANNEL) {
 			obj = &channel_ratelimit[object];
-		}
-		else if (ratelimit_bucket == RateLimitBucketType::GUILD) {
+		} else if (ratelimit_bucket == RateLimitBucketType::GUILD) {
 			obj = &guild_ratelimit[object];
-		}
-		else if (ratelimit_bucket == RateLimitBucketType::WEBHOOK) {
+		} else if (ratelimit_bucket == RateLimitBucketType::WEBHOOK) {
 			obj = &webhook_ratelimit[object];
-		}
-		else if (ratelimit_bucket == RateLimitBucketType::GLOBAL) {
+		} else if (ratelimit_bucket == RateLimitBucketType::GLOBAL) {
 			obj = &global_ratelimit;
-		}
-		else {
+		} else {
 			throw std::runtime_error("RateLimitBucketType is invalid!");
 		}
-	}
-	else {
+	} else {
 		return;
 	}
 
-	obj->limit = std::stoi(header["X-RateLimit-Limit"]);
-	obj->remaining_limit = std::stoi(header["X-RateLimit-Remaining"]);
-	obj->ratelimit_reset = boost::posix_time::from_time_t(std::stoi(header["X-RateLimit-Reset"]));
+	obj->limit = std::stoi(header["x-ratelimit-limit"]);
+	obj->remaining_limit = std::stoi(header["x-ratelimit-remaining"]);
+	obj->ratelimit_reset = std::stod(header["x-ratelimit-reset"]);
 }
 
 time_t discord::TimeFromSnowflake(snowflake snow) {

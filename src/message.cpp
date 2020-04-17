@@ -115,8 +115,8 @@ namespace discord {
 		 * @return void
 		 */
 
-		std::string endpointstr = Endpoint("channels/%/messages/%/reactions/%/@me", channel.id, id, emoji.ToString()); 
-		nlohmann::json result = SendPutRequest(endpointstr, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
+		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions/" + emoji.ToString() + "/@me");
+		nlohmann::json result = SendPutRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
 	void Message::RemoveBotReaction(discord::Emoji emoji) {
@@ -132,7 +132,7 @@ namespace discord {
 		 * @return void
 		 */
 
-		std::string endpoint = Endpoint("/channels/%/messages/%/reactions/%:%/@me", channel.id, id, emoji.name, emoji.id);
+		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions/" + emoji.ToString() + "/@me");
 		nlohmann::json result = SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
@@ -150,7 +150,7 @@ namespace discord {
 		 * @return void
 		 */
 
-		std::string endpoint = Endpoint("/channels/%/messages/%/reactions/%:%/%", channel.id, id, emoji.name, emoji.id, user.id);
+		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions/" + emoji.ToString());
 		nlohmann::json result = SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
@@ -168,7 +168,7 @@ namespace discord {
 		 * @return std::vector<discord::User>
 		 */
 
-		std::string endpoint = Endpoint("/channels/%/messages/%/reactions/%:%", channel.id, id, emoji.name, emoji.id);
+		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions/" + emoji.ToString());
 		cpr::Body body("{\"limit\": " + std::to_string(amount) + "}");
 		nlohmann::json result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
 		
@@ -195,7 +195,7 @@ namespace discord {
 		 * @return std::vector<discord::User>
 		 */
 
-		std::string endpoint = Endpoint("/channels/%/messages/%/reactions/%:%", channel.id, id, emoji.name, emoji.id);
+		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions/" + emoji.ToString());
 		std::string method_str = (method == GetReactionsMethod::BEFORE_USER) ? "before" : "after";
 		cpr::Body body("{\"" + method_str + "\": " + user.id + "}");
 		nlohmann::json result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
@@ -219,7 +219,7 @@ namespace discord {
 		 * @return void
 		 */
 
-		std::string endpoint = Endpoint("/channels/%/messages/%/reactions", channel.id, id);
+		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions");
 		nlohmann::json result = SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
@@ -236,7 +236,7 @@ namespace discord {
 		 * @return discord::Message
 		 */
 
-		std::string endpoint = Endpoint("/channels/%/messages/%", channel.id, id);
+		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id);
 		cpr::Body body("{\"content\": \"" + EscapeString(text) + "\"}");
 		nlohmann::json result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL);
 
@@ -257,8 +257,8 @@ namespace discord {
 		 * @return discord::Message
 		 */
 
-		std::string endpoint = Endpoint("/channels/%/messages/%", channel.id, id);
-		cpr::Body body(Format("{\"embed\": %}", embed.ToJson()));
+		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id);
+		cpr::Body body("{\"embed\": " + embed.ToJson().get<std::string>() + "}");
 		nlohmann::json result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
 		*this = { result };
@@ -278,8 +278,8 @@ namespace discord {
 		 * @return discord::Message
 		 */
 
-		std::string endpoint = Endpoint("/channels/%/messages/%", channel.id, id);
-		cpr::Body body(Format("{\"flags\": %}", flags));
+		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id);
+		cpr::Body body("{\"flags\": " + std::to_string(flags) + "}");
 		nlohmann::json result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
 		*this = { result };
@@ -297,7 +297,7 @@ namespace discord {
 		 * @return void
 		 */
 
-		std::string endpoint = Endpoint("/channels/%/messages/%", channel.id, id);
+		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id);
 		nlohmann::json result = SendDeleteRequest(endpoint, DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 		
 		*this = discord::Message();
@@ -314,7 +314,7 @@ namespace discord {
 		 * @return void
 		 */
 
-		nlohmann::json result = SendPutRequest(Endpoint("/channels/%/pins/%", channel.id, id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		nlohmann::json result = SendPutRequest(Endpoint("/channels/" + channel.id + "/pins/" + id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 
 	void Message::UnpinMessage() {
@@ -328,6 +328,6 @@ namespace discord {
 		 * @return void
 		 */
 
-		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/%/pins/%", channel.id, id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/" + channel.id + "/pins/" + id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 }

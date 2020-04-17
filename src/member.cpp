@@ -162,7 +162,7 @@ namespace discord {
 		 * @return bool
 		 */
 
-		nlohmann::json result = SendGetRequest(Endpoint("/guilds/%/bans/%", guild_id, id), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
+		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + guild_id + "/bans/" + id), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 		return result.contains("reason");
 	}
 

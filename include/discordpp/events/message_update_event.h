@@ -9,9 +9,11 @@
 namespace discord {
 	class MessageUpdateEvent : public Event {
 	public:
-		inline MessageUpdateEvent(discord::Message message) : message(message) {}
+		inline MessageUpdateEvent(discord::Message message, discord::Message old_message, bool triggered_from_edit) : message(message), old_message(old_message), triggered_from_edit(triggered_from_edit) {}
 
 		discord::Message message;
+		discord::Message old_message;
+		bool triggered_from_edit;
 	};
 }
 
