@@ -394,7 +394,7 @@ namespace discord {
 
 			heartbeat_acked = false;
 
-			logger.Log(LogSeverity::SEV_DEBUG, "Waiting for next heartbeat (% seconds)...", hello_packet["d"]["heartbeat_interval"].get<int>() / 1000.0 - 10);
+			logger.Log(LogSeverity::SEV_DEBUG, "Waiting for next heartbeat (" + std::to_string(hello_packet["d"]["heartbeat_interval"].get<int>() / 1000.0 - 10) + " seconds)...");
 			// Wait for the required heartbeat interval, while waiting it should be acked from another thread.
 			std::this_thread::sleep_for(std::chrono::milliseconds(hello_packet["d"]["heartbeat_interval"].get<int>() - 10));
 

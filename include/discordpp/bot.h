@@ -35,6 +35,7 @@ namespace discord {
 		std::vector<discord::Channel> channels;
 		std::vector<discord::Member> members;
 		std::vector<discord::Guild> guilds;
+		std::vector<discord::Message> messages;
 
 		std::vector<std::future<void>> futures;
 
@@ -97,7 +98,6 @@ namespace discord {
 		long long packet_counter;
 
 		int message_cache_count = 10000;
-		std::vector<discord::Message> messages;
 
 		std::unordered_map<std::string, std::function<void(nlohmann::json)>> internal_event_map;
 

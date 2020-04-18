@@ -35,7 +35,7 @@ namespace discord {
 			// Make sure that the given event class derives from discord::Event
 			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discord::Event");
 
-			discord::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::GREEN + "Event listener registered: %", typeid(T).name());
+			discord::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::GREEN + "Event listener registered: " + typeid(T).name());
 
 			auto id = GetNextId();
 			GetHandlers()[id] = listener;
@@ -64,7 +64,7 @@ namespace discord {
 
 			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discord::Event");
 
-			discord::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Event listener removed: %", typeid(T).name());
+			discord::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Event listener removed: " + std::string(typeid(T).name()));
 
 			GetHandlers().erase(handle.id);
 		}
@@ -86,7 +86,7 @@ namespace discord {
 
 			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discord::Event");
 
-			discord::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Event listener triggered: %", typeid(T).name());
+			discord::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Event listener triggered: " + std::string(typeid(T).name()));
 
 			for (std::pair<IdType, std::function<void(const T&)>> handler : GetHandlers()) {
 				discord::globals::bot_instance->futures.push_back(std::async(std::launch::async, handler.second, e));

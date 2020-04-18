@@ -144,7 +144,7 @@ namespace discord {
 
 		void DeleteGuild();
 		std::vector<discord::Channel> GetChannels();
-		discord::Channel CreateChannel(std::string name, GuildChannelType type, std::string topic, int bitrate, int user_limit, int rate_limit_per_user, int position, std::vector<discord::Permissions> permission_overwrites, discord::Channel category, bool nsfw);
+		discord::Channel CreateChannel(std::string name, std::string topic = "", GuildChannelType type = GuildChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discord::Permissions> permission_overwrites = {}, discord::Channel category = {}, bool nsfw = false);
 		void ModifyChannelPositions(std::vector<discord::Channel> new_channel_positions);
 		discord::Member GetMember(snowflake id);
 		discord::Member AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf);
