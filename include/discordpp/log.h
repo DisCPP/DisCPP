@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <utility>
+#include <time.h>
 
 #include "utils.h"
 
@@ -197,7 +198,17 @@ namespace discord {
 			 */
 
 			if (CanLog(sev)) {
-				std::cout << "[" << LogSeverityToString(sev) << "] " << text << LogTextEffect::RESET << std::endl;
+				time_t rawtime;
+				struct tm* timeinfo;
+				char st[80];
+
+				time(&rawtime);
+				timeinfo = localtime(&rawtime);
+
+				strftime(st, 80, "[%H:%M:%S]", timeinfo);
+
+				std::string time(st);
+				std::cout << time << " [" << LogSeverityToString(sev) << "] " << text << LogTextEffect::RESET << std::endl;
 			}
 		}
 
@@ -217,7 +228,17 @@ namespace discord {
 			 */
 
 			if (CanLog(sev) && log_file.is_open()) {
-				log_file << "[" << LogSeverityToString(sev) << "] " << text << LogTextEffect::RESET << std::endl;
+				time_t rawtime;
+				struct tm* timeinfo;
+				char st[80];
+
+				time(&rawtime);
+				timeinfo = localtime(&rawtime);
+
+				strftime(st, 80, "[%H:%M:%S]", timeinfo);
+
+				std::string time(st);
+				log_file << time << " [" << LogSeverityToString(sev) << "] " << text << LogTextEffect::RESET << std::endl;
 			}
 		}
 
