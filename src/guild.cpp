@@ -8,7 +8,7 @@
 #include <iostream>
 
 namespace discord {
-	Guild::Guild(snowflake id) {
+	Guild::Guild(snowflake id) : DiscordObject(id) {
 		/**
 		 * @brief Constructs a discord::Guild object from an id.
 		 *

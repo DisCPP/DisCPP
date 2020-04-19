@@ -7,7 +7,7 @@
 
 namespace discord {
 	struct EventListenerHandle {
-		unsigned int id;
+		unsigned int id = -4294967295;
 	};
 
 	template<typename T>
