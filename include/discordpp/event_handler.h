@@ -3,6 +3,7 @@
 
 #include "event.h"
 #include "utils.h"
+#include "bot.h"
 
 namespace discord {
 	struct EventListenerHandle {
