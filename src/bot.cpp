@@ -314,10 +314,11 @@ namespace discord {
 		logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Websocket was closed with error: 400" + std::to_string(error_code.value()) + "! Attemping reconnect in 10 seconds...");
 		heartbeat_acked = false;
 		disconnected = true;
+		reconnecting = true;
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 		if (disconnected && !reconnecting) {
-			DoFunctionLater(&Bot::ReconnectToWebsocket, this);
+			ReconnectToWebsocket();
 		}
 	}
 
@@ -342,13 +343,7 @@ namespace discord {
 					data["d"] = last_sequence_number;
 				}
 
-				logger.Log(LogSeverity::SEV_DEBUG, "Sending heartbeat payload: " + data.dump());
-				websocket_outgoing_message msg;
-				msg.set_utf8_message(data.dump());
-				
-				websocket_client_mutex.lock();
-				websocket_client.send(msg);
-				websocket_client_mutex.unlock();
+				reconnecting = false;
 			} else {
 				logger.Log(LogSeverity::SEV_DEBUG, "Sending gateway payload: " + GetIdentifyPacket().dump());
 
@@ -403,6 +398,9 @@ namespace discord {
 	void Bot::HandleHeartbeat() {
 		try {
 			while (true) {
+				// Make sure that it doesn't try to do anything while its trying to reconnect.
+				while (reconnecting) { }
+
 				nlohmann::json data = { { "op", packet_opcode::heartbeat }, { "d", nullptr } };
 				if (last_sequence_number != -1) {
 					data["d"] = last_sequence_number;
