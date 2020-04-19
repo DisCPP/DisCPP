@@ -3,6 +3,7 @@
 #include "member.h"
 #include "utils.h"
 #include "bot.h"
+#include <limits>
 
 namespace discord {
 	Member::Member(snowflake id) : discord::DiscordObject(id) {
@@ -47,13 +48,15 @@ namespace discord {
 		} else {
 			user = discord::User();
 		}
-		
+		int maxVal = 0;
 		nick = GetDataSafely<std::string>(json, "nick");
 		if (json.contains("roles")) {
 			discord::Permissions permissions;
 			for (auto& role : json["roles"]) {
 				discord::Role r(role.get<snowflake>(), guild);
-
+				if (r.position > maxVal) {
+					maxVal = r.position;
+				}
 				// Save permissions
 				if (json["roles"][0] == role) {
 					permissions.allow_perms.value = r.permissions.allow_perms.value;
@@ -67,6 +70,12 @@ namespace discord {
 			}
 
 			this->permissions = permissions;
+		}
+		if (guild.owner_id == this->id) {
+			hierarchy = std::numeric_limits<int>::max();
+		}
+		else {
+			hierarchy = maxVal;
 		}
 		joined_at = GetDataSafely<std::string>(json, "joined_at");
 		premium_since = GetDataSafely<std::string>(json, "premium_since");
