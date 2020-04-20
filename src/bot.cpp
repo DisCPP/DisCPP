@@ -201,9 +201,13 @@ namespace discord {
 		logger.Log(LogSeverity::SEV_DEBUG, "Sending gateway payload: " + json.dump());
 		WaitForRateLimits(bot_user.id, RateLimitBucketType::GLOBAL);
 
+
 		websocket_outgoing_message msg;
 		msg.set_utf8_message(json.dump());
+
+		websocket_client_mutex.lock();
 		websocket_client.send(msg);
+		websocket_client_mutex.unlock();
 	}
 
 	void Bot::SetCommandHandler(std::function<void(discord::Bot*, discord::Message)> command_handler) {
@@ -222,6 +226,12 @@ namespace discord {
 		 */
 
 		fire_command_method = command_handler;
+	}
+
+	void Bot::DisconnectWebsocket() {
+		websocket_client_mutex.lock();
+		websocket_client.close(web::websockets::client::websocket_close_status::server_terminate).wait();
+		websocket_client_mutex.unlock();
 	}
 
 	void Bot::BindEvents() {
@@ -275,16 +285,20 @@ namespace discord {
 			// Specify version and encoding just ot be safe
 			gateway_endpoint = gateway_request["url"].get<std::string>() + "?v=6&encoding=json";
 
+			std::thread bindthread{ &Bot::BindEvents, this };
+			utility::string_t stringt = utility::conversions::to_string_t(gateway_endpoint);
+
+			websocket_client_mutex.lock();
+
 			// Recreate a websocket client just incase we're trying to reconnect.
 			if (reconnecting) {
 				websocket_client = websocket_callback_client();
 			}
 
-			std::thread bindthread{ &Bot::BindEvents, this };
-			utility::string_t stringt = utility::conversions::to_string_t(gateway_endpoint);
 			websocket_client.connect(web::uri(stringt));
 			websocket_client.set_message_handler(std::bind(&Bot::OnWebSocketPacket, this, std::placeholders::_1));
 			websocket_client.set_close_handler(std::bind(&Bot::HandleDiscordDisconnect, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+			websocket_client_mutex.unlock();
 
 			disconnected = false;
 
@@ -300,10 +314,11 @@ namespace discord {
 		logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Websocket was closed with error: 400" + std::to_string(error_code.value()) + "! Attemping reconnect in 10 seconds...");
 		heartbeat_acked = false;
 		disconnected = true;
+		reconnecting = true;
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-		if (disconnected) {
-			DoFunctionLater(&Bot::ReconnectToWebsocket, this);
+		if (disconnected && !reconnecting) {
+			ReconnectToWebsocket();
 		}
 	}
 
@@ -328,17 +343,17 @@ namespace discord {
 					data["d"] = last_sequence_number;
 				}
 
-				logger.Log(LogSeverity::SEV_DEBUG, "Sending heartbeat payload: " + data.dump());
-				websocket_outgoing_message msg;
-				msg.set_utf8_message(data.dump());
-				websocket_client.send(msg);
+				reconnecting = false;
 			} else {
 				logger.Log(LogSeverity::SEV_DEBUG, "Sending gateway payload: " + GetIdentifyPacket().dump());
 
 				hello_packet = result;
 				websocket_outgoing_message identify_msg;
 				identify_msg.set_utf8_message(GetIdentifyPacket().dump());
+				
+				websocket_client_mutex.lock();
 				websocket_client.send(identify_msg);
+				websocket_client_mutex.unlock();
 			}
 			break;
 		} case heartbeat_ack:
@@ -381,29 +396,39 @@ namespace discord {
 	}
 
 	void Bot::HandleHeartbeat() {
-		while (true) {
-			nlohmann::json data = { { "op", packet_opcode::heartbeat }, { "d", nullptr } };
-			if (last_sequence_number != -1) {
-				data["d"] = last_sequence_number;
+		try {
+			while (true) {
+				// Make sure that it doesn't try to do anything while its trying to reconnect.
+				while (reconnecting) { }
+
+				nlohmann::json data = { { "op", packet_opcode::heartbeat }, { "d", nullptr } };
+				if (last_sequence_number != -1) {
+					data["d"] = last_sequence_number;
+				}
+
+				logger.Log(LogSeverity::SEV_DEBUG, "Sending heartbeat payload: " + data.dump());
+
+				websocket_client_mutex.lock();
+				websocket_outgoing_message msg;
+				msg.set_utf8_message(data.dump());
+				websocket_client.send(msg);
+				websocket_client_mutex.unlock();
+
+				heartbeat_acked = false;
+
+				logger.Log(LogSeverity::SEV_DEBUG, "Waiting for next heartbeat (" + std::to_string(hello_packet["d"]["heartbeat_interval"].get<int>() / 1000.0 - 10) + " seconds)...");
+				// Wait for the required heartbeat interval, while waiting it should be acked from another thread.
+				std::this_thread::sleep_for(std::chrono::milliseconds(hello_packet["d"]["heartbeat_interval"].get<int>() - 10));
+
+				if (!heartbeat_acked) {
+					logger.Log(LogSeverity::SEV_WARNING, LogTextColor::YELLOW + "Heartbeat wasn't acked, trying to reconnect...");
+					disconnected = true;
+
+					ReconnectToWebsocket();
+				}
 			}
-
-			logger.Log(LogSeverity::SEV_DEBUG, "Sending heartbeat payload: " + data.dump());
-			websocket_outgoing_message msg;
-			msg.set_utf8_message(data.dump());
-			websocket_client.send(msg);
-
-			heartbeat_acked = false;
-
-			logger.Log(LogSeverity::SEV_DEBUG, "Waiting for next heartbeat (% seconds)...", hello_packet["d"]["heartbeat_interval"].get<int>() / 1000.0 - 10);
-			// Wait for the required heartbeat interval, while waiting it should be acked from another thread.
-			std::this_thread::sleep_for(std::chrono::milliseconds(hello_packet["d"]["heartbeat_interval"].get<int>() - 10));
-
-			if (!heartbeat_acked) {
-				logger.Log(LogSeverity::SEV_WARNING, LogTextColor::YELLOW + "Heartbeat wasn't acked, trying to reconnect...");
-				disconnected = true;
-
-				ReconnectToWebsocket();
-			}
+		} catch (std::exception & e) {
+			logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "ERROR: " + e.what());
 		}
 	}
 
@@ -424,7 +449,9 @@ namespace discord {
 		logger.Log(LogSeverity::SEV_INFO, LogTextColor::YELLOW + "Reconnecting to Discord gateway!");
 
 		reconnecting = true;
-		websocket_client.close(web::websockets::client::websocket_close_status::normal);
+
+		//websocket_client.close(web::websockets::client::websocket_close_status::normal);
+		DisconnectWebsocket();
 		WebSocketStart();
 	}
 

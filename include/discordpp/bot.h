@@ -35,6 +35,7 @@ namespace discord {
 		std::vector<discord::Channel> channels;
 		std::vector<discord::Member> members;
 		std::vector<discord::Guild> guilds;
+		std::vector<discord::Message> messages;
 
 		std::vector<std::future<void>> futures;
 
@@ -60,6 +61,7 @@ namespace discord {
 		void UpdatePresence(discord::Activity activity);
 		void CreateWebsocketRequest(nlohmann::json json);
 		void SetCommandHandler(std::function<void(discord::Bot*, discord::Message)> command_handler);
+		void DisconnectWebsocket();
 
 		template <typename FType, typename... T>
 		void DoFunctionLater(FType&& func, T&&... args) {
@@ -90,6 +92,7 @@ namespace discord {
 
 		std::thread heartbeat_thread;
 
+		std::mutex websocket_client_mutex;
 		websocket_callback_client websocket_client;
 
 		bool heartbeat_acked;
@@ -97,7 +100,6 @@ namespace discord {
 		long long packet_counter;
 
 		int message_cache_count = 10000;
-		std::vector<discord::Message> messages;
 
 		std::unordered_map<std::string, std::function<void(nlohmann::json)>> internal_event_map;
 

@@ -8,7 +8,7 @@
 #include <iostream>
 
 namespace discord {
-	Guild::Guild(snowflake id) {
+	Guild::Guild(snowflake id) : DiscordObject(id) {
 		/**
 		 * @brief Constructs a discord::Guild object from an id.
 		 *
@@ -397,7 +397,7 @@ namespace discord {
 		return channels;
 	}
 
-	discord::Channel Guild::CreateChannel(std::string name, GuildChannelType type, std::string topic, int bitrate, int user_limit, int rate_limit_per_user, int position, std::vector<discord::Permissions> permission_overwrites, discord::Channel category, bool nsfw) {
+	discord::Channel Guild::CreateChannel(std::string name, std::string topic, GuildChannelType type, int bitrate, int user_limit, int rate_limit_per_user, int position, std::vector<discord::Permissions> permission_overwrites, discord::Channel category, bool nsfw) {
 		/**
 		 * @brief Creates a channel for this Guild.
 		 *
@@ -406,8 +406,8 @@ namespace discord {
 		 * ```
 		 *
 		 * @param[in] name The name of the new channel.
-		 * @param[in] type The type of the new channel.
 		 * @param[in] topic The topic of the new channel.
+		 * @param[in] type The type of the new channel.
 		 * @param[in] bitrate The bitrate of the new channel (only for voice channels).
 		 * @param[in] user_limit The user limit of the new channel (only for voice channels).
 		 * @param[in] rate_limit_per_user The chat delay for a user of the new channel.
@@ -427,17 +427,27 @@ namespace discord {
 		}
 
 		nlohmann::json json_raw = nlohmann::json({
-			{"name", EscapeString(name)},
+			{"name", name},
 			{"type", type},
-			{"topic", topic},
-			{"bitrate", bitrate},
-			{"user_limit", user_limit},
 			{"rate_limit_per_user", rate_limit_per_user},
 			{"position", position},
-			{"permission_overwrites", permission_json},
-			{"parent_id", category.id},
 			{"nsfw", nsfw}
 		});
+
+		if (!topic.empty()) json_raw.push_back({ "topic", EscapeString(topic) });
+		if (type == GuildChannelType::GUILD_VOICE) {
+			json_raw.push_back({ "bitrate", bitrate });
+			json_raw.push_back({ "user_limit", user_limit });
+		}
+
+		if (permission_json.size() > 0) {
+			json_raw.push_back({ "permission_overwrites", permission_json });
+		}
+
+		if (!category.id.empty()) {
+			json_raw.push_back({ "parent_id", category.id });
+		}
+
 
 		cpr::Body body(json_raw.dump());
 		nlohmann::json result = SendPostRequest(Endpoint("/guilds/" + id + "/channels"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discord::RateLimitBucketType::CHANNEL, body);

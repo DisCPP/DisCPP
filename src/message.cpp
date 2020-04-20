@@ -20,6 +20,12 @@ namespace discord {
 		 *
 		 * @return discord::Member, this is a constructor.
 		 */
+
+		auto message = std::find_if(discord::globals::bot_instance->messages.begin(), discord::globals::bot_instance->messages.end(), [id](discord::Message a) { return id == a.id; });
+
+		if (message != discord::globals::bot_instance->messages.end()) {
+			*this = *message;
+		}
 	}
 
 	Message::Message(nlohmann::json json) {
@@ -68,8 +74,13 @@ namespace discord {
 			mentioned_roles.push_back(discord::Role(mentioned_role.get<snowflake>()));
 		}
 		if (json.contains("mention_channels")) {
-			for (auto& mention_channel : json["mention_channels"]) {
-				mention_channels.push_back(discord::Channel(mention_channel["id"].get<snowflake>()));
+			for (auto& json_chan : json["mention_channels"]) {
+				discord::Channel channel(json_chan["id"].get<snowflake>());
+				channel.type = json_chan["type"].get<int>();
+				channel.guild_id = json_chan["guild_id"].get<snowflake>();
+				channel.name = json_chan["name"];
+
+				mention_channels.push_back(channel);
 			}
 		}
 		if (json.contains("attachments")) {

@@ -3,7 +3,7 @@
 #include "utils.h"
 
 namespace discord {
-	Role::Role(snowflake role_id, discord::Guild guild) {
+	Role::Role(snowflake role_id, discord::Guild guild) : DiscordObject(role_id) {
 		/**
 		 * @brief Constructs a discord::Role object using a role id and a guild.
 		 *

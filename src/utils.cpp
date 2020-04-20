@@ -83,7 +83,7 @@ nlohmann::json discord::SendGetRequest(std::string url, cpr::Header headers, sno
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending get request, URL: %, body: %", url, CprBodyToString(body));
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -106,7 +106,7 @@ nlohmann::json discord::SendPostRequest(std::string url, cpr::Header headers, sn
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending post request, URL: %, body: %", url, CprBodyToString(body));
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending post request, URL: " + url + ", body: " + CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Post(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -129,7 +129,7 @@ nlohmann::json discord::SendPutRequest(std::string url, cpr::Header headers, sno
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending put request, URL: %, body: %", url, CprBodyToString(body));
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending put request, URL: " + url + ", body: " + CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Put(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -152,7 +152,7 @@ nlohmann::json discord::SendPatchRequest(std::string url, cpr::Header headers, s
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending patch request, URL: %, body: %", url, CprBodyToString(body));
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending patch request, URL: " + url + ", body: " + CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Patch(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -174,7 +174,7 @@ nlohmann::json discord::SendDeleteRequest(std::string url, cpr::Header headers, 
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending delete request, URL: %", url);
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending delete request, URL: " + url);
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Delete(cpr::Url{ url }, headers);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -384,7 +384,7 @@ int discord::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_b
 		double milisecond_time = rlmt->ratelimit_reset * 1000 - time(NULL) * 1000 + 15;
 
 		if (milisecond_time > 0) {
-			globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Rate limit wait time: % miliseconds", std::to_string(milisecond_time));
+			globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Rate limit wait time: " + std::to_string(milisecond_time) + " miliseconds");
 			std::this_thread::sleep_for(std::chrono::milliseconds((int)milisecond_time));
 		}
 	}

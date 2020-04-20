@@ -96,7 +96,7 @@ int main(int argc, const char* argv[]) {
 	std::string token;
 	std::getline(token_file, token);
 
-	discord::Bot bot{ token, "!" }; // Token, command prefix.
+	discord::Bot bot{ token, {"!"} }; // Token, command prefixes.
 
 	PingCommand(); // This runs the constructor which will register the command.
 
@@ -123,8 +123,10 @@ int main(int argc, const char* argv[]) {
 		channel.Send("Welcome <@" + event.member.user.id + ">, hope you enjoy!");
 	});
 
-	discord::EventHandler<discord::ChannelPinsUpdateEvent>::RegisterListener([](discord::ChannelPinsUpdateEvent event) {
+	discord::EventHandler<discord::ChannelPinsUpdateEvent>::RegisterListener([](discord::ChannelPinsUpdateEvent event)->bool {
 		event.channel.Send("Detected a pin update!");
+
+		return false;
 	});
 
 	return bot.Run();
