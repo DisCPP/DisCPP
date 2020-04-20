@@ -18,11 +18,6 @@ namespace discord {
 	class User;
 
 	class Emoji : public DiscordObject {
-	private:
-		std::wstring WStringFromString(std::string string) {
-			return std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(string);
-		}
-
 	public:
 		Emoji() = default;
 		Emoji(std::string name, snowflake id);
