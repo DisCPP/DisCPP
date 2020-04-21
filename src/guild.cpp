@@ -66,7 +66,8 @@ namespace discord {
 		}
 		if (json.contains("emojis")) {
 			for (auto& emoji : json["emojis"]) {
-				emojis.push_back(discord::Emoji(emoji));
+				discord::Emoji tmp = discord::Emoji(emoji);
+				emojis.insert(std::make_pair<snowflake, Emoji>(static_cast<discord::snowflake>(tmp.id), static_cast<discord::Emoji>(tmp)));
 			}
 		}
 		// features
@@ -971,7 +972,7 @@ namespace discord {
 		return std::string();
 	}
 
-	std::vector<discord::Emoji> Guild::GetEmojis() {
+	std::unordered_map<snowflake, Emoji> Guild::GetEmojis() {
 		/**
 		 * @brief Get all guild emojis.
 		 *
@@ -984,9 +985,10 @@ namespace discord {
 
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + id + "/emojis"), DefaultHeaders(), {}, {});
 
-		std::vector<discord::Emoji> emojis;
+		std::unordered_map<snowflake, Emoji> emojis;
 		for (auto& emoji : result) {
-			emojis.push_back(discord::Emoji(emoji));
+			discord::Emoji tmp = discord::Emoji(emoji);
+			emojis.insert(std::pair<snowflake, Emoji>(static_cast<snowflake>(tmp.id), static_cast<Emoji>(tmp)));
 		}
 		this->emojis = emojis;
 
@@ -1072,8 +1074,10 @@ namespace discord {
 		cpr::Body body("{\"name\": \"" + name + "\", \"roles\": " + json_roles + "}");
 		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + this->id + "/emojis/" + id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 		discord::Emoji em(result);
-		std::replace_if(emojis.begin(), emojis.end(), [em](discord::Emoji e) { return e.id == em.id; }, em);
-
+		std::unordered_map<snowflake, Emoji>::iterator it = emojis.find(em.id);
+		if (it != emojis.end()) {
+			it->second = em;
+		}
 		return em;
 	}
 
@@ -1089,7 +1093,7 @@ namespace discord {
 		 */
 
 		nlohmann::json result = SendDeleteRequest(Endpoint("/guilds/" + this->id + "/emojis/" + id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
-		emojis.erase(std::remove_if(emojis.begin(), emojis.end(), [emoji](discord::Emoji e) { return e.id == emoji.id; }));
+		emojis.erase(emoji.id);
 	}
 
 	
@@ -1106,6 +1110,8 @@ namespace discord {
 			return cpr::Url(url + ".png");
 		case ImageType::WEBP:
 			return cpr::Url(url + ".webp");
+		default:
+			return cpr::Url(url);
 		}
 	}
 }

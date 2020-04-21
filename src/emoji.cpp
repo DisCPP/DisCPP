@@ -35,10 +35,9 @@ namespace discord {
 		 * @return discord::Emoji, this is a constructor.
 		 */
 
-		auto emoji = std::find_if(guild.emojis.begin(), guild.emojis.end(), [id](discord::Emoji a) { return id == a.id; });
-
-		if (emoji != guild.emojis.end()) {
-			*this = *emoji;
+		std::unordered_map<snowflake, Emoji>::iterator it = guild.emojis.find(id);
+		if (it != guild.emojis.end()) {
+			*this = it->second;
 		}
 	}
 

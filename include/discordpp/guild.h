@@ -171,7 +171,7 @@ namespace discord {
 		// discord::GuildInvite GetVanityURL(); // https://discordapp.com/developers/docs/resources/guild#get-guild-vanity-url - Doesn't work.
 		std::string GetWidgetImageURL(WidgetStyle widget_style = WidgetStyle::SHIELD);
 
-		std::vector<discord::Emoji> GetEmojis();
+		std::unordered_map<snowflake, Emoji> GetEmojis();
 		discord::Emoji GetEmoji(snowflake id);
 		discord::Emoji CreateEmoji(std::string name, discord::Image image, std::vector<discord::Role> roles);
 		discord::Emoji ModifyEmoji(discord::Emoji emoji, std::string name, std::vector<discord::Role> roles);
@@ -194,7 +194,7 @@ namespace discord {
 		discord::specials::DefaultMessageNotificationLevel default_message_notifications;
 		discord::specials::ExplicitContentFilterLevel explicit_content_filter;
 		std::unordered_map<snowflake, Role> roles;
-		std::vector<discord::Emoji> emojis;
+		std::unordered_map<snowflake, Emoji> emojis;
 		// features
 		discord::specials::MFALevel mfa_level;
 		snowflake application_id;
