@@ -25,7 +25,8 @@ namespace discord {
 		Emoji(std::string name, snowflake id);
 		Emoji(discord::Guild guild, snowflake id);
 		Emoji(nlohmann::json json);
-		Emoji(std::wstring unicode);
+		Emoji(std::wstring w_unicode);
+		Emoji(std::string s_unicode);
 
 		std::string ToString() {
 			/**

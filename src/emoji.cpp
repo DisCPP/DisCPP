@@ -69,17 +69,33 @@ namespace discord {
 		animated = GetDataSafely<bool>(json, "animated");
 	}
 
-	Emoji::Emoji(std::wstring unicode) : unicode(unicode) {
+	Emoji::Emoji(std::wstring w_unicode) : unicode(w_unicode) {
 		/**
-		 * @brief Constructs a discord::Emoji object with a name and id.
+		 * @brief Constructs a discord::Emoji object with a std::wstring unicode representation.
 		 *
 		 * ```cpp
-		 *      discord::Emoji emoji("\u0030");
+		 *      discord::Emoji emoji(L"\u0030");
 		 * ```
 		 *
-		 * @param[in] unicode The unicode representation of this emoji.
+		 * @param[in] w_unicode The std::wstring unicode representation of this emoji.
 		 *
 		 * @return discord::Emoji, this is a constructor.
 		 */
 	}
+
+    Emoji::Emoji(std::string s_unicode) {
+        /**
+         * @brief Constructs a discord::Emoji object with a std::string unicode representation.
+         *
+         * ```cpp
+         *      discord::Emoji emoji("\u0030");
+         * ```
+         *
+         * @param[in] s_unicode The std::string unicode representation of this emoji.
+         *
+         * @return discord::Emoji, this is a constructor.
+         */
+        auto converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
+        this->unicode = converter.from_bytes(s_unicode);
+    }
 }
