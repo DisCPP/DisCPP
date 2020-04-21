@@ -32,9 +32,10 @@ namespace discord {
 		discord::User bot_user;
 		discord::Logger logger;
 
-		std::vector<discord::Channel> channels;
+		std::unordered_map<snowflake, Channel> channels;
 		std::unordered_map<snowflake, Member> members;
-		std::vector<discord::Guild> guilds;
+		std::unordered_map<snowflake, Guild> guilds;
+		// TODO: convert this to std::unordered_map<snowflake, Message>
 		std::vector<discord::Message> messages;
 
 		std::vector<std::future<void>> futures;

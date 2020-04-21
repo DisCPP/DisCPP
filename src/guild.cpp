@@ -23,10 +23,9 @@ namespace discord {
 		 * @return discord::Guild, this is a constructor.
 		 */
 
-		auto guild = std::find_if(discord::globals::bot_instance->guilds.begin(), discord::globals::bot_instance->guilds.end(), [id](discord::Guild a) { return id == a.id; });
-
-		if (guild != discord::globals::bot_instance->guilds.end()) {
-			*this = *guild;
+		std::unordered_map<snowflake, Guild>::iterator it = discord::globals::bot_instance->guilds.find(id);
+		if (it != discord::globals::bot_instance->guilds.end()) {
+			*this = it->second;
 		}
 	}
 

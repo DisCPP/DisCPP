@@ -20,10 +20,9 @@ namespace discord {
 		 * @return discord::Channel, this is a constructor.
 		 */
 
-		auto channel = std::find_if(discord::globals::bot_instance->channels.begin(), discord::globals::bot_instance->channels.end(), [id](discord::Channel a) { return id == a.id; });
-		
-		if (channel != discord::globals::bot_instance->channels.end()) {
-			*this = *channel;
+		std::unordered_map<snowflake, Channel>::iterator it = discord::globals::bot_instance->channels.find(id);
+		if (it != discord::globals::bot_instance->channels.end()) {
+			*this = it->second;
 		}
 	}
 
