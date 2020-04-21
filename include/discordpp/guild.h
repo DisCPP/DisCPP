@@ -206,8 +206,8 @@ namespace discord {
 		bool unavailable;
 		int member_count;
 		//voice_states
-		std::vector<discord::Member> members;
-		std::vector<discord::Channel> channels;
+		std::unordered_map<snowflake, Member> members;
+		std::unordered_map<snowflake, Channel> channels;
 		int max_presences;
 		int max_members;
 		std::string vanity_url_code;

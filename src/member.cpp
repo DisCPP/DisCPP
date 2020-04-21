@@ -21,10 +21,9 @@ namespace discord {
 		 * @return discord::Member, this is a constructor.
 		 */
 
-		auto member = std::find_if(discord::globals::bot_instance->members.begin(), discord::globals::bot_instance->members.end(), [id](discord::Member a) { return id == a.user.id; });
-
-		if (member != discord::globals::bot_instance->members.end()) {
-			*this = *member;
+		std::unordered_map<snowflake, Member>::iterator it = discord::globals::bot_instance->members.find(id);
+		if (it != discord::globals::bot_instance->members.end()) {
+			*this = it->second;
 		}
 	}
 

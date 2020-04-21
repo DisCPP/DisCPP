@@ -519,7 +519,7 @@ namespace discord {
 		logger.LogToConsole(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Connected to " + guild.name);
 		guilds.push_back(guild);
 
-		members.insert(members.end(), guild.members.begin(), guild.members.end());
+		members.insert(guild.members.begin(), guild.members.end());
 
 		for (auto& channel : result["channels"]) {
 			channels.push_back(discord::Channel(channel, guild_id));
@@ -578,6 +578,7 @@ namespace discord {
 	void Bot::GuildMemberAddEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
 		discord::Member member(result, guild.id);
+		members.insert(std::pair<snowflake, Member>(static_cast<snowflake>(member.id), static_cast<Member>(member)));
 
 		discord::DispatchEvent(discord::GuildMemberAddEvent(guild, member));
 	}
@@ -585,14 +586,15 @@ namespace discord {
 	void Bot::GuildMemberRemoveEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
 		discord::Member member(result["user"]["id"].get<snowflake>());
-		std::remove_if(members.begin(), members.end(), [member](discord::Member m) { return m.user.id == member.user.id; });
+		members.erase(member.id);
 
 		discord::DispatchEvent(discord::GuildMemberRemoveEvent(guild, member));
 	}
 
 	void Bot::GuildMemberUpdateEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
-		discord::Member member = GetIf(guild.members, [result](discord::Member& member) { return member.user.id == result["user"]["id"]; });
+		std::unordered_map<snowflake, Member>::iterator it = guild.members.find(result["user"]["id"]);
+		discord::Member member = it->second;
 		member.roles.clear();
 		for (auto role : result["roles"]) {
 			member.roles.push_back(discord::Role(role, guild));
@@ -600,7 +602,6 @@ namespace discord {
 		if (result.contains("nick") && !result["nick"].is_null()) {
 			member.nick = result["nick"];
 		}
-
 		discord::DispatchEvent(discord::GuildMemberUpdateEvent(guild, member));
 	}
 

@@ -33,7 +33,7 @@ namespace discord {
 		discord::Logger logger;
 
 		std::vector<discord::Channel> channels;
-		std::vector<discord::Member> members;
+		std::unordered_map<snowflake, Member> members;
 		std::vector<discord::Guild> guilds;
 		std::vector<discord::Message> messages;
 

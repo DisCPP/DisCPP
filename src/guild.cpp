@@ -83,14 +83,15 @@ namespace discord {
 		// voice_states
 		if (json.contains("channels")) {
 			for (auto& channel : json["channels"]) {
-				channels.push_back(discord::Channel(channel));
+				discord::Channel tmp = discord::Channel(channel);
+				channels.insert(std::make_pair<snowflake, Channel>(static_cast<discord::snowflake>(tmp.id), static_cast<discord::Channel>(tmp)));
 			}
 		}
 		if (json.contains("presences") && json.contains("members")) {
 			for (auto const& presence : json["presences"]) {
-				auto member = std::find_if(members.begin(), members.end(), [presence](discord::Member a) { return presence["user"]["id"] == a.user.id;});
-
-				if (member != members.end()) {
+				std::unordered_map<snowflake, Member>::iterator it = members.find(presence["user"]["id"]);
+				
+				if (it != members.end()) {
 					nlohmann::json activity = presence["game"];
 					
 					if (!activity.is_null()) {
@@ -105,7 +106,7 @@ namespace discord {
 						act.application_id = activity["id"];
 						act.created_at = std::to_string(activity["created_at"].get<int>());
 
-						member->activity = act;
+						it->second.activity = act;
 					}
 				}
 			}
@@ -121,7 +122,8 @@ namespace discord {
 		created_at = FormatTimeFromSnowflake(id);
 		if (json.contains("members")) {
 			for (auto& member : json["members"]) {
-				members.push_back(discord::Member(member, *this));
+				discord::Member tmp = discord::Member(member, *this);
+				members.insert(std::make_pair<snowflake, Member>(static_cast<discord::snowflake>(tmp.id), static_cast<discord::Member>(tmp)));
 			}
 		}
 	}
@@ -454,7 +456,7 @@ namespace discord {
 		cpr::Body body(json_raw.dump());
 		nlohmann::json result = SendPostRequest(Endpoint("/guilds/" + id + "/channels"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discord::RateLimitBucketType::CHANNEL, body);
 		discord::Channel channel(result);
-		channels.push_back(channel);
+		channels.insert(std::pair<snowflake, Channel>(static_cast<snowflake>(channel.id), static_cast<Channel>(channel)));
 
 		return channel;
 	}
@@ -495,10 +497,9 @@ namespace discord {
 		 * @return discord::Member
 		 */
 
-		auto member = std::find_if(discord::globals::bot_instance->members.begin(), discord::globals::bot_instance->members.end(), [id](discord::Member a) { return id == a.user.id; });
-
-		if (member != discord::globals::bot_instance->members.end()) {
-			return *member;
+		std::unordered_map<snowflake, Member>::iterator it = discord::globals::bot_instance->members.find(id);
+		if (it != discord::globals::bot_instance->members.end()) {
+			return it->second;
 		}
 		throw std::runtime_error("Member not found!");
 	}
@@ -1096,7 +1097,6 @@ namespace discord {
 		emojis.erase(emoji.id);
 	}
 
-	
 	std::string Guild::GetIconURL(discord::ImageType imgType) {
 		std::string idString = this->id.c_str();
 		std::string url = "https://cdn.discordapp.com/icons/" + idString +  "/" + this->icon;
