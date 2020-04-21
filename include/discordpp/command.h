@@ -19,9 +19,9 @@ namespace discord {
 		virtual bool CanRun(discord::Context ctx);
 
 		std::function<void(discord::Context)> function = nullptr;
-		std::string name;
-		std::string description;
-		std::vector<std::string> hint_args;
+		std::string name; /**< Name of the current command. Ex: "ping"*/
+		std::string description; /**< Description of the current command. Ex: "replies pong!" */
+		std::vector<std::string> hint_args; /**< Arguments of the current command. Ex: @user */
 		std::vector<std::function<bool(discord::Context)>> requirements;
 	};
 }
