@@ -205,9 +205,8 @@ namespace discord {
 		websocket_outgoing_message msg;
 		msg.set_utf8_message(json.dump());
 
-		websocket_client_mutex.lock();
+		auto threadlock = std::lock_guard(websocket_client_mutex);
 		websocket_client.send(msg);
-		websocket_client_mutex.unlock();
 	}
 
 	void Bot::SetCommandHandler(std::function<void(discord::Bot*, discord::Message)> command_handler) {
@@ -229,9 +228,8 @@ namespace discord {
 	}
 
 	void Bot::DisconnectWebsocket() {
-		websocket_client_mutex.lock();
+		auto threadlock = std::lock_guard(websocket_client_mutex);
 		websocket_client.close(web::websockets::client::websocket_close_status::server_terminate).wait();
-		websocket_client_mutex.unlock();
 	}
 
 	void Bot::BindEvents() {
@@ -287,8 +285,7 @@ namespace discord {
 
 			std::thread bindthread{ &Bot::BindEvents, this };
 			utility::string_t stringt = utility::conversions::to_string_t(gateway_endpoint);
-
-			websocket_client_mutex.lock();
+			auto threadlock = std::lock_guard(websocket_client_mutex);
 
 			// Recreate a websocket client just incase we're trying to reconnect.
 			if (reconnecting) {
@@ -298,7 +295,6 @@ namespace discord {
 			websocket_client.connect(web::uri(stringt));
 			websocket_client.set_message_handler(std::bind(&Bot::OnWebSocketPacket, this, std::placeholders::_1));
 			websocket_client.set_close_handler(std::bind(&Bot::HandleDiscordDisconnect, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-			websocket_client_mutex.unlock();
 
 			disconnected = false;
 
