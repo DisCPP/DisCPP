@@ -86,30 +86,6 @@ namespace discord {
 				channels.insert(std::make_pair<snowflake, Channel>(static_cast<discord::snowflake>(tmp.id), static_cast<discord::Channel>(tmp)));
 			}
 		}
-		if (json.contains("presences") && json.contains("members")) {
-			for (auto const& presence : json["presences"]) {
-				std::unordered_map<snowflake, Member>::iterator it = members.find(presence["user"]["id"]);
-				
-				if (it != members.end()) {
-					nlohmann::json activity = presence["game"];
-					
-					if (!activity.is_null()) {
-						discord::Activity act;
-
-						act.text = activity["name"];
-						act.type = static_cast<presence::ActivityType>(activity["type"].get<int>());
-						act.status = presence["status"];
-						if (activity.contains("url")) {
-							act.url = activity["url"];
-						}
-						act.application_id = activity["id"];
-						act.created_at = std::to_string(activity["created_at"].get<int>());
-
-						it->second.activity = act;
-					}
-				}
-			}
-		}
 		max_presences = GetDataSafely<int>(json, "max_presences");
 		max_members = GetDataSafely<int>(json, "max_members");
 		vanity_url_code = GetDataSafely<std::string>(json, "vanity_url_code");
@@ -123,6 +99,34 @@ namespace discord {
 			for (auto& member : json["members"]) {
 				discord::Member tmp = discord::Member(member, *this);
 				members.insert(std::make_pair<snowflake, Member>(static_cast<discord::snowflake>(tmp.id), static_cast<discord::Member>(tmp)));
+			}
+		}
+		if (json.contains("presences") && json.contains("members")) {
+			for (auto const& presence : json["presences"]) {
+				globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::CYAN + presence.dump());
+				std::unordered_map<snowflake, Member>::iterator it = members.find(presence["user"]["id"]);
+
+				if (it != members.end()) {
+					nlohmann::json activity = presence["game"];
+
+					discord::Activity act;
+
+					if (!presence["status"].is_null()) {
+						act.status = presence["status"];
+					}
+
+					if (!activity.is_null()) {
+						act.text = activity["name"];
+						act.type = static_cast<presence::ActivityType>(activity["type"].get<int>());
+						if (activity.contains("url")) {
+							act.url = activity["url"];
+						}
+						act.application_id = activity["id"];
+						act.created_at = std::to_string(activity["created_at"].get<int>());
+					}
+
+					it->second.activity = act;
+				}
 			}
 		}
 	}

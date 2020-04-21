@@ -63,6 +63,7 @@ namespace discord {
 		void CreateWebsocketRequest(nlohmann::json json);
 		void SetCommandHandler(std::function<void(discord::Bot*, discord::Message)> command_handler);
 		void DisconnectWebsocket();
+		void ReconnectToWebsocket();
 
 		template <typename FType, typename... T>
 		void DoFunctionLater(FType&& func, T&&... args) {
@@ -111,7 +112,6 @@ namespace discord {
 		void HandleDiscordDisconnect(websocket_close_status close_status, utility::string_t reason, std::error_code error_code);
 		void HandleHeartbeat();
 		nlohmann::json GetIdentifyPacket();
-		void ReconnectToWebsocket();
 
 		void BindEvents();
 
