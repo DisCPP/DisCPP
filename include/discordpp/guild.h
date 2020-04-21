@@ -144,7 +144,7 @@ namespace discord {
 
 		void DeleteGuild();
 		std::vector<discord::Channel> GetChannels();
-		discord::Channel CreateChannel(std::string name, GuildChannelType type, std::string topic, int bitrate, int user_limit, int rate_limit_per_user, int position, std::vector<discord::Permissions> permission_overwrites, discord::Channel category, bool nsfw);
+		discord::Channel CreateChannel(std::string name, std::string topic = "", GuildChannelType type = GuildChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discord::Permissions> permission_overwrites = {}, discord::Channel category = {}, bool nsfw = false);
 		void ModifyChannelPositions(std::vector<discord::Channel> new_channel_positions);
 		discord::Member GetMember(snowflake id);
 		discord::Member AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf);
@@ -171,7 +171,7 @@ namespace discord {
 		// discord::GuildInvite GetVanityURL(); // https://discordapp.com/developers/docs/resources/guild#get-guild-vanity-url - Doesn't work.
 		std::string GetWidgetImageURL(WidgetStyle widget_style = WidgetStyle::SHIELD);
 
-		std::vector<discord::Emoji> GetEmojis();
+		std::unordered_map<snowflake, Emoji> GetEmojis();
 		discord::Emoji GetEmoji(snowflake id);
 		discord::Emoji CreateEmoji(std::string name, discord::Image image, std::vector<discord::Role> roles);
 		discord::Emoji ModifyEmoji(discord::Emoji emoji, std::string name, std::vector<discord::Role> roles);
@@ -193,8 +193,8 @@ namespace discord {
 		discord::specials::VerificationLevel verification_level;
 		discord::specials::DefaultMessageNotificationLevel default_message_notifications;
 		discord::specials::ExplicitContentFilterLevel explicit_content_filter;
-		std::vector<discord::Role> roles;
-		std::vector<discord::Emoji> emojis;
+		std::unordered_map<snowflake, Role> roles;
+		std::unordered_map<snowflake, Emoji> emojis;
 		// features
 		discord::specials::MFALevel mfa_level;
 		snowflake application_id;
@@ -206,8 +206,8 @@ namespace discord {
 		bool unavailable;
 		int member_count;
 		//voice_states
-		std::vector<discord::Member> members;
-		std::vector<discord::Channel> channels;
+		std::unordered_map<snowflake, Member> members;
+		std::unordered_map<snowflake, Channel> channels;
 		int max_presences;
 		int max_members;
 		std::string vanity_url_code;

@@ -3,6 +3,7 @@
 #include "member.h"
 #include "utils.h"
 #include "cpr/cpr.h"
+#include "activity.h"
 
 namespace discord {
 	User::User(snowflake id) : discord::DiscordObject(id) {
@@ -20,10 +21,9 @@ namespace discord {
 		 * @return discord::User, this is a constructor.
 		 */
 
-		auto member = std::find_if(discord::globals::bot_instance->members.begin(), discord::globals::bot_instance->members.end(), [id](discord::Member a) { return id == a.user.id; });
-
-		if (member != discord::globals::bot_instance->members.end()) {
-			*this = member->user;
+		std::unordered_map<snowflake, Member>::iterator it = discord::globals::bot_instance->members.find(id);
+		if (it != discord::globals::bot_instance->members.end()) {
+			*this = it->second.user;
 		}
 	}
 
@@ -52,6 +52,8 @@ namespace discord {
 		flags = GetDataSafely<int>(json, "flags");
 		premium_type = (json.contains("premium_type")) ? static_cast<discord::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type")) : discord::specials::NitroSubscription::NO_NITRO;
 		created_at = FormatTimeFromSnowflake(id);
+		std::string _id = this->id.c_str();
+		mention = "<@" + _id + ">";
 	}
 
 	Connection::Connection(nlohmann::json json) {
@@ -93,7 +95,7 @@ namespace discord {
 		 * @return discord::Channel
 		 */
 
-		cpr::Body body(Format("{\"recipient_id\": \"%\"}", id));
+		cpr::Body body("{\"recipient_id\": \"" + id + "\"}");
 		nlohmann::json result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders(), id, RateLimitBucketType::CHANNEL, body);
 		return discord::Channel(result);
 	}

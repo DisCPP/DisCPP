@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <utility>
+#include <time.h>
 
 #include "utils.h"
 
@@ -124,6 +125,7 @@ namespace discord {
 				return false;
 			}
 		}
+
 	public:
 		inline Logger(std::string file_path, int logger_flags = logger_flags::ALL_SEVERITY) : flags(logger_flags) {
 			/**
@@ -173,15 +175,14 @@ namespace discord {
 			 */
 
 			if (log_file.is_open()) {
-				LogToFile(LogSeverity::SEV_INFO, "Logger \"%\" is closing", file_path);
+				LogToFile(LogSeverity::SEV_INFO, "Logger \"" + file_path + "\" is closing");
 				log_file.close();
 			} else {
-				LogToConsole(LogSeverity::SEV_INFO, "Logger \"%\" is closing", file_path);
+				LogToConsole(LogSeverity::SEV_INFO, "Logger \"" + file_path + "\" is closing");
 			}
 		}
 
-		template <typename... Tys>
-		inline void LogToConsole(LogSeverity sev, std::string text, Tys&&... args) {
+		inline void LogToConsole(LogSeverity sev, std::string text) {
 			/**
 			 * @brief Logs to console.
 			 *
@@ -197,14 +198,21 @@ namespace discord {
 			 */
 
 			if (CanLog(sev)) {
-				text = discord::Format(text, std::forward<Tys>(args)...);
+				time_t rawtime;
+				struct tm* timeinfo;
+				char st[80];
 
-				std::cout << "[" << LogSeverityToString(sev) << "] " << text << LogTextEffect::RESET << std::endl;
+				time(&rawtime);
+				timeinfo = localtime(&rawtime);
+
+				strftime(st, 80, "[%H:%M:%S]", timeinfo);
+
+				std::string time(st);
+				std::cout << time << " [" << LogSeverityToString(sev) << "] " << text << LogTextEffect::RESET << std::endl;
 			}
 		}
 
-		template <typename... Tys>
-		inline void LogToFile(LogSeverity sev, std::string text, Tys&&... args) {
+		inline void LogToFile(LogSeverity sev, std::string text) {
 			/**
 			 * @brief Logs to file.
 			 *
@@ -220,14 +228,21 @@ namespace discord {
 			 */
 
 			if (CanLog(sev) && log_file.is_open()) {
-				text = discord::Format(text, std::forward<Tys>(args)...);
+				time_t rawtime;
+				struct tm* timeinfo;
+				char st[80];
 
-				log_file << "[" << LogSeverityToString(sev) << "] " << text << LogTextEffect::RESET << std::endl;
+				time(&rawtime);
+				timeinfo = localtime(&rawtime);
+
+				strftime(st, 80, "[%H:%M:%S]", timeinfo);
+
+				std::string time(st);
+				log_file << time << " [" << LogSeverityToString(sev) << "] " << text << LogTextEffect::RESET << std::endl;
 			}
 		}
 
-		template <typename... Tys>
-		inline void Log(LogSeverity sev, std::string text, Tys&&... args) {
+		inline void Log(LogSeverity sev, std::string text) {
 			/**
 			 * @brief Logs to console or file, maybe even both.
 			 *
@@ -243,12 +258,12 @@ namespace discord {
 			 */
 
 			if ((flags & logger_flags::FILE_ONLY) == logger_flags::FILE_ONLY) {
-				LogToFile(sev, text, std::forward<Tys>(args)...);
+				LogToFile(sev, text);
 				return;
 			} 
 
-			LogToConsole(sev, text, std::forward<Tys>(args)...);
-			LogToFile(sev, text, std::forward<Tys>(args)...);
+			LogToConsole(sev, text);
+			LogToFile(sev, text);
 		}
 	};
 }

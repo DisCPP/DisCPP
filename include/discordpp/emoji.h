@@ -1,6 +1,8 @@
 #ifndef DISCORDPP_EMOJI_H
 #define DISCORDPP_EMOJI_H
 
+#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+
 #include "discord_object.h"
 #include "user.h"
 #include "role.h"
@@ -18,11 +20,6 @@ namespace discord {
 	class User;
 
 	class Emoji : public DiscordObject {
-	private:
-		std::wstring WStringFromString(std::string string) {
-			return std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(string);
-		}
-
 	public:
 		Emoji() = default;
 		Emoji(std::string name, snowflake id);
@@ -41,17 +38,18 @@ namespace discord {
 			 * @return std::string
 			 */
 
+			auto converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
+
 			std::wstring emoji;
 			if (name.empty()) {
 				emoji = unicode;
 			} else {
-				emoji = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(name) + L":" + std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(id);
+				emoji = converter.from_bytes(name) + L":" + converter.from_bytes(id);
 			}
 
-			utility::string_t stringt = utility::conversions::to_string_t(emoji);
-			stringt = web::uri::encode_uri(stringt);
+			emoji = web::uri::encode_uri(emoji);
 
-			return utility::conversions::to_utf8string(stringt);
+			return converter.to_bytes(emoji);
 		}
 
 		//snowflake id;

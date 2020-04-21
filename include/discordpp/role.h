@@ -15,7 +15,7 @@ namespace discord {
 		Role(snowflake role_id, discord::Guild guild);
 		Role(nlohmann::json json);
 
-		//snowflake id;
+		snowflake id;
 		std::string name;
 		int color;
 		bool hoist;

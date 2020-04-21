@@ -118,10 +118,10 @@ namespace discord {
 		 *
 		 * @return discord::Guild
 		 */
-		auto guild = std::find_if(discord::globals::bot_instance->guilds.begin(), discord::globals::bot_instance->guilds.end(), [guild_id](discord::Guild a) { return guild_id == a.id; });
 
-		if (guild != discord::globals::bot_instance->guilds.end()) {
-			return *guild;
+		std::unordered_map<snowflake, Guild>::iterator it = discord::globals::bot_instance->guilds.find(guild_id);
+		if (it != discord::globals::bot_instance->guilds.end()) {
+			return it->second;
 		}
 		throw std::runtime_error("Guild not found!");
 	}
@@ -159,7 +159,7 @@ namespace discord {
 		 * @return void
 		 */
 
-		SendDeleteRequest(Endpoint("/users/@me/guilds/%", guild.id), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+		SendDeleteRequest(Endpoint("/users/@me/guilds/" + guild.id), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
 	}
 
 	void Bot::UpdatePresence(discord::Activity activity) {
@@ -201,9 +201,13 @@ namespace discord {
 		logger.Log(LogSeverity::SEV_DEBUG, "Sending gateway payload: " + json.dump());
 		WaitForRateLimits(bot_user.id, RateLimitBucketType::GLOBAL);
 
+
 		websocket_outgoing_message msg;
 		msg.set_utf8_message(json.dump());
+
+		websocket_client_mutex.lock();
 		websocket_client.send(msg);
+		websocket_client_mutex.unlock();
 	}
 
 	void Bot::SetCommandHandler(std::function<void(discord::Bot*, discord::Message)> command_handler) {
@@ -224,9 +228,11 @@ namespace discord {
 		fire_command_method = command_handler;
 	}
 
-	/*void Bot::DisconnectWebsocket() {
-		websocket_client.close(web::websockets::client::websocket_close_status::normal);
-	}*/
+	void Bot::DisconnectWebsocket() {
+		websocket_client_mutex.lock();
+		websocket_client.close(web::websockets::client::websocket_close_status::server_terminate).wait();
+		websocket_client_mutex.unlock();
+	}
 
 	void Bot::BindEvents() {
 		internal_event_map["READY"] = std::bind(&Bot::ReadyEvent, this, std::placeholders::_1);
@@ -266,7 +272,7 @@ namespace discord {
 	}
 
 	void Bot::WebSocketStart() {
-		nlohmann::json gateway_request = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", Format("Bot %", token) }, { "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" } }, {}, {});
+		nlohmann::json gateway_request = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token }, { "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" } }, {}, {});
 
 		if (gateway_request.contains("url")) {
 			logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::YELLOW + "Connecting to gateway...");
@@ -276,18 +282,23 @@ namespace discord {
 				throw std::runtime_error{ "GATEWAY ERROR: Maximum start limit reached" };
 			}
 
-			gateway_endpoint = gateway_request["url"];
+			// Specify version and encoding just ot be safe
+			gateway_endpoint = gateway_request["url"].get<std::string>() + "?v=6&encoding=json";
+
+			std::thread bindthread{ &Bot::BindEvents, this };
+			utility::string_t stringt = utility::conversions::to_string_t(gateway_endpoint);
+
+			websocket_client_mutex.lock();
 
 			// Recreate a websocket client just incase we're trying to reconnect.
 			if (reconnecting) {
 				websocket_client = websocket_callback_client();
 			}
 
-			std::thread bindthread{ &Bot::BindEvents, this };
-			utility::string_t stringt = utility::conversions::to_string_t(gateway_endpoint);
 			websocket_client.connect(web::uri(stringt));
 			websocket_client.set_message_handler(std::bind(&Bot::OnWebSocketPacket, this, std::placeholders::_1));
 			websocket_client.set_close_handler(std::bind(&Bot::HandleDiscordDisconnect, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+			websocket_client_mutex.unlock();
 
 			disconnected = false;
 
@@ -303,9 +314,12 @@ namespace discord {
 		logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Websocket was closed with error: 400" + std::to_string(error_code.value()) + "! Attemping reconnect in 10 seconds...");
 		heartbeat_acked = false;
 		disconnected = true;
+		reconnecting = true;
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-		DoFunctionLater(&Bot::ReconnectToWebsocket, this);
+		if (disconnected && !reconnecting) {
+			ReconnectToWebsocket();
+		}
 	}
 
 	void Bot::OnWebSocketPacket(websocket_incoming_message msg) {
@@ -320,7 +334,7 @@ namespace discord {
 				std::this_thread::sleep_for(std::chrono::milliseconds(1200));
 				logger.Log(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Reconnected!");
 
-				std::string resume = discord::Format("{ \"op\": 6, \"d\": { \"token\": \"%\", \"session_id\": \"%\", \"seq\": % } }", token, session_id, last_sequence_number);
+				std::string resume = "{ \"op\": 6, \"d\": { \"token\": \"" + token + "\", \"session_id\": \"" + session_id + "\", \"seq\": " + std::to_string(last_sequence_number) +"} }";
 				CreateWebsocketRequest(nlohmann::json::parse(resume));
 
 				// Heartbeat just to be safe
@@ -329,17 +343,17 @@ namespace discord {
 					data["d"] = last_sequence_number;
 				}
 
-				logger.Log(LogSeverity::SEV_DEBUG, "Sending heartbeat payload: " + data.dump());
-				websocket_outgoing_message msg;
-				msg.set_utf8_message(data.dump());
-				websocket_client.send(msg);
+				reconnecting = false;
 			} else {
 				logger.Log(LogSeverity::SEV_DEBUG, "Sending gateway payload: " + GetIdentifyPacket().dump());
 
 				hello_packet = result;
 				websocket_outgoing_message identify_msg;
 				identify_msg.set_utf8_message(GetIdentifyPacket().dump());
+				
+				websocket_client_mutex.lock();
 				websocket_client.send(identify_msg);
+				websocket_client_mutex.unlock();
 			}
 			break;
 		} case heartbeat_ack:
@@ -351,7 +365,7 @@ namespace discord {
 		case invalid_session:
 			// Check if the session is resumable
 			if (result["d"].get<bool>()) {
-				std::string resume = discord::Format("{ \"op\": 6, \"d\": { \"token\": \"%\", \"session_id\": \"%\", \"seq\": % } }", token, session_id, last_sequence_number);
+				std::string resume = "{ \"op\": 6, \"d\": { \"token\": \"" + token + "\", \"session_id\": \"" + session_id + "\", \"seq\": " + std::to_string(last_sequence_number) + "} }";
 				CreateWebsocketRequest(nlohmann::json::parse(resume));
 			} else {
 				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -382,29 +396,39 @@ namespace discord {
 	}
 
 	void Bot::HandleHeartbeat() {
-		while (true) {
-			nlohmann::json data = { { "op", packet_opcode::heartbeat }, { "d", nullptr } };
-			if (last_sequence_number != -1) {
-				data["d"] = last_sequence_number;
+		try {
+			while (true) {
+				// Make sure that it doesn't try to do anything while its trying to reconnect.
+				while (reconnecting) { }
+
+				nlohmann::json data = { { "op", packet_opcode::heartbeat }, { "d", nullptr } };
+				if (last_sequence_number != -1) {
+					data["d"] = last_sequence_number;
+				}
+
+				logger.Log(LogSeverity::SEV_DEBUG, "Sending heartbeat payload: " + data.dump());
+
+				websocket_client_mutex.lock();
+				websocket_outgoing_message msg;
+				msg.set_utf8_message(data.dump());
+				websocket_client.send(msg);
+				websocket_client_mutex.unlock();
+
+				heartbeat_acked = false;
+
+				logger.Log(LogSeverity::SEV_DEBUG, "Waiting for next heartbeat (" + std::to_string(hello_packet["d"]["heartbeat_interval"].get<int>() / 1000.0 - 10) + " seconds)...");
+				// Wait for the required heartbeat interval, while waiting it should be acked from another thread.
+				std::this_thread::sleep_for(std::chrono::milliseconds(hello_packet["d"]["heartbeat_interval"].get<int>() - 10));
+
+				if (!heartbeat_acked) {
+					logger.Log(LogSeverity::SEV_WARNING, LogTextColor::YELLOW + "Heartbeat wasn't acked, trying to reconnect...");
+					disconnected = true;
+
+					ReconnectToWebsocket();
+				}
 			}
-
-			logger.Log(LogSeverity::SEV_DEBUG, "Sending heartbeat payload: " + data.dump());
-			websocket_outgoing_message msg;
-			msg.set_utf8_message(data.dump());
-			websocket_client.send(msg);
-
-			heartbeat_acked = false;
-
-			logger.Log(LogSeverity::SEV_DEBUG, "Waiting for next heartbeat (% seconds)...", hello_packet["d"]["heartbeat_interval"].get<int>() / 1000.0 - 10);
-			// Wait for the required heartbeat interval, while waiting it should be acked from another thread.
-			std::this_thread::sleep_for(std::chrono::milliseconds(hello_packet["d"]["heartbeat_interval"].get<int>() - 10));
-
-			if (!heartbeat_acked) {
-				logger.Log(LogSeverity::SEV_WARNING, LogTextColor::YELLOW + "Heartbeat wasn't acked, trying to reconnect...");
-				disconnected = true;
-
-				ReconnectToWebsocket();
-			}
+		} catch (std::exception & e) {
+			logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "ERROR: " + e.what());
 		}
 	}
 
@@ -425,7 +449,9 @@ namespace discord {
 		logger.Log(LogSeverity::SEV_INFO, LogTextColor::YELLOW + "Reconnecting to Discord gateway!");
 
 		reconnecting = true;
-		websocket_client.close(web::websockets::client::websocket_close_status::normal);
+
+		//websocket_client.close(web::websockets::client::websocket_close_status::normal);
+		DisconnectWebsocket();
 		WebSocketStart();
 	}
 
@@ -459,20 +485,24 @@ namespace discord {
 
 	void Bot::ChannelCreateEvent(nlohmann::json result) {
 		discord::Channel new_channel = discord::Channel(result, result["id"].get<snowflake>());
-		channels.push_back(new_channel);
+		channels.insert(std::pair<snowflake, Channel>(static_cast<snowflake>(new_channel.id), static_cast<Channel>(new_channel)));
 
 		discord::DispatchEvent(discord::ChannelCreateEvent(new_channel));
 	}
 
 	void Bot::ChannelUpdateEvent(nlohmann::json result) {
 		discord::Channel new_channel = discord::Channel(result);
-		std::replace_if(channels.begin(), channels.end(), [new_channel](discord::Channel a) { return new_channel.id == a.id; }, new_channel);
+		
+		std::unordered_map<snowflake, Channel>::iterator it = channels.find(new_channel.id);
+		if (it != channels.end()) {
+			it->second = new_channel;
+		}
 
 		discord::DispatchEvent(discord::ChannelUpdateEvent(new_channel));
 	}
 
 	void Bot::ChannelDeleteEvent(nlohmann::json result) {
-		std::remove_if(channels.begin(), channels.end(), [&](discord::Channel& channel) { return channel.id == result["id"].get<snowflake>(); });
+		channels.erase(result["id"].get<snowflake>());
 
 		discord::DispatchEvent(discord::ChannelDeleteEvent(discord::Channel(result)));
 	}
@@ -482,7 +512,10 @@ namespace discord {
 		new_channel.last_pin_timestamp = GetDataSafely<std::string>(result, "last_pin_timestamp");
 		new_channel.guild_id = result["guild_id"].get<snowflake>();
 
-		std::replace_if(channels.begin(), channels.end(), [new_channel](discord::Channel a) { return new_channel.id == a.id; }, new_channel);
+		std::unordered_map<snowflake, Channel>::iterator it = channels.find(new_channel.id);
+		if (it != channels.end()) {
+			it->second = new_channel;
+		}
 
 		discord::DispatchEvent(discord::ChannelPinsUpdateEvent(new_channel));
 	}
@@ -490,12 +523,14 @@ namespace discord {
 	void Bot::GuildCreateEvent(nlohmann::json result) {
 		snowflake guild_id = result["id"].get<snowflake>();
 		discord::Guild guild(result);
-		guilds.push_back(guild);
+		logger.LogToConsole(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Connected to " + guild.name);
+		guilds.insert(std::pair<snowflake, Guild>(static_cast<snowflake>(guild.id), static_cast<Guild>(guild)));
 
-		members.insert(members.end(), guild.members.begin(), guild.members.end());
+		members.insert(guild.members.begin(), guild.members.end());
 
 		for (auto& channel : result["channels"]) {
-			channels.push_back(discord::Channel(channel, guild_id));
+			discord::Channel _channel = Channel(channel, guild_id);
+			channels.insert(std::pair<snowflake, Channel>(static_cast<snowflake>(_channel.id), static_cast<Channel>(_channel)));
 		}
 
 		discord::DispatchEvent(discord::GuildCreateEvent(guild));
@@ -503,8 +538,10 @@ namespace discord {
 
 	void Bot::GuildUpdateEvent(nlohmann::json result) {
 		discord::Guild guild(result);
-		std::replace_if(guilds.begin(), guilds.end(), [guild](discord::Guild gild) { return gild.id == guild.id; }, guild);
-
+		std::unordered_map<snowflake, Guild>::iterator it = guilds.find(guild.id);
+		if (it != guilds.end()) {
+			it->second = guild;
+		}
 		discord::DispatchEvent(discord::GuildUpdateEvent(guild));
 	}
 
@@ -512,7 +549,7 @@ namespace discord {
 		discord::Guild guild;
 		guild.id = result["id"].get<snowflake>();
 		guild.unavailable = true;
-		std::remove_if(guilds.begin(), guilds.end(), [guild](discord::Guild gild) {return gild.id == guild.id; });
+		guilds.erase(guild.id);
 
 		discord::DispatchEvent(discord::GuildDeleteEvent(guild));
 	}
@@ -533,12 +570,16 @@ namespace discord {
 
 	void Bot::GuildEmojisUpdateEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
-		std::vector<discord::Emoji> emojis;
-		for (auto emoji : result["emojis"]) {
-			emojis.push_back({ emoji });
+		std::unordered_map<snowflake, Emoji> emojis;
+		for (nlohmann::json emoji : result["emojis"]) {
+			discord::Emoji tmp = discord::Emoji(emoji);
+			emojis.insert(std::pair<snowflake, Emoji>(static_cast<snowflake>(tmp.id), static_cast<Emoji>(tmp)));
 		}
-		guild.emojis = emojis;
-		std::replace_if(guilds.begin(), guilds.end(), [guild](discord::Guild gild) { return gild.id == guild.id; }, guild);
+
+		guild.emojis = emojis; std::unordered_map<snowflake, Guild>::iterator it = discord::globals::bot_instance->guilds.find(guild.id);
+		if (it != discord::globals::bot_instance->guilds.end()) {
+			it->second = guild;
+		}
 
 		discord::DispatchEvent(discord::GuildEmojisUpdateEvent(guild));
 	}
@@ -550,6 +591,7 @@ namespace discord {
 	void Bot::GuildMemberAddEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
 		discord::Member member(result, guild.id);
+		members.insert(std::pair<snowflake, Member>(static_cast<snowflake>(member.id), static_cast<Member>(member)));
 
 		discord::DispatchEvent(discord::GuildMemberAddEvent(guild, member));
 	}
@@ -557,14 +599,15 @@ namespace discord {
 	void Bot::GuildMemberRemoveEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
 		discord::Member member(result["user"]["id"].get<snowflake>());
-		std::remove_if(members.begin(), members.end(), [member](discord::Member member) { return member.user.id == member.user.id; });
+		members.erase(member.id);
 
 		discord::DispatchEvent(discord::GuildMemberRemoveEvent(guild, member));
 	}
 
 	void Bot::GuildMemberUpdateEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
-		discord::Member member = GetIf(guild.members, [result](discord::Member& member) { return member.user.id == result["user"]["id"]; });
+		std::unordered_map<snowflake, Member>::iterator it = guild.members.find(result["user"]["id"]);
+		discord::Member member = it->second;
 		member.roles.clear();
 		for (auto role : result["roles"]) {
 			member.roles.push_back(discord::Role(role, guild));
@@ -572,7 +615,6 @@ namespace discord {
 		if (result.contains("nick") && !result["nick"].is_null()) {
 			member.nick = result["nick"];
 		}
-
 		discord::DispatchEvent(discord::GuildMemberUpdateEvent(guild, member));
 	}
 
@@ -594,8 +636,8 @@ namespace discord {
 
 	void Bot::GuildRoleDeleteEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
-		discord::Role role = GetIf(guild.roles, [result](discord::Role& role) {return role.id == result["role_id"].get<snowflake>(); });
-		std::replace_if(guild.roles.begin(), guild.roles.end(), [role](discord::Role& r) { return r.id == role.id; }, role);
+		discord::Role role(result["role"]);
+		guild.roles.erase(role.id);
 
 		discord::DispatchEvent(discord::GuildRoleDeleteEvent(role));
 	}
@@ -616,9 +658,12 @@ namespace discord {
 		if (messages.size() >= message_cache_count) {
 			messages.erase(messages.begin());
 		}
-		std::replace_if(messages.begin(), messages.end(), [message](discord::Message& msg) { return msg.id == message.id; }, message);
 
-		discord::DispatchEvent(discord::MessageUpdateEvent(message));
+		discord::Message old_message(result["id"].get<snowflake>());
+		std::replace_if(messages.begin(), messages.end(), [message](discord::Message& msg) { return msg.id == message.id; }, message);
+		bool is_edited = !result["edited_timestamp"].empty();
+
+		discord::DispatchEvent(discord::MessageUpdateEvent(message, old_message, is_edited));
 	}
 
 	void Bot::MessageDeleteEvent(nlohmann::json result) {
@@ -650,7 +695,7 @@ namespace discord {
 
 	void Bot::MessageReactionAddEvent(nlohmann::json result) {
 		discord::Message message = GetIf(messages, [result](discord::Message& msg) { return msg.id == result["message_id"].get<snowflake>(); });
-		discord::Channel channel = GetIf(channels, [result](discord::Channel& channel) { return channel.id == result["channel_id"].get<snowflake>(); });
+		discord::Channel channel = channels.find(result["channel_id"].get<snowflake>())->second;
 		message.channel = channel;
 
 		if (result.contains("guild_id")) {
@@ -666,7 +711,7 @@ namespace discord {
 
 	void Bot::MessageReactionRemoveEvent(nlohmann::json result) {
 		discord::Message message = GetIf(messages, [result](discord::Message& msg) { return msg.id == result["message_id"].get<snowflake>(); });
-		discord::Channel channel = GetIf(channels, [result](discord::Channel& channel) { return channel.id == result["channel_id"].get<snowflake>(); });
+		discord::Channel channel = channels.find(result["channel_id"].get<snowflake>())->second;
 		message.channel = channel;
 
 		if (result.contains("guild_id")) {
@@ -681,7 +726,7 @@ namespace discord {
 
 	void Bot::MessageReactionRemoveAllEvent(nlohmann::json result) {
 		discord::Message message = GetIf(messages, [result](discord::Message& msg) { return msg.id == result["message_id"].get<snowflake>(); });
-		discord::Channel channel = GetIf(channels, [result](discord::Channel& channel) { return channel.id == result["channel_id"].get<snowflake>(); });
+		discord::Channel channel = channels.find(result["channel_id"].get<snowflake>())->second;
 		message.channel = channel;
 
 		if (result.contains("guild_id")) {

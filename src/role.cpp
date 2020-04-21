@@ -3,7 +3,7 @@
 #include "utils.h"
 
 namespace discord {
-	Role::Role(snowflake role_id, discord::Guild guild) {
+	Role::Role(snowflake role_id, discord::Guild guild) : DiscordObject(role_id) {
 		/**
 		 * @brief Constructs a discord::Role object using a role id and a guild.
 		 *
@@ -19,10 +19,9 @@ namespace discord {
 		 * @return discord::Role, this is a constructor.
 		 */
 
-		auto role = std::find_if(guild.roles.begin(), guild.roles.end(), [role_id](discord::Role r) { return role_id == r.id; });
-
-		if (role != guild.roles.end()) {
-			*this = *role;
+		std::unordered_map<snowflake, Role>::iterator it = guild.roles.find(role_id); 
+		if (it != guild.roles.end()) {
+			*this = it->second;
 		}
 	}
 
