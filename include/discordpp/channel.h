@@ -72,22 +72,22 @@ namespace discord {
 
 		//snowflake id;
 		int type;
-		snowflake guild_id;
-		int position;
-		std::vector<discord::Permissions> permissions;
-		std::string name;
-		std::string topic;
-		bool nsfw;
-		snowflake last_message_id;
-		int bitrate;
-		int user_limit;
-		int rate_limit_per_user;
-		std::vector<discord::User> recipients;
-		std::string icon;
-		snowflake owner_id;
-		snowflake application_id;
-		snowflake category_id;
-		std::string last_pin_timestamp; // TODO: Convert to iso8601Time
+		snowflake guild_id; /**< ID of the current channel's owning guild */
+		int position; /**< Position of channel in guild's channel list */
+		std::vector<discord::Permissions> permissions; /**< PermissionOverwrites of the current channel */
+		std::string name; /**< Name of the current channel */
+		std::string topic; /**< Topic of the current channel */
+		bool nsfw; /**< Whether or not the current channel is not safe for work */
+		snowflake last_message_id; /**< Last message sent in the current channel */
+		int bitrate; /**< Bitrate the current voice channel is encoded at */
+		int user_limit; /**< Max users the current voice channel can hold */
+		int rate_limit_per_user; 
+		std::vector<discord::User> recipients; /**< Members of the current groupdm channel */
+		std::string icon; /**< Icon of the current groupdm channel */
+		snowflake owner_id; /**< Owner of the current groupdm channel */
+		snowflake application_id; 
+		snowflake category_id; /**< Category the current channel is in */
+		std::string last_pin_timestamp; // TODO: Convert to iso8601Time 
 	};
 }
 
