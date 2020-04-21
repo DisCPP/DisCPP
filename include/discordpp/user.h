@@ -42,19 +42,19 @@ namespace discord {
 		std::vector<Connection> GetUserConnections();
 		std::string GetAvatarURL(ImageType imgType = ImageType::AUTO);
 		//snowflake id;
-		std::string username;
-		std::string discriminator;
-		std::string avatar;
-		bool bot;
-		bool system;
-		bool mfa_enabled;
-		std::string locale;
-		bool verified;
-		std::string email;
+		std::string username; /**< Username of the current user */
+		std::string discriminator; /**< Discriminator of the current user */
+		std::string avatar; /**< Hashed avatar of the current user */
+		bool bot; /**< Whether or not the current user is a bot */
+		bool system; /**< Whether or not the current user is part of discord's system (Clyde) */
+		bool mfa_enabled; /**< Whether or not the current user has MFA enabled (only applies for the current user logged in) */
+		std::string locale; /**< Locale of the current user (only applies for the current user logged in) */
+		bool verified; /**< Whether or not the current bot user is verified */
+		std::string email; /**< Email of the current user (only applies for the current user logged in) */
 		int flags;
-		discord::specials::NitroSubscription premium_type;
-		std::string created_at;
-		std::string mention;
+		discord::specials::NitroSubscription premium_type; /**< The status of discord nitro for the current user */
+		std::string created_at; /**< The creation date of the current user's account */
+		std::string mention; /**< The @ mention of the current user Ex: <@150312037426135041> */
 	};
 }
 
