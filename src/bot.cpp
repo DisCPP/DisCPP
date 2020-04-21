@@ -702,6 +702,20 @@ namespace discord {
 		discord::Emoji emoji(result["emoji"]);
 		discord::User user(result["user_id"].get<snowflake>());
 
+        auto reaction = std::find_if(message.reactions.begin(), message.reactions.end(),
+                                     [emoji](discord::Reaction react) { return react.emoji.name == emoji.name || react.emoji.id == emoji.id; });
+
+        if (reaction != message.reactions.end()) {
+            reaction->count++;
+
+            if (user.bot) {
+                reaction->from_bot = true;
+            }
+        } else {
+            discord::Reaction r = discord::Reaction(1, user.bot, emoji);
+            message.reactions.push_back(r);
+        }
+
 		discord::DispatchEvent(discord::MessageReactionAddEvent(message, emoji, user));
 	}
 
@@ -716,6 +730,19 @@ namespace discord {
 
 		discord::Emoji emoji(result["emoji"]);
 		discord::User user(result["user_id"].get<snowflake>());
+
+        auto reaction = std::find_if(message.reactions.begin(), message.reactions.end(),
+                [emoji](discord::Reaction react) { return react.emoji.name == emoji.name || react.emoji.id == emoji.id; });
+
+        if (reaction != message.reactions.end()) {
+            if (reaction->count == 1) {
+                message.reactions.erase(reaction);
+            } else {
+                reaction->count--;
+
+                // @TODO: Add a way to change reaction::from_bot
+            }
+        }
 
 		discord::DispatchEvent(discord::MessageReactionRemoveEvent(message, emoji, user));
 	}
