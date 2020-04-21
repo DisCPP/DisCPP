@@ -560,9 +560,10 @@ namespace discord {
 
 	void Bot::GuildEmojisUpdateEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
-		std::vector<discord::Emoji> emojis;
+		std::unordered_map<snowflake, Emoji> emojis;
 		for (nlohmann::json emoji : result["emojis"]) {
-			emojis.push_back({ emoji });
+			discord::Emoji tmp = discord::Emoji(emoji);
+			emojis.insert(std::pair<snowflake, Emoji>(static_cast<snowflake>(tmp.id), static_cast<Emoji>(tmp)));
 		}
 		guild.emojis = emojis;
 		std::replace_if(guilds.begin(), guilds.end(), [guild](discord::Guild _guild) { return _guild.id == guild.id; }, guild);
