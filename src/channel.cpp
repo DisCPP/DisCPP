@@ -237,7 +237,7 @@ namespace discord {
 		}
 
 		cpr::Body body = cpr::Body("{\"" + field + "\": \"" + modify_request.value + "\"}");
-		nlohmann::json result = SendPatchRequest(Endpoint("/channels/%" + id), headers, id, RateLimitBucketType::CHANNEL, body);
+		nlohmann::json result = SendPatchRequest(Endpoint("/channels/" + id), headers, id, RateLimitBucketType::CHANNEL, body);
 		
 		*this = discord::Channel(result);
 		return *this;
@@ -254,7 +254,7 @@ namespace discord {
 		 * @return discord::Channel - Returns a default channel object
 		 */
 
-		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/%" + id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/" + id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 		*this = discord::Channel();
 		return *this;
 	}

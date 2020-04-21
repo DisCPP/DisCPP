@@ -255,6 +255,8 @@ std::string discord::CombineStringVector(std::vector<std::string> vector, std::s
 	 * @return std::string
 	 */
 
+	if (vector.size() == 0) return "";
+
 	return std::accumulate(vector.begin() + offset, vector.end(), std::string(""), [delimiter](std::string s0, std::string const& s1) { return s0 += delimiter + s1; }).substr(1);
 }
 

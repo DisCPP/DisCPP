@@ -561,7 +561,7 @@ namespace discord {
 	void Bot::GuildEmojisUpdateEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
 		std::vector<discord::Emoji> emojis;
-		for (auto emoji : result["emojis"]) {
+		for (nlohmann::json emoji : result["emojis"]) {
 			emojis.push_back({ emoji });
 		}
 		guild.emojis = emojis;
