@@ -34,6 +34,7 @@ namespace discord {
 		bool mute;
 		discord::Permissions permissions;
 		discord::Activity activity;
+		int hierarchy;
 	};
 }
 

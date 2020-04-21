@@ -3,6 +3,7 @@
 #include "member.h"
 #include "utils.h"
 #include "bot.h"
+#include <limits>
 
 namespace discord {
 	Member::Member(snowflake id) : discord::DiscordObject(id) {
@@ -20,10 +21,9 @@ namespace discord {
 		 * @return discord::Member, this is a constructor.
 		 */
 
-		auto member = std::find_if(discord::globals::bot_instance->members.begin(), discord::globals::bot_instance->members.end(), [id](discord::Member a) { return id == a.user.id; });
-
-		if (member != discord::globals::bot_instance->members.end()) {
-			*this = *member;
+		std::unordered_map<snowflake, Member>::iterator it = discord::globals::bot_instance->members.find(id);
+		if (it != discord::globals::bot_instance->members.end()) {
+			*this = it->second;
 		}
 	}
 
@@ -47,13 +47,15 @@ namespace discord {
 		} else {
 			user = discord::User();
 		}
-		
+		int maxVal = 0;
 		nick = GetDataSafely<std::string>(json, "nick");
 		if (json.contains("roles")) {
 			discord::Permissions permissions;
 			for (auto& role : json["roles"]) {
 				discord::Role r(role.get<snowflake>(), guild);
-
+				if (r.position > maxVal) {
+					maxVal = r.position;
+				}
 				// Save permissions
 				if (json["roles"][0] == role) {
 					permissions.allow_perms.value = r.permissions.allow_perms.value;
@@ -68,10 +70,18 @@ namespace discord {
 
 			this->permissions = permissions;
 		}
+		if (guild.owner_id == this->id) {
+			hierarchy = std::numeric_limits<int>::max();
+		}
+		else {
+			hierarchy = maxVal;
+		}
 		joined_at = GetDataSafely<std::string>(json, "joined_at");
 		premium_since = GetDataSafely<std::string>(json, "premium_since");
 		deaf = GetDataSafely<bool>(json, "deaf");
 		mute = GetDataSafely<bool>(json, "mute");
+		std::string _id = this->id.c_str();
+		user.mention = "<@!" + _id + ">";
 	}
 
 	void Member::ModifyMember(std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf, snowflake channel_id) {

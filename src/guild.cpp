@@ -23,10 +23,9 @@ namespace discord {
 		 * @return discord::Guild, this is a constructor.
 		 */
 
-		auto guild = std::find_if(discord::globals::bot_instance->guilds.begin(), discord::globals::bot_instance->guilds.end(), [id](discord::Guild a) { return id == a.id; });
-
-		if (guild != discord::globals::bot_instance->guilds.end()) {
-			*this = *guild;
+		std::unordered_map<snowflake, Guild>::iterator it = discord::globals::bot_instance->guilds.find(id);
+		if (it != discord::globals::bot_instance->guilds.end()) {
+			*this = it->second;
 		}
 	}
 
@@ -60,12 +59,14 @@ namespace discord {
 		explicit_content_filter = (json.contains("explicit_content_filter")) ? static_cast<discord::specials::ExplicitContentFilterLevel>(json["explicit_content_filter"].get<int>()) : discord::specials::ExplicitContentFilterLevel::DISABLED;
 		if (json.contains("roles")) {
 			for (auto& role : json["roles"]) {
-				roles.push_back(discord::Role(role));
+				discord::Role tmp = discord::Role(role);
+				roles.insert(std::make_pair<snowflake, Role>(static_cast<discord::snowflake>(tmp.id), static_cast<discord::Role>(tmp)));
 			}
 		}
 		if (json.contains("emojis")) {
 			for (auto& emoji : json["emojis"]) {
-				emojis.push_back(discord::Emoji(emoji));
+				discord::Emoji tmp = discord::Emoji(emoji);
+				emojis.insert(std::make_pair<snowflake, Emoji>(static_cast<discord::snowflake>(tmp.id), static_cast<discord::Emoji>(tmp)));
 			}
 		}
 		// features
@@ -81,14 +82,15 @@ namespace discord {
 		// voice_states
 		if (json.contains("channels")) {
 			for (auto& channel : json["channels"]) {
-				channels.push_back(discord::Channel(channel));
+				discord::Channel tmp = discord::Channel(channel);
+				channels.insert(std::make_pair<snowflake, Channel>(static_cast<discord::snowflake>(tmp.id), static_cast<discord::Channel>(tmp)));
 			}
 		}
 		if (json.contains("presences") && json.contains("members")) {
 			for (auto const& presence : json["presences"]) {
-				auto member = std::find_if(members.begin(), members.end(), [presence](discord::Member a) { return presence["user"]["id"] == a.user.id;});
-
-				if (member != members.end()) {
+				std::unordered_map<snowflake, Member>::iterator it = members.find(presence["user"]["id"]);
+				
+				if (it != members.end()) {
 					nlohmann::json activity = presence["game"];
 					
 					if (!activity.is_null()) {
@@ -103,7 +105,7 @@ namespace discord {
 						act.application_id = activity["id"];
 						act.created_at = std::to_string(activity["created_at"].get<int>());
 
-						member->activity = act;
+						it->second.activity = act;
 					}
 				}
 			}
@@ -119,7 +121,8 @@ namespace discord {
 		created_at = FormatTimeFromSnowflake(id);
 		if (json.contains("members")) {
 			for (auto& member : json["members"]) {
-				members.push_back(discord::Member(member, *this));
+				discord::Member tmp = discord::Member(member, *this);
+				members.insert(std::make_pair<snowflake, Member>(static_cast<discord::snowflake>(tmp.id), static_cast<discord::Member>(tmp)));
 			}
 		}
 	}
@@ -452,7 +455,7 @@ namespace discord {
 		cpr::Body body(json_raw.dump());
 		nlohmann::json result = SendPostRequest(Endpoint("/guilds/" + id + "/channels"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discord::RateLimitBucketType::CHANNEL, body);
 		discord::Channel channel(result);
-		channels.push_back(channel);
+		channels.insert(std::pair<snowflake, Channel>(static_cast<snowflake>(channel.id), static_cast<Channel>(channel)));
 
 		return channel;
 	}
@@ -493,10 +496,9 @@ namespace discord {
 		 * @return discord::Member
 		 */
 
-		auto member = std::find_if(discord::globals::bot_instance->members.begin(), discord::globals::bot_instance->members.end(), [id](discord::Member a) { return id == a.user.id; });
-
-		if (member != discord::globals::bot_instance->members.end()) {
-			return *member;
+		std::unordered_map<snowflake, Member>::iterator it = discord::globals::bot_instance->members.find(id);
+		if (it != discord::globals::bot_instance->members.end()) {
+			return it->second;
 		}
 		throw std::runtime_error("Member not found!");
 	}
@@ -669,7 +671,7 @@ namespace discord {
 		cpr::Body body(json_body.dump());
 		nlohmann::json result = SendPostRequest(Endpoint("/guilds/" + id + "/roles"), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 		discord::Role new_role(result);
-		roles.push_back(new_role);
+		roles.insert(std::pair<snowflake, Role>(new_role.id, new_role));
 
 		return new_role;
 	}
@@ -725,7 +727,10 @@ namespace discord {
 		cpr::Body body(json_body.dump());
 		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + id + "/roles/" + role.id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 		discord::Role modified_role(result);
-		std::replace_if(roles.begin(), roles.end(), [modified_role](discord::Role r) { return r.id == modified_role.id; }, modified_role);
+		std::unordered_map<snowflake, Role>::iterator it = roles.find(role.id);
+		if (it != roles.end()) {
+			it->second = modified_role;
+		}
 
 		return modified_role;
 	}
@@ -744,7 +749,7 @@ namespace discord {
 		 */
 
 		nlohmann::json result = SendDeleteRequest(Endpoint("/guilds/" + id + "/roles/" + role.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
-		roles.erase(std::remove_if(roles.begin(), roles.end(), [role](discord::Role r) { return r.id == role.id; }));
+		roles.erase(role.id);
 	}
 
 	int Guild::GetPruneAmount(int days) {
@@ -967,7 +972,7 @@ namespace discord {
 		return std::string();
 	}
 
-	std::vector<discord::Emoji> Guild::GetEmojis() {
+	std::unordered_map<snowflake, Emoji> Guild::GetEmojis() {
 		/**
 		 * @brief Get all guild emojis.
 		 *
@@ -980,9 +985,10 @@ namespace discord {
 
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + id + "/emojis"), DefaultHeaders(), {}, {});
 
-		std::vector<discord::Emoji> emojis;
+		std::unordered_map<snowflake, Emoji> emojis;
 		for (auto& emoji : result) {
-			emojis.push_back(discord::Emoji(emoji));
+			discord::Emoji tmp = discord::Emoji(emoji);
+			emojis.insert(std::pair<snowflake, Emoji>(static_cast<snowflake>(tmp.id), static_cast<Emoji>(tmp)));
 		}
 		this->emojis = emojis;
 
@@ -1068,8 +1074,10 @@ namespace discord {
 		cpr::Body body("{\"name\": \"" + name + "\", \"roles\": " + json_roles + "}");
 		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + this->id + "/emojis/" + id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 		discord::Emoji em(result);
-		std::replace_if(emojis.begin(), emojis.end(), [em](discord::Emoji e) { return e.id == em.id; }, em);
-
+		std::unordered_map<snowflake, Emoji>::iterator it = emojis.find(em.id);
+		if (it != emojis.end()) {
+			it->second = em;
+		}
 		return em;
 	}
 
@@ -1085,10 +1093,9 @@ namespace discord {
 		 */
 
 		nlohmann::json result = SendDeleteRequest(Endpoint("/guilds/" + this->id + "/emojis/" + id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
-		emojis.erase(std::remove_if(emojis.begin(), emojis.end(), [emoji](discord::Emoji e) { return e.id == emoji.id; }));
+		emojis.erase(emoji.id);
 	}
 
-	
 	std::string Guild::GetIconURL(discord::ImageType imgType) {
 		std::string idString = this->id.c_str();
 		std::string url = "https://cdn.discordapp.com/icons/" + idString +  "/" + this->icon;
@@ -1102,6 +1109,8 @@ namespace discord {
 			return cpr::Url(url + ".png");
 		case ImageType::WEBP:
 			return cpr::Url(url + ".webp");
+		default:
+			return cpr::Url(url);
 		}
 	}
 }

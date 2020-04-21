@@ -3,7 +3,7 @@
 
 #include "discord_object.h"
 #include "utils.h"
-
+#include "activity.h"
 #include <nlohmann/json.hpp>
 
 namespace discord {
@@ -54,6 +54,7 @@ namespace discord {
 		int flags;
 		discord::specials::NitroSubscription premium_type;
 		std::string created_at;
+		std::string mention;
 	};
 }
 

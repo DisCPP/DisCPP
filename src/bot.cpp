@@ -118,10 +118,10 @@ namespace discord {
 		 *
 		 * @return discord::Guild
 		 */
-		auto guild = std::find_if(discord::globals::bot_instance->guilds.begin(), discord::globals::bot_instance->guilds.end(), [guild_id](discord::Guild a) { return guild_id == a.id; });
 
-		if (guild != discord::globals::bot_instance->guilds.end()) {
-			return *guild;
+		std::unordered_map<snowflake, Guild>::iterator it = discord::globals::bot_instance->guilds.find(guild_id);
+		if (it != discord::globals::bot_instance->guilds.end()) {
+			return it->second;
 		}
 		throw std::runtime_error("Guild not found!");
 	}
@@ -485,20 +485,24 @@ namespace discord {
 
 	void Bot::ChannelCreateEvent(nlohmann::json result) {
 		discord::Channel new_channel = discord::Channel(result, result["id"].get<snowflake>());
-		channels.push_back(new_channel);
+		channels.insert(std::pair<snowflake, Channel>(static_cast<snowflake>(new_channel.id), static_cast<Channel>(new_channel)));
 
 		discord::DispatchEvent(discord::ChannelCreateEvent(new_channel));
 	}
 
 	void Bot::ChannelUpdateEvent(nlohmann::json result) {
 		discord::Channel new_channel = discord::Channel(result);
-		std::replace_if(channels.begin(), channels.end(), [new_channel](discord::Channel a) { return new_channel.id == a.id; }, new_channel);
+		
+		std::unordered_map<snowflake, Channel>::iterator it = channels.find(new_channel.id);
+		if (it != channels.end()) {
+			it->second = new_channel;
+		}
 
 		discord::DispatchEvent(discord::ChannelUpdateEvent(new_channel));
 	}
 
 	void Bot::ChannelDeleteEvent(nlohmann::json result) {
-		std::remove_if(channels.begin(), channels.end(), [&](discord::Channel& channel) { return channel.id == result["id"].get<snowflake>(); });
+		channels.erase(result["id"].get<snowflake>());
 
 		discord::DispatchEvent(discord::ChannelDeleteEvent(discord::Channel(result)));
 	}
@@ -508,7 +512,10 @@ namespace discord {
 		new_channel.last_pin_timestamp = GetDataSafely<std::string>(result, "last_pin_timestamp");
 		new_channel.guild_id = result["guild_id"].get<snowflake>();
 
-		std::replace_if(channels.begin(), channels.end(), [new_channel](discord::Channel a) { return new_channel.id == a.id; }, new_channel);
+		std::unordered_map<snowflake, Channel>::iterator it = channels.find(new_channel.id);
+		if (it != channels.end()) {
+			it->second = new_channel;
+		}
 
 		discord::DispatchEvent(discord::ChannelPinsUpdateEvent(new_channel));
 	}
@@ -516,12 +523,14 @@ namespace discord {
 	void Bot::GuildCreateEvent(nlohmann::json result) {
 		snowflake guild_id = result["id"].get<snowflake>();
 		discord::Guild guild(result);
-		guilds.push_back(guild);
+		logger.LogToConsole(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Connected to " + guild.name);
+		guilds.insert(std::pair<snowflake, Guild>(static_cast<snowflake>(guild.id), static_cast<Guild>(guild)));
 
-		members.insert(members.end(), guild.members.begin(), guild.members.end());
+		members.insert(guild.members.begin(), guild.members.end());
 
 		for (auto& channel : result["channels"]) {
-			channels.push_back(discord::Channel(channel, guild_id));
+			discord::Channel _channel = Channel(channel, guild_id);
+			channels.insert(std::pair<snowflake, Channel>(static_cast<snowflake>(_channel.id), static_cast<Channel>(_channel)));
 		}
 
 		discord::DispatchEvent(discord::GuildCreateEvent(guild));
@@ -529,8 +538,10 @@ namespace discord {
 
 	void Bot::GuildUpdateEvent(nlohmann::json result) {
 		discord::Guild guild(result);
-		std::replace_if(guilds.begin(), guilds.end(), [guild](discord::Guild gild) { return gild.id == guild.id; }, guild);
-
+		std::unordered_map<snowflake, Guild>::iterator it = guilds.find(guild.id);
+		if (it != guilds.end()) {
+			it->second = guild;
+		}
 		discord::DispatchEvent(discord::GuildUpdateEvent(guild));
 	}
 
@@ -538,7 +549,7 @@ namespace discord {
 		discord::Guild guild;
 		guild.id = result["id"].get<snowflake>();
 		guild.unavailable = true;
-		std::remove_if(guilds.begin(), guilds.end(), [guild](discord::Guild gild) {return gild.id == guild.id; });
+		guilds.erase(guild.id);
 
 		discord::DispatchEvent(discord::GuildDeleteEvent(guild));
 	}
@@ -559,12 +570,16 @@ namespace discord {
 
 	void Bot::GuildEmojisUpdateEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
-		std::vector<discord::Emoji> emojis;
+		std::unordered_map<snowflake, Emoji> emojis;
 		for (nlohmann::json emoji : result["emojis"]) {
-			emojis.push_back({ emoji });
+			discord::Emoji tmp = discord::Emoji(emoji);
+			emojis.insert(std::pair<snowflake, Emoji>(static_cast<snowflake>(tmp.id), static_cast<Emoji>(tmp)));
 		}
-		guild.emojis = emojis;
-		std::replace_if(guilds.begin(), guilds.end(), [guild](discord::Guild gild) { return gild.id == guild.id; }, guild);
+
+		guild.emojis = emojis; std::unordered_map<snowflake, Guild>::iterator it = discord::globals::bot_instance->guilds.find(guild.id);
+		if (it != discord::globals::bot_instance->guilds.end()) {
+			it->second = guild;
+		}
 
 		discord::DispatchEvent(discord::GuildEmojisUpdateEvent(guild));
 	}
@@ -576,6 +591,7 @@ namespace discord {
 	void Bot::GuildMemberAddEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
 		discord::Member member(result, guild.id);
+		members.insert(std::pair<snowflake, Member>(static_cast<snowflake>(member.id), static_cast<Member>(member)));
 
 		discord::DispatchEvent(discord::GuildMemberAddEvent(guild, member));
 	}
@@ -583,14 +599,15 @@ namespace discord {
 	void Bot::GuildMemberRemoveEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
 		discord::Member member(result["user"]["id"].get<snowflake>());
-		std::remove_if(members.begin(), members.end(), [member](discord::Member m) { return m.user.id == member.user.id; });
+		members.erase(member.id);
 
 		discord::DispatchEvent(discord::GuildMemberRemoveEvent(guild, member));
 	}
 
 	void Bot::GuildMemberUpdateEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
-		discord::Member member = GetIf(guild.members, [result](discord::Member& member) { return member.user.id == result["user"]["id"]; });
+		std::unordered_map<snowflake, Member>::iterator it = guild.members.find(result["user"]["id"]);
+		discord::Member member = it->second;
 		member.roles.clear();
 		for (auto role : result["roles"]) {
 			member.roles.push_back(discord::Role(role, guild));
@@ -598,7 +615,6 @@ namespace discord {
 		if (result.contains("nick") && !result["nick"].is_null()) {
 			member.nick = result["nick"];
 		}
-
 		discord::DispatchEvent(discord::GuildMemberUpdateEvent(guild, member));
 	}
 
@@ -620,8 +636,8 @@ namespace discord {
 
 	void Bot::GuildRoleDeleteEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
-		discord::Role role = GetIf(guild.roles, [result](discord::Role& role) {return role.id == result["role_id"].get<snowflake>(); });
-		std::replace_if(guild.roles.begin(), guild.roles.end(), [role](discord::Role& r) { return r.id == role.id; }, role);
+		discord::Role role(result["role"]);
+		guild.roles.erase(role.id);
 
 		discord::DispatchEvent(discord::GuildRoleDeleteEvent(role));
 	}
@@ -679,7 +695,7 @@ namespace discord {
 
 	void Bot::MessageReactionAddEvent(nlohmann::json result) {
 		discord::Message message = GetIf(messages, [result](discord::Message& msg) { return msg.id == result["message_id"].get<snowflake>(); });
-		discord::Channel channel = GetIf(channels, [result](discord::Channel& channel) { return channel.id == result["channel_id"].get<snowflake>(); });
+		discord::Channel channel = channels.find(result["channel_id"].get<snowflake>())->second;
 		message.channel = channel;
 
 		if (result.contains("guild_id")) {
@@ -695,7 +711,7 @@ namespace discord {
 
 	void Bot::MessageReactionRemoveEvent(nlohmann::json result) {
 		discord::Message message = GetIf(messages, [result](discord::Message& msg) { return msg.id == result["message_id"].get<snowflake>(); });
-		discord::Channel channel = GetIf(channels, [result](discord::Channel& channel) { return channel.id == result["channel_id"].get<snowflake>(); });
+		discord::Channel channel = channels.find(result["channel_id"].get<snowflake>())->second;
 		message.channel = channel;
 
 		if (result.contains("guild_id")) {
@@ -710,7 +726,7 @@ namespace discord {
 
 	void Bot::MessageReactionRemoveAllEvent(nlohmann::json result) {
 		discord::Message message = GetIf(messages, [result](discord::Message& msg) { return msg.id == result["message_id"].get<snowflake>(); });
-		discord::Channel channel = GetIf(channels, [result](discord::Channel& channel) { return channel.id == result["channel_id"].get<snowflake>(); });
+		discord::Channel channel = channels.find(result["channel_id"].get<snowflake>())->second;
 		message.channel = channel;
 
 		if (result.contains("guild_id")) {
