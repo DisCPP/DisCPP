@@ -1149,4 +1149,18 @@ namespace discord {
 			return cpr::Url(url);
 		}
 	}
+
+	discord::Member Guild::GetOwnerObject() {
+		/**
+		 * @brief Retrieve guild owner as a discord::Member object
+		 *
+		 * ```cpp
+		 *      discord::Member owner = guild.GetOwnerObject()
+		 * ```
+		 *
+		 * @return discord::Member
+		 */
+
+		return this->GetMember(this->owner_id);
+	}
 }

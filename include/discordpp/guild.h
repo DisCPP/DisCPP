@@ -185,6 +185,7 @@ namespace discord {
 		std::string splash;
 		std::string owner;
 		snowflake owner_id;
+		Member GetOwnerObject();
 		int permissions;
 		std::string region;
 		snowflake afk_channel_id;
