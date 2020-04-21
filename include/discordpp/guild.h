@@ -18,8 +18,8 @@ namespace discord {
 	class User;
 
 	struct GuildBan {
-		std::string reason;
-		discord::User user;
+		std::string reason; /**< Ban reason */
+		discord::User user; /**< Banned member */
 
 		GuildBan(std::string reason, discord::User user) {
 			this->reason = reason;
@@ -29,13 +29,13 @@ namespace discord {
 
 	class GuildInvite {
 	public:
-		std::string code;
-		snowflake guild_id;
-		discord::Channel channel;
-		discord::User target_user;
+		std::string code; /**< Guild Invite code */
+		snowflake guild_id; /**< Guild ID the invite was issued for */
+		discord::Channel channel; /**< Channel the invite was issued for */
+		discord::User target_user; 
 		int target_user_type;
-		int approximate_presence_count;
-		int approximate_member_count;
+		int approximate_presence_count; 
+		int approximate_member_count; /**< Approximate count of members in the guild the invite was issued for */
 
 		GuildInvite() = default;
 		GuildInvite(nlohmann::json json) {
@@ -50,8 +50,8 @@ namespace discord {
 	};
 
 	struct GuildIntegrationAccount {
-		std::string id;
-		std::string name;
+		std::string id; /**< ID of the integration */
+		std::string name; /**< Name of the integration */
 
 		GuildIntegrationAccount() = default;
 		GuildIntegrationAccount(nlohmann::json json) {
@@ -63,11 +63,11 @@ namespace discord {
 	class GuildIntegration : public DiscordObject {
 	public:
 		//snowflake id;
-		std::string name;
-		std::string type;
-		bool enabled;
-		bool syncing;
-		discord::Role role;
+		std::string name; /**< Name of the integration */
+		std::string type; /**< Type of the integration */
+		bool enabled; /**< Is the integration enabled? */
+		bool syncing; 
+		discord::Role role; 
 		int expire_behavior;
 		int expire_grace_period;
 		discord::User user;
@@ -154,6 +154,7 @@ namespace discord {
 		void BanMember(discord::Member member, std::string reason = "");
 		void UnbanMember(discord::Member member);
 		void KickMember(discord::Member member);
+		discord::Role GetRole(snowflake id);
 		discord::Role CreateRole(std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
 		void ModifyRolePositions(std::vector<discord::Role> new_role_positions); // https://discordapp.com/developers/docs/resources/guild#modify-guild-role-positions
 		discord::Role ModifyRole(discord::Role role, std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
@@ -179,24 +180,25 @@ namespace discord {
 		std::string GetIconURL(discord::ImageType imgType = discord::ImageType::AUTO);
 
 		//snowflake id;
-		std::string name;
-		std::string icon;
-		std::string splash;
-		std::string owner;
-		snowflake owner_id;
+		std::string name; /**< Guild name */
+		std::string icon; /**< Hashed guild icon */
+		std::string splash; /**< Optional guild splash */
+		std::string owner; /**< Guild Owner */
+		snowflake owner_id; /**< Snowflake id of the guild owner */
+		Member GetOwnerObject();
 		int permissions;
-		std::string region;
-		snowflake afk_channel_id;
-		int afk_timeout;
+		std::string region; /**< Guild region */
+		snowflake afk_channel_id; /**< Guild AFK voice channel if enabled */
+		int afk_timeout; /**< Guild AFK timeout if enabled */
 		bool embed_enabled;
 		snowflake embed_channel_id;
-		discord::specials::VerificationLevel verification_level;
-		discord::specials::DefaultMessageNotificationLevel default_message_notifications;
-		discord::specials::ExplicitContentFilterLevel explicit_content_filter;
-		std::unordered_map<snowflake, Role> roles;
-		std::unordered_map<snowflake, Emoji> emojis;
+		discord::specials::VerificationLevel verification_level; /**< Guild Verification level if enabled */
+		discord::specials::DefaultMessageNotificationLevel default_message_notifications; /**< Default channel for join/leave notifications if enabled */
+		discord::specials::ExplicitContentFilterLevel explicit_content_filter; /**< Content filtering level if enabled */
+		std::unordered_map<snowflake, Role> roles; /**< List of roles in the current guild */
+		std::unordered_map<snowflake, Emoji> emojis; /**< List of emojis in the current guild */
 		// features
-		discord::specials::MFALevel mfa_level;
+		discord::specials::MFALevel mfa_level; /**< MFA level for current guild */
 		snowflake application_id;
 		bool widget_enabled;
 		snowflake widget_channel_id;
@@ -204,19 +206,19 @@ namespace discord {
 		std::string joined_at; // TODO: Convert to iso8601Time
 		bool large;
 		bool unavailable;
-		int member_count;
+		int member_count; /**< Number of members in the current guild */
 		//voice_states
-		std::unordered_map<snowflake, Member> members;
-		std::unordered_map<snowflake, Channel> channels;
-		int max_presences;
+		std::unordered_map<snowflake, Member> members; /**< List of members in the current guild */
+		std::unordered_map<snowflake, Channel> channels; /**< List of channels in the current guild */
+		int max_presences; 
 		int max_members;
-		std::string vanity_url_code;
-		std::string description;
+		std::string vanity_url_code; /**< Optional vanity_url for current guild */
+		std::string description; 
 		std::string banner;
 		discord::specials::NitroTier premium_tier;
 		int premium_subscription_count;
 		std::string preferred_locale;
-		std::string created_at;
+		std::string created_at; /**< Date in which the current guild was created */
 	};
 }
 
