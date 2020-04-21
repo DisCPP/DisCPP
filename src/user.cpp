@@ -121,6 +121,18 @@ namespace discord {
 	}
 	
 	std::string User::GetAvatarURL(ImageType imgType) {
+		/**
+		 * @brief Retrieve user avatar url.
+		 *
+		 * ```cpp
+		 *      std::string avatar_url = user.GetAvatarURL()
+		 * ```
+	     *
+         * @param[in] imgType Optional parameter for type of image
+		 *
+		 * @return std::string
+		 */
+
 		std::string idString = this->id.c_str();
 		if (this->avatar == "") {
 			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(std::stoi(this->discriminator) % 5) + ".png");
@@ -137,6 +149,8 @@ namespace discord {
 				return cpr::Url(url + ".png");
 			case ImageType::WEBP:
 				return cpr::Url(url + ".webp");
+			default:
+				return cpr::Url(url);
 			}
 		}
 	}

@@ -647,6 +647,26 @@ namespace discord {
 		SendDeleteRequest(Endpoint("guilds/" + id + "/members/" + member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
+	discord::Role Guild::GetRole(snowflake) {
+		/**
+		 * @brief Retrieve a guild role.
+		 *
+		 * ```cpp
+		 *      discord::Role new_role = guild.GetRole(638157816325996565)
+		 * ```
+		 *
+		 * @param[in] id The id of the role you want to retrieve
+		 *
+		 * @return discord::Role
+		 */
+
+		std::unordered_map<snowflake, Role>::iterator it = roles.find(id);
+		if (it != roles.end()) {
+			return it->second;
+		}
+		throw std::runtime_error("Role not found!");
+	}
+
 	discord::Role Guild::CreateRole(std::string name, Permissions permissions, int color, bool hoist, bool mentionable) {
 		/**
 		 * @brief Create a guild role.
@@ -1101,6 +1121,18 @@ namespace discord {
 	}
 
 	std::string Guild::GetIconURL(discord::ImageType imgType) {
+		/**
+		 * @brief Retrieve guild icon url.
+		 *
+		 * ```cpp
+		 *      std::string icon_url = guild.GetIconURL()
+		 * ```
+		 *
+		 * @param[in] imgType Optional parameter for type of image
+		 *
+		 * @return std::string
+		 */
+
 		std::string idString = this->id.c_str();
 		std::string url = "https://cdn.discordapp.com/icons/" + idString +  "/" + this->icon;
 		if (imgType == ImageType::AUTO) imgType = StartsWith(this->icon, "a_") ? ImageType::GIF : ImageType::PNG;
