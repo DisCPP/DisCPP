@@ -516,7 +516,7 @@ namespace discord {
 	void Bot::GuildCreateEvent(nlohmann::json result) {
 		snowflake guild_id = result["id"].get<snowflake>();
 		discord::Guild guild(result);
-		logger.LogToConsole(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Connected to %", guild.name);
+		logger.LogToConsole(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Connected to " + guild.name);
 		guilds.push_back(guild);
 
 		members.insert(members.end(), guild.members.begin(), guild.members.end());
@@ -621,8 +621,8 @@ namespace discord {
 
 	void Bot::GuildRoleDeleteEvent(nlohmann::json result) {
 		discord::Guild guild(result["guild_id"].get<snowflake>());
-		discord::Role role = GetIf(guild.roles, [result](discord::Role& role) {return role.id == result["role_id"].get<snowflake>(); });
-		std::replace_if(guild.roles.begin(), guild.roles.end(), [role](discord::Role& r) { return r.id == role.id; }, role);
+		discord::Role role(result["role"]);
+		guild.roles.erase(role.id);
 
 		discord::DispatchEvent(discord::GuildRoleDeleteEvent(role));
 	}

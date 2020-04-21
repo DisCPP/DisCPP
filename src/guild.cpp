@@ -60,7 +60,8 @@ namespace discord {
 		explicit_content_filter = (json.contains("explicit_content_filter")) ? static_cast<discord::specials::ExplicitContentFilterLevel>(json["explicit_content_filter"].get<int>()) : discord::specials::ExplicitContentFilterLevel::DISABLED;
 		if (json.contains("roles")) {
 			for (auto& role : json["roles"]) {
-				roles.push_back(discord::Role(role));
+				discord::Role tmp = discord::Role(role);
+				roles.insert(std::make_pair<snowflake, Role>(static_cast<discord::snowflake>(tmp.id), static_cast<discord::Role>(tmp)));
 			}
 		}
 		if (json.contains("emojis")) {
@@ -669,7 +670,7 @@ namespace discord {
 		cpr::Body body(json_body.dump());
 		nlohmann::json result = SendPostRequest(Endpoint("/guilds/" + id + "/roles"), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 		discord::Role new_role(result);
-		roles.push_back(new_role);
+		roles.insert(std::pair<snowflake, Role>(new_role.id, new_role));
 
 		return new_role;
 	}
@@ -725,7 +726,10 @@ namespace discord {
 		cpr::Body body(json_body.dump());
 		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + id + "/roles/" + role.id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 		discord::Role modified_role(result);
-		std::replace_if(roles.begin(), roles.end(), [modified_role](discord::Role r) { return r.id == modified_role.id; }, modified_role);
+		std::unordered_map<snowflake, Role>::iterator it = roles.find(role.id);
+		if (it != roles.end()) {
+			it->second = modified_role;
+		}
 
 		return modified_role;
 	}
@@ -744,7 +748,7 @@ namespace discord {
 		 */
 
 		nlohmann::json result = SendDeleteRequest(Endpoint("/guilds/" + id + "/roles/" + role.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
-		roles.erase(std::remove_if(roles.begin(), roles.end(), [role](discord::Role r) { return r.id == role.id; }));
+		roles.erase(role.id);
 	}
 
 	int Guild::GetPruneAmount(int days) {

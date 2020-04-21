@@ -193,7 +193,7 @@ namespace discord {
 		discord::specials::VerificationLevel verification_level;
 		discord::specials::DefaultMessageNotificationLevel default_message_notifications;
 		discord::specials::ExplicitContentFilterLevel explicit_content_filter;
-		std::vector<discord::Role> roles;
+		std::unordered_map<snowflake, Role> roles;
 		std::vector<discord::Emoji> emojis;
 		// features
 		discord::specials::MFALevel mfa_level;

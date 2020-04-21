@@ -1,6 +1,8 @@
 #ifndef DISCORDPP_EMOJI_H
 #define DISCORDPP_EMOJI_H
 
+#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+
 #include "discord_object.h"
 #include "user.h"
 #include "role.h"
