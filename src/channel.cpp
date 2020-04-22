@@ -86,18 +86,18 @@ namespace discord {
 		this->guild_id = guild_id;
 	}
 
-	discord::Message Channel::Send(std::string text, bool tts) {
+	discord::Message Channel::Send(std::string text, bool tts, discord::EmbedBuilder* embed, std::vector<File> files) {
 		/**
 		 * @brief Send a message in this channel.
 		 *
-		 * If the message is over 2000 characters, then it will write the message to a temporary file and send that. It will then delete the file after its sent.
-		 *
 		 * ```cpp
-		 *      channel.Send("Test");
+		 *      channel.Send(embed);
 		 * ```
 		 *
-		 * @param[in] text The message to send.
+		 * @param[in] text The text that goes along with the embed.
 		 * @param[in] tts Should it be a text to speech message?
+		 * @param[in] embed Embed to send
+		 * @param[in] files Files to send
 		 *
 		 * @return discord::Message
 		 */
@@ -121,7 +121,8 @@ namespace discord {
 
 				// Delete the temporary message file
 				remove("message.txt");
-			} catch (std::exception e) {
+			}
+			catch (std::exception e) {
 				// Delete the temporary message file
 				remove("message.txt");
 
@@ -131,59 +132,29 @@ namespace discord {
 			return sent_message;
 		}
 
-		cpr::Body body = cpr::Body(message_json.dump());
+		cpr::Body body;
+		if (embed != nullptr) {
+			body = cpr::Body("{\"embed\": " + embed->ToJson().dump() + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
+		}
+		else if (!files.empty()) {
+			cpr::Multipart multipart_data{};
+
+			for (int i = 0; i < files.size(); i++) {
+				multipart_data.parts.emplace_back("file" + std::to_string(i), cpr::File(files[i].file_path), "application/octet-stream");
+			}
+
+			multipart_data.parts.emplace_back("payload_json", "{\"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "\"}");
+
+			WaitForRateLimits(id, RateLimitBucketType::CHANNEL);
+			cpr::Response response = cpr::Post(cpr::Url{ Endpoint("/channels/" + id + "/messages") }, DefaultHeaders({ {"Content-Type", "multipart/form-data"} }), multipart_data);
+			HandleRateLimits(response.header, id, RateLimitBucketType::CHANNEL);
+
+			return discord::Message(nlohmann::json::parse(response.text));
+		}
+		body = cpr::Body(message_json.dump());
 		nlohmann::json result = SendPostRequest(Endpoint("/channels/" + id + "/messages"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
 		return discord::Message(result);
-	}
-
-	discord::Message Channel::Send(discord::EmbedBuilder embed, std::string text) {
-		/**
-		 * @brief Send an embed in this channel.
-		 *
-		 * ```cpp
-		 *      channel.Send(embed);
-		 * ```
-		 *
-		 * @param[in] embed The embed to send.
-		 * @param[in] text The text that goes along with the embed.
-		 *
-		 * @return discord::Message
-		 */
-
-		cpr::Body body = cpr::Body("{\"embed\": " + embed.ToJson().dump() + ((!text.empty()) ? ", \"content\": \"" + EscapeString(text) + "\"" : "") + "}");
-		nlohmann::json result = SendPostRequest(Endpoint("/channels/" + id + "/messages"), DefaultHeaders({ {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
-
-		return discord::Message(result);
-	}
-
-	discord::Message discord::Channel::Send(std::vector<File> files, std::string text) {
-		/**
-		 * @brief Send a file(s) through the channel.
-		 *
-		 * ```cpp
-		 *      channel.Send({ discord::File{file_1} });
-		 * ```
-		 *
-		 * @param[in] files The file(s) to send.
-		 * @param[in] text The text that goes along with the files.
-		 *
-		 * @return discord::Message
-		 */
-
-		cpr::Multipart multipart_data{};
-
-		for (int i = 0; i < files.size(); i++) {
-			multipart_data.parts.emplace_back("file" + std::to_string(i), cpr::File(files[i].file_path), "application/octet-stream");
-		}
-
-		multipart_data.parts.emplace_back("payload_json", "{\"content\": \"" + EscapeString(text) + "\"}");
-
-		WaitForRateLimits(id, RateLimitBucketType::CHANNEL);
-		cpr::Response response = cpr::Post(cpr::Url{ Endpoint("/channels/" + id + "/messages") }, DefaultHeaders({ {"Content-Type", "multipart/form-data"} }), multipart_data);
-		HandleRateLimits(response.header, id, RateLimitBucketType::CHANNEL);
-
-		return discord::Message(nlohmann::json::parse(response.text));
 	}
 
 	discord::Channel Channel::Modify(ModifyRequest modify_request) {

@@ -53,9 +53,7 @@ namespace discord {
 		Channel(nlohmann::json json);
 		Channel(nlohmann::json json, snowflake guild_id);
 
-		discord::Message Send(std::string text, bool tts = false);
-		discord::Message Send(discord::EmbedBuilder embed, std::string text = "");
-		discord::Message Send(std::vector<File> files, std::string text = "");
+		discord::Message Send(std::string text = "", bool tts = false, discord::EmbedBuilder* embed = nullptr, std::vector<discord::File> files = {});
 		discord::Channel Modify(ModifyRequest modify_request);
 		discord::Channel Delete();
 		std::vector<discord::Message> GetChannelMessages(int amount, GetChannelsMessagesMethod get_method = GetChannelsMessagesMethod::LIMIT);
