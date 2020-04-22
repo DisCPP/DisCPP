@@ -2,6 +2,30 @@
 #define DISCORDPP_COLOR_H
 
 namespace discord {
+	enum class EmbedColor {
+		RED = 0xFF0000,
+		DARKRED = 0x8B0000,
+		GOLD = 0xFFD700,
+		ORANGE = 0xFFA500,
+		DARKORANGE = 0xFF8C00,
+		YELLOW = 0xFFFF00,
+		LIME = 0x00FF00,
+		GREEN = 0x008000,
+		DARKGREEN = 0x006400,
+		OLIVE = 0x808000,
+		CYAN = 0x00FFFF,
+		TEAL = 0x008080,
+		BLUE = 0x3498DB,
+		DARKBLUE = 0x00008B,
+		VIOLET = 0xEE82EE,
+		PURPLE = 0x800080,
+		PINK = 0xFFC0CB,
+		HOTPINK = 0xFF69B4,
+		WHITE = 0xFFFFE,
+		BLACK = 0x000000,
+		BROWN = 0x8B4513
+	};
+
 	class Color {
 	public:
 		Color() = default;
