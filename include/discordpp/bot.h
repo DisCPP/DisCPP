@@ -35,8 +35,7 @@ namespace discord {
 		std::unordered_map<snowflake, Channel> channels;
 		std::unordered_map<snowflake, Member> members;
 		std::unordered_map<snowflake, Guild> guilds;
-		// TODO: convert this to std::unordered_map<snowflake, Message>
-		std::vector<discord::Message> messages;
+		std::unordered_map<snowflake, Message> messages;
 
 		std::vector<std::future<void>> futures;
 
