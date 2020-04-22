@@ -117,7 +117,7 @@ namespace discord {
 				// Send the message
 				std::vector<discord::File> files;
 				files.push_back({ "message.txt", "message.txt" });
-				sent_message = Send(files, "Message was too large to fit in 2000 characters");
+				sent_message = Send("Message was too large to fit in 2000 characters", tts, nullptr, files);
 
 				// Delete the temporary message file
 				remove("message.txt");
