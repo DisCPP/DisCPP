@@ -26,19 +26,19 @@ namespace discord {
 
 	class Bot {
 	public:
-		std::string token;
-		std::vector<std::string> prefixes;
+		std::string token; /**< Token for the current bot */
+		std::vector<std::string> prefixes; /**< Command prefixes for the current bot */
 
-		discord::User bot_user;
-		discord::Logger logger;
+		discord::User bot_user; /**< discord::User object representing current bot */
+		discord::Logger logger; /**< discord::Logger object representing current logger */
 
-		std::unordered_map<snowflake, Channel> channels;
-		std::unordered_map<snowflake, Member> members;
-		std::unordered_map<snowflake, Guild> guilds;
+		std::unordered_map<snowflake, Channel> channels; /**< List of channels the current bot can access */
+		std::unordered_map<snowflake, Member> members; /**< List of members the current bot can access */
+		std::unordered_map<snowflake, Guild> guilds; /**< List of guilds the current bot can access */
 		// TODO: convert this to std::unordered_map<snowflake, Message>
-		std::vector<discord::Message> messages;
+		std::vector<discord::Message> messages; /**< List of messages the current bot can access */
 
-		std::vector<std::future<void>> futures;
+		std::vector<std::future<void>> futures; /**< List of events */
 
 		enum packet_opcode : int {
 			dispatch = 0,				// Receive

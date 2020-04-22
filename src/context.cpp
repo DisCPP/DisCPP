@@ -19,9 +19,9 @@ discord::Context::Context(discord::Bot* bot, discord::Channel channel, discord::
 	 */
 }
 
-discord::Message discord::Context::Send(std::string text, bool tts) {
+discord::Message discord::Context::Send(std::string text, bool tts, discord::EmbedBuilder* embed, std::vector<discord::File> files) {
 	/**
-	 * @brief Sends a text message (Shortcut for `channel.send(text, tts)`).
+	 * @brief Sends a text message (Shortcut for `channel.send(text, tts, embed, files)`).
 	 *
 	 * ```cpp
 	 *      ctx.Send("Hello, I'm a bot!");
@@ -29,43 +29,11 @@ discord::Message discord::Context::Send(std::string text, bool tts) {
 	 *
 	 * @param[in] text The text that will be sent.
 	 * @param[in] tts If the text could be spoken through text to speach.
+	 * @param[in] embed Optional embed to send
+	 * @param[in] files Option files to send
 	 *
 	 * @return discord::Message
 	 */
 
-	return channel.Send(text, tts);
-}
-
-discord::Message discord::Context::Send(discord::EmbedBuilder embed, std::string text) {
-	/**
-	 * @brief Sends an embed (Shortcut for `channel.send(embed, text)`).
-	 *
-	 * ```cpp
-	 *      ctx.Send(embed, "Look at the embed I sent!");
-	 * ```
-	 *
-	 * @param[in] embed The embed to send.
-	 * @param[in] text The text to send.
-	 *
-	 * @return discord::Message
-	 */
-
-	return channel.Send(embed, text);
-}
-
-discord::Message discord::Context::Send(std::vector<discord::File> files, std::string text) {
-	/**
-	 * @brief Sends files (Shortcut for `channel.send({file_a, file_b}, text)`).
-	 *
-	 * ```cpp
-	 *      ctx.Send({file_a, file_b}, "Read these files real quick");
-	 * ```
-	 *
-	 * @param[in] files The files that will be sent.
-	 * @param[in] text The text that will be sent.
-	 *
-	 * @return discord::Message
-	 */
-
-	return channel.Send(files, text);
+	return channel.Send(text, tts, embed, files);
 }

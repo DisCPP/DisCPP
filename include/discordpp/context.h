@@ -28,9 +28,7 @@ namespace discord {
 
 		Context(discord::Bot* bot, discord::Channel channel, discord::Member author, discord::Message message, std::string remainder, std::vector<std::string> arguments);
 
-		discord::Message Send(std::string text, bool tts = false);
-		discord::Message Send(discord::EmbedBuilder embed, std::string text = "");
-		discord::Message Send(std::vector<discord::File> files, std::string text = "");
+		discord::Message Send(std::string text, bool tts = false, discord::EmbedBuilder* embed = nullptr, std::vector<discord::File> files = {});
 	};
 }
 
