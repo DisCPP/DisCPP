@@ -267,7 +267,7 @@ namespace discord {
 		 */
 
 		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id);
-		cpr::Body body("{\"embed\": " + embed.ToJson().get<std::string>() + "}");
+		cpr::Body body("{\"embed\": " + embed.ToJson().dump() + "}");
 		nlohmann::json result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
 		*this = { result };
