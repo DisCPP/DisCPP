@@ -10,8 +10,6 @@ namespace discord {
 		/**
 		 * @brief Constructs a discord::Message object from an id.
 		 *
-		 * This only stores the id and that will be the only thing valid.
-		 *
 		 * ```cpp
 		 *      discord::Message message(583251190591258624);
 		 * ```
@@ -21,10 +19,10 @@ namespace discord {
 		 * @return discord::Member, this is a constructor.
 		 */
 
-		auto message = std::find_if(discord::globals::bot_instance->messages.begin(), discord::globals::bot_instance->messages.end(), [id](discord::Message a) { return id == a.id; });
+		auto message = discord::globals::bot_instance->messages.find(id);
 
 		if (message != discord::globals::bot_instance->messages.end()) {
-			*this = *message;
+			*this = message->second;
 		}
 	}
 
@@ -269,7 +267,7 @@ namespace discord {
 		 */
 
 		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id);
-		cpr::Body body("{\"embed\": " + embed.ToJson().get<std::string>() + "}");
+		cpr::Body body("{\"embed\": " + embed.ToJson().dump() + "}");
 		nlohmann::json result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
 		*this = { result };

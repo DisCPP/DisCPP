@@ -32,7 +32,7 @@ namespace discord {
 		MessageActivity() = default;
 		MessageActivity(nlohmann::json json) {
 			type = static_cast<ActivityType>(json["type"]);
-			party_id = json["pary_id"];
+			party_id = GetDataSafely<std::string>(json, "pary_id");
 		}
 	};
 
@@ -46,7 +46,7 @@ namespace discord {
 		MessageApplication() = default;
 		MessageApplication(nlohmann::json json) {
 			id = json["id"].get<snowflake>();
-			cover_image = json["cover_image"];
+			cover_image = GetDataSafely<std::string>(json, "cover_image");
 			description = json["description"];
 			icon = json["icon"];
 			name = json["name"];
@@ -60,9 +60,9 @@ namespace discord {
 
 		MessageReference() = default;
 		MessageReference(nlohmann::json json) {
-			message_id = json["message_id"].get<snowflake>();
+			message_id = GetDataSafely<snowflake>(json, "message_id");
 			channel_id = json["channel_id"].get<snowflake>();
-			guild_id = json["guild_id"].get<snowflake>();
+			guild_id = GetDataSafely<snowflake>(json, "guild_id");
 		}
 	};
 
