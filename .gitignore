@@ -2,6 +2,7 @@
 .vs/*
 out/*
 html/*
+latex/*
 
 # Compiled source #
 ###################
@@ -18,5 +19,3 @@ html/*
 *.tex
 *.eps
 *.sty
-latex/make.bat
-latex/Makefile
