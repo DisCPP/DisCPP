@@ -1,8 +1,12 @@
 # Don't track content of these folders
+.vscode/*
+CMakeFiles/*
 .vs/*
 out/*
 html/*
 latex/*
+.idea/*
+cmake-build-debug/*
 
 # Compiled source #
 ###################
