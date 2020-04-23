@@ -27,6 +27,15 @@ namespace discord {
 		EmbedBuilder& SetProvider(std::string name, std::string url);
 		EmbedBuilder& SetAuthor(std::string name, std::string url = "", std::string icon_url = "");
 		EmbedBuilder& AddField(std::string name, std::string value, bool is_inline = false);
+
+		std::string GetDescription();
+		std::string GetTitle();
+		std::string GetUrl();
+		std::string GetTimestamp();
+		Color GetColor();
+		std::pair<std::string, std::string> GetFooter();
+        std::pair<std::string, std::string> GetProvider();
+
 		nlohmann::json ToJson();
 		operator nlohmann::json();
 		

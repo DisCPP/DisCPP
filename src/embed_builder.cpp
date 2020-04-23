@@ -370,4 +370,32 @@ namespace discord {
 	EmbedBuilder::operator nlohmann::json() {
 		return embed_json;
 	}
+
+    std::string EmbedBuilder::GetDescription() {
+        return embed_json["description"];
+    }
+
+    std::string EmbedBuilder::GetTitle() {
+        return embed_json["title"];
+    }
+
+    std::string EmbedBuilder::GetUrl() {
+        return embed_json["url"];
+    }
+
+    std::string EmbedBuilder::GetTimestamp() {
+        return embed_json["timestamp"];
+    }
+
+    Color EmbedBuilder::GetColor() {
+        return Color();
+    }
+
+    std::pair<std::string, std::string> EmbedBuilder::GetFooter() {
+        return std::make_pair<std::string, std::string>(embed_json["footer"]["text"], embed_json["footer"]["icon_url"]);
+    }
+
+    std::pair<std::string, std::string> EmbedBuilder::GetProvider() {
+        return std::make_pair<std::string, std::string>(embed_json["provider"]["name"], embed_json["provider"]["url"]);
+    }
 }
