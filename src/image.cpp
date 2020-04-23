@@ -1,23 +1,27 @@
+#include <discpp/log.h>
 #include "image.h"
 #include "utils.h"
+#include "bot.h"
 
-namespace discord {
+namespace discpp {
 	std::string GetFileExtension(std::string file_name) {
 		return file_name.substr(file_name.find_last_of('.') + 1);
 	}
 
 	Image::Image(std::ifstream* image, std::string location) : image(image), location(location) {
 		/**
-		 * @brief Constructs a discord::Image object from the id.
+		 * @brief Constructs a discpp::Image object from the id.
+		 *
+		 * You must supply the location of `*file` due to us needing to find out the file extension.
 		 *
 		 * ```cpp
-		 *      discord::Image image(&file, "test.txt");
+		 *      discpp::Image image(&file, "test.png");
 		 * ```
 		 *
 		 * @param[in] image The image.
 		 * @param[in] location The image location.
 		 *
-		 * @return discord::Image, this is a constructor.
+		 * @return discpp::Image, this is a constructor.
 		 */
 	}
 
@@ -26,7 +30,7 @@ namespace discord {
 		 * @brief Converts the image to the Data URI scheme.
 		 *
 		 * ```cpp
-		 *      discord::Image image(&file, "test.txt");
+		 *      discpp::Image image(&file, "test.txt");
 		 *		std::string data_uri = image.ToDataURI();
 		 * ```
 		 *
@@ -46,13 +50,13 @@ namespace discord {
 			} else if (ext == "gif") {
 				data_uri_ext = "gif";
 			} else {
-				std::cout << "The file extension, \"" << ext << "\" is not supported by Discord!" << std::endl;
+				globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "The file extension, \"" + ext + "\" is not supported by Discord!");
 				throw std::runtime_error("The file extension, \"" + ext + "\" is not supported by Discord!");
 			}
 
 			return "data:image/" + data_uri_ext + ";base64," + Base64Encode(buffer.str());
 		} else {
-			std::cout << "Failed to open image!" << std::endl;
+			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Failed to open image!");
 			throw std::runtime_error("Failed to open image!");
 		}
 	}

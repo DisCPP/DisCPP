@@ -1,11 +1,11 @@
 #include "command.h"
 #include "command_handler.h"
 
-void discord::FireCommand(discord::Bot* bot, discord::Message message) {
+void discpp::FireCommand(discpp::Bot* bot, discpp::Message message) {
     /**
      * @brief Detects if a command has ran, and if it has then execute it.
      *
-     * @param[in] bot A reference to the discord bot.
+     * @param[in] bot A reference to the discpp bot.
      * @param[in] message The message that was sent.
      *
      * @return void
@@ -38,7 +38,7 @@ void discord::FireCommand(discord::Bot* bot, discord::Message message) {
 
     argument_vec.erase(argument_vec.begin()); // Erase the command from the arguments
 
-    discord::Member member(message.author.id);
+    discpp::Member member(message.author.id);
 
     std::string remainder = "d";
     if (!argument_vec.empty()) remainder = CombineStringVector(argument_vec);

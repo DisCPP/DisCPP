@@ -3,7 +3,7 @@
 
 #include "../event.h"
 
-namespace discord {
+namespace discpp {
 	class ReconnectEvent : public Event {
 	public:
 		ReconnectEvent() = default;

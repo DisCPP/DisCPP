@@ -7,13 +7,13 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class GuildMemberUpdateEvent : public Event {
 	public:
-		inline GuildMemberUpdateEvent(discord::Guild guild, discord::Member member) : guild(guild), member(member) {}
+		inline GuildMemberUpdateEvent(discpp::Guild guild, discpp::Member member) : guild(guild), member(member) {}
 
-		discord::Guild guild;
-		discord::Member member;
+		discpp::Guild guild;
+		discpp::Member member;
 	};
 }
 

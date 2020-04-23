@@ -1,7 +1,7 @@
 #ifndef DISCPP_EVENT_H
 #define DISCPP_EVENT_H
 
-namespace discord {
+namespace discpp {
 	class Event {
 	
 	};

@@ -1,20 +1,20 @@
 #include "guild.h"
 
-namespace discord {
-	Role::Role(snowflake role_id, discord::Guild guild) : DiscordObject(role_id) {
+namespace discpp {
+	Role::Role(snowflake role_id, discpp::Guild guild) : DiscordObject(role_id) {
 		/**
-		 * @brief Constructs a discord::Role object using a role id and a guild.
+		 * @brief Constructs a discpp::Role object using a role id and a guild.
 		 *
 		 * This constructor searches the roles cache in the guild object to get the role object from.
 		 *
 		 * ```cpp
-		 *      discord::Role role(657246994997444614, guild);
+		 *      discpp::Role role(657246994997444614, guild);
 		 * ```
 		 *
 		 * @param[in] role_id The role id.
 		 * @param[in] guild The guild that has this role.
 		 *
-		 * @return discord::Role, this is a constructor.
+		 * @return discpp::Role, this is a constructor.
 		 */
 
 		std::unordered_map<snowflake, Role>::iterator it = guild.roles.find(role_id); 
@@ -25,15 +25,15 @@ namespace discord {
 
 	Role::Role(nlohmann::json json) {
 		/**
-		 * @brief Constructs a discord::Role object by parsing json.
+		 * @brief Constructs a discpp::Role object by parsing json.
 		 *
 		 * ```cpp
-		 *      discord::Role role(json);
+		 *      discpp::Role role(json);
 		 * ```
 		 *
 		 * @param[in] json The json that makes up of role object.
 		 *
-		 * @return discord::Role, this is a constructor.
+		 * @return discpp::Role, this is a constructor.
 		 */
 
 		id = GetDataSafely<snowflake>(json, "id");

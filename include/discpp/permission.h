@@ -5,7 +5,7 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	typedef std::string snowflake;
 
 	enum class PermissionType : int {

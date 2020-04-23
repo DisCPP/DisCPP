@@ -6,12 +6,12 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class MessageCreateEvent : public Event {
 	public:
-		inline MessageCreateEvent(discord::Message message) : message(message) {}
+		inline MessageCreateEvent(discpp::Message message) : message(message) {}
 
-		discord::Message message;
+		discpp::Message message;
 	};
 }
 

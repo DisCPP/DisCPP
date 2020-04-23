@@ -8,14 +8,14 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class MessageReactionRemoveEvent : public Event {
 	public:
-		inline MessageReactionRemoveEvent(discord::Message message, discord::Emoji emoji, discord::User user) : message(message), emoji(emoji), user(user) {}
+		inline MessageReactionRemoveEvent(discpp::Message message, discpp::Emoji emoji, discpp::User user) : message(message), emoji(emoji), user(user) {}
 
-		discord::Message message;
-		discord::Emoji emoji;
-		discord::User user;
+		discpp::Message message;
+		discpp::Emoji emoji;
+		discpp::User user;
 	};
 }
 

@@ -1,24 +1,24 @@
 #include "context.h"
 
-discord::Context::Context(discord::Bot* bot, discord::Channel channel, discord::Member author, discord::Message message, std::string remainder, std::vector<std::string> arguments) : bot(bot), guild(message.guild), channel(channel), author(author), user(author.user), message(message), remainder(remainder), arguments(arguments) {
+discpp::Context::Context(discpp::Bot* bot, discpp::Channel channel, discpp::Member author, discpp::Message message, std::string remainder, std::vector<std::string> arguments) : bot(bot), guild(message.guild), channel(channel), author(author), user(author.user), message(message), remainder(remainder), arguments(arguments) {
 	/**
-	 * @brief Constructs a discord::Context object.
+	 * @brief Constructs a discpp::Context object.
 	 *
 	 * ```cpp
-	 *      discord::Context ctx(bot, channel, author, message, arguments);
+	 *      discpp::Context ctx(bot, channel, author, message, arguments);
 	 * ```
 	 *
-	 * @param[in] bot The discord bot.
+	 * @param[in] bot The discpp bot.
 	 * @param[in] channel The channel the command was ran in.
 	 * @param[in] author The author of the message that executed the command.
 	 * @param[in] message The message that was sent by the player
 	 * @param[in] arguments The command arguments
 	 *
-	 * @return discord::Context, this is a constructor.
+	 * @return discpp::Context, this is a constructor.
 	 */
 }
 
-discord::Message discord::Context::Send(std::string text, bool tts, discord::EmbedBuilder* embed, std::vector<discord::File> files) {
+discpp::Message discpp::Context::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<discpp::File> files) {
 	/**
 	 * @brief Sends a text message (Shortcut for `channel.send(text, tts, embed, files)`).
 	 *
@@ -33,7 +33,7 @@ discord::Message discord::Context::Send(std::string text, bool tts, discord::Emb
 	 * @param[in] embed Optional embed to send
 	 * @param[in] files Option files to send
 	 *
-	 * @return discord::Message
+	 * @return discpp::Message
 	 */
 
 	return channel.Send(text, tts, embed, files);

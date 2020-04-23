@@ -17,7 +17,7 @@
 #include "guild.h"
 #include "log.h"
 
-namespace discord {
+namespace discpp {
 	class Role;
 	class User;
 	class Activity;
@@ -29,8 +29,8 @@ namespace discord {
 		std::string token; /**< Token for the current bot */
 		std::vector<std::string> prefixes; /**< Command prefixes for the current bot */
 
-		discord::User bot_user; /**< discord::User object representing current bot */
-		discord::Logger logger; /**< discord::Logger object representing current logger */
+		discpp::User bot_user; /**< discpp::User object representing current bot */
+		discpp::Logger logger; /**< discpp::Logger object representing current logger */
 
 		std::unordered_map<snowflake, Channel> channels; /**< List of channels the current bot can access */
 		std::unordered_map<snowflake, Member> members; /**< List of members the current bot can access */
@@ -55,12 +55,12 @@ namespace discord {
 
 		Bot(std::string token, std::vector<std::string> prefixes, int logger_flags = logger_flags::ERROR_SEVERITY | logger_flags::WARNING_SEVERITY, std::string logger_path = "");
 		int Run();
-		discord::Guild GetGuild(snowflake guild_id);
-		discord::User ModifyCurrentUser(std::string username);
-		void LeaveGuild(discord::Guild guild);
-		void UpdatePresence(discord::Activity activity);
+		discpp::Guild GetGuild(snowflake guild_id);
+		discpp::User ModifyCurrentUser(std::string username);
+		void LeaveGuild(discpp::Guild guild);
+		void UpdatePresence(discpp::Activity activity);
 		void CreateWebsocketRequest(nlohmann::json json);
-		void SetCommandHandler(std::function<void(discord::Bot*, discord::Message)> command_handler);
+		void SetCommandHandler(std::function<void(discpp::Bot*, discpp::Message)> command_handler);
 		void DisconnectWebsocket();
 		void ReconnectToWebsocket();
 
@@ -115,7 +115,7 @@ namespace discord {
 		void BindEvents();
 
 		// Commands
-		std::function<void(discord::Bot*, discord::Message)> fire_command_method;
+		std::function<void(discpp::Bot*, discpp::Message)> fire_command_method;
 
 		// Events
 		void ReadyEvent(nlohmann::json result);

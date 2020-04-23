@@ -1,39 +1,39 @@
 #include "user.h"
 #include "bot.h"
 
-namespace discord {
-	User::User(snowflake id) : discord::DiscordObject(id) {
+namespace discpp {
+	User::User(snowflake id) : discpp::DiscordObject(id) {
 		/**
-		 * @brief Constructs a discord::User object from an id.
+		 * @brief Constructs a discpp::User object from an id.
 		 *
 		 * This constructor searches the user cache to get a user object.
 		 *
 		 * ```cpp
-		 *      discord::User user(583251190591258624);
+		 *      discpp::User user(583251190591258624);
 		 * ```
 		 *
 		 * @param[in] id The id of the user.
 		 *
-		 * @return discord::User, this is a constructor.
+		 * @return discpp::User, this is a constructor.
 		 */
 
-		std::unordered_map<snowflake, Member>::iterator it = discord::globals::bot_instance->members.find(id);
-		if (it != discord::globals::bot_instance->members.end()) {
+		std::unordered_map<snowflake, Member>::iterator it = discpp::globals::bot_instance->members.find(id);
+		if (it != discpp::globals::bot_instance->members.end()) {
 			*this = it->second.user;
 		}
 	}
 
 	User::User(nlohmann::json json) {
 		/**
-		 * @brief Constructs a discord::User object by parsing json.
+		 * @brief Constructs a discpp::User object by parsing json.
 		 *
 		 * ```cpp
-		 *      discord::User user(json);
+		 *      discpp::User user(json);
 		 * ```
 		 *
 		 * @param[in] json The json that makes up of user object.
 		 *
-		 * @return discord::User, this is a constructor.
+		 * @return discpp::User, this is a constructor.
 		 */
 
 		id = GetDataSafely<snowflake>(json, "id");
@@ -46,23 +46,23 @@ namespace discord {
 		locale = GetDataSafely<std::string>(json, "locale");
 		verified = GetDataSafely<bool>(json, "verified");
 		flags = GetDataSafely<int>(json, "flags");
-		premium_type = (json.contains("premium_type")) ? static_cast<discord::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type")) : discord::specials::NitroSubscription::NO_NITRO;
+		premium_type = (json.contains("premium_type")) ? static_cast<discpp::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type")) : discpp::specials::NitroSubscription::NO_NITRO;
+		public_flags = GetDataSafely<int>(json, "public_flags");
 		created_at = FormatTimeFromSnowflake(id);
-		std::string _id = this->id.c_str();
-		mention = "<@" + _id + ">";
+		mention = "<@" + id + ">";
 	}
 
 	Connection::Connection(nlohmann::json json) {
 		/**
-		 * @brief Constructs a discord::Connection object by parsing json.
+		 * @brief Constructs a discpp::Connection object by parsing json.
 		 *
 		 * ```cpp
-		 *      discord::Connection connection(json);
+		 *      discpp::Connection connection(json);
 		 * ```
 		 *
 		 * @param[in] json The json that makes up the connection object.
 		 *
-		 * @return discord::Connection, this is a constructor.
+		 * @return discpp::Connection, this is a constructor.
 		 */
 
 		id = GetDataSafely<snowflake>(json, "id");
@@ -71,7 +71,7 @@ namespace discord {
 		revoked = GetDataSafely<bool>(json, "revoked");
 		if (json.contains("integrations")) {
 			for (auto& integration : json["integrations"]) {
-				integrations.push_back(discord::GuildIntegration(integration));
+				integrations.push_back(discpp::GuildIntegration(integration));
 			}
 		}
 		verified = GetDataSafely<bool>(json, "verified");
@@ -80,20 +80,20 @@ namespace discord {
 		visibility = (json.contains("visibility")) ? static_cast<ConnectionVisibility>(GetDataSafely<int>(json, "visibility")) : ConnectionVisibility::NONE;
 	}
 
-	discord::Channel User::CreateDM() {
+	discpp::Channel User::CreateDM() {
 		/**
 		 * @brief Create a DM channel with this user.
 		 *
 		 * ```cpp
-		 *      discord::Channel channel = user.CreateDM();
+		 *      discpp::Channel channel = user.CreateDM();
 		 * ```
 		 *
-		 * @return discord::Channel
+		 * @return discpp::Channel
 		 */
 
 		cpr::Body body("{\"recipient_id\": \"" + id + "\"}");
 		nlohmann::json result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders(), id, RateLimitBucketType::CHANNEL, body);
-		return discord::Channel(result);
+		return discpp::Channel(result);
 	}
 
 	std::vector<Connection> User::GetUserConnections() {
@@ -101,17 +101,17 @@ namespace discord {
 		 * @brief Create all connections of this user.
 		 *
 		 * ```cpp
-		 *      std::vector<discord::Connection> conntections = user.GetUserConnections();
+		 *      std::vector<discpp::Connection> conntections = user.GetUserConnections();
 		 * ```
 		 *
-		 * @return std::vector<discord::Connection>
+		 * @return std::vector<discpp::Connection>
 		 */
 
 		nlohmann::json result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
 
 		std::vector<Connection> connections;
 		for (auto& connection : result) {
-			connections.push_back(discord::Connection(connection));
+			connections.push_back(discpp::Connection(connection));
 		}
 		return connections;
 	}
@@ -131,10 +131,10 @@ namespace discord {
 
 		std::string idString = this->id.c_str();
 		if (this->avatar == "") {
-			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(std::stoi(this->discriminator) % 5) + ".png");
+			return cpr::Url("https://cdn.discppapp.com/embed/avatars/" + std::to_string(std::stoi(this->discriminator) % 5) + ".png");
 		}
 		else {
-			std::string url = "https://cdn.discordapp.com/avatars/" + idString + "/" + this->avatar;
+			std::string url = "https://cdn.discppapp.com/avatars/" + idString + "/" + this->avatar;
 			if (imgType == ImageType::AUTO) imgType = StartsWith(this->avatar, "a_") ? ImageType::GIF : ImageType::PNG;
 			switch (imgType) {
 			case ImageType::GIF:

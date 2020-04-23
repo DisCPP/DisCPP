@@ -15,34 +15,34 @@ int main(int argc, const char* argv[]) {
 	std::string token;
 	std::getline(token_file, token);
 
-	discord::Bot bot{ token, {"!"} }; // Token, command prefix.
+	discpp::Bot bot{ token, {"!"} }; // Token, command prefix.
 
 	PingCommand(); // This runs the constructor which will register the command.
 
 	// I would recommend creating a class for the commands, you can check that in the examples folder
 	// But, you can still register a command like you did before
-	discord::Command("test", "Quick example of a quick command", {}, [](discord::Context ctx) {
+	discpp::Command("test", "Quick example of a quick command", {}, [](discpp::Context ctx) {
 		ctx.Send("Quick new command handler test");
 	}, {});
 
 	// New event system
-	discord::EventHandler<discord::ReadyEvent>::RegisterListener([&bot](discord::ReadyEvent event) {
+	discpp::EventHandler<discpp::ReadyEvent>::RegisterListener([&bot](discpp::ReadyEvent event) {
 		std::cout << "Ready!" << std::endl
 			<< "Logged in as: " << bot.bot_user.username << "#" << bot.bot_user.discriminator << std::endl
 			<< "ID: " << bot.bot_user.id << std::endl << "-----------------------------" << std::endl;
 
 		// Will show "Playing With Crashes!"
-		discord::Activity activity = discord::Activity("With Crashes!", discord::presence::ActivityType::GAME, discord::presence::Status::idle);
+		discpp::Activity activity = discpp::Activity("With Crashes!", discpp::presence::ActivityType::GAME, discpp::presence::Status::idle);
 		bot.UpdatePresence(activity);
 	});
 
-	discord::EventHandler<discord::GuildMemberAddEvent>::RegisterListener([](discord::GuildMemberAddEvent event) {
-		discord::Channel channel((discord::snowflake) "638156895953223714");
+	discpp::EventHandler<discpp::GuildMemberAddEvent>::RegisterListener([](discpp::GuildMemberAddEvent event) {
+		discpp::Channel channel((discpp::snowflake) "638156895953223714");
 
 		channel.Send("Welcome <@" + event.member.user.id + ">, hope you enjoy!");
 	});
 
-	discord::EventHandler<discord::ChannelPinsUpdateEvent>::RegisterListener([](discord::ChannelPinsUpdateEvent event)->bool {
+	discpp::EventHandler<discpp::ChannelPinsUpdateEvent>::RegisterListener([](discpp::ChannelPinsUpdateEvent event)->bool {
 		event.channel.Send("Detected a pin update!");
 
 		return false;

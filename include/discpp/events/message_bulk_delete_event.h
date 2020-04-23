@@ -9,12 +9,12 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class MessageBulkDeleteEvent : public Event {
 	public:
-		inline MessageBulkDeleteEvent(std::vector<discord::Message> message) : messages(messages) {}
+		inline MessageBulkDeleteEvent(std::vector<discpp::Message> message) : messages(messages) {}
 
-		std::vector<discord::Message> messages;
+		std::vector<discpp::Message> messages;
 	};
 }
 

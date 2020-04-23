@@ -6,12 +6,12 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class GuildDeleteEvent : public Event {
 	public:
-		inline GuildDeleteEvent(discord::Guild guild) : guild(guild) {}
+		inline GuildDeleteEvent(discpp::Guild guild) : guild(guild) {}
 
-		discord::Guild guild;
+		discpp::Guild guild;
 	};
 }
 

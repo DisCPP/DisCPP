@@ -8,10 +8,10 @@
 
 #include <memory>
 
-namespace discord {
+namespace discpp {
 	inline std::unordered_map<std::string, Command*> registered_commands;
 
-	void FireCommand(discord::Bot* bot, discord::Message message);
+	void FireCommand(discpp::Bot* bot, discpp::Message message);
 }
 
 #endif
