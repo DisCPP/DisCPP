@@ -269,7 +269,7 @@ namespace discord {
 
     void Bot::WebSocketStart() {
         nlohmann::json gateway_request = SendGetRequest(Endpoint("/gateway/bot"), {{"Authorization", "Bot " + token},
-                                                                                   {"User-Agent",    "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)"}},
+                                                                                   {"User-Agent",    "DiscordBot (https://github.com/seanomik/DISCPP, v0.0.0)"}},
                                                         {}, {});
 
         if (gateway_request.contains("url")) {
@@ -449,8 +449,8 @@ namespace discord {
                                      {{"token", token},
                                              {"properties",
                                                      {{"$os", GetOsName()},
-                                                             {"$browser", "discordpp"},
-                                                             {"$device", "discordpp"}}},
+                                                             {"$browser", "DISCPP"},
+                                                             {"$device", "DISCPP"}}},
                                              {"compress", false},
                                              {"large_threshold", 250}}}};
         return obj;

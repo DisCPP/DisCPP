@@ -188,7 +188,7 @@ cpr::Header discord::DefaultHeaders(cpr::Header add) {
 	 */
 
 	cpr::Header headers = { { "Authorization", "Bot " + discord::globals::bot_instance->token },
-							{ "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" },
+							{ "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" },
 							{ "X-RateLimit-Precision", "millisecond"} };
 	for (auto head : add) {
 		headers.insert(headers.end(), head);

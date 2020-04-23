@@ -1,12 +1,12 @@
-#include <discordpp/bot.h>
-#include <discordpp/context.h>
-#include <discordpp/command_handler.h>
+#include <DISCPP/bot.h>
+#include <DISCPP/context.h>
+#include <DISCPP/command_handler.h>
 
 // Events
-#include <discordpp/event_handler.h>
-#include <discordpp/events/ready_event.h>
-#include <discordpp/events/guild_member_add_event.h>
-#include <discordpp/events/channel_pins_update_event.h>
+#include <DISCPP/event_handler.h>
+#include <DISCPP/events/ready_event.h>
+#include <DISCPP/events/guild_member_add_event.h>
+#include <DISCPP/events/channel_pins_update_event.h>
 
 #include "ping_command.h"
 

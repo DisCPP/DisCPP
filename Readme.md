@@ -1,15 +1,15 @@
-<h1 align="center">DiscordPP</h1>
+<h1 align="center">Discpp</h1>
 <p align="center">
-  <a href="https://dev.azure.com/seanomik/DiscordPP/_build">
-    <img src="https://dev.azure.com/seanomik/DiscordPP/_apis/build/status/SeanOMik.DiscordPP?branchName=master">
+  <a href="https://dev.azure.com/seanomik/discpp/_build">
+    <img src="https://dev.azure.com/seanomik/discpp/_apis/build/status/SeanOMik.DISCPP?branchName=master">
   </a>
 </p>
 <p align="center">
 Discord API Wrapper Written in C++  
 </p>
 
-## DiscordPP
-DiscordPP is a Discord API wrapper written in C++. This is one of the few that can compile on Windows and Linux. Its also focused on being multi threaded so commands and event listeners are ran on seperate threads, this means you dont have to worry about slowing the bot down with a certain command.
+## DisCPP
+DisCPP is a Discord API wrapper written in C++. This is one of the few that can compile on Windows and Linux. Its also focused on being multi threaded so commands and event listeners are ran on seperate threads, this means you dont have to worry about slowing the bot down with a certain command.
 
 ## Dependencies
 - [Nlohmann JSON](https://github.com/nlohmann/json)
@@ -37,18 +37,18 @@ Please follow [Google's styling guide](https://google.github.io/styleguide/cppgu
 7. While inside CMake settings, make sure your compiling in x86-Debug.
 	* Scroll to `Toolset` and set it to a x86 compiler of your choosing (ex: msvc_x86)
 ## Setting up a Bot Project
-First follow the [building](#Building) steps above to make sure DiscordPP will compile.
+First follow the [building](#Building) steps above to make sure DisCPP will compile.
 1. Currently you need to create a thirdparty folder in the root of your bot project directory.
 2. Inside the thirdparty folder, clone this repository.
-3. Open your CMake file and add `add_subdirectory(thirdparty/DiscordPP)` near the top.
-4. Where ever you link your libraries, add this: `target_link_libraries(main PRIVATE discordpp)` (usually at, or near, the end of the file)
+3. Open your CMake file and add `add_subdirectory(thirdparty/DisCPP)` near the top.
+4. Where ever you link your libraries, add this: `target_link_libraries(main PRIVATE DISCPP)` (usually at, or near, the end of the file)
 5. Your finished CMakefile should be similar to this:
 ```cmake
 #CMakeLists.txt
 cmake_minimum_required(VERSION 3.6)
 project(bot)
 
-add_subdirectory(thirdparty/DiscordPP)
+add_subdirectory(thirdparty/DisCPP)
 
 add_executable(main src/main.cpp)
 
@@ -57,7 +57,7 @@ target_include_directories(main PUBLIC include)
 file(GLOB_RECURSE source_list src/*.cpp)
 target_sources(main PRIVATE ${source_list})
 
-target_link_libraries(main PRIVATE discordpp)
+target_link_libraries(main PRIVATE DISCPP)
 ```
 6. Edit your cmake settings to reflect how it was edited in [building](#Building) steps.
 7. You're done, enjoy!
@@ -68,23 +68,23 @@ target_link_libraries(main PRIVATE discordpp)
 - [x] Convert the event system to use a more object oriented system, similar to the new command handler.
 
 ## Documentation
-Currently the only documentation is from Doxygen; its currently completely up to date. To generate documentation, install Doxygen and run doxygen in the root DiscordPP directory.
+Currently the only documentation is from Doxygen; its currently completely up to date. To generate documentation, install Doxygen and run doxygen in the root DISCPP directory.
 
 ## Examples
 There may be more inside the [Examples](examples) folder.
 ```cpp
-#include <discordpp/bot.h>
-#include <discordpp/context.h>
-#include <discordpp/command_handler.h>
-#include <discordpp/channel.h>
-#include <discordpp/activity.h>
-#include <discordpp/command.h>
+#include <discpp/bot.h>
+#include <discpp/context.h>
+#include <discpp/command_handler.h>
+#include <discpp/channel.h>
+#include <discpp/activity.h>
+#include <discpp/command.h>
 
 // Events
-#include <discordpp/event_handler.h>
-#include <discordpp/events/ready_event.h>
-#include <discordpp/events/guild_member_add_event.h>
-#include <discordpp/events/channel_pins_update_event.h>
+#include <discpp/event_handler.h>
+#include <discpp/events/ready_event.h>
+#include <discpp/events/guild_member_add_event.h>
+#include <discpp/events/channel_pins_update_event.h>
 
 #include <iostream>
 #include <fstream>
