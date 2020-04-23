@@ -1,9 +1,5 @@
 #include "message.h"
-#include "utils.h"
 #include "bot.h"
-
-#include <cpprest/http_client.h>
-#include <cpprest/http_msg.h>
 
 namespace discord {
 	Message::Message(snowflake id) : discord::DiscordObject(id) {
@@ -159,7 +155,7 @@ namespace discord {
 		 * @return void
 		 */
 
-		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions/" + emoji.ToString());
+		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions/" + emoji.ToString() + "/" + user.id);
 		nlohmann::json result = SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 

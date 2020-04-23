@@ -36,7 +36,7 @@ matrix:
       - cd ../
       - mkdir build
       - cd build
-      - cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/travis/build/SeanOMik/DiscordPP/vcpkg/scripts/buildsystems/vcpkg.cmake
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/travis/build/SeanOMik/discpp/vcpkg/scripts/buildsystems/vcpkg.cmake
       - make
   - os: windows
     name: windows
@@ -55,7 +55,7 @@ matrix:
     script:
       - mkdir build
       - cd build
-      - cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/travis/build/SeanOMik/DiscordPP/vcpkg/scripts/buildsystems/vcpkg.cmake
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/travis/build/SeanOMik/discpp/vcpkg/scripts/buildsystems/vcpkg.cmake
       - make
 
 
@@ -70,5 +70,5 @@ matrix:
 #- cd ../
 #- mkdir build
 #- cd build
-#- cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/travis/build/SeanOMik/DiscordPP/vcpkg/scripts/buildsystems/vcpkg.cmake
+#- cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/travis/build/SeanOMik/discpp/vcpkg/scripts/buildsystems/vcpkg.cmake
 #- make

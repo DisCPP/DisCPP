@@ -1,10 +1,6 @@
 #include "channel.h"
 #include "utils.h"
 #include "bot.h"
-#include "user.h"
-#include "guild.h"
-
-#include <cpprest/http_client.h>
 
 namespace discord {
 	Channel::Channel(snowflake id) : discord::DiscordObject(id) {
@@ -91,7 +87,9 @@ namespace discord {
 		 * @brief Send a message in this channel.
 		 *
 		 * ```cpp
-		 *      channel.Send(embed);
+	     *      ctx.Send("Hello, I'm a bot!"); // Sending text
+	     *      ctx.Send("", false, embed); // Sending an embed
+	     *      ctx.Send("Command output was too large to fit in an embed.", false, nullptr, { file }); // Sending files
 		 * ```
 		 *
 		 * @param[in] text The text that goes along with the embed.
@@ -310,7 +308,7 @@ namespace discord {
 		 *     std::vector<discord::GuildInvite> invites = channel.GetInvites();
 		 * ```
 		 *
-		 * @return std::vector<discord::GuidlInvite>
+		 * @return std::vector<discord::GuildInvite>
 		 */
 
 		nlohmann::json result = SendGetRequest(Endpoint("/channels/" + id + "/invites"), DefaultHeaders(), {}, {});
@@ -333,7 +331,7 @@ namespace discord {
 		 * @param[in] max_age How long the invite will last for.
 		 * @param[in] max_uses Max uses of the invite.
 		 * @param[in] temporary Whether this invite only grants temporary membership.
-		 * @param[in] If ture, dont try to reuse similar invites.
+		 * @param[in] If true, dont try to reuse similar invites.
 		 *
 		 * @return discord::GuildInvite
 		 */

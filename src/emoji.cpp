@@ -1,7 +1,5 @@
 #include "emoji.h"
 #include "guild.h"
-#include "utils.h"
-#include "user.h"
 
 namespace discord {
 	Emoji::Emoji(std::string name, snowflake id) : name(EscapeString(name)), DiscordObject(id) {

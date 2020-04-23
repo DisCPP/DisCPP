@@ -1,5 +1,4 @@
 #include "context.h"
-#include <string>
 
 discord::Context::Context(discord::Bot* bot, discord::Channel channel, discord::Member author, discord::Message message, std::string remainder, std::vector<std::string> arguments) : bot(bot), guild(message.guild), channel(channel), author(author), user(author.user), message(message), remainder(remainder), arguments(arguments) {
 	/**
@@ -24,7 +23,9 @@ discord::Message discord::Context::Send(std::string text, bool tts, discord::Emb
 	 * @brief Sends a text message (Shortcut for `channel.send(text, tts, embed, files)`).
 	 *
 	 * ```cpp
-	 *      ctx.Send("Hello, I'm a bot!");
+	 *      ctx.Send("Hello, I'm a bot!"); // Sending text
+	 *      ctx.Send("", false, embed); // Sending an embed
+	 *      ctx.Send("Command output was too large to fit in an embed.", false, nullptr, { file }); // Sending files
 	 * ```
 	 *
 	 * @param[in] text The text that will be sent.

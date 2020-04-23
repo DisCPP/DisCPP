@@ -16,6 +16,5 @@ latex/*
 #*.7z
 #*.dmg
 *.tex
-*.tex
 *.eps
 *.sty

@@ -1,6 +1,4 @@
 #include "guild.h"
-#include "role.h"
-#include "utils.h"
 
 namespace discord {
 	Role::Role(snowflake role_id, discord::Guild guild) : DiscordObject(role_id) {

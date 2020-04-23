@@ -1,5 +1,4 @@
 #include "reaction.h"
-#include "emoji.h"
 
 namespace discord {
 	Reaction::Reaction(nlohmann::json json) {

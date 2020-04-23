@@ -1,8 +1,6 @@
 #include "image.h"
 #include "utils.h"
 
-#include <fstream>
-
 namespace discord {
 	std::string GetFileExtension(std::string file_name) {
 		return file_name.substr(file_name.find_last_of('.') + 1);
