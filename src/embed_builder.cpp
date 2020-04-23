@@ -2,7 +2,7 @@
 #include "color.h"
 #include "utils.h"
 
-#include <discordpp/bot.h>
+#include <DISCPP/bot.h>
 
 namespace discord {
 	EmbedBuilder::EmbedBuilder() : embed_json(nlohmann::json({})) { }

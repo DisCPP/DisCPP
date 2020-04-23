@@ -1,9 +1,5 @@
 #include "guild.h"
-#include "role.h"
-#include "member.h"
-#include "utils.h"
 #include "bot.h"
-#include <limits>
 
 namespace discord {
 	Member::Member(snowflake id) : discord::DiscordObject(id) {

@@ -1,5 +1,4 @@
 #include "context.h"
-#include <string>
 
 discord::Context::Context(discord::Bot* bot, discord::Channel channel, discord::Member author, discord::Message message, std::string remainder, std::vector<std::string> arguments) : bot(bot), guild(message.guild), channel(channel), author(author), user(author.user), message(message), remainder(remainder), arguments(arguments) {
 	/**

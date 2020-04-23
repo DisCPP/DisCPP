@@ -1,14 +1,8 @@
 #include "utils.h"
 #include "bot.h"
 
-#include <cstring>
-
 #include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
-
-#include <curl/curl.h>
-
-#include <cpprest/uri.h>
 
 std::string discord::GetOsName() {
 	/**
@@ -194,7 +188,7 @@ cpr::Header discord::DefaultHeaders(cpr::Header add) {
 	 */
 
 	cpr::Header headers = { { "Authorization", "Bot " + discord::globals::bot_instance->token },
-							{ "User-Agent", "DiscordBot (https://github.com/seanomik/discordpp, v0.0.0)" },
+							{ "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" },
 							{ "X-RateLimit-Precision", "millisecond"} };
 	for (auto head : add) {
 		headers.insert(headers.end(), head);
