@@ -41,7 +41,7 @@ First follow the [building](#Building) steps above to make sure DisCPP will comp
 1. Currently you need to create a thirdparty folder in the root of your bot project directory.
 2. Inside the thirdparty folder, clone this repository.
 3. Open your CMake file and add `add_subdirectory(thirdparty/DisCPP)` near the top.
-4. Where ever you link your libraries, add this: `target_link_libraries(main PRIVATE DISCPP)` (usually at, or near, the end of the file)
+4. Where ever you link your libraries, add this: `target_link_libraries(main PRIVATE DisCPP)` (usually at, or near, the end of the file)
 5. Your finished CMakefile should be similar to this:
 ```cmake
 #CMakeLists.txt
@@ -57,7 +57,7 @@ target_include_directories(main PUBLIC include)
 file(GLOB_RECURSE source_list src/*.cpp)
 target_sources(main PRIVATE ${source_list})
 
-target_link_libraries(main PRIVATE DISCPP)
+target_link_libraries(main PRIVATE DisCPP)
 ```
 6. Edit your cmake settings to reflect how it was edited in [building](#Building) steps.
 7. You're done, enjoy!
@@ -68,7 +68,7 @@ target_link_libraries(main PRIVATE DISCPP)
 - [x] Convert the event system to use a more object oriented system, similar to the new command handler.
 
 ## Documentation
-Currently the only documentation is from Doxygen; its currently completely up to date. To generate documentation, install Doxygen and run doxygen in the root DISCPP directory.
+Currently the only documentation is from Doxygen; its currently completely up to date. To generate documentation, install Doxygen and run doxygen in the root DisCPP directory.
 
 ## Examples
 There may be more inside the [Examples](examples) folder.
