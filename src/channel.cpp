@@ -87,7 +87,9 @@ namespace discord {
 		 * @brief Send a message in this channel.
 		 *
 		 * ```cpp
-		 *      channel.Send(embed);
+	     *      ctx.Send("Hello, I'm a bot!"); // Sending text
+	     *      ctx.Send("", false, embed); // Sending an embed
+	     *      ctx.Send("Command output was too large to fit in an embed.", false, nullptr, { file }); // Sending files
 		 * ```
 		 *
 		 * @param[in] text The text that goes along with the embed.
