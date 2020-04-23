@@ -652,7 +652,14 @@ namespace discord {
     void Bot::GuildMemberUpdateEvent(nlohmann::json result) {
         discord::Guild guild(result["guild_id"].get<snowflake>());
         std::unordered_map<snowflake, Member>::iterator it = guild.members.find(result["user"]["id"]);
-        discord::Member member = it->second;
+        discord::Member member;
+        if (it != guild.members.end()) {
+            member = it->second;
+        }
+        else {
+            member = discord::Member(result["user"]["id"].get<snowflake>());
+            guild.members.insert(std::pair<snowflake, Member>(static_cast<snowflake>(member.id), static_cast<discord::Member>(member)));
+        }
         member.roles.clear();
         for (auto role : result["roles"]) {
             member.roles.push_back(discord::Role(role, guild));
