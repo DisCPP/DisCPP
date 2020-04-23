@@ -16,12 +16,12 @@ int main(int argc, const char* argv[]) {
 	std::string token;
 	std::getline(token_file, token);
 
-	discord::Bot bot { token, {"!"} }; // Token, command prefix.
+	discpp::Bot bot { token, {"!"} }; // Token, command prefix.
 
 	ServerinfoCommand();
 	
 	// ready event
-	discord::EventHandler<discord::ReadyEvent>::RegisterListener([&bot](discord::ReadyEvent event) {
+	discpp::EventHandler<discpp::ReadyEvent>::RegisterListener([&bot](discpp::ReadyEvent event) {
 		std::cout << "Ready!" << std::endl; 
 	});
 

@@ -1,7 +1,7 @@
 #include "PreconditionRequireGuild.h"
 
-bool Precondition::RequireGuild(discord::Context ctx, std::string message) {
-    if (ctx.channel.type != discord::DM) {
+bool Precondition::RequireGuild(discpp::Context ctx, std::string message) {
+    if (ctx.channel.type != discpp::DM) {
         return true;
     }
     else {

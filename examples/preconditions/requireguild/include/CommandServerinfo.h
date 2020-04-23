@@ -5,11 +5,11 @@
 #include <discpp/context.h>
 #include <discpp/command_handler.h>
 
-class ServerinfoCommand : public discord::Command {
+class ServerinfoCommand : public discpp::Command {
 public:
 	ServerinfoCommand();
-	virtual bool CanRun(discord::Context ctx) override;
-	virtual void CommandBody(discord::Context ctx) override;
+	virtual bool CanRun(discpp::Context ctx) override;
+	virtual void CommandBody(discpp::Context ctx) override;
 };
 
 #endif

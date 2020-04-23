@@ -5,7 +5,7 @@
 #include <string>
 
 namespace Precondition {
-    bool RequireGuild(discord::Context ctx, std::string message = "This command requires you to be in a guild to run");
+    bool RequireGuild(discpp::Context ctx, std::string message = "This command requires you to be in a guild to run");
 }
 
 #endif
