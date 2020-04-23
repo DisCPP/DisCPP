@@ -1,5 +1,5 @@
 #include "ping_command.h"
-#include <DISCPP/command_handler.h>
+#include <discpp/command_handler.h>
 
 PingCommand::PingCommand() : discord::Command("ping") {
 	this->description = "Just a quick test command";

@@ -1,12 +1,12 @@
-#include <DISCPP/bot.h>
-#include <DISCPP/context.h>
-#include <DISCPP/command_handler.h>
+#include <discpp/bot.h>
+#include <discpp/context.h>
+#include <discpp/command_handler.h>
 
 // Events
-#include <DISCPP/event_handler.h>
-#include <DISCPP/events/ready_event.h>
-#include <DISCPP/events/guild_member_add_event.h>
-#include <DISCPP/events/channel_pins_update_event.h>
+#include <discpp/event_handler.h>
+#include <discpp/events/ready_event.h>
+#include <discpp/events/guild_member_add_event.h>
+#include <discpp/events/channel_pins_update_event.h>
 
 #include "ping_command.h"
 
