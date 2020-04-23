@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <iostream>
 
-namespace discord {
+namespace discpp {
 	typedef std::string snowflake;
 
 	class DiscordObject {

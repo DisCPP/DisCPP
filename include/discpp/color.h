@@ -1,7 +1,7 @@
 #ifndef DISCPP_COLOR_H
 #define DISCPP_COLOR_H
 
-namespace discord {
+namespace discpp {
 	enum class EmbedColor {
 		RED = 0xFF0000,
 		DARKRED = 0x8B0000,
@@ -31,10 +31,10 @@ namespace discord {
 		Color() = default;
 		Color(int red, int green, int blue) : red(red), green(green), blue(blue) {
 			/**
-			 * @brief Constructor to convert an rgb color to a discord::Color
+			 * @brief Constructor to convert an rgb color to a discpp::Color
 			 *
 			 * ```cpp
-			 *      discord::Color color(255, 255, 255); // White
+			 *      discpp::Color color(255, 255, 255); // White
 			 * ```
 			 *
 			 * @param[in] red Red value
@@ -48,10 +48,10 @@ namespace discord {
 
 		Color(int color_hex) : color_hex(color_hex) {
 			/**
-			 * @brief Constructor to go from a hex color value to a discord::Color
+			 * @brief Constructor to go from a hex color value to a discpp::Color
 			 *
 			 * ```cpp
-			 *      discord::Color color(0xffffff); // White
+			 *      discpp::Color color(0xffffff); // White
 			 * ```
 			 *
 			 * @param[in] color_hex The combined hex value

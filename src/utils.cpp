@@ -4,12 +4,12 @@
 #include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
 
-std::string discord::GetOsName() {
+std::string discpp::GetOsName() {
 	/**
 	 * @brief Get the OS name this application is running on.
 	 *
 	 * ```cpp
-	 *      std::string os_name = discord::GetOSName();
+	 *      std::string os_name = discpp::GetOSName();
 	 * ```
 	 *
 	 * @return std::string
@@ -32,12 +32,12 @@ std::string discord::GetOsName() {
 	#endif
 }
 
-nlohmann::json discord::HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket) {
+nlohmann::json discpp::HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket) {
 	/**
-	 * @brief Handles a response from the discord servers.
+	 * @brief Handles a response from the discpp servers.
 	 *
 	 * ```cpp
-	 *      nlohmann::json response = discord::HandleResponse(cpr_response, object, discord::RateLimitBucketType::CHANNEL);
+	 *      nlohmann::json response = discpp::HandleResponse(cpr_response, object, discpp::RateLimitBucketType::CHANNEL);
 	 * ```
 	 *
 	 * @param[in] reponse The cpr response from the servers.
@@ -60,12 +60,12 @@ std::string CprBodyToString(cpr::Body body) {
 	return body;
 }
 
-nlohmann::json discord::SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+nlohmann::json discpp::SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
 	/**
 	 * @brief Sends a get request to a url.
 	 *
 	 * ```cpp
-	 *      nlohmann::json response = discord::SendGetRequest(url, discord::DefaultHeaders(), object, discord::RateLimitBucketType::CHANNEL, {});
+	 *      nlohmann::json response = discpp::SendGetRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
 	 * ```
 	 *
 	 * @param[in] url The url to create a request to.
@@ -83,12 +83,12 @@ nlohmann::json discord::SendGetRequest(std::string url, cpr::Header headers, sno
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-nlohmann::json discord::SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+nlohmann::json discpp::SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
 	/**
 	 * @brief Sends a post request to a url.
 	 *
 	 * ```cpp
-	 *      nlohmann::json response = discord::SendPostRequest(url, discord::DefaultHeaders(), object, discord::RateLimitBucketType::CHANNEL, {});
+	 *      nlohmann::json response = discpp::SendPostRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
 	 * ```
 	 *
 	 * @param[in] url The url to create a request to.
@@ -106,12 +106,12 @@ nlohmann::json discord::SendPostRequest(std::string url, cpr::Header headers, sn
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-nlohmann::json discord::SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+nlohmann::json discpp::SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
 	/**
 	 * @brief Sends a put request to a url.
 	 *
 	 * ```cpp
-	 *      nlohmann::Json response = discord::SendPutRequest(url, discord::DefaultHeaders(), object, discord::RateLimitBucketType::CHANNEL, {});
+	 *      nlohmann::Json response = discpp::SendPutRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
 	 * ```
 	 *
 	 * @param[in] url The url to create a request to.
@@ -129,12 +129,12 @@ nlohmann::json discord::SendPutRequest(std::string url, cpr::Header headers, sno
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-nlohmann::json discord::SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+nlohmann::json discpp::SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
 	/**
 	 * @brief Sends a patch request to a url.
 	 *
 	 * ```cpp
-	 *      nlohmann::json response = discord::SendPatchRequest(url, discord::DefaultHeaders(), object, discord::RateLimitBucketType::CHANNEL, {});
+	 *      nlohmann::json response = discpp::SendPatchRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
 	 * ```
 	 *
 	 * @param[in] url The url to create a request to.
@@ -152,12 +152,12 @@ nlohmann::json discord::SendPatchRequest(std::string url, cpr::Header headers, s
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-nlohmann::json discord::SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket) {
+nlohmann::json discpp::SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket) {
 	/**
 	 * @brief Sends a delete request to a url.
 	 *
 	 * ```cpp
-	 *      nlohmann::json response = discord::SendDeleteRequest(url, discord::DefaultHeaders(), object, discord::RateLimitBucketType::CHANNEL);
+	 *      nlohmann::json response = discpp::SendDeleteRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL);
 	 * ```
 	 *
 	 * @param[in] url The url to create a request to.
@@ -174,12 +174,12 @@ nlohmann::json discord::SendDeleteRequest(std::string url, cpr::Header headers, 
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-cpr::Header discord::DefaultHeaders(cpr::Header add) {
+cpr::Header discpp::DefaultHeaders(cpr::Header add) {
 	/**
-	 * @brief Gets the default headers to communicate with the discord servers.
+	 * @brief Gets the default headers to communicate with the discpp servers.
 	 *
 	 * ```cpp
-	 *      cpr::Header default_headers = discord::DefaultHeaders({});
+	 *      cpr::Header default_headers = discpp::DefaultHeaders({});
 	 * ```
 	 *
 	 * @param[in] add The headers to add to the default ones.
@@ -187,7 +187,7 @@ cpr::Header discord::DefaultHeaders(cpr::Header add) {
 	 * @return nlohmann::json
 	 */
 
-	cpr::Header headers = { { "Authorization", "Bot " + discord::globals::bot_instance->token },
+	cpr::Header headers = { { "Authorization", "Bot " + discpp::globals::bot_instance->token },
 							{ "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" },
 							{ "X-RateLimit-Precision", "millisecond"} };
 	for (auto head : add) {
@@ -197,12 +197,12 @@ cpr::Header discord::DefaultHeaders(cpr::Header add) {
 	return headers;
 }
 
-bool discord::StartsWith(std::string string, std::string prefix) {
+bool discpp::StartsWith(std::string string, std::string prefix) {
 	/**
 	 * @brief Check if a string starts with another string.
 	 *
 	 * ```cpp
-	 *      bool does_start_with = discord::StartsWith("$test_command", "$");
+	 *      bool does_start_with = discpp::StartsWith("$test_command", "$");
 	 * ```
 	 *
 	 * @param[in] string The string to check if it starts with.
@@ -214,12 +214,12 @@ bool discord::StartsWith(std::string string, std::string prefix) {
 	return string.substr(0, prefix.size()) == prefix;
 }
 
-std::vector<std::string> discord::SplitString(std::string str, std::string delimiter) {
+std::vector<std::string> discpp::SplitString(std::string str, std::string delimiter) {
 	/**
 	 * @brief Split a string into a vector.
 	 *
 	 * ```cpp
-	 *      std::vector<std::string> argument_vec = discord::SplitString(message.content, ' ');
+	 *      std::vector<std::string> argument_vec = discpp::SplitString(message.content, ' ');
 	 * ```
 	 *
 	 * @param[in] str The string to split
@@ -234,12 +234,12 @@ std::vector<std::string> discord::SplitString(std::string str, std::string delim
 	return out;
 }
 
-std::string discord::CombineStringVector(std::vector<std::string> vector, std::string delimiter, int offset) {
+std::string discpp::CombineStringVector(std::vector<std::string> vector, std::string delimiter, int offset) {
 	/**
 	 * @brief Combine a vector into a string with spaces between each element.
 	 *
 	 * ```cpp
-	 *      std::string combined = discord::CombineVectorWithSpaces(arguments, 1);
+	 *      std::string combined = discpp::CombineVectorWithSpaces(arguments, 1);
 	 * ```
 	 *
 	 * @param[in] vector The vector to combine.
@@ -254,12 +254,12 @@ std::string discord::CombineStringVector(std::vector<std::string> vector, std::s
 	return std::accumulate(vector.begin() + offset, vector.end(), std::string(""), [delimiter](std::string s0, std::string const& s1) { return s0 += delimiter + s1; }).substr(1);
 }
 
-std::string discord::ReadEntireFile(std::ifstream& file) {
+std::string discpp::ReadEntireFile(std::ifstream& file) {
 	/**
 	 * @brief Reads an entire file.
 	 *
 	 * ```cpp
-	 *      std::string file_contents = discord::ReadEntireFile(file);
+	 *      std::string file_contents = discpp::ReadEntireFile(file);
 	 * ```
 	 *
 	 * @param[in] file The file to read.
@@ -270,7 +270,7 @@ std::string discord::ReadEntireFile(std::ifstream& file) {
 	return std::string((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
 }
 
-std::string discord::Base64Encode(std::string text) {
+std::string discpp::Base64Encode(std::string text) {
 	/**
 	 * @brief Encode Base64.
 	 *
@@ -289,12 +289,12 @@ std::string discord::Base64Encode(std::string text) {
 	return tmp.append((3 - text.size() % 3) % 3, '=');
 }
 
-std::string discord::ReplaceAll(std::string data, std::string toSearch, std::string replaceStr) {
+std::string discpp::ReplaceAll(std::string data, std::string toSearch, std::string replaceStr) {
 	/**
 	 * @brief Replace all occurences of sub strings
 	 *
 	 * ```cpp
-	 *      std::string raw_text = ReplaceAll("discord text", " ", "_");
+	 *      std::string raw_text = ReplaceAll("discpp text", " ", "_");
 	 * ```
 	 *
 	 * @param[in] string The string to escape.
@@ -307,9 +307,9 @@ std::string discord::ReplaceAll(std::string data, std::string toSearch, std::str
 	return data;
 }
 
-std::string discord::EscapeString(std::string string) {
+std::string discpp::EscapeString(std::string string) {
 	/**
-	 * @brief Escape strings for discord json endpoints and cpr body
+	 * @brief Escape strings for discpp json endpoints and cpr body
 	 *
 	 * ```cpp
 	 *      std::string raw_text = "{\"content\":\"" + EscapeString(text) + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
@@ -334,12 +334,12 @@ std::string discord::EscapeString(std::string string) {
 	return string;
 }
 
-int discord::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bucket) {
+int discpp::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bucket) {
 	/**
 	 * @brief Wait for rate limits.
 	 *
 	 * ```cpp
-	 *      discord::WaitForRateLimits(message.id, discord::RateLimitBucketType::CHANNEL);
+	 *      discpp::WaitForRateLimits(message.id, discpp::RateLimitBucketType::CHANNEL);
 	 * ```
 	 *
 	 * @param[in] object The object id.
@@ -390,7 +390,7 @@ bool HeaderContains(cpr::Header header, std::string key) {
 	 * @brief Check if a cpr::Header contains a specific key.
 	 *
 	 * ```cpp
-	 *      bool contains = discord::HeaderContains(headers, "auth");
+	 *      bool contains = discpp::HeaderContains(headers, "auth");
 	 * ```
 	 *
 	 * @param[in] header The headers to see if the key is contained in.
@@ -405,12 +405,12 @@ bool HeaderContains(cpr::Header header, std::string key) {
 	return false;
 }
 
-void discord::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBucketType ratelimit_bucket) {
+void discpp::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBucketType ratelimit_bucket) {
 	/**
 	 * @brief Handle rate limites
 	 *
 	 * ```cpp
-	 *      discord::HandleRateLimits(header, id, bucket);
+	 *      discpp::HandleRateLimits(header, id, bucket);
 	 * ```
 	 *
 	 * @param[in] header The headers to get the wait rate limit from.
@@ -444,14 +444,14 @@ void discord::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBu
 	obj->ratelimit_reset = std::stod(header["x-ratelimit-reset"]);
 }
 
-time_t discord::TimeFromSnowflake(snowflake snow) {
+time_t discpp::TimeFromSnowflake(snowflake snow) {
 	int64_t unix = ((std::strtoll(snow.c_str(), NULL, 10) >> 22) + 1420070400000) / 1000;
 	time_t unix_time = unix;
 
 	return unix_time;
 }
 
-std::string discord::FormatTimeFromSnowflake(snowflake snow) {
+std::string discpp::FormatTimeFromSnowflake(snowflake snow) {
 	time_t unix_time = TimeFromSnowflake(snow);
 
 	tm* n = std::gmtime(&unix_time);

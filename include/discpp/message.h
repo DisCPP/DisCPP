@@ -11,7 +11,7 @@
 #include "embed_builder.h"
 #include "attachment.h"
 
-namespace discord {
+namespace discpp {
 	enum class GetReactionsMethod : int {
 		BEFORE_USER,
 		AFTER_USER
@@ -72,40 +72,40 @@ namespace discord {
 		Message(snowflake id);
 		Message(nlohmann::json json);
 
-		void AddReaction(discord::Emoji emoji);
-		void RemoveBotReaction(discord::Emoji emoji);
-		void RemoveReaction(discord::User user, discord::Emoji emoji);
-		std::vector<discord::User> GetReactorsOfEmoji(discord::Emoji emoji, int amount);
-		std::vector<discord::User> GetReactorsOfEmoji(discord::Emoji emoji, discord::User user, GetReactionsMethod method);
+		void AddReaction(discpp::Emoji emoji);
+		void RemoveBotReaction(discpp::Emoji emoji);
+		void RemoveReaction(discpp::User user, discpp::Emoji emoji);
+		std::vector<discpp::User> GetReactorsOfEmoji(discpp::Emoji emoji, int amount);
+		std::vector<discpp::User> GetReactorsOfEmoji(discpp::Emoji emoji, discpp::User user, GetReactionsMethod method);
 		void ClearReactions();
-		discord::Message EditMessage(std::string text);
-		discord::Message EditMessage(discord::EmbedBuilder embed);
-		discord::Message EditMessage(int flags);
+		discpp::Message EditMessage(std::string text);
+		discpp::Message EditMessage(discpp::EmbedBuilder embed);
+		discpp::Message EditMessage(int flags);
 		void DeleteMessage();
 		void PinMessage();
 		void UnpinMessage();
 
 		//snowflake id;
-		discord::Channel channel;
-		discord::Guild guild;
-		discord::User author;
+		discpp::Channel channel;
+		discpp::Guild guild;
+		discpp::User author;
 		std::string content;
 		std::string timestamp; // TODO: Convert to iso8601Time
 		std::string edited_timestamp; // TODO: Convert to iso8601Time
 		bool tts;
 		bool mention_everyone;
-		std::vector<discord::Member> mentions;
-		std::vector<discord::Role> mentioned_roles;
-		std::vector<discord::Channel> mention_channels;
-		std::vector<discord::Attachment> attachments;
-		std::vector<discord::EmbedBuilder> embeds;
-		std::vector<discord::Reaction> reactions;
+		std::vector<discpp::Member> mentions;
+		std::vector<discpp::Role> mentioned_roles;
+		std::vector<discpp::Channel> mention_channels;
+		std::vector<discpp::Attachment> attachments;
+		std::vector<discpp::EmbedBuilder> embeds;
+		std::vector<discpp::Reaction> reactions;
 		bool pinned;
 		snowflake webhook_id;
 		int type;
-		discord::MessageActivity activity;
-		discord::MessageApplication application;
-		discord::MessageReference message_reference;
+		discpp::MessageActivity activity;
+		discpp::MessageApplication application;
+		discpp::MessageReference message_reference;
 		int flags;
 	};
 }

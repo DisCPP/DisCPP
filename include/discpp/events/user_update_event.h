@@ -6,12 +6,12 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class UserUpdateEvent : public Event {
 	public:
-		inline UserUpdateEvent(discord::User user) : user(user) {}
+		inline UserUpdateEvent(discpp::User user) : user(user) {}
 
-		discord::User user;
+		discpp::User user;
 	};
 }
 

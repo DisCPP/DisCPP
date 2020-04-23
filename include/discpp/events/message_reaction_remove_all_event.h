@@ -6,12 +6,12 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class MessageReactionRemoveAllEvent : public Event {
 	public:
-		inline MessageReactionRemoveAllEvent(discord::Message message) {}
+		inline MessageReactionRemoveAllEvent(discpp::Message message) {}
 
-		discord::Message message;
+		discpp::Message message;
 	};
 }
 

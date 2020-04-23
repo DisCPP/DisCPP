@@ -37,18 +37,18 @@ Please follow [Google's styling guide](https://google.github.io/styleguide/cppgu
 7. While inside CMake settings, make sure your compiling in x86-Debug.
 	* Scroll to `Toolset` and set it to a x86 compiler of your choosing (ex: msvc_x86)
 ## Setting up a Bot Project
-First follow the [building](#Building) steps above to make sure DisCPP will compile.
+First follow the [building](#Building) steps above to make sure Disc++ will compile.
 1. Currently you need to create a thirdparty folder in the root of your bot project directory.
 2. Inside the thirdparty folder, clone this repository.
-3. Open your CMake file and add `add_subdirectory(thirdparty/DisCPP)` near the top.
-4. Where ever you link your libraries, add this: `target_link_libraries(main PRIVATE DisCPP)` (usually at, or near, the end of the file)
+3. Open your CMake file and add `add_subdirectory(thirdparty/discpp)` near the top.
+4. Where ever you link your libraries, add this: `target_link_libraries(main PRIVATE discpp)` (usually at, or near, the end of the file)
 5. Your finished CMakefile should be similar to this:
 ```cmake
 #CMakeLists.txt
 cmake_minimum_required(VERSION 3.6)
 project(bot)
 
-add_subdirectory(thirdparty/DisCPP)
+add_subdirectory(thirdparty/discpp)
 
 add_executable(main src/main.cpp)
 
@@ -57,7 +57,7 @@ target_include_directories(main PUBLIC include)
 file(GLOB_RECURSE source_list src/*.cpp)
 target_sources(main PRIVATE ${source_list})
 
-target_link_libraries(main PRIVATE DisCPP)
+target_link_libraries(main PRIVATE discpp)
 ```
 6. Edit your cmake settings to reflect how it was edited in [building](#Building) steps.
 7. You're done, enjoy!
@@ -96,34 +96,34 @@ int main(int argc, const char* argv[]) {
 	std::string token;
 	std::getline(token_file, token);
 
-	discord::Bot bot{ token, {"!"} }; // Token, command prefixes.
+	discpp::Bot bot{ token, {"!"} }; // Token, command prefixes.
 
 	PingCommand(); // This runs the constructor which will register the command.
 
 	// I would recommend creating a class for the commands, you can check that in the examples folder
 	// But, you can still register a command like you did before
-	discord::Command("test", "Quick example of a quick command", {}, [](discord::Context ctx) {
+	discpp::Command("test", "Quick example of a quick command", {}, [](discpp::Context ctx) {
 		ctx.Send("Quick new command handler test");
 	}, {});
 
 	// New event system
-	discord::EventHandler<discord::ReadyEvent>::RegisterListener([&bot](discord::ReadyEvent event) {
+	discpp::EventHandler<discpp::ReadyEvent>::RegisterListener([&bot](discpp::ReadyEvent event) {
 		std::cout << "Ready!" << std::endl
 			<< "Logged in as: " << bot.bot_user.username << "#" << bot.bot_user.discriminator << std::endl
 			<< "ID: " << bot.bot_user.id << std::endl << "-----------------------------" << std::endl;
 
 		// Will show "Playing With Crashes!"
-		discord::Activity activity = discord::Activity("With Crashes!", discord::presence::ActivityType::GAME, discord::presence::Status::idle);
+		discpp::Activity activity = discpp::Activity("With Crashes!", discpp::presence::ActivityType::GAME, discpp::presence::Status::idle);
 		bot.UpdatePresence(activity);
 	});
 
-	discord::EventHandler<discord::GuildMemberAddEvent>::RegisterListener([](discord::GuildMemberAddEvent event) {
-		discord::Channel channel((discord::snowflake) "638156895953223714");
+	discpp::EventHandler<discpp::GuildMemberAddEvent>::RegisterListener([](discpp::GuildMemberAddEvent event) {
+		discpp::Channel channel((discpp::snowflake) "638156895953223714");
 
 		channel.Send("Welcome <@" + event.member.user.id + ">, hope you enjoy!");
 	});
 
-	discord::EventHandler<discord::ChannelPinsUpdateEvent>::RegisterListener([](discord::ChannelPinsUpdateEvent event)->bool {
+	discpp::EventHandler<discpp::ChannelPinsUpdateEvent>::RegisterListener([](discpp::ChannelPinsUpdateEvent event)->bool {
 		event.channel.Send("Detected a pin update!");
 
 		return false;

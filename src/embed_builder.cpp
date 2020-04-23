@@ -4,22 +4,22 @@
 
 #include <DISCPP/bot.h>
 
-namespace discord {
+namespace discpp {
 	EmbedBuilder::EmbedBuilder() : embed_json(nlohmann::json({})) { }
 
-	EmbedBuilder::EmbedBuilder(std::string title, std::string description, discord::Color color) {
+	EmbedBuilder::EmbedBuilder(std::string title, std::string description, discpp::Color color) {
 		/**
-		 * @brief Constructs a discord::EmbedBuilder object with a title, description, and color.
+		 * @brief Constructs a discpp::EmbedBuilder object with a title, description, and color.
 		 *
 		 * ```cpp
-		 *      discord::EmbedBuilder embed("Banned players", "This is a list of banned players from this guild", 0xffbb00);
+		 *      discpp::EmbedBuilder embed("Banned players", "This is a list of banned players from this guild", 0xffbb00);
 		 * ```
 		 *
 		 * @param[in] title The title of the embed.
 		 * @param[in] description The description of the embed.
 		 * @param[in] color The color of the embed.
 		 *
-		 * @return discord::EmbedBuilder, this is a constructor.
+		 * @return discpp::EmbedBuilder, this is a constructor.
 		 */
 
 		SetTitle(EscapeString(title));
@@ -29,15 +29,15 @@ namespace discord {
 
 	EmbedBuilder::EmbedBuilder(nlohmann::json json) : embed_json(json) {
 		/**
-		 * @brief Constructs a discord::EmbedBuilder object from json.
+		 * @brief Constructs a discpp::EmbedBuilder object from json.
 		 *
 		 * ```cpp
-		 *      discord::EmbedBuilder embed(json);
+		 *      discpp::EmbedBuilder embed(json);
 		 * ```
 		 *
 		 * @param[in] json The json to parse the embed from.
 		 *
-		 * @return discord::EmbedBuilder, this is a constructor.
+		 * @return discpp::EmbedBuilder, this is a constructor.
 		 */
 	}
 
@@ -51,7 +51,7 @@ namespace discord {
 		 *
 		 * @param[in] title The title of the embed.
 		 *
-		 * @return discord::EmbedBuilder, just returns an object of this.
+		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
 		if (title.size() < 0 || title.size() > 256) {
@@ -72,7 +72,7 @@ namespace discord {
 		 *
 		 * @param[in] type The type of this embed
 		 *
-		 * @return discord::EmbedBuilder, just returns an object of this.
+		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
 		embed_json["type"] = EscapeString(type);
@@ -88,7 +88,7 @@ namespace discord {
 		 *
 		 * @param[in] description The description for the embed.
 		 *
-		 * @return discord::EmbedBuilder, just returns an object of this.
+		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
 		if (description.size() < 0 || description.size() > 2048) {
@@ -109,7 +109,7 @@ namespace discord {
 		 *
 		 * @param[in] url The URL of the embed.
 		 *
-		 * @return discord::EmbedBuilder, just returns an object of this.
+		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
 		embed_json["url"] = EscapeString(url);
@@ -126,7 +126,7 @@ namespace discord {
 		 *
 		 * @param[in] timestamp The timestamp of the embed.
 		 *
-		 * @return discord::EmbedBuilder, just returns an object of this.
+		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
 		embed_json["timestamp"] = timestamp;
@@ -143,7 +143,7 @@ namespace discord {
 		 *
 		 * @param[in] color The color to set the embeds to.
 		 *
-		 * @return discord::EmbedBuilder, just returns an object of this.
+		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
 		embed_json["color"] = color.color_hex;
@@ -161,7 +161,7 @@ namespace discord {
 		 * @param[in] text The text of the footer.
 		 * @param[in] icon_url The icon url.
 		 *
-		 * @return discord::EmbedBuilder, just returns an object of this.
+		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
 		embed_json["footer"] = nlohmann::json({});
@@ -188,7 +188,7 @@ namespace discord {
 		 * @param[in] height The height of the image.
 		 * @param[in] widgth The width of the image.
 		 *
-		 * @return discord::EmbedBuilder, just returns an object of this.
+		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
 		embed_json["image"] = nlohmann::json({});
@@ -214,7 +214,7 @@ namespace discord {
 		 * @param[in] height The height of the thumbnail.
 		 * @param[in] width The width of the thumbnail.
 		 *
-		 * @return discord::EmbedBuilder, just returns an object of this.
+		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
 		embed_json["thumbnail"] = nlohmann::json({});
@@ -240,7 +240,7 @@ namespace discord {
 		 * @param[in] height The height of the video.
 		 * @param[in] width The width of the video.
 		 *
-		 * @return discord::EmbedBuilder, just returns an object of this.
+		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
 		embed_json["video"] = nlohmann::json({});
@@ -265,7 +265,7 @@ namespace discord {
 		 * @param[in] name The name of the provider of the embed.
 		 * @param[in] url The URL of the provider.
 		 *
-		 * @return discord::EmbedBuilder, just returns an object of this.
+		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
 		embed_json["provider"] = nlohmann::json({});
@@ -286,7 +286,7 @@ namespace discord {
 		 * @param[in] url The URL of the author.
 		 * @param[in] icon_url The URL of the icon.
 		 *
-		 * @return discord::EmbedBuilder, just returns an object of this.
+		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
 		embed_json["author"] = nlohmann::json({});
@@ -316,7 +316,7 @@ namespace discord {
 		 * @param[in] name The name/title of the field.
 		 * @param[in] value The value/description of the field
 		 *
-		 * @return discord::EmbedBuilder, just returns an object of this.
+		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
 		if (name.empty()) {

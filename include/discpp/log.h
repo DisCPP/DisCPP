@@ -7,7 +7,7 @@
 
 #include "utils.h"
 
-namespace discord {
+namespace discpp {
 	namespace logger_flags {
 		enum _LogFlagMode { // constants for logger options
 			_LogFlagMask = 0xff
@@ -138,7 +138,7 @@ namespace discord {
 			 * @param file_path The log file path.
 			 * @param logger_flags The flags for what gets logged.
 			 *
-			 * @return discord::Logger
+			 * @return discpp::Logger
 			 */
 
 			log_file.open(file_path, std::ios::out | std::ios::binary);
@@ -159,7 +159,7 @@ namespace discord {
 			 *
 			 * @param logger_flags The flags for what gets logged.
 			 *
-			 * @return discord::Logger
+			 * @return discpp::Logger
 			 */
 		}
 

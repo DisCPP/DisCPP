@@ -3,7 +3,7 @@
 
 #include "../event.h"
 
-namespace discord {
+namespace discpp {
 	class InvalidSessionEvent : public Event {
 	public:
 		InvalidSessionEvent() = default;

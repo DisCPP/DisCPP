@@ -7,13 +7,13 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class GuildMemberRemoveEvent : public Event {
 	public:
-		inline GuildMemberRemoveEvent(discord::Guild guild, discord::Member member) : guild(guild), member(member) {}
+		inline GuildMemberRemoveEvent(discpp::Guild guild, discpp::Member member) : guild(guild), member(member) {}
 
-		discord::Guild guild;
-		discord::Member member;
+		discpp::Guild guild;
+		discpp::Member member;
 	};
 }
 

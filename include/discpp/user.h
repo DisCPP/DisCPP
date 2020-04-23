@@ -6,7 +6,7 @@
 #include "activity.h"
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	enum ImageType : int { AUTO, WEBP, PNG, JPEG, GIF };
 	class Channel;
 	class GuildIntegration;
@@ -38,7 +38,7 @@ namespace discord {
 		User(snowflake id);
 		User(nlohmann::json json);
 
-		discord::Channel CreateDM();
+		discpp::Channel CreateDM();
 		std::vector<Connection> GetUserConnections();
 		std::string GetAvatarURL(ImageType imgType = ImageType::AUTO);
 
@@ -52,7 +52,7 @@ namespace discord {
 		bool verified; /**< Whether the email on this account has been verified. */
 		std::string email; /**< The user's email. */
 		int flags; /**< The flags on a user's account. */
-		discord::specials::NitroSubscription premium_type; /**< The type of Nitro subscription on a user's account. */
+		discpp::specials::NitroSubscription premium_type; /**< The type of Nitro subscription on a user's account. */
 		int public_flags;
 		std::string created_at; /**< The creation date of the current user's account. */
 		std::string mention; /**< The @ mention of the current user Ex: <@150312037426135041>. */

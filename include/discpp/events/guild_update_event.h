@@ -6,12 +6,12 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class GuildUpdateEvent : public Event {
 	public:
-		inline GuildUpdateEvent(discord::Guild guild) : guild(guild) {}
+		inline GuildUpdateEvent(discpp::Guild guild) : guild(guild) {}
 
-		discord::Guild guild;
+		discpp::Guild guild;
 	};
 }
 

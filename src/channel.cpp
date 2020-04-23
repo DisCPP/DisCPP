@@ -2,37 +2,37 @@
 #include "utils.h"
 #include "bot.h"
 
-namespace discord {
-	Channel::Channel(snowflake id) : discord::DiscordObject(id) {
+namespace discpp {
+	Channel::Channel(snowflake id) : discpp::DiscordObject(id) {
 		/**
-		 * @brief Constructs a discord::Channel object from the id.
+		 * @brief Constructs a discpp::Channel object from the id.
 		 *
 		 * ```cpp
-		 *      discord::Channel channel(674023471063498772);
+		 *      discpp::Channel channel(674023471063498772);
 		 * ```
 		 *
 		 * @param[in] id The channel id
 		 *
-		 * @return discord::Channel, this is a constructor.
+		 * @return discpp::Channel, this is a constructor.
 		 */
 
-		std::unordered_map<snowflake, Channel>::iterator it = discord::globals::bot_instance->channels.find(id);
-		if (it != discord::globals::bot_instance->channels.end()) {
+		std::unordered_map<snowflake, Channel>::iterator it = discpp::globals::bot_instance->channels.find(id);
+		if (it != discpp::globals::bot_instance->channels.end()) {
 			*this = it->second;
 		}
 	}
 
 	Channel::Channel(nlohmann::json json) {
 		/**
-		 * @brief Constructs a discord::Channel object from json.
+		 * @brief Constructs a discpp::Channel object from json.
 		 *
 		 * ```cpp
-		 *      discord::channel channel(json);
+		 *      discpp::channel channel(json);
 		 * ```
 		 *
 		 * @param[in] json The json data for the channel.
 		 *
-		 * @return discord::Channel, this is a constructor.
+		 * @return discpp::Channel, this is a constructor.
 		 */
 
 		id = GetDataSafely<snowflake>(json, "id");
@@ -43,7 +43,7 @@ namespace discord {
 		position = GetDataSafely<int>(json, "position");
 		if (json.contains("permission_overwrites")) {
 			for (auto permission_overwrite : json["permission_overwrites"]) {
-				permissions.push_back(discord::Permissions(permission_overwrite));
+				permissions.push_back(discpp::Permissions(permission_overwrite));
 			}
 		}
 		name = GetDataSafely<std::string>(json, "name");
@@ -55,7 +55,7 @@ namespace discord {
 		rate_limit_per_user = GetDataSafely<int>(json, "rate_limit_per_user");
 		if (json.contains("recipients")) {
 			for (auto recipient : json["recipients"]) {
-				recipients.push_back(discord::User(recipient));
+				recipients.push_back(discpp::User(recipient));
 			}
 		}
 		icon = GetDataSafely<std::string>(json, "icon");
@@ -67,22 +67,22 @@ namespace discord {
 
 	Channel::Channel(nlohmann::json json, snowflake guild_id) : Channel(json) {
 		/**
-		 * @brief Constructs a discord::Channel object from json with a guild id.
+		 * @brief Constructs a discpp::Channel object from json with a guild id.
 		 *
 		 * ```cpp
-		 *      discord::Channel channel(json, 583251190591258624);
+		 *      discpp::Channel channel(json, 583251190591258624);
 		 * ```
 		 *
 		 * @param[in] json The json data for the channel.
 		 * @param[in] guild_id The guild id for this channel.
 		 *
-		 * @return discord::Bot, this is a constructor.
+		 * @return discpp::Bot, this is a constructor.
 		 */
 
 		this->guild_id = guild_id;
 	}
 
-	discord::Message Channel::Send(std::string text, bool tts, discord::EmbedBuilder* embed, std::vector<File> files) {
+	discpp::Message Channel::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<File> files) {
 		/**
 		 * @brief Send a message in this channel.
 		 *
@@ -97,7 +97,7 @@ namespace discord {
 		 * @param[in] embed Embed to send
 		 * @param[in] files Files to send
 		 *
-		 * @return discord::Message
+		 * @return discpp::Message
 		 */
 
 		std::string escaped_text = EscapeString(text);
@@ -110,10 +110,10 @@ namespace discord {
 			message.close();
 
 			// Ensure the file will be deleted even if it runs into an exception sending the file.
-			discord::Message sent_message;
+			discpp::Message sent_message;
 			try {
 				// Send the message
-				std::vector<discord::File> files;
+				std::vector<discpp::File> files;
 				files.push_back({ "message.txt", "message.txt" });
 				sent_message = Send("Message was too large to fit in 2000 characters", tts, nullptr, files);
 
@@ -146,14 +146,14 @@ namespace discord {
 			cpr::Response response = cpr::Post(cpr::Url{ Endpoint("/channels/" + id + "/messages") }, DefaultHeaders({ {"Content-Type", "multipart/form-data"} }), multipart_data);
 			HandleRateLimits(response.header, id, RateLimitBucketType::CHANNEL);
 
-			return discord::Message(nlohmann::json::parse(response.text));
+			return discpp::Message(nlohmann::json::parse(response.text));
 		}
 		else {
 			body = cpr::Body(message_json.dump());
 		}
 		nlohmann::json result = SendPostRequest(Endpoint("/channels/" + id + "/messages"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
-		return discord::Message(result);
+		return discpp::Message(result);
 	}
 
 	std::string ChannelPropertyToString(ChannelProperty prop) {
@@ -183,21 +183,21 @@ namespace discord {
     template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template<class... Ts> overloaded(Ts...)->overloaded<Ts...>;
 
-	discord::Channel Channel::Modify(ModifyRequests modify_requests) {
+	discpp::Channel Channel::Modify(ModifyRequests modify_requests) {
 		/**
 		 * @brief Modify the channel.
 		 *
-		 * Use discord::ModifyRequest to modify a field of the channel.
+		 * Use discpp::ModifyRequest to modify a field of the channel.
 		 *
 		 * ```cpp
 		 *		// Change the name of the channel to "Test"
-		 *		discord::ModifyRequests request(discord::ChannelProperty::NAME, "Test");
+		 *		discpp::ModifyRequests request(discpp::ChannelProperty::NAME, "Test");
 		 *      channel.Modify(request);
 		 * ```
 		 *
 		 * @param[in] modify_request The field to modify and what to set it to.
 		 *
-		 * @return discord::Channel - This method also sets the channel reference to the returned channel.
+		 * @return discpp::Channel - This method also sets the channel reference to the returned channel.
 		 */
 
 		cpr::Header headers = DefaultHeaders({ {"Content-Type", "application/json" } });
@@ -215,11 +215,11 @@ namespace discord {
 		cpr::Body body(j_body.dump());
 		nlohmann::json result = SendPatchRequest(Endpoint("/channels/" + id), headers, id, RateLimitBucketType::CHANNEL, body);
 		
-		*this = discord::Channel(result);
+		*this = discpp::Channel(result);
 		return *this;
 	}
 
-	discord::Channel Channel::Delete() {
+	discpp::Channel Channel::Delete() {
 		/**
 		 * @brief Delete this channel.
 		 *
@@ -227,40 +227,40 @@ namespace discord {
 		 *      channel.Delete();
 		 * ```
 		 *
-		 * @return discord::Channel - Returns a default channel object
+		 * @return discpp::Channel - Returns a default channel object
 		 */
 
 		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/" + id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
-		*this = discord::Channel();
+		*this = discpp::Channel();
 		return *this;
 	}
 
-	std::vector<discord::Message> Channel::GetChannelMessages(int amount, GetChannelsMessagesMethod get_method) {
+	std::vector<discpp::Message> Channel::GetChannelMessages(int amount, GetChannelsMessagesMethod get_method) {
 		/**
 		 * @brief Get channel's messages depending on the given method.
 		 *
 		 * ```cpp
-		 *      std::vector<discord::Message> messages = channel.GetChannelMessages(50);
+		 *      std::vector<discpp::Message> messages = channel.GetChannelMessages(50);
 		 * ```
 		 *
 		 * @param[in] amount The amount of the messages to get unless the method is not "limit".
 		 * @param[in] get_method The method of how to get the messages.
 		 *
-		 * @return std::vector<discord::Message>
+		 * @return std::vector<discpp::Message>
 		 */
 		
 		nlohmann::json result = SendGetRequest(Endpoint("/channels/" + id + "/messages"), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 
-		std::vector<discord::Message> messages;
+		std::vector<discpp::Message> messages;
 
 		for (nlohmann::json message : result) {
-			messages.push_back(discord::Message(message));
+			messages.push_back(discpp::Message(message));
 		}
 
 		return messages;
 	}
 
-	discord::Message Channel::FindMessage(snowflake message_id) {
+	discpp::Message Channel::FindMessage(snowflake message_id) {
 		/**
 		 * @brief Get a message from the channel from the id.
 		 *
@@ -270,11 +270,11 @@ namespace discord {
 		 *
 		 * @param[in] message_id The message id.
 		 *
-		 * @return discord::Message
+		 * @return discpp::Message
 		 */
 
 		nlohmann::json result = SendGetRequest(Endpoint("/channels/" + id + "/messages/" + message_id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
-		return discord::Message(result);
+		return discpp::Message(result);
 	}
 
 	void Channel::BulkDeleteMessage(std::vector<snowflake> messages) {
@@ -306,32 +306,32 @@ namespace discord {
 		nlohmann::json result = SendPostRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 	}
 
-	std::vector<discord::GuildInvite> Channel::GetInvites() {
+	std::vector<discpp::GuildInvite> Channel::GetInvites() {
 		/**
 		 * @brief Get all the channel invites.
 		 *
 		 * ```cpp
-		 *     std::vector<discord::GuildInvite> invites = channel.GetInvites();
+		 *     std::vector<discpp::GuildInvite> invites = channel.GetInvites();
 		 * ```
 		 *
-		 * @return std::vector<discord::GuildInvite>
+		 * @return std::vector<discpp::GuildInvite>
 		 */
 
 		nlohmann::json result = SendGetRequest(Endpoint("/channels/" + id + "/invites"), DefaultHeaders(), {}, {});
-		std::vector<discord::GuildInvite> invites;
+		std::vector<discpp::GuildInvite> invites;
 		for (auto invite : result) {
-			invites.push_back(discord::GuildInvite(invite));
+			invites.push_back(discpp::GuildInvite(invite));
 		}
 
 		return invites;
 	}
 
-	discord::GuildInvite Channel::CreateInvite(int max_age, int max_uses, bool temporary, bool unique) {
+	discpp::GuildInvite Channel::CreateInvite(int max_age, int max_uses, bool temporary, bool unique) {
 		/**
 		 * @brief Create an invite for the channel.
 		 *
 		 * ```cpp
-		 *      discord::GuildInvite invite = channel.CreateInvite(86400, 5, true, true);
+		 *      discpp::GuildInvite invite = channel.CreateInvite(86400, 5, true, true);
 		 * ```
 		 *
 		 * @param[in] max_age How long the invite will last for.
@@ -339,12 +339,12 @@ namespace discord {
 		 * @param[in] temporary Whether this invite only grants temporary membership.
 		 * @param[in] If true, dont try to reuse similar invites.
 		 *
-		 * @return discord::GuildInvite
+		 * @return discpp::GuildInvite
 		 */
 
 		cpr::Body body("{\"max_age\": " + std::to_string(max_age) + ", \"max_uses\": " + std::to_string(max_uses) + ", \"temporary\": " + std::to_string(temporary) + ", \"unique\": " + std::to_string(unique) + "}");
 		nlohmann::json result = SendPostRequest(Endpoint("/channels/" + id + "/invites"), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
-		discord::GuildInvite invite(result);
+		discpp::GuildInvite invite(result);
 
 		return invite;
 	}
@@ -363,7 +363,7 @@ namespace discord {
 		nlohmann::json result = SendPostRequest(Endpoint("/channels/" + id + "/typing"), DefaultHeaders(), {}, {});
 	}
 
-	std::vector<discord::Message> Channel::GetPinnedMessages() {
+	std::vector<discpp::Message> Channel::GetPinnedMessages() {
 		/**
 		 * @brief Get all messages pinned to the channel.
 		 *
@@ -371,20 +371,20 @@ namespace discord {
 		 *      channel.GetPinnedMessages();
 		 * ```
 		 *
-		 * @return std::vector<discord::Message>
+		 * @return std::vector<discpp::Message>
 		 */
 
 		nlohmann::json result = SendGetRequest(Endpoint("/channels/" + id = "/pins"), DefaultHeaders(), {}, {});
 		
-		std::vector<discord::Message> messages;
+		std::vector<discpp::Message> messages;
 		for (auto message : result) {
-			messages.push_back(discord::Message(message));
+			messages.push_back(discpp::Message(message));
 		}
 
 		return messages;
 	}
 
-	void Channel::GroupDMAddRecipient(discord::User user) {
+	void Channel::GroupDMAddRecipient(discpp::User user) {
 		/**
 		 * @brief Add a recipient to the group dm.
 		 *
@@ -400,7 +400,7 @@ namespace discord {
 		nlohmann::json result = SendPutRequest(Endpoint("/channels/" + id + "/recipients/" + user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 
-	void Channel::GroupDMRemoveRecipient(discord::User user) {
+	void Channel::GroupDMRemoveRecipient(discpp::User user) {
 		/**
 		 * @brief Remove a recipient from the group dm.
 		 *
@@ -416,7 +416,7 @@ namespace discord {
 		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/" + id + "/recipients/" + user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 
-    void Channel::EditPermissions(discord::Permissions permissions) {
+    void Channel::EditPermissions(discpp::Permissions permissions) {
         /**
          * @brief Edit permission overwrites for this channel.
          *
@@ -440,7 +440,7 @@ namespace discord {
         nlohmann::json result = SendPutRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(j_body.dump()));
     }
 
-    void Channel::DeletePermission(discord::Permissions permissions) {
+    void Channel::DeletePermission(discpp::Permissions permissions) {
         /**
          * @brief Remove permission overwrites for this channel.
          *

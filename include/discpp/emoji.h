@@ -15,7 +15,7 @@
 #include <codecvt>
 #include <string>
 
-namespace discord {
+namespace discpp {
 	class Guild;
 	class User;
 
@@ -23,7 +23,7 @@ namespace discord {
 	public:
 		Emoji() = default;
 		Emoji(std::string name, snowflake id);
-		Emoji(discord::Guild guild, snowflake id);
+		Emoji(discpp::Guild guild, snowflake id);
 		Emoji(nlohmann::json json);
 		Emoji(std::wstring w_unicode);
 		Emoji(std::string s_unicode);
@@ -56,8 +56,8 @@ namespace discord {
 		//snowflake id;
 		std::string name; /**< Name of the current emoji */
 		std::wstring unicode; /**< Unicode representation of the current emoji */
-		std::vector<discord::Role> roles; /**< Roles */
-		discord::User user;
+		std::vector<discpp::Role> roles; /**< Roles */
+		discpp::User user;
 		bool require_colons;
 		bool managed;
 		bool animated; /**< Whether or not the current emoji is animated */

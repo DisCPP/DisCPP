@@ -14,15 +14,15 @@
 #include <optional>
 #include <utility>
 
-namespace discord {
+namespace discpp {
 	class Guild;
 	class User;
 
 	struct GuildBan {
 		std::string reason; /**< Ban reason */
-		discord::User user; /**< Banned member */
+		discpp::User user; /**< Banned member */
 
-		GuildBan(std::string reason, discord::User user) {
+		GuildBan(std::string reason, discpp::User user) {
 			this->reason = reason;
 			this->user = user;
 		}
@@ -32,8 +32,8 @@ namespace discord {
 	public:
 		std::string code; /**< Guild Invite code */
 		snowflake guild_id; /**< Guild ID the invite was issued for */
-		discord::Channel channel; /**< Channel the invite was issued for */
-		discord::User target_user; 
+		discpp::Channel channel; /**< Channel the invite was issued for */
+		discpp::User target_user; 
 		int target_user_type;
 		int approximate_presence_count; 
 		int approximate_member_count; /**< Approximate count of members in the guild the invite was issued for */
@@ -42,8 +42,8 @@ namespace discord {
 		GuildInvite(nlohmann::json json) {
 			code = json["code"];
 			guild_id = (json.contains("guild")) ? json["guild"]["id"].get<snowflake>() : 0;
-			channel = discord::Channel(json["channel"]["id"].get<snowflake>());
-			target_user = (json.contains("target_user")) ? discord::User(json["target_user"]) : discord::User();
+			channel = discpp::Channel(json["channel"]["id"].get<snowflake>());
+			target_user = (json.contains("target_user")) ? discpp::User(json["target_user"]) : discpp::User();
 			target_user_type = GetDataSafely<int>(json, "target_user_type");
 			approximate_presence_count = GetDataSafely<int>(json, "approximate_presence_count");
 			approximate_member_count = GetDataSafely<int>(json, "approximate_member_count");
@@ -68,11 +68,11 @@ namespace discord {
 		std::string type; /**< Type of the integration */
 		bool enabled; /**< Is the integration enabled? */
 		bool syncing; 
-		discord::Role role; 
+		discpp::Role role; 
 		int expire_behavior;
 		int expire_grace_period;
-		discord::User user;
-		discord::GuildIntegrationAccount account;
+		discpp::User user;
+		discpp::GuildIntegrationAccount account;
 		std::string synced_at; // TODO: Convert to iso8601Time
 
 		GuildIntegration() = default;
@@ -82,11 +82,11 @@ namespace discord {
 			type = json["type"];
 			enabled = json["enabled"].get<bool>();
 			syncing = json["syncing"].get<bool>();
-			role = discord::Role(json["role_id"].get<snowflake>());
+			role = discpp::Role(json["role_id"].get<snowflake>());
 			expire_behavior = json["expire_behavior"].get<int>();
 			expire_grace_period = json["expire_grace_period"].get<int>();
-			user = discord::User(json["user"]);
-			account = discord::GuildIntegrationAccount(json["account"]);
+			user = discpp::User(json["user"]);
+			account = discpp::GuildIntegrationAccount(json["account"]);
 			synced_at = json["synced_at"];
 		}
 	};
@@ -119,7 +119,7 @@ namespace discord {
             channel_id = GetDataSafely<snowflake>(json, guild_id);
             user_id = json[guild_id].get<snowflake>();
             if (json.contains("member")) {
-                member = discord::Member(json["member"]);
+                member = discpp::Member(json["member"]);
             }
             session_id = json["session_id"];
             deaf = json["deaf"].get<bool>();
@@ -133,7 +133,7 @@ namespace discord {
 	    snowflake guild_id; /**< The guild id this voice state is for. */
 	    snowflake channel_id; /**< The channel id this user is connected to. */
 	    snowflake user_id; /**< The user id this voice state is for. */
-	    discord::Member member; /**< The guild member this voice state is for. */
+	    discpp::Member member; /**< The guild member this voice state is for. */
 	    std::string session_id; /**< The session id for this voice state. */
 	    bool deaf; /**< Whether this user is deafened by the server. */
 	    bool mute; /**< Whether this user is muted by the server. */
@@ -182,45 +182,45 @@ namespace discord {
 		Guild(snowflake id);
 		Guild(nlohmann::json json);
 
-		discord::Guild Modify(GuildModifyRequests modify_requests);
+		discpp::Guild Modify(GuildModifyRequests modify_requests);
 
 		void DeleteGuild();
-		std::vector<discord::Channel> GetChannels();
-		discord::Channel CreateChannel(std::string name, std::string topic = "", ChannelType type = ChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discord::Permissions> permission_overwrites = {}, discord::Channel category = {}, bool nsfw = false);
-		void ModifyChannelPositions(std::vector<discord::Channel> new_channel_positions);
-		discord::Member GetMember(snowflake id);
-		discord::Member AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf);
-		void RemoveMember(discord::Member member);
-		std::vector<discord::GuildBan> GetBans();
-		std::optional<std::string> GetMemberBanReason(discord::Member member);
-		void BanMember(discord::Member member, std::string reason = "");
-		void UnbanMember(discord::Member member);
-		void KickMember(discord::Member member);
-		discord::Role GetRole(snowflake id);
-		discord::Role CreateRole(std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
-		void ModifyRolePositions(std::vector<discord::Role> new_role_positions);
-		discord::Role ModifyRole(discord::Role role, std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
-		void DeleteRole(discord::Role role);
+		std::vector<discpp::Channel> GetChannels();
+		discpp::Channel CreateChannel(std::string name, std::string topic = "", ChannelType type = ChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discpp::Permissions> permission_overwrites = {}, discpp::Channel category = {}, bool nsfw = false);
+		void ModifyChannelPositions(std::vector<discpp::Channel> new_channel_positions);
+		discpp::Member GetMember(snowflake id);
+		discpp::Member AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf);
+		void RemoveMember(discpp::Member member);
+		std::vector<discpp::GuildBan> GetBans();
+		std::optional<std::string> GetMemberBanReason(discpp::Member member);
+		void BanMember(discpp::Member member, std::string reason = "");
+		void UnbanMember(discpp::Member member);
+		void KickMember(discpp::Member member);
+		discpp::Role GetRole(snowflake id);
+		discpp::Role CreateRole(std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
+		void ModifyRolePositions(std::vector<discpp::Role> new_role_positions);
+		discpp::Role ModifyRole(discpp::Role role, std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
+		void DeleteRole(discpp::Role role);
 		int GetPruneAmount(int days);
 		void BeginPrune(int days);
-		std::vector<discord::GuildInvite> GetInvites();
-		std::vector<discord::GuildIntegration> GetIntegrations();
+		std::vector<discpp::GuildInvite> GetInvites();
+		std::vector<discpp::GuildIntegration> GetIntegrations();
 		void CreateIntegration(snowflake id, std::string type);
-		void ModifyIntegration(discord::GuildIntegration guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons);
-		void DeleteIntegration(discord::GuildIntegration guild_integration);
-		void SyncIntegration(discord::GuildIntegration guild_integration);
+		void ModifyIntegration(discpp::GuildIntegration guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons);
+		void DeleteIntegration(discpp::GuildIntegration guild_integration);
+		void SyncIntegration(discpp::GuildIntegration guild_integration);
 		GuildEmbed GetGuildEmbed();
 		GuildEmbed ModifyGuildEmbed(snowflake channel_id, bool enabled);
-		discord::GuildInvite GetVanityURL();
+		discpp::GuildInvite GetVanityURL();
 		std::string GetWidgetImageURL(WidgetStyle widget_style = WidgetStyle::SHIELD);
 
 		std::unordered_map<snowflake, Emoji> GetEmojis();
-		discord::Emoji GetEmoji(snowflake id);
-		discord::Emoji CreateEmoji(std::string name, discord::Image image, std::vector<discord::Role> roles);
-		discord::Emoji ModifyEmoji(discord::Emoji emoji, std::string name, std::vector<discord::Role> roles);
-		void DeleteEmoji(discord::Emoji emoji);
-		std::string GetIconURL(discord::ImageType imgType = discord::ImageType::AUTO);
-		discord::Member GetOwnerObject();
+		discpp::Emoji GetEmoji(snowflake id);
+		discpp::Emoji CreateEmoji(std::string name, discpp::Image image, std::vector<discpp::Role> roles);
+		discpp::Emoji ModifyEmoji(discpp::Emoji emoji, std::string name, std::vector<discpp::Role> roles);
+		void DeleteEmoji(discpp::Emoji emoji);
+		std::string GetIconURL(discpp::ImageType imgType = discpp::ImageType::AUTO);
+		discpp::Member GetOwnerObject();
 
 		std::string name; /**< Guild name. */
 		std::string icon; /**< Hashed guild icon. */
@@ -234,13 +234,13 @@ namespace discord {
 		int afk_timeout; /**< AFK timeout in seconds. */
 		bool embed_enabled;/**< Whether this guild is embeddable (e.g. widget). */
 		snowflake embed_channel_id;/**< If not null, the channel id that the widget will generate an invite to. */
-		discord::specials::VerificationLevel verification_level; /**< Verification level required for the guild. */
-		discord::specials::DefaultMessageNotificationLevel default_message_notifications; /**< Default message notifications level. */
-		discord::specials::ExplicitContentFilterLevel explicit_content_filter; /**< Explicit content filter level. */
+		discpp::specials::VerificationLevel verification_level; /**< Verification level required for the guild. */
+		discpp::specials::DefaultMessageNotificationLevel default_message_notifications; /**< Default message notifications level. */
+		discpp::specials::ExplicitContentFilterLevel explicit_content_filter; /**< Explicit content filter level. */
 		std::unordered_map<snowflake, Role> roles; /**< Roles in the guild. */
 		std::unordered_map<snowflake, Emoji> emojis; /**< Custom guild emojis. */
 		std::vector<std::string> features; /**< Enabled guild features. */
-		discord::specials::MFALevel mfa_level; /**< Required MFA level for the guild. */
+		discpp::specials::MFALevel mfa_level; /**< Required MFA level for the guild. */
 		snowflake application_id; /**< Application id of the guild creator if it is bot-created. */
 		bool widget_enabled; /**< Whether or not the server widget is enabled. */
 		snowflake widget_channel_id; /**< The channel id for the server widget. */
@@ -252,7 +252,7 @@ namespace discord {
 		bool large; /**< Whether this is considered a large guild. */
 		bool unavailable; /**< Whether this guild is unavailable. */
 		int member_count; /**< Total number of members in this guild. */
-		std::vector<discord::VoiceState> voice_states; /**< Array of partial voice state objects. */
+		std::vector<discpp::VoiceState> voice_states; /**< Array of partial voice state objects. */
 		std::unordered_map<snowflake, Member> members; /**< Users in the guild. */
 		std::unordered_map<snowflake, Channel> channels; /**< Channels in the guild. */
 		int max_presences; /**< The maximum amount of presences for the guild (the default value, currently 25000, is in effect when null is returned). */
@@ -260,7 +260,7 @@ namespace discord {
 		std::string vanity_url_code; /**< The vanity url code for the guild. */
 		std::string description; /**< The description for the guild. */
 		std::string banner; /**< Banner hash. */
-		discord::specials::NitroTier premium_tier; /**< Premium tier (Server Boost level). */
+		discpp::specials::NitroTier premium_tier; /**< Premium tier (Server Boost level). */
 		int premium_subscription_count; /**< The number of boosts this server currently has. */
 		std::string preferred_locale; /**< The preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults to "en-US". */
 		std::string created_at; /**< The id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */

@@ -7,7 +7,7 @@
 
 #include "utils.h"
 
-namespace discord {
+namespace discpp {
 	typedef std::string snowflake;
 
 	namespace presence {

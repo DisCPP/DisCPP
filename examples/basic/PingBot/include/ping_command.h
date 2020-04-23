@@ -4,10 +4,10 @@
 #include <discpp/command.h>
 #include <discpp/context.h>
 
-class PingCommand : public discord::Command {
+class PingCommand : public discpp::Command {
 public:
 	PingCommand();
-	virtual void CommandBody(discord::Context ctx) override;
+	virtual void CommandBody(discpp::Context ctx) override;
 };
 
 #endif

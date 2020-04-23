@@ -6,12 +6,12 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class ChannelDeleteEvent : public Event {
 	public:
-		inline ChannelDeleteEvent(discord::Channel channel) : channel(channel) {}
+		inline ChannelDeleteEvent(discpp::Channel channel) : channel(channel) {}
 
-		discord::Channel channel;
+		discpp::Channel channel;
 	};
 }
 

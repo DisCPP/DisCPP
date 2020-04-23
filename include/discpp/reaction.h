@@ -6,17 +6,17 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 
 	class Reaction : public DiscordObject {
 	public:
 		Reaction() = default;
 		Reaction(nlohmann::json json);
-		Reaction(int count, bool from_bot, discord::Emoji emoji) : count(count), from_bot(from_bot), emoji(emoji) { }
+		Reaction(int count, bool from_bot, discpp::Emoji emoji) : count(count), from_bot(from_bot), emoji(emoji) { }
 
 		int count;
 		bool from_bot;
-		discord::Emoji emoji;
+		discpp::Emoji emoji;
 	};
 }
 

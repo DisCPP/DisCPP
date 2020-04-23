@@ -6,12 +6,12 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class GuildRoleUpdateEvent : public Event {
 	public:
-		inline GuildRoleUpdateEvent(discord::Role role) : role(role) {}
+		inline GuildRoleUpdateEvent(discpp::Role role) : role(role) {}
 
-		discord::Role role;
+		discpp::Role role;
 	};
 }
 
