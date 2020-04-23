@@ -1,6 +1,6 @@
 #include "discord_object.h"
 
-namespace discord {
+namespace discpp {
 	DiscordObject::DiscordObject(snowflake id) : id(id) {
 
 	}
@@ -13,11 +13,11 @@ namespace discord {
 		return this->id == other;
 	}
 
-	bool discord::DiscordObject::operator!=(DiscordObject& other) const {
+	bool discpp::DiscordObject::operator!=(DiscordObject& other) const {
 		return this->id != other.id;
 	}
 
-	bool discord::DiscordObject::operator!=(snowflake& other) const {
+	bool discpp::DiscordObject::operator!=(snowflake& other) const {
 		return this->id != other;
 	}
 }

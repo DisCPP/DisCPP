@@ -1,19 +1,19 @@
 #include "permission.h"
 #include "utils.h"
 
-namespace discord {
+namespace discpp {
 	Permissions::Permissions(PermissionType permission_type, int byte_set) : permission_type(permission_type) {
 		/**
-		 * @brief Constructs a discord::Permission object with its type and byte set.
+		 * @brief Constructs a discpp::Permission object with its type and byte set.
 		 *
 		 * ```cpp
-		 *      discord::Permissions perms(type, 0);
+		 *      discpp::Permissions perms(type, 0);
 		 * ```
 		 *
 		 * @param[in] permission_type The permission type.
 		 * @param[in] byte_set The permissions byte set.
 		 *
-		 * @return discord::Permissions, this is a constructor.
+		 * @return discpp::Permissions, this is a constructor.
 		 */
 
 		allow_perms = PermissionOverwrite(byte_set);
@@ -21,15 +21,15 @@ namespace discord {
 
 	Permissions::Permissions(nlohmann::json json) {
 		/**
-		 * @brief Constructs a discord::Permissions object by parsing json.
+		 * @brief Constructs a discpp::Permissions object by parsing json.
 		 *
 		 * ```cpp
-		 *      discord::Permissions perms(json);
+		 *      discpp::Permissions perms(json);
 		 * ```
 		 *
 		 * @param[in] json The json that makes up the Permissions object.
 		 *
-		 * @return discord::Permissions, this is a constructor.
+		 * @return discpp::Permissions, this is a constructor.
 		 */
 
 		role_user_id = json["id"].get<snowflake>();
@@ -59,15 +59,15 @@ namespace discord {
 
 	PermissionOverwrite::PermissionOverwrite(int value) : value(value) { 
 		/**
-		 * @brief Constructs a discord::PermissionOverwrite object with its permission value.
+		 * @brief Constructs a discpp::PermissionOverwrite object with its permission value.
 		 *
 		 * ```cpp
-		 *      discord::PermissionOverwrite permission_overwrite(0);
+		 *      discpp::PermissionOverwrite permission_overwrite(0);
 		 * ```
 		 *
 		 * @param[in] value The permission overwrite value.
 		 *
-		 * @return discord::PermissionOverwrite, this is a constructor.
+		 * @return discpp::PermissionOverwrite, this is a constructor.
 		 */
 	}
 

@@ -5,7 +5,7 @@
 #include "utils.h"
 #include "bot.h"
 
-namespace discord {
+namespace discpp {
 	struct EventListenerHandle {
 		unsigned int id = -4294967295;
 	};
@@ -19,10 +19,10 @@ namespace discord {
 			/**
 			 * @brief Registers an event listener.
 			 *
-			 * The given event class must derive from discord::Event
+			 * The given event class must derive from discpp::Event
 			 *
 			 * ```cpp
-			 *      discord::EventHandler<discord::ChannelPinsUpdateEvent>::RegisterListener([](discord::ChannelPinsUpdateEvent event)->bool {
+			 *      discpp::EventHandler<discpp::ChannelPinsUpdateEvent>::RegisterListener([](discpp::ChannelPinsUpdateEvent event)->bool {
 			 *			event.channel.Send("Detected a pin update!");
 			 *			return false;
 			 *		});
@@ -30,13 +30,13 @@ namespace discord {
 			 *
 			 * @param[in] listener The code to execute when the event gets dispatched.
 			 *
-			 * @return discord::EventListenerhandle
+			 * @return discpp::EventListenerhandle
 			 */
 
-			// Make sure that the given event class derives from discord::Event
-			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discord::Event");
+			// Make sure that the given event class derives from discpp::Event
+			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
-			discord::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::GREEN + "Event listener registered: " + typeid(T).name());
+			discpp::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::GREEN + "Event listener registered: " + typeid(T).name());
 
 			auto id = GetNextId();
 			GetHandlers()[id] = listener;
@@ -47,15 +47,15 @@ namespace discord {
 			/**
 			 * @brief Removes an event listener.
 			 *
-			 * The given event class must derive from discord::Event.
+			 * The given event class must derive from discpp::Event.
 			 *
 			 * ```cpp
-			 *      auto eventListen = discord::EventHandler<discord::ChannelPinsUpdateEvent>::RegisterListener([](discord::ChannelPinsUpdateEvent event)->bool {
+			 *      auto eventListen = discpp::EventHandler<discpp::ChannelPinsUpdateEvent>::RegisterListener([](discpp::ChannelPinsUpdateEvent event)->bool {
 			 *			event.channel.Send("Detected a pin update!");
 			 *			return false;
 			 *		});
 			 *
-			 *		discord::EventHandler<discord::ChannelPinsUpdateEvent>::RemoveListener(eventListen);
+			 *		discpp::EventHandler<discpp::ChannelPinsUpdateEvent>::RemoveListener(eventListen);
 			 * ```
 			 *
 			 * @param[in] handle The event listener to remove.
@@ -63,9 +63,9 @@ namespace discord {
 			 * @return void
 			 */
 
-			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discord::Event");
+			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
-			discord::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Event listener removed: " + std::string(typeid(T).name()));
+			discpp::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Event listener removed: " + std::string(typeid(T).name()));
 
 			GetHandlers().erase(handle.id);
 		}
@@ -74,10 +74,10 @@ namespace discord {
 			/**
 			 * @brief Triggers an event.
 			 *
-			 * The given event class must derive from discord::Event. The event will be thrown on another thread.
+			 * The given event class must derive from discpp::Event. The event will be thrown on another thread.
 			 *
 			 * ```cpp
-			 *      discord::EventHandler<discord::MessageCreateEvent>::TriggerEvent(discord::MessageCreateEvent(created_message));
+			 *      discpp::EventHandler<discpp::MessageCreateEvent>::TriggerEvent(discpp::MessageCreateEvent(created_message));
 			 * ```
 			 *
 			 * @param[in] e The event to trigger.
@@ -85,25 +85,25 @@ namespace discord {
 			 * @return void
 			 */
 
-			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discord::Event");
+			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
-			discord::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Event listener triggered: " + std::string(typeid(T).name()));
+			discpp::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Event listener triggered: " + std::string(typeid(T).name()));
 
 			for (std::pair<IdType, std::function<void(const T&)>> handler : GetHandlers()) {
-				discord::globals::bot_instance->futures.push_back(std::async(std::launch::async, handler.second, e));
+				discpp::globals::bot_instance->futures.push_back(std::async(std::launch::async, handler.second, e));
 			}
 		}
 
 	private:
 		static IdType GetNextId() {
-			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discord::Event");
+			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
 			static IdType id = 0;
 			return ++id;
 		}
 
 		static std::unordered_map<IdType, std::function<void(const T&)>>& GetHandlers() {
-			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discord::Event");
+			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
 			static std::unordered_map<IdType, std::function<void(const T&)>> handlers;
 			return handlers;
@@ -125,10 +125,10 @@ namespace discord {
 		/**
 		 * @brief Dispatches an event, shorter than using TriggerEvent.
 		 *
-		 * The given event class must derive from discord::Event.
+		 * The given event class must derive from discpp::Event.
 		 *
 		 * ```cpp
-		 *      DispatchEvent(discord::MessageCreateEvent(created_message));
+		 *      DispatchEvent(discpp::MessageCreateEvent(created_message));
 		 * ```
 		 *
 		 * @param[in] t The event to dispatch.
@@ -136,7 +136,7 @@ namespace discord {
 		 * @return void
 		 */
 
-		static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discord::Event");
+		static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
 		EventHandler<T>::TriggerEvent(t);
 	}
@@ -147,10 +147,10 @@ namespace discord {
 		/**
 		 * @brief Dispatches an event pointer, shorter than using TriggerEvent.
 		 *
-		 * The given event class must derive from discord::Event.
+		 * The given event class must derive from discpp::Event.
 		 *
 		 * ```cpp
-		 *      DispatchEvent(&discord::MessageCreateEvent(created_message));
+		 *      DispatchEvent(&discpp::MessageCreateEvent(created_message));
 		 * ```
 		 *
 		 * @param[in] t The event to dispatch.
@@ -158,7 +158,7 @@ namespace discord {
 		 * @return void
 		 */
 
-		static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discord::Event");
+		static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
 		DispatchEvent<T>(*t);
 	}

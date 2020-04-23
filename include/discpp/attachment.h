@@ -5,7 +5,7 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class Attachment : DiscordObject {
 	public:
 		Attachment() = default;

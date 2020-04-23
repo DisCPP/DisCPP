@@ -7,13 +7,13 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class TypingStartEvent : public Event {
 	public:
-		inline TypingStartEvent(discord::User user, discord::Channel channel, int timestamp) : user(user), channel(channel), timestamp(timestamp) {}
+		inline TypingStartEvent(discpp::User user, discpp::Channel channel, int timestamp) : user(user), channel(channel), timestamp(timestamp) {}
 
-		discord::User user;
-		discord::Channel channel;
+		discpp::User user;
+		discpp::Channel channel;
 		int timestamp;
 	};
 }

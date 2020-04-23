@@ -11,24 +11,24 @@
 #include "member.h"
 #include "message.h"
 
-namespace discord {
+namespace discpp {
 
 	class Context {
 	private:
 
 	public:
-		discord::Bot* bot;
-		discord::Guild guild;
-		discord::Channel channel;
-		discord::User user;
-		discord::Member author;
-		discord::Message message;
+		discpp::Bot* bot;
+		discpp::Guild guild;
+		discpp::Channel channel;
+		discpp::User user;
+		discpp::Member author;
+		discpp::Message message;
 		std::string remainder;
 		std::vector<std::string> arguments;
 
-		Context(discord::Bot* bot, discord::Channel channel, discord::Member author, discord::Message message, std::string remainder, std::vector<std::string> arguments);
+		Context(discpp::Bot* bot, discpp::Channel channel, discpp::Member author, discpp::Message message, std::string remainder, std::vector<std::string> arguments);
 
-		discord::Message Send(std::string text, bool tts = false, discord::EmbedBuilder* embed = nullptr, std::vector<discord::File> files = {});
+		discpp::Message Send(std::string text, bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
 	};
 }
 

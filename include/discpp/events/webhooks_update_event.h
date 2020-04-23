@@ -6,12 +6,12 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class WebhooksUpdateEvent : public Event {
 	public:
-		inline WebhooksUpdateEvent(discord::Channel channel) : channel(channel) {}
+		inline WebhooksUpdateEvent(discpp::Channel channel) : channel(channel) {}
 
-		discord::Channel channel;
+		discpp::Channel channel;
 	};
 }
 

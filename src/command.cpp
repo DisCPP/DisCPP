@@ -1,16 +1,16 @@
 #include "command.h"
 #include "command_handler.h"
 
-discord::Command::Command(std::string name) : name(name) {
-	discord::registered_commands.insert(std::make_pair(name, this));
+discpp::Command::Command(std::string name) : name(name) {
+	discpp::registered_commands.insert(std::make_pair(name, this));
 }
 
-discord::Command::Command(std::string name, std::string desc, std::vector<std::string> hint_args, std::function<void(discord::Context)> function, std::vector<std::function<bool(discord::Context)>> requirements) : Command() {
+discpp::Command::Command(std::string name, std::string desc, std::vector<std::string> hint_args, std::function<void(discpp::Context)> function, std::vector<std::function<bool(discpp::Context)>> requirements) : Command() {
 	/**
-	 * @brief Constructs a discord::Command
+	 * @brief Constructs a discpp::Command
 	 *
 	 * ```cpp
-	 *      discord::Command("test", "Quick example of a quick command", {}, [](discord::Context ctx) {
+	 *      discpp::Command("test", "Quick example of a quick command", {}, [](discpp::Context ctx) {
 	 *			ctx.Send("Quick new command handler test");
 	 *		}, {
 	 *			// Preconditions
@@ -23,7 +23,7 @@ discord::Command::Command(std::string name, std::string desc, std::vector<std::s
 	 * @param[in] function The function that is executed when the command is triggered
 	 * @param[in] requirements A list of preconditions for the command.
 	 *
-	 * @return discord::Command, this is a constructor.
+	 * @return discpp::Command, this is a constructor.
 	 */
 
 	this->name = name;
@@ -32,10 +32,10 @@ discord::Command::Command(std::string name, std::string desc, std::vector<std::s
 	this->function = function;
 	this->requirements = requirements;
 
-	discord::registered_commands.insert(std::make_pair(name, this));
+	discpp::registered_commands.insert(std::make_pair(name, this));
 }
 
-void discord::Command::CommandBody(discord::Context ctx) {
+void discpp::Command::CommandBody(discpp::Context ctx) {
 	/**
 	 * @brief The method that is executed when the command is triggered if overrided.
 	 *
@@ -45,13 +45,13 @@ void discord::Command::CommandBody(discord::Context ctx) {
 	 */
 
 	if (function == nullptr) {
-		std::cout << "Make sure to override the \"CommandBody(discord::Context)\" method to get an actual command body for: \"" + name + "\"" << std::endl;
+		std::cout << "Make sure to override the \"CommandBody(discpp::Context)\" method to get an actual command body for: \"" + name + "\"" << std::endl;
 	} else {
 		function(ctx);
 	}
 }
 
-bool discord::Command::CanRun(discord::Context ctx) {
+bool discpp::Command::CanRun(discpp::Context ctx) {
 	/**
 	 * @brief This method checks if the requirements of the command allowes it to run.
 	 *

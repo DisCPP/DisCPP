@@ -1,54 +1,54 @@
 #include "guild.h"
 #include "bot.h"
 
-namespace discord {
-	Member::Member(snowflake id) : discord::DiscordObject(id) {
+namespace discpp {
+	Member::Member(snowflake id) : discpp::DiscordObject(id) {
 		/**
-		 * @brief Constructs a discord::Member object using its id.
+		 * @brief Constructs a discpp::Member object using its id.
 		 *
 		 * This constructor searches the member cache to get a member object.
 		 *
 		 * ```cpp
-		 *      discord::Member member(657246994997444614);
+		 *      discpp::Member member(657246994997444614);
 		 * ```
 		 *
 		 * @param[in] id The id of the member.
 		 *
-		 * @return discord::Member, this is a constructor.
+		 * @return discpp::Member, this is a constructor.
 		 */
 
-		std::unordered_map<snowflake, Member>::iterator it = discord::globals::bot_instance->members.find(id);
-		if (it != discord::globals::bot_instance->members.end()) {
+		std::unordered_map<snowflake, Member>::iterator it = discpp::globals::bot_instance->members.find(id);
+		if (it != discpp::globals::bot_instance->members.end()) {
 			*this = it->second;
 		}
 	}
 
-	Member::Member(nlohmann::json json, discord::Guild guild) : guild_id(guild.id) {
+	Member::Member(nlohmann::json json, discpp::Guild guild) : guild_id(guild.id) {
 		/**
-		 * @brief Constructs a discord::Member object by parsing json and stores the guild_id.
+		 * @brief Constructs a discpp::Member object by parsing json and stores the guild_id.
 		 *
 		 * ```cpp
-		 *      discord::Member member(json, 657246994997444614);
+		 *      discpp::Member member(json, 657246994997444614);
 		 * ```
 		 *
 		 * @param[in] json The json that makes up of member object.
 		 * @param[in] json guild_id The guild id.
 		 *
-		 * @return discord::Member, this is a constructor.
+		 * @return discpp::Member, this is a constructor.
 		 */
 
 		if (json.contains("user")) {
-			user = discord::User(json["user"]);
+			user = discpp::User(json["user"]);
 			id = user.id;
 		} else {
-			user = discord::User();
+			user = discpp::User();
 		}
 		int maxVal = 0;
 		nick = GetDataSafely<std::string>(json, "nick");
 		if (json.contains("roles")) {
-			discord::Permissions permissions;
+			discpp::Permissions permissions;
 			for (auto& role : json["roles"]) {
-				discord::Role r(role.get<snowflake>(), guild);
+				discpp::Role r(role.get<snowflake>(), guild);
 				if (r.position > maxVal) {
 					maxVal = r.position;
 				}
@@ -80,7 +80,7 @@ namespace discord {
 		user.mention = "<@!" + _id + ">";
 	}
 
-	void Member::ModifyMember(std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf, snowflake channel_id) {
+	void Member::ModifyMember(std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf, snowflake channel_id) {
 		/**
 		 * @brief Modifies this guild member.
 		 *
@@ -98,7 +98,7 @@ namespace discord {
 		 */
 
 		std::string json_roles = "[";
-		for (discord::Role role : roles) {
+		for (discpp::Role role : roles) {
 			if (&role == &roles.front()) {
 				json_roles += "\"" + role.id + "\"";
 			}
@@ -109,13 +109,13 @@ namespace discord {
 		json_roles += "]";
 
 		// Update permissions variable.
-		discord::Permissions permissions;
+		discpp::Permissions permissions;
 		if (roles.size() != 0) {
 			permissions.allow_perms.value = roles.front().permissions.allow_perms.value;
 			permissions.deny_perms.value = roles.front().permissions.deny_perms.value;
 			roles.erase(roles.begin());
 
-			for (discord::Role role : roles) {
+			for (discpp::Role role : roles) {
 				permissions.allow_perms.value |= role.permissions.allow_perms.value;
 				permissions.deny_perms.value |= role.permissions.deny_perms.value;
 			}
@@ -125,7 +125,7 @@ namespace discord {
 		SendPatchRequest(Endpoint("/guilds/" + this->id + "/members/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), guild_id, RateLimitBucketType::GUILD, body);
 	}
 
-	void Member::AddRole(discord::Role role) {
+	void Member::AddRole(discpp::Role role) {
 		/**
 		 * @brief Adds a role to a guild member.
 		 *
@@ -141,7 +141,7 @@ namespace discord {
 		SendPutRequest(Endpoint("/guilds/" + guild_id + "/members/" + id + "/roles/" + role.id), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 	}
 
-	void Member::RemoveRole(discord::Role role) {
+	void Member::RemoveRole(discpp::Role role) {
 		/**
 		 * @brief Removes a role to a guild member.
 		 *
@@ -172,7 +172,7 @@ namespace discord {
 		return result.contains("reason");
 	}
 
-	bool Member::HasRole(discord::Role role) {
+	bool Member::HasRole(discpp::Role role) {
 		/**
 		 * @brief Check if this member is a role.
 		 *
@@ -185,15 +185,15 @@ namespace discord {
 		 * @return bool
 		 */
 
-		return count_if(roles.begin(), roles.end(), [role](discord::Role r) { return role.id == r.id; }) != 0;
+		return count_if(roles.begin(), roles.end(), [role](discpp::Role r) { return role.id == r.id; }) != 0;
 	}
 
-	bool Member::HasPermission(discord::Permission perm) {
+	bool Member::HasPermission(discpp::Permission perm) {
 		/**
 		 * @brief Check if this member has a permission
 		 *
 		 * ```cpp
-		 *      bool has_perm = member.HasPermission(discord::Permission::ADMINISTRATOR);
+		 *      bool has_perm = member.HasPermission(discpp::Permission::ADMINISTRATOR);
 		 * ```
 		 *
 		 * @param[in] perm The permission to check that the member has.
@@ -201,10 +201,10 @@ namespace discord {
 		 * @return bool
 		 */
 
-		discord::Permissions permissions;
+		discpp::Permissions permissions;
 
 		if (roles.size() > 0) {
-			for (discord::Role role : roles) {
+			for (discpp::Role role : roles) {
 				if (roles.front() == role) {
 					permissions.allow_perms.value = role.permissions.allow_perms.value;
 					permissions.deny_perms.value = role.permissions.deny_perms.value;

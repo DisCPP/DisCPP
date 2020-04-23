@@ -6,7 +6,7 @@
 #include "activity.h"
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	enum ImageType : int { AUTO, WEBP, PNG, JPEG, GIF };
 	class Channel;
 	class GuildIntegration;
@@ -38,23 +38,24 @@ namespace discord {
 		User(snowflake id);
 		User(nlohmann::json json);
 
-		discord::Channel CreateDM();
+		discpp::Channel CreateDM();
 		std::vector<Connection> GetUserConnections();
 		std::string GetAvatarURL(ImageType imgType = ImageType::AUTO);
-		//snowflake id;
-		std::string username; /**< Username of the current user */
-		std::string discriminator; /**< Discriminator of the current user */
-		std::string avatar; /**< Hashed avatar of the current user */
-		bool bot; /**< Whether or not the current user is a bot */
-		bool system; /**< Whether or not the current user is part of discord's system (Clyde) */
-		bool mfa_enabled; /**< Whether or not the current user has MFA enabled (only applies for the current user logged in) */
-		std::string locale; /**< Locale of the current user (only applies for the current user logged in) */
-		bool verified; /**< Whether or not the current bot user is verified */
-		std::string email; /**< Email of the current user (only applies for the current user logged in) */
-		int flags;
-		discord::specials::NitroSubscription premium_type; /**< The status of discord nitro for the current user */
-		std::string created_at; /**< The creation date of the current user's account */
-		std::string mention; /**< The @ mention of the current user Ex: <@150312037426135041> */
+
+		std::string username; /**< The user's username, not unique across the platform. */
+		std::string discriminator; /**< The user's 4-digit discord-tag. */
+		std::string avatar; /**< The user's avatar hash. */
+		bool bot; /**< Whether the user belongs to an OAuth2 application. */
+		bool system; /**< Whether the user is an Official Discord System user (part of the urgent message system). */
+		bool mfa_enabled; /**< Whether the user has two factor enabled on their account.*/
+		std::string locale; /**< The user's chosen language option. */
+		bool verified; /**< Whether the email on this account has been verified. */
+		std::string email; /**< The user's email. */
+		int flags; /**< The flags on a user's account. */
+		discpp::specials::NitroSubscription premium_type; /**< The type of Nitro subscription on a user's account. */
+		int public_flags;
+		std::string created_at; /**< The creation date of the current user's account. */
+		std::string mention; /**< The @ mention of the current user Ex: <@150312037426135041>. */
 	};
 }
 

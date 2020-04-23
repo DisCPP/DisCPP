@@ -6,12 +6,12 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class ChannelPinsUpdateEvent : public Event {
 	public:
-		inline ChannelPinsUpdateEvent(discord::Channel channel) : channel(channel) {}
+		inline ChannelPinsUpdateEvent(discpp::Channel channel) : channel(channel) {}
 
-		discord::Channel channel;
+		discpp::Channel channel;
 	};
 }
 

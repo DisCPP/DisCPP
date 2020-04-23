@@ -1,46 +1,46 @@
 #include "message.h"
 #include "bot.h"
 
-namespace discord {
-	Message::Message(snowflake id) : discord::DiscordObject(id) {
+namespace discpp {
+	Message::Message(snowflake id) : discpp::DiscordObject(id) {
 		/**
-		 * @brief Constructs a discord::Message object from an id.
+		 * @brief Constructs a discpp::Message object from an id.
 		 *
 		 * ```cpp
-		 *      discord::Message message(583251190591258624);
+		 *      discpp::Message message(583251190591258624);
 		 * ```
 		 *
 		 * @param[in] id The id of the message.
 		 *
-		 * @return discord::Member, this is a constructor.
+		 * @return discpp::Member, this is a constructor.
 		 */
 
-		auto message = discord::globals::bot_instance->messages.find(id);
+		auto message = discpp::globals::bot_instance->messages.find(id);
 
-		if (message != discord::globals::bot_instance->messages.end()) {
+		if (message != discpp::globals::bot_instance->messages.end()) {
 			*this = message->second;
 		}
 	}
 
 	Message::Message(nlohmann::json json) {
 		/**
-		 * @brief Constructs a discord::Message object by parsing json
+		 * @brief Constructs a discpp::Message object by parsing json
 		 *
 		 * ```cpp
-		 *      discord::Message message(json);
+		 *      discpp::Message message(json);
 		 * ```
 		 *
 		 * @param[in] json The json that makes up the message.
 		 *
-		 * @return discord::Message, this is a constructor.
+		 * @return discpp::Message, this is a constructor.
 		 */
 
 		id = GetDataSafely<snowflake>(json, "id");
-		channel = (json.contains("channel_id")) ? discord::Channel(json["channel_id"].get<snowflake>()) : discord::Channel();
+		channel = (json.contains("channel_id")) ? discpp::Channel(json["channel_id"].get<snowflake>()) : discpp::Channel();
 		if (json.contains("guild_id")) {
-			guild = discord::Guild(json["guild_id"].get<snowflake>());
+			guild = discpp::Guild(json["guild_id"].get<snowflake>());
 		}
-		author = (json.contains("author")) ? discord::User(json["author"]) : discord::User();
+		author = (json.contains("author")) ? discpp::User(json["author"]) : discpp::User();
 		content = GetDataSafely<std::string>(json, "content");
 		timestamp = GetDataSafely<std::string>(json, "timestamp");
 		edited_timestamp = GetDataSafely<std::string>(json, "edited_timestamp");
@@ -62,15 +62,15 @@ namespace discord {
 				{"roles", mention["member"]["roles"]}
 			};
 
-			mentions.push_back(discord::Member(new_member_json, guild.id));
+			mentions.push_back(discpp::Member(new_member_json, guild.id));
 		}
 		for (auto& mentioned_role : json["mentioned_roles"]) {
-			mentioned_roles.push_back(discord::Role(mentioned_role.get<snowflake>()));
+			mentioned_roles.push_back(discpp::Role(mentioned_role.get<snowflake>()));
 		}
 		if (json.contains("mention_channels")) {
 			for (auto& json_chan : json["mention_channels"]) {
-				discord::Channel channel(json_chan["id"].get<snowflake>());
-				channel.type = json_chan["type"].get<int>();
+				discpp::Channel channel(json_chan["id"].get<snowflake>());
+				channel.type = json_chan["type"].get<ChannelType>();
 				channel.guild_id = json_chan["guild_id"].get<snowflake>();
 				channel.name = json_chan["name"];
 
@@ -79,35 +79,35 @@ namespace discord {
 		}
 		if (json.contains("attachments")) {
 			for (auto& attachment : json["attachments"]) {
-				attachments.push_back(discord::Attachment(attachment));
+				attachments.push_back(discpp::Attachment(attachment));
 			}
 		}
 		if (json.contains("embeds")) {
 			for (auto& embed : json["embeds"]) {
-				embeds.push_back(discord::EmbedBuilder(embed));
+				embeds.push_back(discpp::EmbedBuilder(embed));
 			}
 		}
 		if (json.contains("reactions")) {
 			for (auto& reaction : json["reactions"]) {
-				reactions.push_back(discord::Reaction(reaction));
+				reactions.push_back(discpp::Reaction(reaction));
 			}
 		}
 		pinned = GetDataSafely<bool>(json, "pinned");
 		webhook_id = GetDataSafely<snowflake>(json, "webhook_id");
 		type = GetDataSafely<int>(json, "type");
 		if (json.contains("activity")) {
-			activity = discord::MessageActivity(json["activity"]);
+			activity = discpp::MessageActivity(json["activity"]);
 		}
 		if (json.contains("application")) {
-			application = discord::MessageApplication(json["application"]);
+			application = discpp::MessageApplication(json["application"]);
 		}
 		if (json.contains("message_reference")) {
-			message_reference = discord::MessageReference(json["message_reference"]);
+			message_reference = discpp::MessageReference(json["message_reference"]);
 		}
 		flags = GetDataSafely<int>(json, "flags");
 	}
 
-	void Message::AddReaction(discord::Emoji emoji) {
+	void Message::AddReaction(discpp::Emoji emoji) {
 		/**
 		 * @brief Add a reaction to the message.
 		 *
@@ -124,7 +124,7 @@ namespace discord {
 		nlohmann::json result = SendPutRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
-	void Message::RemoveBotReaction(discord::Emoji emoji) {
+	void Message::RemoveBotReaction(discpp::Emoji emoji) {
 		/**
 		 * @brief Remove a bot reaction from the message.
 		 *
@@ -141,7 +141,7 @@ namespace discord {
 		nlohmann::json result = SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
-	void Message::RemoveReaction(discord::User user, discord::Emoji emoji) {
+	void Message::RemoveReaction(discpp::User user, discpp::Emoji emoji) {
 		/**
 		 * @brief Removes a user's reaction from the message.
 		 *
@@ -159,45 +159,45 @@ namespace discord {
 		nlohmann::json result = SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
-	std::vector<discord::User> Message::GetReactorsOfEmoji(discord::Emoji emoji, int amount) {
+	std::vector<discpp::User> Message::GetReactorsOfEmoji(discpp::Emoji emoji, int amount) {
 		/**
 		 * @brief Get reactors of a specific emoji.
 		 *
 		 * ```cpp
-		 *      std::vector<discord::User> reactors = message.GetReactorOfEmoji(emoji, 50);
+		 *      std::vector<discpp::User> reactors = message.GetReactorOfEmoji(emoji, 50);
 		 * ```
 		 *
 		 * @param[in] emoji The emoji to get reactors of.
 		 * @param[in] amount The amount of users to get.
 		 *
-		 * @return std::vector<discord::User>
+		 * @return std::vector<discpp::User>
 		 */
 
 		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions/" + emoji.ToString());
 		cpr::Body body("{\"limit\": " + std::to_string(amount) + "}");
 		nlohmann::json result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
 		
-		std::vector<discord::User> users;
+		std::vector<discpp::User> users;
 		for (auto& user : result) {
-			users.push_back(discord::User(user));
+			users.push_back(discpp::User(user));
 		}
 
 		return users;
 	}
 
-	std::vector<discord::User> Message::GetReactorsOfEmoji(discord::Emoji emoji, discord::User user, GetReactionsMethod method) {
+	std::vector<discpp::User> Message::GetReactorsOfEmoji(discpp::Emoji emoji, discpp::User user, GetReactionsMethod method) {
 		/**
 		 * @brief Get reactors of a specific emoji of the specific method.
 		 *
 		 * ```cpp
-		 *      std::vector<discord::User> reactors = message.GetReactorOfEmoji(emoji, 50, reaction_method);
+		 *      std::vector<discpp::User> reactors = message.GetReactorOfEmoji(emoji, 50, reaction_method);
 		 * ```
 		 *
 		 * @param[in] emoji The emoji to get reactors of.
 		 * @param[in] amount The amount of users to get.
 		 * @param[in] method The method the users reacted by.
 		 *
-		 * @return std::vector<discord::User>
+		 * @return std::vector<discpp::User>
 		 */
 
 		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions/" + emoji.ToString());
@@ -205,9 +205,9 @@ namespace discord {
 		cpr::Body body("{\"" + method_str + "\": " + user.id + "}");
 		nlohmann::json result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
 		
-		std::vector<discord::User> users;
+		std::vector<discpp::User> users;
 		for (auto& user : result) {
-			users.push_back(discord::User(user));
+			users.push_back(discpp::User(user));
 		}
 
 		return users;
@@ -228,17 +228,17 @@ namespace discord {
 		nlohmann::json result = SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
-	discord::Message Message::EditMessage(std::string text) {
+	discpp::Message Message::EditMessage(std::string text) {
 		/**
 		 * @brief Edit the message's text.
 		 *
 		 * ```cpp
-		 *      discord::Message edited_text_message = message.EditMessage("This is edited text");
+		 *      discpp::Message edited_text_message = message.EditMessage("This is edited text");
 		 * ```
 		 *
 		 * @param[in] text The new message text.
 		 *
-		 * @return discord::Message
+		 * @return discpp::Message
 		 */
 
 		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id);
@@ -249,17 +249,17 @@ namespace discord {
 		return *this;
 	}
 
-	discord::Message Message::EditMessage(discord::EmbedBuilder embed) {
+	discpp::Message Message::EditMessage(discpp::EmbedBuilder embed) {
 		/**
 		 * @brief Edit the message's embed.
 		 *
 		 * ```cpp
-		 *      discord::Message edited_embed_message = message.EditMessage(new_embed);
+		 *      discpp::Message edited_embed_message = message.EditMessage(new_embed);
 		 * ```
 		 *
 		 * @param[in] embed The new embed.
 		 *
-		 * @return discord::Message
+		 * @return discpp::Message
 		 */
 
 		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id);
@@ -270,17 +270,17 @@ namespace discord {
 		return *this;
 	}
 
-	discord::Message Message::EditMessage(int flags) {
+	discpp::Message Message::EditMessage(int flags) {
 		/**
 		 * @brief Edit the message's embed.
 		 *
 		 * ```cpp
-		 *      discord::Message edited_embed_message = message.EditMessage(1 << 0);
+		 *      discpp::Message edited_embed_message = message.EditMessage(1 << 0);
 		 * ```
 		 *
 		 * @param[in] flags The message flags.
 		 *
-		 * @return discord::Message
+		 * @return discpp::Message
 		 */
 
 		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id);
@@ -305,7 +305,7 @@ namespace discord {
 		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id);
 		nlohmann::json result = SendDeleteRequest(endpoint, DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 		
-		*this = discord::Message();
+		*this = discpp::Message();
 	}
 
 	void Message::PinMessage() {

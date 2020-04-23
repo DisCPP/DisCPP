@@ -1,13 +1,13 @@
 #include "attachment.h"
 #include "utils.h"
 
-namespace discord {
-	discord::Attachment::Attachment(nlohmann::json json) {
+namespace discpp {
+	discpp::Attachment::Attachment(nlohmann::json json) {
 		/**
-		 * @brief Contructs a discord::Attachment object from json.
+		 * @brief Contructs a discpp::Attachment object from json.
 		 *
 		 * ```cpp
-		 *		discord::Attachment attachment(json);
+		 *		discpp::Attachment attachment(json);
 		 * ```
 		 *
 		 * @param[in] json The json that makes up this object.

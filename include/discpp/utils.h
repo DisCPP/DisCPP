@@ -11,11 +11,11 @@
 
 #include <unordered_map>
 
-namespace discord {
+namespace discpp {
 	class Bot;
 
 	namespace globals {
-		inline discord::Bot* bot_instance;
+		inline discpp::Bot* bot_instance;
 	}
 
 	namespace specials {

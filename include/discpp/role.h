@@ -6,13 +6,13 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class Guild;
 
 	class Role : public DiscordObject {
 	public:
 		Role() = default;
-		Role(snowflake role_id, discord::Guild guild);
+		Role(snowflake role_id, discpp::Guild guild);
 		Role(nlohmann::json json);
 
 		snowflake id;  /**< Id of the current role */

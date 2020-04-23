@@ -7,7 +7,7 @@
 
 #include <vector>
 
-namespace discord {
+namespace discpp {
 	class Role;
 	class Guild;
 
@@ -15,25 +15,25 @@ namespace discord {
 	public:
 		Member() = default;
 		Member(snowflake id);
-		Member(nlohmann::json json, discord::Guild guild);
+		Member(nlohmann::json json, discpp::Guild guild);
 
-		void ModifyMember(std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf, snowflake channel_id);
-		void AddRole(discord::Role role);
-		void RemoveRole(discord::Role role);
+		void ModifyMember(std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf, snowflake channel_id);
+		void AddRole(discpp::Role role);
+		void RemoveRole(discpp::Role role);
 		bool IsBanned();
-		bool HasRole(discord::Role role);
-		bool HasPermission(discord::Permission perm);
+		bool HasRole(discpp::Role role);
+		bool HasPermission(discpp::Permission perm);
 
-		discord::User user; /**< Discord user object */
+		discpp::User user; /**< Discord user object */
 		snowflake guild_id; /**< ID of the guild the current member is in */
 		std::string nick; /**< Nickname of current member if it has one */
-		std::vector<discord::Role> roles; /**< Roles the current member has */
+		std::vector<discpp::Role> roles; /**< Roles the current member has */
 		std::string joined_at; // TODO: Convert to iso8601Time
 		std::string premium_since; // TODO: Convert to iso8601Time
 		bool deaf; /**< Whether or not the current member is deafened */
 		bool mute; /**< Whether or not the current member is muted */
-		discord::Permissions permissions; /**< Guild permissions for the current member */
-		discord::Activity activity; /**< Activity for the current member */
+		discpp::Permissions permissions; /**< Guild permissions for the current member */
+		discpp::Activity activity; /**< Activity for the current member */
 		int hierarchy; /**< Role hierarchy for the current member */
 	};
 }

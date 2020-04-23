@@ -3,7 +3,7 @@
 
 #include "../event.h"
 
-namespace discord {
+namespace discpp {
 	class GuildMembersChunkEvent : public Event {
 	public:
 		GuildMembersChunkEvent() = default;

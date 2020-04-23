@@ -6,7 +6,7 @@
 
 #include <nlohmann/json.hpp>
 
-namespace discord {
+namespace discpp {
 	class VoiceServerUpdateEvent : public Event {
 	public:
 		inline VoiceServerUpdateEvent(nlohmann::json json) : json(json) { }
