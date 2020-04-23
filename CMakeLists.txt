@@ -21,11 +21,21 @@ target_link_libraries(discpp PRIVATE cpprestsdk::cpprest cpprestsdk::cpprestsdk_
 
 set_target_properties(discpp PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS OFF)
 
-add_executable(bot_example examples/basic/PingBot/main.cpp)
-target_sources(bot_example PRIVATE examples/basic/PingBot/ping_command.cpp)
 
-target_include_directories(bot_example PUBLIC examples/basic/PingBot/include)
+# TODO: make cmakelists.txt for these examples and link here.
 
-target_link_libraries(bot_example PUBLIC discpp)
+# pingbot example 
+add_executable(pingbot_example examples/basic/pingbot/main.cpp)
+target_include_directories(pingbot_example PUBLIC examples/basic/pingbot/include)
+file(GLOB_RECURSE pingbot examples/basic/pingbot/*.cpp)
+target_sources(pingbot_example PRIVATE ${pingbot})
+target_link_libraries(pingbot_example PUBLIC discpp)
+set_target_properties(pingbot_example PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS OFF)
 
-set_target_properties(bot_example PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS OFF)
+# preconditions example
+add_executable(requireguild_example examples/preconditions/requireguild/src/main.cpp)
+target_include_directories(requireguild_example PUBLIC examples/preconditions/requireguild/include)
+file(GLOB_RECURSE preconditions examples/preconditions/requireguild/src/*.cpp)
+target_sources(requireguild_example PRIVATE ${preconditions})
+target_link_libraries(requireguild_example PUBLIC discpp)
+set_target_properties(requireguild_example PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS OFF)
