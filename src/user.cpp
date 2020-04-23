@@ -1,9 +1,5 @@
 #include "user.h"
 #include "bot.h"
-#include "member.h"
-#include "utils.h"
-#include "cpr/cpr.h"
-#include "activity.h"
 
 namespace discord {
 	User::User(snowflake id) : discord::DiscordObject(id) {

@@ -1,9 +1,5 @@
 #include "message.h"
-#include "utils.h"
 #include "bot.h"
-
-#include <cpprest/http_client.h>
-#include <cpprest/http_msg.h>
 
 namespace discord {
 	Message::Message(snowflake id) : discord::DiscordObject(id) {

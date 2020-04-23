@@ -1,7 +1,5 @@
 #include "command.h"
 #include "command_handler.h"
-#include "utils.h"
-#include <iostream>
 
 void discord::FireCommand(discord::Bot* bot, discord::Message message) {
     /**

@@ -46,10 +46,6 @@
 #include "events/voice_state_update_event.h"
 #include "events/webhooks_update_event.h"
 
-#include <iostream>
-#include <algorithm>
-#include <vector>
-
 namespace discord {
     Bot::Bot(std::string token, std::vector<std::string> prefixes, int logger_flags, std::string logger_path) : token(
             token), prefixes(prefixes) {
@@ -237,64 +233,38 @@ namespace discord {
     void Bot::BindEvents() {
         internal_event_map["READY"] = std::bind(&Bot::ReadyEvent, this, std::placeholders::_1);
         internal_event_map["RESUMED"] = std::bind(&discord::Bot::ResumedEvent, this, std::placeholders::_1);
-        internal_event_map["INVALID_SESSION"] = std::bind(&discord::Bot::InvalidSesionEvent, this,
-                                                          std::placeholders::_1);
-        internal_event_map["CHANNEL_CREATE"] = std::bind(&discord::Bot::ChannelCreateEvent, this,
-                                                         std::placeholders::_1);
-        internal_event_map["CHANNEL_UPDATE"] = std::bind(&discord::Bot::ChannelUpdateEvent, this,
-                                                         std::placeholders::_1);
-        internal_event_map["CHANNEL_DELETE"] = std::bind(&discord::Bot::ChannelDeleteEvent, this,
-                                                         std::placeholders::_1);
-        internal_event_map["CHANNEL_PINS_UPDATE"] = std::bind(&discord::Bot::ChannelPinsUpdateEvent, this,
-                                                              std::placeholders::_1);
+        internal_event_map["INVALID_SESSION"] = std::bind(&discord::Bot::InvalidSessionEvent, this, std::placeholders::_1);
+        internal_event_map["CHANNEL_CREATE"] = std::bind(&discord::Bot::ChannelCreateEvent, this, std::placeholders::_1);
+        internal_event_map["CHANNEL_UPDATE"] = std::bind(&discord::Bot::ChannelUpdateEvent, this, std::placeholders::_1);
+        internal_event_map["CHANNEL_DELETE"] = std::bind(&discord::Bot::ChannelDeleteEvent, this, std::placeholders::_1);
+        internal_event_map["CHANNEL_PINS_UPDATE"] = std::bind(&discord::Bot::ChannelPinsUpdateEvent, this, std::placeholders::_1);
         internal_event_map["GUILD_CREATE"] = std::bind(&discord::Bot::GuildCreateEvent, this, std::placeholders::_1);
         internal_event_map["GUILD_UPDATE"] = std::bind(&discord::Bot::GuildUpdateEvent, this, std::placeholders::_1);
         internal_event_map["GUILD_DELETE"] = std::bind(&discord::Bot::GuildDeleteEvent, this, std::placeholders::_1);
         internal_event_map["GUILD_BAN_ADD"] = std::bind(&discord::Bot::GuildBanAddEvent, this, std::placeholders::_1);
-        internal_event_map["GUILD_BAN_REMOVE"] = std::bind(&discord::Bot::GuildBanRemoveEvent, this,
-                                                           std::placeholders::_1);
-        internal_event_map["GUILD_EMOJIS_UPDATE"] = std::bind(&discord::Bot::GuildEmojisUpdateEvent, this,
-                                                              std::placeholders::_1);
-        internal_event_map["GUILD_INTEGRATIONS_UPDATE"] = std::bind(&discord::Bot::GuildIntegrationsUpdateEvent, this,
-                                                                    std::placeholders::_1);
-        internal_event_map["GUILD_MEMBER_ADD"] = std::bind(&discord::Bot::GuildMemberAddEvent, this,
-                                                           std::placeholders::_1);
-        internal_event_map["GUILD_MEMBER_REMOVE"] = std::bind(&discord::Bot::GuildMemberRemoveEvent, this,
-                                                              std::placeholders::_1);
-        internal_event_map["GUILD_MEMBER_UPDATE"] = std::bind(&discord::Bot::GuildMemberUpdateEvent, this,
-                                                              std::placeholders::_1);
-        internal_event_map["GUILD_MEMBERS_CHUNK"] = std::bind(&discord::Bot::GuildMembersChunkEvent, this,
-                                                              std::placeholders::_1);
-        internal_event_map["GUILD_ROLE_CREATE"] = std::bind(&discord::Bot::GuildRoleCreateEvent, this,
-                                                            std::placeholders::_1);
-        internal_event_map["GUILD_ROLE_UPDATE"] = std::bind(&discord::Bot::GuildRoleUpdateEvent, this,
-                                                            std::placeholders::_1);
-        internal_event_map["GUILD_ROLE_DELETE"] = std::bind(&discord::Bot::GuildRoleDeleteEvent, this,
-                                                            std::placeholders::_1);
-        internal_event_map["MESSAGE_CREATE"] = std::bind(&discord::Bot::MessageCreateEvent, this,
-                                                         std::placeholders::_1);
-        internal_event_map["MESSAGE_UPDATE"] = std::bind(&discord::Bot::MessageUpdateEvent, this,
-                                                         std::placeholders::_1);
-        internal_event_map["MESSAGE_DELETE"] = std::bind(&discord::Bot::MessageDeleteEvent, this,
-                                                         std::placeholders::_1);
-        internal_event_map["MESSAGE_DELETE_BULK"] = std::bind(&discord::Bot::MessageDeleteBulkEvent, this,
-                                                              std::placeholders::_1);
-        internal_event_map["MESSAGE_REACTION_ADD"] = std::bind(&discord::Bot::MessageReactionAddEvent, this,
-                                                               std::placeholders::_1);
-        internal_event_map["MESSAGE_REACTION_REMOVE"] = std::bind(&discord::Bot::MessageReactionRemoveEvent, this,
-                                                                  std::placeholders::_1);
-        internal_event_map["MESSAGE_REACTION_REMOVE_ALL"] = std::bind(&discord::Bot::MessageReactionRemoveAllEvent,
-                                                                      this, std::placeholders::_1);
-        internal_event_map["PRESENCE_UPDATE"] = std::bind(&discord::Bot::PresenceUpdateEvent, this,
-                                                          std::placeholders::_1);
+        internal_event_map["GUILD_BAN_REMOVE"] = std::bind(&discord::Bot::GuildBanRemoveEvent, this, std::placeholders::_1);
+        internal_event_map["GUILD_EMOJIS_UPDATE"] = std::bind(&discord::Bot::GuildEmojisUpdateEvent, this, std::placeholders::_1);
+        internal_event_map["GUILD_INTEGRATIONS_UPDATE"] = std::bind(&discord::Bot::GuildIntegrationsUpdateEvent, this, std::placeholders::_1);
+        internal_event_map["GUILD_MEMBER_ADD"] = std::bind(&discord::Bot::GuildMemberAddEvent, this, std::placeholders::_1);
+        internal_event_map["GUILD_MEMBER_REMOVE"] = std::bind(&discord::Bot::GuildMemberRemoveEvent, this, std::placeholders::_1);
+        internal_event_map["GUILD_MEMBER_UPDATE"] = std::bind(&discord::Bot::GuildMemberUpdateEvent, this, std::placeholders::_1);
+        internal_event_map["GUILD_MEMBERS_CHUNK"] = std::bind(&discord::Bot::GuildMembersChunkEvent, this, std::placeholders::_1);
+        internal_event_map["GUILD_ROLE_CREATE"] = std::bind(&discord::Bot::GuildRoleCreateEvent, this, std::placeholders::_1);
+        internal_event_map["GUILD_ROLE_UPDATE"] = std::bind(&discord::Bot::GuildRoleUpdateEvent, this, std::placeholders::_1);
+        internal_event_map["GUILD_ROLE_DELETE"] = std::bind(&discord::Bot::GuildRoleDeleteEvent, this, std::placeholders::_1);
+        internal_event_map["MESSAGE_CREATE"] = std::bind(&discord::Bot::MessageCreateEvent, this, std::placeholders::_1);
+        internal_event_map["MESSAGE_UPDATE"] = std::bind(&discord::Bot::MessageUpdateEvent, this, std::placeholders::_1);
+        internal_event_map["MESSAGE_DELETE"] = std::bind(&discord::Bot::MessageDeleteEvent, this, std::placeholders::_1);
+        internal_event_map["MESSAGE_DELETE_BULK"] = std::bind(&discord::Bot::MessageDeleteBulkEvent, this, std::placeholders::_1);
+        internal_event_map["MESSAGE_REACTION_ADD"] = std::bind(&discord::Bot::MessageReactionAddEvent, this, std::placeholders::_1);
+        internal_event_map["MESSAGE_REACTION_REMOVE"] = std::bind(&discord::Bot::MessageReactionRemoveEvent, this, std::placeholders::_1);
+        internal_event_map["MESSAGE_REACTION_REMOVE_ALL"] = std::bind(&discord::Bot::MessageReactionRemoveAllEvent, this, std::placeholders::_1);
+        internal_event_map["PRESENCE_UPDATE"] = std::bind(&discord::Bot::PresenceUpdateEvent, this, std::placeholders::_1);
         internal_event_map["TYPING_START"] = std::bind(&discord::Bot::TypingStartEvent, this, std::placeholders::_1);
         internal_event_map["USER_UPDATE"] = std::bind(&discord::Bot::UserUpdateEvent, this, std::placeholders::_1);
-        internal_event_map["VOICE_STATE_UPDATE"] = std::bind(&discord::Bot::VoiceStateUpdateEvent, this,
-                                                             std::placeholders::_1);
-        internal_event_map["VOICE_SERVER_UPDATE"] = std::bind(&discord::Bot::VoiceServerUpdateEvent, this,
-                                                              std::placeholders::_1);
-        internal_event_map["WEBHOOKS_UPDATE"] = std::bind(&discord::Bot::WebhooksUpdateEvent, this,
-                                                          std::placeholders::_1);
+        internal_event_map["VOICE_STATE_UPDATE"] = std::bind(&discord::Bot::VoiceStateUpdateEvent, this, std::placeholders::_1);
+        internal_event_map["VOICE_SERVER_UPDATE"] = std::bind(&discord::Bot::VoiceServerUpdateEvent, this, std::placeholders::_1);
+        internal_event_map["WEBHOOKS_UPDATE"] = std::bind(&discord::Bot::WebhooksUpdateEvent, this, std::placeholders::_1);
     }
 
     void Bot::WebSocketStart() {
@@ -516,11 +486,11 @@ namespace discord {
         discord::DispatchEvent(discord::ResumedEvent());
     }
 
-    void Bot::ReconectEvent(nlohmann::json result) {
+    void Bot::ReconnectEvent(nlohmann::json result) {
         discord::DispatchEvent(discord::ReconnectEvent());
     }
 
-    void Bot::InvalidSesionEvent(nlohmann::json result) {
+    void Bot::InvalidSessionEvent(nlohmann::json result) {
         discord::DispatchEvent(discord::InvalidSessionEvent());
     }
 

@@ -1,11 +1,5 @@
 #include "guild.h"
-#include "member.h"
-#include "channel.h"
-#include "utils.h"
-#include "emoji.h"
 #include "bot.h"
-#include <string>
-#include <iostream>
 
 namespace discord {
 	Guild::Guild(snowflake id) : DiscordObject(id) {
@@ -420,7 +414,7 @@ namespace discord {
 		 * @param[in] position The sorting position of the new channel.
 		 * @param[in] permission_overwrites Array of permission overwrite objects.
 		 * @param[in] parent_id The parent id of the new channel.
-		 * @param[in] nsfw Wheather the new channel is marked as nsfw.
+		 * @param[in] nsfw Whether the new channel is marked as nsfw.
 		 *
 		 * @return discord::Channel
 		 */
@@ -515,7 +509,7 @@ namespace discord {
 		 * ```
 		 *
 		 * @param[in] id The id of this member.
-		 * @param[in] access_token The oauth2 token granted witht he guilds.join to the bot's application for the member.
+		 * @param[in] access_token The oauth2 token granted with guilds.join to the bot's application for the member.
 		 * @param[in] nick The user nick name.
 		 * @param[in] roles The users role.
 		 * @param[in] mute Whether the user is muted in voice channels.
@@ -842,7 +836,7 @@ namespace discord {
 		 * @brief Get guild integrations.
 		 *
 		 * ```cpp
-		 *      std::vector<discord::GuildIntegration> itegration = guild.GetIntegrations();
+		 *      std::vector<discord::GuildIntegration> integration = guild.GetIntegrations();
 		 * ```
 		 *
 		 * @return std::vector<discord::GuildIntegration>
@@ -1076,7 +1070,7 @@ namespace discord {
 		 *      discord::Emoji modified_emoji = guild.ModifyEmoji(emoji, "New emoji", roles);
 		 * ```
 		 *
-		 * @param[in] emoji The emoji to modfy.
+		 * @param[in] emoji The emoji to modify.
 		 * @param[in] name The emoji's name.
 		 * @param[in] role The emoji's roles.
 		 *

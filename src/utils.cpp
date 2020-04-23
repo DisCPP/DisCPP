@@ -1,14 +1,8 @@
 #include "utils.h"
 #include "bot.h"
 
-#include <cstring>
-
 #include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
-
-#include <curl/curl.h>
-
-#include <cpprest/uri.h>
 
 std::string discord::GetOsName() {
 	/**

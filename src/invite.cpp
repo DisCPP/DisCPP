@@ -1,8 +1,4 @@
 #include "invite.h"
-#include "utils.h"
-#include "guild.h"
-#include "channel.h"
-#include "user.h"
 
 namespace discord {
 	Invite::Invite(nlohmann::json json) {

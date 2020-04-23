@@ -120,8 +120,8 @@ namespace discord {
 		// Events
 		void ReadyEvent(nlohmann::json result);
 		void ResumedEvent(nlohmann::json result);
-		void ReconectEvent(nlohmann::json result);
-		void InvalidSesionEvent(nlohmann::json result);
+		void ReconnectEvent(nlohmann::json result);
+		void InvalidSessionEvent(nlohmann::json result);
 		void ChannelCreateEvent(nlohmann::json result);
 		void ChannelUpdateEvent(nlohmann::json result);
 		void ChannelDeleteEvent(nlohmann::json result);
