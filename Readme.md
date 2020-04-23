@@ -1,11 +1,11 @@
-<h1 align="center">Discpp</h1>
+<h1 align="center">DisC++</h1>
 <p align="center">
   <a href="https://dev.azure.com/seanomik/discpp/_build">
     <img src="https://dev.azure.com/seanomik/discpp/_apis/build/status/SeanOMik.DISCPP?branchName=master">
   </a>
 </p>
 <p align="center">
-Discord API Wrapper Written in C++  
+Discord API Wrapper Written in Modern C++  
 </p>
 
 ## DisCPP
