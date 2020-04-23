@@ -103,7 +103,6 @@ namespace discord {
 		}
 		if (json.contains("presences") && json.contains("members")) {
 			for (auto const& presence : json["presences"]) {
-				globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::CYAN + presence.dump());
 				std::unordered_map<snowflake, Member>::iterator it = members.find(presence["user"]["id"]);
 
 				if (it != members.end()) {

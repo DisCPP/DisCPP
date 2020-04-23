@@ -151,7 +151,9 @@ namespace discord {
 
 			return discord::Message(nlohmann::json::parse(response.text));
 		}
-		body = cpr::Body(message_json.dump());
+		else {
+			body = cpr::Body(message_json.dump());
+		}
 		nlohmann::json result = SendPostRequest(Endpoint("/channels/" + id + "/messages"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
 		return discord::Message(result);

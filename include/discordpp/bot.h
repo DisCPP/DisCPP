@@ -34,9 +34,8 @@ namespace discord {
 
 		std::unordered_map<snowflake, Channel> channels; /**< List of channels the current bot can access */
 		std::unordered_map<snowflake, Member> members; /**< List of members the current bot can access */
-		std::unordered_map<snowflake, Guild> guilds; /**< List of guilds the current bot can access */
-		// TODO: convert this to std::unordered_map<snowflake, Message>
-		std::vector<discord::Message> messages; /**< List of messages the current bot can access */
+		std::unordered_map<snowflake, Guild> guilds; /**< List of guilds the current bot can access */ 
+		std::unordered_map<snowflake, Message> messages; /**< List of messages the current bot can access */
 
 		std::vector<std::future<void>> futures; /**< List of events */
 
