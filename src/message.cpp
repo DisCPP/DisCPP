@@ -159,7 +159,7 @@ namespace discord {
 		 * @return void
 		 */
 
-		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions/" + emoji.ToString());
+		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions/" + emoji.ToString() + "/" + user.id);
 		nlohmann::json result = SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
