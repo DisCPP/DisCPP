@@ -10,8 +10,10 @@ namespace discord {
 		/**
 		 * @brief Constructs a discord::Image object from the id.
 		 *
+		 * You must supply the location of `*file` due to us needing to find out the file extension.
+		 *
 		 * ```cpp
-		 *      discord::Image image(&file, "test.txt");
+		 *      discord::Image image(&file, "test.png");
 		 * ```
 		 *
 		 * @param[in] image The image.
@@ -46,13 +48,13 @@ namespace discord {
 			} else if (ext == "gif") {
 				data_uri_ext = "gif";
 			} else {
-				std::cout << "The file extension, \"" << ext << "\" is not supported by Discord!" << std::endl;
+				globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "The file extension, \"" << ext << "\" is not supported by Discord!");
 				throw std::runtime_error("The file extension, \"" + ext + "\" is not supported by Discord!");
 			}
 
 			return "data:image/" + data_uri_ext + ";base64," + Base64Encode(buffer.str());
 		} else {
-			std::cout << "Failed to open image!" << std::endl;
+			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Failed to open image!");
 			throw std::runtime_error("Failed to open image!");
 		}
 	}

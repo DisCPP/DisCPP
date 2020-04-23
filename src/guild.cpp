@@ -63,17 +63,23 @@ namespace discord {
 				emojis.insert(std::make_pair<snowflake, Emoji>(static_cast<discord::snowflake>(tmp.id), static_cast<discord::Emoji>(tmp)));
 			}
 		}
-		// features
+		for (auto const& feature : json["features"]) {
+		    features.push_back(feature);
+		}
 		mfa_level = (json.contains("mfa_level")) ? static_cast<discord::specials::MFALevel>(json["mfa_level"].get<int>()) : discord::specials::MFALevel::NO_MFA;
 		application_id = GetDataSafely<snowflake>(json, "application_id");
 		widget_enabled = GetDataSafely<bool>(json, "widget_enabled");
 		widget_channel_id = GetDataSafely<snowflake>(json, "widget_channel_id");
 		system_channel_id = GetDataSafely<snowflake>(json, "system_channel_id");
+		system_channel_flags = GetDataSafely<int>(json, "system_channel_flags");
+        rules_channel_id = GetDataSafely<snowflake>(json, "rules_channel_id");
 		joined_at = GetDataSafely<std::string>(json, "joined_at");
 		large = GetDataSafely<bool>(json, "large");
 		unavailable = GetDataSafely<bool>(json, "unavailable");
 		member_count = GetDataSafely<int>(json, "member_count");
-		// voice_states
+		for (auto const& voice_state : json["voice_states"]) {
+		    voice_states.push_back({voice_state});
+		}
 		if (json.contains("channels")) {
 			for (auto& channel : json["channels"]) {
 				discord::Channel tmp = discord::Channel(channel);
@@ -124,246 +130,6 @@ namespace discord {
 		}
 	}
 
-	discord::Guild Guild::ModifyGuildName(std::string name) {
-		/**
-		 * @brief Modify guild name.
-		 *
-		 * ```cpp
-		 *      guild.ModifyGuildName("Test");
-		 * ```
-		 *
-		 * @param[in] name The new guild name.
-		 *
-		 * @return discord::Guild
-		 */
-
-		cpr::Body body("{\"name\": \"" + EscapeString(name) + "\"}");
-
-		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discord::RateLimitBucketType::GUILD, body);
-
-		return discord::Guild(result);
-	}
-
-	discord::Guild Guild::ModifyGuildRegion(discord::snowflake region_id) {
-		/**
-		 * @brief Modify guild region.
-		 *
-		 * ```cpp
-		 *      guild.ModifyGuildRegion(new_region_id);
-		 * ```
-		 *
-		 * @param[in] region_id The new guild region.
-		 *
-		 * @return discord::Guild
-		 */
-
-		cpr::Body body("{\"region\": \"" + region_id + "\"}");
-
-		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discord::RateLimitBucketType::GUILD, body);
-
-		return discord::Guild(result);
-	}
-
-	discord::Guild Guild::ModifyGuildVerificationLevel(discord::specials::VerificationLevel verification_level) {
-		/**
-		 * @brief Modify guild verification level.
-		 *
-		 * ```cpp
-		 *      guild.ModifyGuildVerificationLevel(discord::specials::VerificationLevel::LOW);
-		 * ```
-		 *
-		 * @param[in] verification_level The new guild verification level.
-		 *
-		 * @return discord::Guild
-		 */
-
-		cpr::Body body("{\"verification_level\": \"" + std::to_string(verification_level) + "\"}");
-
-		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discord::RateLimitBucketType::GUILD, body);
-
-		return discord::Guild(result);
-	}
-
-	discord::Guild Guild::ModifyGuildDefaultMessageNotifications(discord::specials::DefaultMessageNotificationLevel notification_level) {
-		/**
-		 * @brief Modify guild message notifications.
-		 *
-		 * ```cpp
-		 *      guild.ModifyGuildDefaultMessageNotifications(discord::specials::DefaultMessageNotificationLevel::ALL_MESSAGES);
-		 * ```
-		 *
-		 * @param[in] notification_level The new guild notification level.
-		 *
-		 * @return discord::Guild
-		 */
-
-		cpr::Body body("{\"default_message_notifications\": \"" + std::to_string(notification_level) + "\"}");
-
-		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discord::RateLimitBucketType::GUILD, body);
-
-		return discord::Guild(result);
-	}
-
-	discord::Guild Guild::ModifyGuildExplicitContentFilter(discord::specials::ExplicitContentFilterLevel explicit_content_filter) {
-		/**
-		 * @brief Modify guild explicit content filter.
-		 *
-		 * ```cpp
-		 *      guild.ModifyGuildExplicitContentFilter(discord::specials::VerificationLevel::DISABLED);
-		 * ```
-		 *
-		 * @param[in] explicit_content_filter The new guild content filter.
-		 *
-		 * @return discord::Guild
-		 */
-
-		cpr::Body body("{\"verification_level\": \"" + std::to_string(verification_level) + "\"}");
-
-		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discord::RateLimitBucketType::GUILD, body);
-
-		return discord::Guild(result);
-	}
-
-	discord::Guild Guild::ModifyGuildAFKChannelID(discord::snowflake afk_channel_id) {
-		/**
-		 * @brief Modify guild afk channel id.
-		 *
-		 * ```cpp
-		 *      guild.ModifyGuildAFKChannelID(663949599937134603);
-		 * ```
-		 *
-		 * @param[in] afk_channel_id The new guild afk channel id.
-		 *
-		 * @return discord::Guild
-		 */
-
-		cpr::Body body("{\"afk_channel_id\": \"" + afk_channel_id + "\"}");
-
-		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discord::RateLimitBucketType::GUILD, body);
-
-		return discord::Guild(result);
-	}
-
-	discord::Guild Guild::ModifyGuildAFKTimeout(int timeout) {
-		/**
-		 * @brief Modify guild afk timeout.
-		 *
-		 * ```cpp
-		 *      guild.ModifyGuildAFKTimeout(1000);
-		 * ```
-		 *
-		 * @param[in] timeout The new guild afk timeout (in seconds).
-		 *
-		 * @return discord::Guild
-		 */
-
-		cpr::Body body("{\"afk_timeout\": \"" + std::to_string(timeout) + "\"}");
-
-		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discord::RateLimitBucketType::GUILD, body);
-
-		return discord::Guild(result);
-	}
-
-	discord::Guild Guild::ModifyGuildOwnerID(discord::snowflake owner_id) {
-		/**
-		 * @brief Modify guild owner id.
-		 *
-		 * ```cpp
-		 *      guild.ModifyGuildOwnerID(661013339748696075);
-		 * ```
-		 *
-		 * @param[in] owner_id The new guild owner id to transfer the guild ownership.
-		 *
-		 * @return discord::Guild
-		 */
-
-		cpr::Body body("{\"owner_id\": \"" + owner_id + "\"}");
-
-		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discord::RateLimitBucketType::GUILD, body);
-
-		return discord::Guild(result);
-	}
-
-	discord::Guild Guild::ModifyGuildSystemChannelID(discord::snowflake system_channel_id) {
-		/**
-		 * @brief Modify guild system channel id.
-		 *
-		 * ```cpp
-		 *      guild.ModifyGuildSystemChannelID(661013339748696075);
-		 * ```
-		 *
-		 * @param[in] system_channel_id The new guild system channel id.
-		 *
-		 * @return discord::Guild
-		 */
-
-		cpr::Body body("{\"system_channel_id\": \"" + system_channel_id + "\"}");
-
-		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discord::RateLimitBucketType::GUILD, body);
-
-		return discord::Guild(result);
-	}
-
-	discord::Guild Guild::ModifyGuildRulesChannelID(discord::snowflake rules_channel_id) {
-		/**
-		 * @brief Modify guild rules channel id.
-		 *
-		 * ```cpp
-		 *      guild.ModifyGuildRulesChannelID(661013339748696075);
-		 * ```
-		 *
-		 * @param[in] rules_channel_id The new guild rules channel id.
-		 *
-		 * @return discord::Guild
-		 */
-
-		cpr::Body body("{\"rules_channel_id\": \"" + rules_channel_id + "\"}");
-
-		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discord::RateLimitBucketType::GUILD, body);
-
-		return discord::Guild(result);
-	}
-
-	discord::Guild Guild::ModifyGuildPublicUpdatesChannelID(discord::snowflake public_updates_channel_id) {
-		/**
-		 * @brief Modify guild public update channel id.
-		 *
-		 * ```cpp
-		 *      guild.ModifyGuildPublicUpdatesChannelID(661013339748696075);
-		 * ```
-		 *
-		 * @param[in] public_updates_channel_id The new guild public updates channel id.
-		 *
-		 * @return discord::Guild
-		 */
-
-		cpr::Body body("{\"public_updates_channel_id\": \"" + public_updates_channel_id + "\"}");
-
-		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discord::RateLimitBucketType::GUILD, body);
-
-		return discord::Guild(result);
-	}
-
-	discord::Guild Guild::ModifyGuildPreferredLocale(std::string preferred_locale) {
-		/**
-		 * @brief Modify guild preferred local.
-		 *
-		 * ```cpp
-		 *      guild.ModifyGuildPreferredLocale("en-US");
-		 * ```
-		 *
-		 * @param[in] preferred_locale The new guild preferred locale.
-		 *
-		 * @return discord::Guild
-		 */
-
-		cpr::Body body("{\"preferred_locale\": \"" + preferred_locale + "\"}");
-
-		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discord::RateLimitBucketType::GUILD, body);
-
-		return discord::Guild(result);
-	}
-
 	void Guild::DeleteGuild() {
 		/**
 		 * @brief Deletes this guild.
@@ -397,7 +163,7 @@ namespace discord {
 		return channels;
 	}
 
-	discord::Channel Guild::CreateChannel(std::string name, std::string topic, GuildChannelType type, int bitrate, int user_limit, int rate_limit_per_user, int position, std::vector<discord::Permissions> permission_overwrites, discord::Channel category, bool nsfw) {
+	discord::Channel Guild::CreateChannel(std::string name, std::string topic, ChannelType type, int bitrate, int user_limit, int rate_limit_per_user, int position, std::vector<discord::Permissions> permission_overwrites, discord::Channel category, bool nsfw) {
 		/**
 		 * @brief Creates a channel for this Guild.
 		 *
@@ -435,7 +201,7 @@ namespace discord {
 		});
 
 		if (!topic.empty()) json_raw.push_back({ "topic", EscapeString(topic) });
-		if (type == GuildChannelType::GUILD_VOICE) {
+		if (type == ChannelType::GUILD_VOICE) {
 			json_raw.push_back({ "bitrate", bitrate });
 			json_raw.push_back({ "user_limit", user_limit });
 		}
@@ -497,7 +263,8 @@ namespace discord {
 		if (it != discord::globals::bot_instance->members.end()) {
 			return it->second;
 		}
-		throw std::runtime_error("Member not found!");
+		//throw std::runtime_error("Member not found!");
+		return discord::Member();
 	}
 
 	discord::Member Guild::AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discord::Role> roles, bool mute, bool deaf) {
@@ -1156,4 +923,97 @@ namespace discord {
 
 		return this->GetMember(this->owner_id);
 	}
+
+    std::string GuildPropertyToString(GuildProperty prop) {
+        switch (prop) {
+            case GuildProperty::NAME:
+                return "name";
+            case GuildProperty::REGION:
+                return "region";
+            case GuildProperty::VERIFICATION_LEVEL:
+                return "verification_level";
+            case GuildProperty::DEFAULT_MESSAGE_NOTIFICATIONS:
+                return "default_message_notifications";
+            case GuildProperty::EXPLICIT_CONTENT_FILTER:
+                return "explicit_content_filter";
+            case GuildProperty::AFK_CHANNEL_ID:
+                return "afk_channel_id";
+            case GuildProperty::AFK_TIMEOUT:
+                return "afk_timeout";
+            case GuildProperty::ICON:
+                return "icon";
+            case GuildProperty::OWNER_ID:
+                return "owner_id";
+            case GuildProperty::SPLASH:
+                return "splash";
+            case GuildProperty::BANNER:
+                return "banner";
+            case GuildProperty::SYSTEM_CHANNEL_ID:
+                return "system_channel_id";
+            case GuildProperty::RULES_CHANNEL_ID:
+                return "rules_channel_id";
+            case GuildProperty::PUBLIC_UPDATES_CHANNEL_ID:
+                return "public_updates_channel_id";
+            case GuildProperty::PREFERRED_LOCALE:
+                return "preferred_locale";
+        }
+    }
+
+    // Helper type for the visitor
+    template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+    template<class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+
+    discord::Guild Guild::ModifyGuild(GuildModifyRequests modify_requests) {
+        /**
+         * @brief Modify the guild.
+         *
+         * Use discord::GuildModifyRequests to modify a field of the guild.
+         *
+         * ```cpp
+         *		// Change the name of the guild to "Test"
+         *		discord::ModifyRequests request(discord::GuildProperty::NAME, "Test");
+         *      guild.Modify(request);
+         * ```
+         *
+         * @param[in] modify_request The field to modify, and what to set it to.
+         *
+         * @return discord::Channel - This method also sets the guild reference to the returned guild.
+         */
+
+        cpr::Header headers = DefaultHeaders({ {"Content-Type", "application/json" } });
+        std::string field;
+        nlohmann::json j_body = {};
+        for (auto request : modify_requests.guild_requests) {
+            std::variant<std::string, int, Image> variant = request.second;
+            std::visit(overloaded {
+                    [&](int i) { j_body[GuildPropertyToString(request.first)] = i; },
+                    [&](Image img) { j_body[GuildPropertyToString(request.first)] = img.ToDataURI(); },
+                    [&](const std::string& str) { j_body[GuildPropertyToString(request.first)] = str; }
+            }, variant);
+        }
+
+        cpr::Body body(j_body.dump());
+        nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + id), headers, id, RateLimitBucketType::CHANNEL, body);
+
+        *this = discord::Guild(result);
+        return *this;
+    }
+
+    discord::GuildInvite Guild::GetVanityURL() {
+        /**
+         * @brief Returns a partial invite object for guilds with that feature enabled.
+         *
+         * Requires the MANAGE_GUILD permission. code will be null if a vanity url for the guild is not set. Only `code` and `uses` are valid
+         *
+         * ```cpp
+         *      discord::GuildInvite vanity_url = ctx.guild.GetVanityURL();
+         * ```
+         *
+         * @return discord::GuildInvite
+         */
+
+	    nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + id + "/vanity-url"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
+
+        return discord::GuildInvite(result);
+    }
 }

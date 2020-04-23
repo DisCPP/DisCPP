@@ -36,7 +36,7 @@ namespace discord {
 		 */
 
 		id = GetDataSafely<snowflake>(json, "id");
-		type = GetDataSafely<int>(json, "type");
+		type = GetDataSafely<ChannelType>(json, "type");
 		if (json.contains("guild_id")) { // Can't use GetDataSafely so it doesn't over write the other constructor.
 			guild_id = json["guild_id"].get<snowflake>();
 		}
@@ -133,8 +133,7 @@ namespace discord {
 		cpr::Body body;
 		if (embed != nullptr) {
 			body = cpr::Body("{\"embed\": " + embed->ToJson().dump() + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
-		}
-		else if (!files.empty()) {
+		} else if (!files.empty()) {
 			cpr::Multipart multipart_data{};
 
 			for (int i = 0; i < files.size(); i++) {
@@ -157,7 +156,34 @@ namespace discord {
 		return discord::Message(result);
 	}
 
-	discord::Channel Channel::Modify(ModifyRequest modify_request) {
+	std::string ChannelPropertyToString(ChannelProperty prop) {
+        switch (prop) {
+            case ChannelProperty::NAME:
+                return "name";
+            case ChannelProperty::POSITION:
+                return "position";
+            case ChannelProperty::TOPIC:
+                return "topic";
+            case ChannelProperty::NSFW:
+                return "nsfw";
+            case ChannelProperty::RATE_LIMIT:
+                return "rate_limit_per_user";
+            case ChannelProperty::BITRATE:
+                return "bitrate";
+            case ChannelProperty::USER_LIMIT:
+                return "user_limit";
+            case ChannelProperty::PERMISSION_OVERWRITES:
+                return "permission_overwrites";
+            case ChannelProperty::PARENT_ID:
+                return "parent_id";
+        }
+	}
+
+    // Helper type for the visitor
+    template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+    template<class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+
+	discord::Channel Channel::Modify(ModifyRequests modify_requests) {
 		/**
 		 * @brief Modify the channel.
 		 *
@@ -165,7 +191,7 @@ namespace discord {
 		 *
 		 * ```cpp
 		 *		// Change the name of the channel to "Test"
-		 *		discord::ModifyRequest request(discord::ModifyChannelValue::NAME, "Test");
+		 *		discord::ModifyRequests request(discord::ChannelProperty::NAME, "Test");
 		 *      channel.Modify(request);
 		 * ```
 		 *
@@ -176,37 +202,17 @@ namespace discord {
 
 		cpr::Header headers = DefaultHeaders({ {"Content-Type", "application/json" } });
 		std::string field;
-		switch (modify_request.key) {
-		case ModifyChannelValue::NAME:
-			field = "name";
-			break;
-		case ModifyChannelValue::POSITION:
-			field = "position";
-			break;
-		case ModifyChannelValue::TOPIC:
-			field = "topic";
-			break;
-		case ModifyChannelValue::NSFW:
-			field = "nsfw";
-			break;
-		case ModifyChannelValue::RATE_LIMIT:
-			field = "rate_limit_per_user";
-			break;
-		case ModifyChannelValue::BITRATE:
-			field = "bitrate";
-			break;
-		case ModifyChannelValue::USER_LIMIT:
-			field = "user_limit";
-			break;
-		case ModifyChannelValue::PERMISSION_OVERWRITES:
-			field = "permission_overwrites";
-			break;
-		case ModifyChannelValue::PARENT_ID:
-			field = "parent_id";
-			break;
-		}
+        nlohmann::json j_body = {};
+        for (auto request : modify_requests.requests) {
+            std::variant<std::string, int, bool> variant = request.second;
+            std::visit(overloaded {
+                [&](bool b) { j_body[ChannelPropertyToString(request.first)] = (b) ? "true" : "false"; },
+                [&](int i) { j_body[ChannelPropertyToString(request.first)] = i; },
+                [&](const std::string& str) { j_body[ChannelPropertyToString(request.first)] = str; }
+            }, variant);
+        }
 
-		cpr::Body body = cpr::Body("{\"" + field + "\": \"" + modify_request.value + "\"}");
+		cpr::Body body(j_body.dump());
 		nlohmann::json result = SendPatchRequest(Endpoint("/channels/" + id), headers, id, RateLimitBucketType::CHANNEL, body);
 		
 		*this = discord::Channel(result);
@@ -409,4 +415,44 @@ namespace discord {
 
 		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/" + id + "/recipients/" + user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
+
+    void Channel::EditPermissions(discord::Permissions permissions) {
+        /**
+         * @brief Edit permission overwrites for this channel.
+         *
+         * ```cpp
+         *      channel.EditPermissions(permissions);
+         * ```
+         *
+         * @param[in] permissions The permissions that the channels permission overwrites will be set to.
+         *
+         * @return void
+         */
+
+        std::string s_type = (permissions.permission_type == PermissionType::MEMBER) ? "member" : "role";
+
+        nlohmann::json j_body = {
+                {"allow" , permissions.allow_perms.value},
+                {"deny", permissions.deny_perms.value},
+                {"type", s_type}
+        };
+
+        nlohmann::json result = SendPutRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(j_body.dump()));
+    }
+
+    void Channel::DeletePermission(discord::Permissions permissions) {
+        /**
+         * @brief Remove permission overwrites for this channel.
+         *
+         * ```cpp
+         *      channel.DeletePermission(permissions);
+         * ```
+         *
+         * @param[in] permissions The permissions that will be removed
+         *
+         * @return void
+         */
+
+        nlohmann::json result = SendDeleteRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+    }
 }

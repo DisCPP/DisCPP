@@ -70,7 +70,7 @@ namespace discord {
 		if (json.contains("mention_channels")) {
 			for (auto& json_chan : json["mention_channels"]) {
 				discord::Channel channel(json_chan["id"].get<snowflake>());
-				channel.type = json_chan["type"].get<int>();
+				channel.type = json_chan["type"].get<ChannelType>();
 				channel.guild_id = json_chan["guild_id"].get<snowflake>();
 				channel.name = json_chan["name"];
 

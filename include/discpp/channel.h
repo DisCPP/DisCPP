@@ -7,13 +7,15 @@
 
 #include <nlohmann/json.hpp>
 
+#include <variant>
+
 namespace discord {
 	class Message;
 	class GuildInvite;
 	class User;
 	class Guild;
 
-	enum class ModifyChannelValue : int {
+	enum class ChannelProperty : int {
 		NAME,
 		POSITION,
 		TOPIC,
@@ -25,13 +27,20 @@ namespace discord {
 		PARENT_ID
 	};
 
-	struct ModifyRequest {
-		ModifyChannelValue key;
-		std::string value;
+	struct ModifyRequests {
+	    // key, value
+		std::unordered_map<ChannelProperty, std::variant<std::string, int, bool>> requests;
 
-		ModifyRequest(ModifyChannelValue key, std::string value) : key(key), value(value) {
+		ModifyRequests(ChannelProperty key, std::variant<std::string, int, bool> value) : requests({ {key, value} }) {};
+		ModifyRequests(std::unordered_map<ChannelProperty, std::variant<std::string, int, bool>> requests) : requests(requests) {};
 
+		void Add(ChannelProperty key, std::variant<std::string, int, bool> value) {
+		    requests.insert({key, value});
 		};
+
+		void Remove(ChannelProperty key) {
+		    requests.erase(requests.find(key));
+		}
 	};
 
 	enum class GetChannelsMessagesMethod {
@@ -46,6 +55,16 @@ namespace discord {
 		std::string file_path;
 	};
 
+    enum ChannelType : int {
+        GUILD_TEXT,
+        DM,
+        GUILD_VOICE,
+        GROUP_DM,
+        GROUP_CATEGORY,
+        GROUP_NEWS,
+        GROUP_STORE
+    };
+
 	class Channel : public DiscordObject {
 	public:
 		Channel() = default;
@@ -53,39 +72,39 @@ namespace discord {
 		Channel(nlohmann::json json);
 		Channel(nlohmann::json json, snowflake guild_id);
 
-		discord::Message Send(std::string text = "", bool tts = false, discord::EmbedBuilder* embed = nullptr, std::vector<discord::File> files = {});
-		discord::Channel Modify(ModifyRequest modify_request);
+		discord::Message Send(std::string text, bool tts = false, discord::EmbedBuilder* embed = nullptr, std::vector<discord::File> files = {});
+		discord::Channel Modify(ModifyRequests modify_requests);
 		discord::Channel Delete();
 		std::vector<discord::Message> GetChannelMessages(int amount, GetChannelsMessagesMethod get_method = GetChannelsMessagesMethod::LIMIT);
 		discord::Message FindMessage(snowflake message_id);
 		void BulkDeleteMessage(std::vector<snowflake> messages);
-		// void EditPermissions() // TODO: https://discordapp.com/developers/docs/resources/channel#edit-channel-permissions
+		void EditPermissions(discord::Permissions permissions);
 		std::vector<discord::GuildInvite> GetInvites();
 		discord::GuildInvite CreateInvite(int max_age, int max_uses, bool temporary, bool unique);
-		// void deletePermission() // TODO: https://discordapp.com/developers/docs/resources/channel#delete-channel-permission
+		void DeletePermission(discord::Permissions permissions); // TODO: https://discordapp.com/developers/docs/resources/channel#delete-channel-permission
 		void TriggerTypingIndicator();
 		std::vector<discord::Message> GetPinnedMessages();
 		void GroupDMAddRecipient(discord::User user);
 		void GroupDMRemoveRecipient(discord::User user);
 
-		//snowflake id;
-		int type;
-		snowflake guild_id; /**< ID of the current channel's owning guild */
-		int position; /**< Position of channel in guild's channel list */
-		std::vector<discord::Permissions> permissions; /**< PermissionOverwrites of the current channel */
-		std::string name; /**< Name of the current channel */
-		std::string topic; /**< Topic of the current channel */
-		bool nsfw; /**< Whether or not the current channel is not safe for work */
-		snowflake last_message_id; /**< Last message sent in the current channel */
-		int bitrate; /**< Bitrate the current voice channel is encoded at */
-		int user_limit; /**< Max users the current voice channel can hold */
-		int rate_limit_per_user; 
-		std::vector<discord::User> recipients; /**< Members of the current groupdm channel */
-		std::string icon; /**< Icon of the current groupdm channel */
-		snowflake owner_id; /**< Owner of the current groupdm channel */
-		snowflake application_id; 
-		snowflake category_id; /**< Category the current channel is in */
-		std::string last_pin_timestamp; // TODO: Convert to iso8601Time 
+        ChannelType type; /**< The type of channel. */
+		snowflake guild_id; /**< ID of the current channel's owning guild. */
+		int position; /**< Position of channel in guild's channel list. */
+		std::vector<discord::Permissions> permissions; /**< Explicit permission overwrites for members and roles. */
+		std::string name; /**< The name of the channel. */
+		std::string topic; /**< The channel topic. */
+		bool nsfw; /**< Whether or not the current channel is not safe for work. */
+		snowflake last_message_id; /**< The ID of the last message sent in this channel. */
+		int bitrate; /**< The bitrate (in bits) of the voice channel. */
+		int user_limit; /**< The user limit of the voice channel. */
+		int rate_limit_per_user; /**< Amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected. */
+		std::vector<discord::User> recipients; /**< The recipients of the DM. */
+		std::string icon; /**< Hashed icon for this channel. */
+		snowflake owner_id; /**< ID of the DM creator. */
+		snowflake application_id; /**< Application ID of the group DM creator if it is bot-created. */
+		snowflake category_id; /**< ID of the parent category for a channel (each parent category can contain up to 50 channels). */
+        // TODO: Convert to iso8601Time
+		std::string last_pin_timestamp; /**< When the last pinned message was pinned. */
 	};
 }
 

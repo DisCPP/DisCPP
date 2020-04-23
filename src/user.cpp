@@ -47,9 +47,9 @@ namespace discord {
 		verified = GetDataSafely<bool>(json, "verified");
 		flags = GetDataSafely<int>(json, "flags");
 		premium_type = (json.contains("premium_type")) ? static_cast<discord::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type")) : discord::specials::NitroSubscription::NO_NITRO;
+		public_flags = GetDataSafely<int>(json, "public_flags");
 		created_at = FormatTimeFromSnowflake(id);
-		std::string _id = this->id.c_str();
-		mention = "<@" + _id + ">";
+		mention = "<@" + id + ">";
 	}
 
 	Connection::Connection(nlohmann::json json) {
