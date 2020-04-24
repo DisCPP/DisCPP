@@ -1,15 +1,15 @@
 <h1 align="center">DisC++</h1>
 <p align="center">
-  <a href="https://dev.azure.com/seanomik/discpp/_build">
-    <img src="https://dev.azure.com/seanomik/discpp/_apis/build/status/SeanOMik.DISCPP?branchName=master">
+  <a href="https://dev.azure.com/seanomik/DisCPP/_build">
+    <img src="https://dev.azure.com/seanomik/DisCPP/_apis/build/status/SeanOMik.DisCPP?branchName=master">
   </a>
 </p>
 <p align="center">
-Discord API Wrapper Written in Modern C++  
+Discord API Wrapper Written in Modern C++ aimed towards ease of use.
 </p>
 
 ## DisC++
-DisC++ is a Discord API wrapper written in C++. This is one of the few that can compile on Windows and Linux. Its also focused on being multi threaded so commands and event listeners are ran on seperate threads, this means you dont have to worry about slowing the bot down with a certain command.
+DisC++ is a Discord API wrapper written in modern C++ aimed towards ease of use. This is one of the few that can compile on Windows and Linux. Its also focused on being multi threaded so commands and event listeners are ran on seperate threads, this means you dont have to worry about slowing the bot down with a certain command.
 
 ## Dependencies
 - [Nlohmann JSON](https://github.com/nlohmann/json)
