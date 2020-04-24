@@ -1,7 +1,7 @@
 <h1 align="center">DisC++</h1>
 <p align="center">
-  <a href="https://dev.azure.com/seanomik/discpp/_build">
-    <img src="https://dev.azure.com/seanomik/discpp/_apis/build/status/SeanOMik.DISCPP?branchName=master">
+  <a href="https://dev.azure.com/seanomik/DisCPP/_build">
+    <img src="https://dev.azure.com/seanomik/DisCPP/_apis/build/status/SeanOMik.DisCPP?branchName=master">
   </a>
 </p>
 <p align="center">
