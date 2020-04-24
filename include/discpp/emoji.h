@@ -58,7 +58,6 @@ namespace discpp {
 #endif
 		}
 
-		//snowflake id;
 		std::string name; /**< Name of the current emoji */
 		std::wstring unicode; /**< Unicode representation of the current emoji */
 		std::vector<discpp::Role> roles; /**< Roles */
