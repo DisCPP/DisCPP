@@ -47,8 +47,8 @@
 #include "events/webhooks_update_event.h"
 
 namespace discpp {
-    Bot::Bot(std::string token, std::vector<std::string> prefixes, int logger_flags, std::string logger_path) : token(
-            token), prefixes(prefixes) {
+    Bot::Bot(std::string token, BotConfig config) : token(
+            token), config(config) {
         /**
          * @brief Constructs a discpp::Bot object.
          *
@@ -68,10 +68,10 @@ namespace discpp {
 
         discpp::globals::bot_instance = this;
 
-        if (logger_path.empty()) {
-            logger = discpp::Logger(logger_flags);
+        if (config.logger_path.empty()) {
+            logger = discpp::Logger(config.logger_flags);
         } else {
-            logger = discpp::Logger(logger_path, logger_flags);
+            logger = discpp::Logger(config.logger_path, config.logger_flags);
         }
     }
 

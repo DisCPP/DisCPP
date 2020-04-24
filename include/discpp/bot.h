@@ -16,18 +16,20 @@
 #include "member.h"
 #include "guild.h"
 #include "log.h"
+#include "bot_config.h"
 
 namespace discpp {
 	class Role;
 	class User;
 	class Activity;
+	class BotConfig;
 
 	using namespace web::websockets::client;
 
 	class Bot {
 	public:
 		std::string token; /**< Token for the current bot */
-		std::vector<std::string> prefixes; /**< Command prefixes for the current bot */
+		BotConfig config; /**< Configuration for the current bot */
 
 		discpp::User bot_user; /**< discpp::User object representing current bot */
 		discpp::Logger logger; /**< discpp::Logger object representing current logger */
@@ -53,7 +55,7 @@ namespace discpp {
 			heartbeat_ack = 11			// Receive
 		};
 
-		Bot(std::string token, std::vector<std::string> prefixes, int logger_flags = logger_flags::ERROR_SEVERITY | logger_flags::WARNING_SEVERITY, std::string logger_path = "");
+		Bot(std::string token, BotConfig config);
 		int Run();
 		discpp::Guild GetGuild(snowflake guild_id);
 		discpp::User ModifyCurrentUser(std::string username);
@@ -100,7 +102,7 @@ namespace discpp {
 		int last_sequence_number;
 		long long packet_counter;
 
-		int message_cache_count = 10000;
+		int message_cache_count = config.messageCacheSize;
 
 		std::unordered_map<std::string, std::function<void(nlohmann::json)>> internal_event_map;
 

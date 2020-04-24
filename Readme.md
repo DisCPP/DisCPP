@@ -95,8 +95,9 @@ int main(int argc, const char* argv[]) {
 	std::ifstream token_file("token.txt", std::ios::out);
 	std::string token;
 	std::getline(token_file, token);
-
-	discpp::Bot bot{ token, {"!"} }; // Token, command prefixes.
+	
+	discpp::BotConfig config {{"!"}};
+	discpp::Bot bot{ token, config }; // Token, config.
 
 	PingCommand(); // This runs the constructor which will register the command.
 

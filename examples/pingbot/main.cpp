@@ -1,3 +1,7 @@
+/*
+	Basic bot showing off commands
+*/
+
 #include <discpp/bot.h>
 #include <discpp/context.h>
 #include <discpp/command_handler.h>
@@ -15,7 +19,8 @@ int main(int argc, const char* argv[]) {
 	std::string token;
 	std::getline(token_file, token);
 
-	discpp::Bot bot{ token, {"!"} }; // Token, command prefix.
+	discpp::BotConfig config{ {"!"} };
+	discpp::Bot bot{ token, config }; // Token, config 
 
 	PingCommand(); // This runs the constructor which will register the command.
 

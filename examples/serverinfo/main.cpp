@@ -16,7 +16,8 @@ int main(int argc, const char* argv[]) {
 	std::string token;
 	std::getline(token_file, token);
 
-	discpp::Bot bot { token, {"!"} }; // Token, command prefix.
+	discpp::BotConfig config{ {"!"} };
+	discpp::Bot bot { token, config }; // Token, config
 
 	ServerinfoCommand();
 	
