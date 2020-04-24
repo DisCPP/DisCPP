@@ -21,11 +21,5 @@ target_link_libraries(discpp PRIVATE cpprestsdk::cpprest cpprestsdk::cpprestsdk_
 
 set_target_properties(discpp PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS OFF)
 
-add_executable(ping_bot_ex examples/basic/PingBot/main.cpp)
-target_sources(ping_bot_ex PRIVATE examples/basic/PingBot/ping_command.cpp)
-
-target_include_directories(ping_bot_ex PUBLIC examples/basic/PingBot/include)
-
-target_link_libraries(ping_bot_ex PUBLIC discpp)
-
-set_target_properties(ping_bot_ex PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS OFF)
+add_subdirectory(examples/pingbot)
+add_subdirectory(examples/serverinfo)
