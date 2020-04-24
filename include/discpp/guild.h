@@ -76,7 +76,8 @@ namespace discpp {
 	};
 
 	class GuildIntegrationAccount : public DiscordObject {
-		GuildIntegrationAccount() = default;
+	public:
+        GuildIntegrationAccount() = default;
         GuildIntegrationAccount(nlohmann::json json) {
             /**
              * @brief Constructs a discpp::GuildIntegrationAccount object from json.
@@ -104,7 +105,31 @@ namespace discpp {
 	    };
 
 		GuildIntegration() = default;
-        GuildIntegration(nlohmann::json json);
+        GuildIntegration(nlohmann::json json) {
+            /**
+             * @brief Constructs a discpp::GuildIntegration object from json.
+             *
+             * ```cpp
+             *      discpp::GuildIntegration guild_integration(json);
+             * ```
+             *
+             * @param[in] json The json data for the guild integration.
+             *
+             * @return discpp::GuildIntegration, this is a constructor.
+             */
+
+            id = json["id"].get<snowflake>();
+            name = json["name"];
+            type = json["type"];
+            enabled = json["enabled"].get<bool>();
+            syncing = json["syncing"].get<bool>();
+            role = discpp::Role(json["role_id"].get<snowflake>());
+            expire_behavior = static_cast<IntegrationExpireBehavior>(json["expire_behavior"].get<int>());
+            expire_grace_period = json["expire_grace_period"].get<int>();
+            user = discpp::User(json["user"]);
+            account = discpp::GuildIntegrationAccount(json["account"]);
+            synced_at = json["synced_at"];
+        }
 
         std::string name; /**< Integration name. */
         std::string type; /**< Integration type (twitch, youtube, etc). */
