@@ -48,9 +48,14 @@ namespace discpp {
 				emoji = converter.from_bytes(name) + L":" + converter.from_bytes(id);
 			}
 
+#ifdef _WIN32
 			emoji = web::uri::encode_uri(emoji);
-
 			return converter.to_bytes(emoji);
+#else
+            std::string emoji_str = converter.to_bytes(emoji);
+            emoji_str = web::uri::encode_uri(emoji_str);
+            return emoji_str;
+#endif
 		}
 
 		//snowflake id;

@@ -226,7 +226,9 @@ namespace discpp {
     }
 
     void Bot::DisconnectWebsocket() {
-        auto threadlock = std::lock_guard(websocket_client_mutex);
+        logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::YELLOW + "Locking Mutex before disconnect...");
+        std::lock_guard<std::mutex> lck(websocket_client_mutex);
+        logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::YELLOW + "Closing websocket connection...");
         websocket_client.close(web::websockets::client::websocket_close_status::server_terminate).wait();
     }
 
@@ -457,11 +459,10 @@ namespace discpp {
     }
 
     void Bot::ReconnectToWebsocket() {
-        logger.Log(LogSeverity::SEV_INFO, LogTextColor::YELLOW + "Reconnecting to discpp gateway!");
+        logger.Log(LogSeverity::SEV_INFO, LogTextColor::YELLOW + "Reconnecting to Discord gateway!");
 
         reconnecting = true;
 
-        //websocket_client.close(web::websockets::client::websocket_close_status::normal);
         DisconnectWebsocket();
         WebSocketStart();
     }
