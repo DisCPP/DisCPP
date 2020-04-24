@@ -68,7 +68,7 @@ target_link_libraries(main PRIVATE discpp)
 - [x] Convert the event system to use a more object oriented system, similar to the new command handler.
 
 ## Documentation
-Currently the only documentation is from Doxygen; its currently completely up to date. To generate documentation, install Doxygen and run doxygen in the root DisCPP directory.
+Currently the only documentation is from Doxygen; its currently completely up to date. You can view it [here](https://discpp.github.io/). If you want to generate documentation you need to install Doxygen and run doxygen in the root DisCPP directory. ```doxygen Doxyfile```
 
 ## Examples
 There may be more inside the [Examples](examples) folder.
