@@ -226,7 +226,7 @@ namespace discpp {
     }
 
     void Bot::DisconnectWebsocket() {
-        auto threadlock = std::lock_guard(websocket_client_mutex);
+        std::lock_guard<std::mutex> lck(websocket_client_mutex);
         websocket_client.close(web::websockets::client::websocket_close_status::server_terminate).wait();
     }
 
@@ -285,35 +285,34 @@ namespace discpp {
 
             std::thread bindthread{&Bot::BindEvents, this};
             utility::string_t stringt = utility::conversions::to_string_t(gateway_endpoint);
-            auto threadlock = std::lock_guard(websocket_client_mutex);
 
-            // Recreate a websocket client just incase we're trying to reconnect.
-            if (reconnecting) {
-                websocket_client = websocket_callback_client();
+            {
+                std::lock_guard<std::mutex> lck(websocket_client_mutex);
+
+                // Recreate a websocket client just incase we're trying to reconnect.
+                if (reconnecting) {
+                    websocket_client = websocket_callback_client();
+                }
+
+                websocket_client.connect(web::uri(stringt));
+                websocket_client.set_message_handler(std::bind(&Bot::OnWebSocketPacket, this, std::placeholders::_1));
+                websocket_client.set_close_handler(
+                        std::bind(&Bot::HandleDiscordDisconnect, this, std::placeholders::_1, std::placeholders::_2,
+                                  std::placeholders::_3));
             }
-
-            websocket_client.connect(web::uri(stringt));
-            websocket_client.set_message_handler(std::bind(&Bot::OnWebSocketPacket, this, std::placeholders::_1));
-            websocket_client.set_close_handler(
-                    std::bind(&Bot::HandleDiscordDisconnect, this, std::placeholders::_1, std::placeholders::_2,
-                              std::placeholders::_3));
 
             disconnected = false;
 
             logger.Log(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Connected to gateway!");
             bindthread.join();
         } else {
-            logger.Log(LogSeverity::SEV_ERROR,
-                       LogTextColor::RED + "Improper token, failed to connect to discpp gateway!");
+            logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Improper token, failed to connect to discpp gateway!");
             throw std::runtime_error("Improper token, failed to connect to discpp gateway!");
         }
     }
 
-    void Bot::HandleDiscordDisconnect(websocket_close_status close_status, utility::string_t reason,
-                                      std::error_code error_code) {
-        logger.Log(LogSeverity::SEV_ERROR,
-                   LogTextColor::RED + "Websocket was closed with error: 400" + std::to_string(error_code.value()) +
-                   "! Attemping reconnect in 10 seconds...");
+    void Bot::HandleDiscordDisconnect(websocket_close_status close_status, utility::string_t reason, std::error_code error_code) {
+        logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Websocket was closed with error: 400" + std::to_string(error_code.value()) + "! Attemping reconnect in 10 seconds...");
         heartbeat_acked = false;
         disconnected = true;
         reconnecting = true;
@@ -336,14 +335,11 @@ namespace discpp {
                     std::this_thread::sleep_for(std::chrono::milliseconds(1200));
                     logger.Log(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Reconnected!");
 
-                    std::string resume =
-                            "{ \"op\": 6, \"d\": { \"token\": \"" + token + "\", \"session_id\": \"" + session_id +
-                            "\", \"seq\": " + std::to_string(last_sequence_number) + "} }";
+                    std::string resume = "{ \"op\": 6, \"d\": { \"token\": \"" + token + "\", \"session_id\": \"" + session_id + "\", \"seq\": " + std::to_string(last_sequence_number) + "} }";
                     CreateWebsocketRequest(nlohmann::json::parse(resume));
 
                     // Heartbeat just to be safe
-                    nlohmann::json data = {{"op", packet_opcode::heartbeat},
-                                           {"d",  nullptr}};
+                    nlohmann::json data = {{"op", packet_opcode::heartbeat}, {"d",  nullptr}};
                     if (last_sequence_number != -1) {
                         data["d"] = last_sequence_number;
                     }
@@ -356,9 +352,10 @@ namespace discpp {
                     websocket_outgoing_message identify_msg;
                     identify_msg.set_utf8_message(GetIdentifyPacket().dump());
 
-                    websocket_client_mutex.lock();
-                    websocket_client.send(identify_msg);
-                    websocket_client_mutex.unlock();
+                    {
+                        std::lock_guard<std::mutex> lck(websocket_client_mutex);
+                        websocket_client.send(identify_msg);
+                    }
                 }
                 break;
             }
@@ -371,9 +368,7 @@ namespace discpp {
             case invalid_session:
                 // Check if the session is resumable
                 if (result["d"].get<bool>()) {
-                    std::string resume =
-                            "{ \"op\": 6, \"d\": { \"token\": \"" + token + "\", \"session_id\": \"" + session_id +
-                            "\", \"seq\": " + std::to_string(last_sequence_number) + "} }";
+                    std::string resume = "{ \"op\": 6, \"d\": { \"token\": \"" + token + "\", \"session_id\": \"" + session_id + "\", \"seq\": " + std::to_string(last_sequence_number) + "} }";
                     CreateWebsocketRequest(nlohmann::json::parse(resume));
                 } else {
                     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -416,23 +411,21 @@ namespace discpp {
 
                 logger.Log(LogSeverity::SEV_DEBUG, "Sending heartbeat payload: " + data.dump());
 
-                websocket_client_mutex.lock();
-                websocket_outgoing_message msg;
-                msg.set_utf8_message(data.dump());
-                websocket_client.send(msg);
-                websocket_client_mutex.unlock();
+                {
+                    std::lock_guard<std::mutex> lck(websocket_client_mutex);
+                    websocket_outgoing_message msg;
+                    msg.set_utf8_message(data.dump());
+                    websocket_client.send(msg);
+                }
 
                 heartbeat_acked = false;
 
-                logger.Log(LogSeverity::SEV_DEBUG, "Waiting for next heartbeat (" + std::to_string(
-                        hello_packet["d"]["heartbeat_interval"].get<int>() / 1000.0 - 10) + " seconds)...");
+                logger.Log(LogSeverity::SEV_DEBUG, "Waiting for next heartbeat (" + std::to_string(hello_packet["d"]["heartbeat_interval"].get<int>() / 1000.0 - 10) + " seconds)...");
                 // Wait for the required heartbeat interval, while waiting it should be acked from another thread.
-                std::this_thread::sleep_for(
-                        std::chrono::milliseconds(hello_packet["d"]["heartbeat_interval"].get<int>() - 10));
+                std::this_thread::sleep_for(std::chrono::milliseconds(hello_packet["d"]["heartbeat_interval"].get<int>() - 10));
 
                 if (!heartbeat_acked) {
-                    logger.Log(LogSeverity::SEV_WARNING,
-                               LogTextColor::YELLOW + "Heartbeat wasn't acked, trying to reconnect...");
+                    logger.Log(LogSeverity::SEV_WARNING, LogTextColor::YELLOW + "Heartbeat wasn't acked, trying to reconnect...");
                     disconnected = true;
 
                     ReconnectToWebsocket();
@@ -460,8 +453,7 @@ namespace discpp {
         logger.Log(LogSeverity::SEV_INFO, LogTextColor::YELLOW + "Reconnecting to discpp gateway!");
 
         reconnecting = true;
-
-        //websocket_client.close(web::websockets::client::websocket_close_status::normal);
+        
         DisconnectWebsocket();
         WebSocketStart();
     }
