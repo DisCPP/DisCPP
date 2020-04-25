@@ -140,7 +140,9 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
-
+		if (discpp::globals::bot_instance->bot_user.id != this->owner_id) {
+			throw new NotGuildOwner();
+		}
 		SendDeleteRequest(Endpoint("/guilds/" + id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
@@ -184,6 +186,8 @@ namespace discpp {
 		 *
 		 * @return discpp::Channel
 		 */
+
+		Guild::EnsureBotPermission(Permission::MANAGE_CHANNELS);
 
 		if (bitrate < 8000) bitrate = 8000;
 
@@ -236,6 +240,8 @@ namespace discpp {
 		 * @return void
 		 */
 
+		Guild::EnsureBotPermission(Permission::MANAGE_CHANNELS);
+
 		nlohmann::json json_raw = nlohmann::json();
 
 		for (int i = 0; i < new_channel_positions.size(); i++) {
@@ -265,6 +271,23 @@ namespace discpp {
 		}
 		//throw std::runtime_error("Member not found!");
 		return discpp::Member();
+	}
+
+	void Guild::EnsureBotPermission(Permission reqPerm) {
+		/**
+		 * @brief Ensures the bot has permission
+		 *
+		 * ```cpp
+		 *      Guild::EnsureBotPermission(Permission::MANAGE_CHANNELS);
+		 * ```
+		 *
+		 * @param[in] reqPerm the permission in question
+		 *
+		 */
+		Member tmp = this->GetMember(discpp::globals::bot_instance->bot_user.id);
+		if ((this->owner_id != tmp.id) || (!tmp.HasPermission(reqPerm)) || (!tmp.HasPermission(Permission::ADMINISTRATOR))) {
+			throw new NoPermissionException(reqPerm);
+		}
 	}
 
 	discpp::Member Guild::AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf) {
@@ -370,7 +393,7 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
-
+		Guild::EnsureBotPermission(Permission::BAN_MEMBERS);
 		cpr::Body body("{\"reason\": \"" + EscapeString(reason) + "\"}");
 		nlohmann::json json = SendPutRequest(Endpoint("/guilds/" + id + "/bans/" + member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 	}
@@ -387,7 +410,7 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
-
+		Guild::EnsureBotPermission(Permission::BAN_MEMBERS);
 		SendDeleteRequest(Endpoint("/guilds/" + id + "/bans/" + member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
@@ -403,7 +426,7 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
-
+		Guild::EnsureBotPermission(Permission::KICK_MEMBERS);
 		SendDeleteRequest(Endpoint("guilds/" + id + "/members/" + member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
@@ -443,7 +466,7 @@ namespace discpp {
 		 *
 		 * @return discpp::Role
 		 */
-
+		Guild::EnsureBotPermission(Permission::MANAGE_ROLES);
 		nlohmann::json json_body = nlohmann::json({
 			{"name", EscapeString(name)},
 			{"permissions", permissions.allow_perms.value},
@@ -472,7 +495,7 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
-
+		Guild::EnsureBotPermission(Permission::MANAGE_ROLES);
 		nlohmann::json json_raw = nlohmann::json();
 
 		for (int i = 0; i < new_role_positions.size(); i++) {
@@ -499,7 +522,7 @@ namespace discpp {
 		 *
 		 * @return discpp::Role
 		 */
-
+		Guild::EnsureBotPermission(Permission::MANAGE_ROLES);
 		nlohmann::json json_body = nlohmann::json({
 			{"name", name},
 			{"permissions", permissions.allow_perms.value},
@@ -531,7 +554,7 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
-
+		Guild::EnsureBotPermission(Permission::MANAGE_ROLES);
 		nlohmann::json result = SendDeleteRequest(Endpoint("/guilds/" + id + "/roles/" + role.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 		roles.erase(role.id);
 	}
@@ -632,7 +655,7 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
-
+		Guild::EnsureBotPermission(Permission::MANAGE_GUILD);
 		cpr::Body body("{\"type\": \"" + type + "\", \"id\": \"" + id + "\"}");
 		SendPostRequest(Endpoint("/guilds/" + this->id + "/integrations"), DefaultHeaders(), this->id, RateLimitBucketType::GUILD, body);
 	}
@@ -652,7 +675,7 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
-
+		Guild::EnsureBotPermission(Permission::MANAGE_GUILD);
 		cpr::Body body("{\"expire_behavior\": " + std::to_string(expire_behavior) + ", \"expire_grace_period\": " + std::to_string(expire_grace_period) + ", \"enable_emoticons\": " + std::to_string(enable_emoticons) + "}");
 		SendPostRequest(Endpoint("/guilds/" + id + "/integrations/" + guild_integration.id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 	}
@@ -669,7 +692,7 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
-
+		Guild::EnsureBotPermission(Permission::MANAGE_GUILD);
 		SendDeleteRequest(Endpoint("/guilds/" + id + "/integrations/" + guild_integration.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
@@ -685,7 +708,7 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
-
+		Guild::EnsureBotPermission(Permission::MANAGE_GUILD);
 		SendPostRequest(Endpoint("/guilds/" + id + "/integrations/" + guild_integration.id + "/sync"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
@@ -811,7 +834,7 @@ namespace discpp {
 		 *
 		 * @return discpp::Emoji
 		 */
-
+		Guild::EnsureBotPermission(Permission::MANAGE_EMOJIS);
 		nlohmann::json role_json;
 		for (discpp::Role role : roles) {
 			role_json.push_back(role.id);
@@ -843,7 +866,7 @@ namespace discpp {
 		 *
 		 * @return discpp::Emoji
 		 */
-
+		Guild::EnsureBotPermission(Permission::MANAGE_EMOJIS);
 		std::string json_roles = "[";
 		for (discpp::Role role : roles) {
 			if (&role == &roles.front()) {
@@ -875,7 +898,7 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
-
+		Guild::EnsureBotPermission(Permission::MANAGE_EMOJIS);
 		nlohmann::json result = SendDeleteRequest(Endpoint("/guilds/" + this->id + "/emojis/" + id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 		emojis.erase(emoji.id);
 	}
@@ -979,7 +1002,7 @@ namespace discpp {
          *
          * @return discpp::Channel - This method also sets the guild reference to the returned guild.
          */
-
+		Guild::EnsureBotPermission(Permission::MANAGE_GUILD);
         cpr::Header headers = DefaultHeaders({ {"Content-Type", "application/json" } });
         std::string field;
         nlohmann::json j_body = {};

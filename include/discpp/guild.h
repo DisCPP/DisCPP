@@ -183,12 +183,12 @@ namespace discpp {
 		Guild(nlohmann::json json);
 
 		discpp::Guild Modify(GuildModifyRequests modify_requests);
-
 		void DeleteGuild();
 		std::vector<discpp::Channel> GetChannels();
 		discpp::Channel CreateChannel(std::string name, std::string topic = "", ChannelType type = ChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discpp::Permissions> permission_overwrites = {}, discpp::Channel category = {}, bool nsfw = false);
 		void ModifyChannelPositions(std::vector<discpp::Channel> new_channel_positions);
 		discpp::Member GetMember(snowflake id);
+		void EnsureBotPermission(Permission reqPerm);
 		discpp::Member AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf);
 		void RemoveMember(discpp::Member member);
 		std::vector<discpp::GuildBan> GetBans();
