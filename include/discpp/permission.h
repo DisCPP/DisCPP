@@ -45,7 +45,7 @@ namespace discpp {
 		MANAGE_EMOJIS = 0x40000000
 	};
 	
-	std::unordered_map<Permission, std::string> PermissionMap = {
+	inline std::unordered_map<Permission, std::string> PermissionMap = {
 		{Permission::CREATE_INSTANT_INVITE, "CREATE_INSTANT_INVITE"},
 		{Permission::KICK_MEMBERS, "KICK_MEMBERS"},
 		{Permission::BAN_MEMBERS, "BAN_MEMBERS"},
