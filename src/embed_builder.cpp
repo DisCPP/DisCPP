@@ -2,7 +2,7 @@
 #include "color.h"
 #include "utils.h"
 
-#include <DISCPP/bot.h>
+#include <discpp/bot.h>
 
 namespace discpp {
 	EmbedBuilder::EmbedBuilder() : embed_json(nlohmann::json({})) { }
