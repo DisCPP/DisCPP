@@ -5,9 +5,11 @@
 #include "utils.h"
 #include "bot.h"
 
+#include <climits>
+
 namespace discpp {
 	struct EventListenerHandle {
-		unsigned int id = -4294967295;
+		unsigned int id = UINT_MAX;
 	};
 
 	template<typename T>

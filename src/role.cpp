@@ -1,7 +1,7 @@
 #include "guild.h"
 
 namespace discpp {
-	Role::Role(snowflake role_id, discpp::Guild guild) : DiscordObject(role_id) {
+	Role::Role(snowflake role_id, discpp::Guild& guild) : DiscordObject(role_id) {
 		/**
 		 * @brief Constructs a discpp::Role object using a role id and a guild.
 		 *

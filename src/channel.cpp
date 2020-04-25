@@ -82,7 +82,7 @@ namespace discpp {
 		this->guild_id = guild_id;
 	}
 
-	discpp::Message Channel::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<File> files) {
+	discpp::Message Channel::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<File>& files) {
 		/**
 		 * @brief Send a message in this channel.
 		 *
@@ -183,7 +183,7 @@ namespace discpp {
     template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template<class... Ts> overloaded(Ts...)->overloaded<Ts...>;
 
-	discpp::Channel Channel::Modify(ModifyRequests modify_requests) {
+	discpp::Channel Channel::Modify(ModifyRequests& modify_requests) {
 		/**
 		 * @brief Modify the channel.
 		 *
@@ -277,7 +277,7 @@ namespace discpp {
 		return discpp::Message(result);
 	}
 
-	void Channel::BulkDeleteMessage(std::vector<snowflake> messages) {
+	void Channel::BulkDeleteMessage(std::vector<snowflake>& messages) {
 		/**
 		 * @brief Delete several messages (2-100).
 		 *
@@ -384,7 +384,7 @@ namespace discpp {
 		return messages;
 	}
 
-	void Channel::GroupDMAddRecipient(discpp::User user) {
+	void Channel::GroupDMAddRecipient(discpp::User& user) {
 		/**
 		 * @brief Add a recipient to the group dm.
 		 *
@@ -400,7 +400,7 @@ namespace discpp {
 		nlohmann::json result = SendPutRequest(Endpoint("/channels/" + id + "/recipients/" + user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 
-	void Channel::GroupDMRemoveRecipient(discpp::User user) {
+	void Channel::GroupDMRemoveRecipient(discpp::User& user) {
 		/**
 		 * @brief Remove a recipient from the group dm.
 		 *
@@ -416,7 +416,7 @@ namespace discpp {
 		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/" + id + "/recipients/" + user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 
-    void Channel::EditPermissions(discpp::Permissions permissions) {
+    void Channel::EditPermissions(discpp::Permissions& permissions) {
         /**
          * @brief Edit permission overwrites for this channel.
          *
@@ -440,7 +440,7 @@ namespace discpp {
         nlohmann::json result = SendPutRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(j_body.dump()));
     }
 
-    void Channel::DeletePermission(discpp::Permissions permissions) {
+    void Channel::DeletePermission(discpp::Permissions& permissions) {
         /**
          * @brief Remove permission overwrites for this channel.
          *

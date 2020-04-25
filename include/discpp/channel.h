@@ -72,20 +72,20 @@ namespace discpp {
 		Channel(nlohmann::json json);
 		Channel(nlohmann::json json, snowflake guild_id);
 
-		discpp::Message Send(std::string text, bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
-		discpp::Channel Modify(ModifyRequests modify_requests);
+		discpp::Message Send(std::string text, bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File>& files = {});
+		discpp::Channel Modify(ModifyRequests& modify_requests);
 		discpp::Channel Delete();
 		std::vector<discpp::Message> GetChannelMessages(int amount, GetChannelsMessagesMethod get_method = GetChannelsMessagesMethod::LIMIT);
 		discpp::Message FindMessage(snowflake message_id);
-		void BulkDeleteMessage(std::vector<snowflake> messages);
-		void EditPermissions(discpp::Permissions permissions);
+		void BulkDeleteMessage(std::vector<snowflake>& messages);
+		void EditPermissions(discpp::Permissions& permissions);
 		std::vector<discpp::GuildInvite> GetInvites();
 		discpp::GuildInvite CreateInvite(int max_age, int max_uses, bool temporary, bool unique);
-		void DeletePermission(discpp::Permissions permissions); // TODO: https://discordapp.com/developers/docs/resources/channel#delete-channel-permission
+		void DeletePermission(discpp::Permissions& permissions); // TODO: https://discordapp.com/developers/docs/resources/channel#delete-channel-permission
 		void TriggerTypingIndicator();
 		std::vector<discpp::Message> GetPinnedMessages();
-		void GroupDMAddRecipient(discpp::User user);
-		void GroupDMRemoveRecipient(discpp::User user);
+		void GroupDMAddRecipient(discpp::User& user);
+		void GroupDMRemoveRecipient(discpp::User& user);
 
         ChannelType type; /**< The type of channel. */
 		snowflake guild_id; /**< ID of the current channel's owning guild. */
