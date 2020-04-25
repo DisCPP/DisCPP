@@ -66,6 +66,8 @@ target_link_libraries(main PRIVATE discpp)
 - [x] Finish tons of unimplemented methods in certain classes.
 - [x] Convert the default command handler to use command classes.
 - [x] Convert the event system to use a more object oriented system, similar to the new command handler.
+- [ ] Voice websocket connection.
+- [ ] Sending audio through a voice connection.
 
 ## Documentation
 Currently the only documentation is from Doxygen; its currently completely up to date. You can view it [here](https://discpp.github.io/). If you want to generate documentation you need to install Doxygen and run doxygen in the root DisCPP directory. ```doxygen Doxyfile```
