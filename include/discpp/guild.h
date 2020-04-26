@@ -58,7 +58,7 @@ namespace discpp {
              */
             code = json["code"];
             guild_id = (json.contains("guild")) ? json["guild"]["id"].get<snowflake>() : "";
-            channel = discpp::Channel(json["channel"]);
+            channel = discpp::GuildChannel(json["channel"]);
             inviter = (json.contains("inviter")) ? discpp::User(json["inviter"]) : discpp::User();
             target_user = (json.contains("target_user")) ? discpp::User(json["target_user"]) : discpp::User();
             target_user_type = static_cast<TargetUserType>(GetDataSafely<int>(json, "target_user_type"));
@@ -67,7 +67,7 @@ namespace discpp {
         }
         std::string code; /**< The invite code (unique ID). */
         snowflake guild_id; /**< GThe guild this invite is for. */
-        discpp::Channel channel; /**< The channel this invite is for. */
+        discpp::GuildChannel channel; /**< The channel this invite is for. */
         discpp::User inviter; /**< he user who created the invite. */
         discpp::User target_user; /**< The target user for this invite. */
         TargetUserType target_user_type; /**< The type of user target for this invite. */
@@ -261,31 +261,32 @@ namespace discpp {
 
 		discpp::Guild Modify(GuildModifyRequests modify_requests);
 		void DeleteGuild();
-		std::vector<discpp::Channel> GetChannels();
-		discpp::Channel CreateChannel(std::string name, std::string topic = "", ChannelType type = ChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discpp::Permissions> permission_overwrites = {}, discpp::Channel category = {}, bool nsfw = false);
-		void ModifyChannelPositions(std::vector<discpp::Channel> new_channel_positions);
+		std::vector<discpp::GuildChannel> GetChannels();
+        discpp::GuildChannel GetChannel(snowflake id);
+		discpp::GuildChannel CreateChannel(std::string name, std::string topic = "", ChannelType type = ChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discpp::Permissions> permission_overwrites = {}, discpp::Channel category = {}, bool nsfw = false);
+		void ModifyChannelPositions(std::vector<discpp::Channel>& new_channel_positions);
 		discpp::Member GetMember(snowflake id);
 		void EnsureBotPermission(Permission reqPerm);
-		discpp::Member AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf);
-		void RemoveMember(discpp::Member member);
+		discpp::Member AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discpp::Role>& roles, bool mute, bool deaf);
+		void RemoveMember(discpp::Member& member);
 		std::vector<discpp::GuildBan> GetBans();
-		std::optional<std::string> GetMemberBanReason(discpp::Member member);
-		void BanMember(discpp::Member member, std::string reason = "");
-		void UnbanMember(discpp::Member member);
-		void KickMember(discpp::Member member);
+		std::optional<std::string> GetMemberBanReason(discpp::Member& member);
+		void BanMember(discpp::Member& member, std::string reason = "");
+		void UnbanMember(discpp::Member& member);
+		void KickMember(discpp::Member& member);
 		discpp::Role GetRole(snowflake id);
 		discpp::Role CreateRole(std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
-		void ModifyRolePositions(std::vector<discpp::Role> new_role_positions);
+		void ModifyRolePositions(std::vector<discpp::Role>& new_role_positions);
 		discpp::Role ModifyRole(discpp::Role role, std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
-		void DeleteRole(discpp::Role role);
+		void DeleteRole(discpp::Role& role);
 		int GetPruneAmount(int days);
 		void BeginPrune(int days);
 		std::vector<discpp::GuildInvite> GetInvites();
 		std::vector<discpp::GuildIntegration> GetIntegrations();
 		void CreateIntegration(snowflake id, std::string type);
-		void ModifyIntegration(discpp::GuildIntegration guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons);
-		void DeleteIntegration(discpp::GuildIntegration guild_integration);
-		void SyncIntegration(discpp::GuildIntegration guild_integration);
+		void ModifyIntegration(discpp::GuildIntegration& guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons);
+		void DeleteIntegration(discpp::GuildIntegration& guild_integration);
+		void SyncIntegration(discpp::GuildIntegration& guild_integration);
 		GuildEmbed GetGuildEmbed();
 		GuildEmbed ModifyGuildEmbed(snowflake channel_id, bool enabled);
 		discpp::GuildInvite GetVanityURL();
@@ -293,9 +294,9 @@ namespace discpp {
 
 		std::unordered_map<snowflake, Emoji> GetEmojis();
 		discpp::Emoji GetEmoji(snowflake id);
-		discpp::Emoji CreateEmoji(std::string name, discpp::Image image, std::vector<discpp::Role> roles);
-		discpp::Emoji ModifyEmoji(discpp::Emoji emoji, std::string name, std::vector<discpp::Role> roles);
-		void DeleteEmoji(discpp::Emoji emoji);
+		discpp::Emoji CreateEmoji(std::string name, discpp::Image image, std::vector<discpp::Role>& roles);
+		discpp::Emoji ModifyEmoji(discpp::Emoji& emoji, std::string name, std::vector<discpp::Role>& roles);
+		void DeleteEmoji(discpp::Emoji& emoji);
 		std::string GetIconURL(discpp::ImageType imgType = discpp::ImageType::AUTO);
 		discpp::Member GetOwnerObject();
 
@@ -331,7 +332,7 @@ namespace discpp {
 		int member_count; /**< Total number of members in this guild. */
 		std::vector<discpp::VoiceState> voice_states; /**< Array of partial voice state objects. */
 		std::unordered_map<snowflake, Member> members; /**< Users in the guild. */
-		std::unordered_map<snowflake, Channel> channels; /**< Channels in the guild. */
+		std::unordered_map<snowflake, GuildChannel> channels; /**< Channels in the guild. */
 		int max_presences; /**< The maximum amount of presences for the guild (the default value, currently 25000, is in effect when null is returned). */
 		int max_members; /**< The maximum amount of members for the guild. */
 		std::string vanity_url_code; /**< The vanity url code for the guild. */

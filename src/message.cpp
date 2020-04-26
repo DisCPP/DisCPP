@@ -69,7 +69,7 @@ namespace discpp {
 		}
 		if (json.contains("mention_channels")) {
 			for (auto& json_chan : json["mention_channels"]) {
-				discpp::Channel channel(json_chan["id"].get<snowflake>());
+				discpp::GuildChannel channel(json_chan["id"].get<snowflake>());
 				channel.type = json_chan["type"].get<ChannelType>();
 				channel.guild_id = json_chan["guild_id"].get<snowflake>();
 				channel.name = json_chan["name"];
