@@ -82,7 +82,7 @@ namespace discpp {
 		this->guild_id = guild_id;
 	}
 
-	discpp::Message Channel::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<File>& files) {
+	discpp::Message Channel::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<File> files) {
 		/**
 		 * @brief Send a message in this channel.
 		 *
