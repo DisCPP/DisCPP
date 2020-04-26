@@ -22,7 +22,7 @@ if(MSVC)
     target_compile_options(discpp PUBLIC "/bigobj")
 else()
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-        target_compile_options(discpp PUBLIC "-mbig-obj")
+        target_compile_options(discpp PUBLIC "-Wa,-mbig-obj")
     elseif(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
         # Not an issue with clang
     else()
