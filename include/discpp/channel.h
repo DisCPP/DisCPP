@@ -72,7 +72,7 @@ namespace discpp {
 		Channel(nlohmann::json json);
 		Channel(nlohmann::json json, snowflake guild_id);
 
-		discpp::Message Send(std::string text, bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File>& files = {});
+		discpp::Message Send(std::string text, bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
 		discpp::Channel Modify(ModifyRequests& modify_requests);
 		discpp::Channel Delete();
 		std::vector<discpp::Message> GetChannelMessages(int amount, GetChannelsMessagesMethod get_method = GetChannelsMessagesMethod::LIMIT);
