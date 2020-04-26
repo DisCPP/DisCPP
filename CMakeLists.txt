@@ -37,11 +37,9 @@ target_link_libraries(discpp PUBLIC Boost::date_time)
 target_link_libraries(discpp PUBLIC Boost::serialization)
 target_link_libraries(discpp PUBLIC cpprestsdk::cpprest cpprestsdk::cpprestsdk_zlib_internal cpprestsdk::cpprestsdk_boost_internal)
 
-set_target_properties(discpp PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS OFF)
-
 # Unit tests
 if (BUILD_TESTS)
-	add_subdirectory(tests)
+    add_subdirectory(tests)
 endif()
 
 # Examples
@@ -49,3 +47,5 @@ if (BUILD_EXAMPLES)
 	add_subdirectory(examples/pingbot)
 	add_subdirectory(examples/serverinfo)
 endif()
+
+set_target_properties(discpp PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS OFF)
