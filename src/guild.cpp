@@ -231,7 +231,7 @@ namespace discpp {
 		return channel;
 	}
 
-	void Guild::ModifyChannelPositions(std::vector<discpp::Channel> new_channel_positions) {
+	void Guild::ModifyChannelPositions(std::vector<discpp::Channel>& new_channel_positions) {
 		/**
 		 * @brief Modifies channel's positions in order to vector elements.
 		 *
@@ -294,7 +294,7 @@ namespace discpp {
 		}
 	}
 
-	discpp::Member Guild::AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf) {
+	discpp::Member Guild::AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discpp::Role>& roles, bool mute, bool deaf) {
 		/**
 		 * @brief Adds a discpp::Member to this guild.
 		 *
@@ -327,7 +327,7 @@ namespace discpp {
 		return (result == "{}") ? discpp::Member(id) : discpp::Member(result, id); // If the member is already added, return it.
 	}
 
-	void Guild::RemoveMember(discpp::Member member) {
+	void Guild::RemoveMember(discpp::Member& member) {
 		/**
 		 * @brief Remove a member from the guild.
 		 *
@@ -365,7 +365,7 @@ namespace discpp {
 		return guild_bans;
 	}
 
-	std::optional<std::string> Guild::GetMemberBanReason(discpp::Member member) {
+	std::optional<std::string> Guild::GetMemberBanReason(discpp::Member& member) {
 		/**
 		 * @brief Get ban reasons if they are any.
 		 *
@@ -384,7 +384,7 @@ namespace discpp {
 		return std::nullopt;
 	}
 
-	void Guild::BanMember(discpp::Member member, std::string reason) {
+	void Guild::BanMember(discpp::Member& member, std::string reason) {
 		/**
 		 * @brief Ban a guild member.
 		 *
@@ -402,7 +402,7 @@ namespace discpp {
 		nlohmann::json json = SendPutRequest(Endpoint("/guilds/" + id + "/bans/" + member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 	}
 
-	void Guild::UnbanMember(discpp::Member member) {
+	void Guild::UnbanMember(discpp::Member& member) {
 		/**
 		 * @brief Unban a guild member.
 		 *
@@ -418,7 +418,7 @@ namespace discpp {
 		SendDeleteRequest(Endpoint("/guilds/" + id + "/bans/" + member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-	void Guild::KickMember(discpp::Member member) {
+	void Guild::KickMember(discpp::Member& member) {
 		/**
 		 * @brief Kick a guild member.
 		 *
@@ -434,7 +434,7 @@ namespace discpp {
 		SendDeleteRequest(Endpoint("guilds/" + id + "/members/" + member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-	discpp::Role Guild::GetRole(snowflake) {
+	discpp::Role Guild::GetRole(snowflake id) {
 		/**
 		 * @brief Retrieve a guild role.
 		 *
@@ -487,7 +487,7 @@ namespace discpp {
 		return new_role;
 	}
 
-	void Guild::ModifyRolePositions(std::vector<discpp::Role> new_role_positions) {
+	void Guild::ModifyRolePositions(std::vector<discpp::Role>& new_role_positions) {
 		/**
 		 * @brief Modifies role's positions in order to vector elements.
 		 *
@@ -546,7 +546,7 @@ namespace discpp {
 		return modified_role;
 	}
 
-	void Guild::DeleteRole(discpp::Role role) {
+	void Guild::DeleteRole(discpp::Role& role) {
 		/**
 		 * @brief Deleted a guild role.
 		 *
@@ -664,7 +664,7 @@ namespace discpp {
 		SendPostRequest(Endpoint("/guilds/" + this->id + "/integrations"), DefaultHeaders(), this->id, RateLimitBucketType::GUILD, body);
 	}
 
-	void Guild::ModifyIntegration(discpp::GuildIntegration guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons) {
+	void Guild::ModifyIntegration(discpp::GuildIntegration& guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons) {
 		/**
 		 * @brief Modify a guild integration.
 		 *
@@ -684,7 +684,7 @@ namespace discpp {
 		SendPostRequest(Endpoint("/guilds/" + id + "/integrations/" + guild_integration.id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 	}
 
-	void Guild::DeleteIntegration(discpp::GuildIntegration guild_integration) {
+	void Guild::DeleteIntegration(discpp::GuildIntegration& guild_integration) {
 		/**
 		 * @brief Delete a guild integration.
 		 *
@@ -700,7 +700,7 @@ namespace discpp {
 		SendDeleteRequest(Endpoint("/guilds/" + id + "/integrations/" + guild_integration.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-	void Guild::SyncIntegration(discpp::GuildIntegration guild_integration) {
+	void Guild::SyncIntegration(discpp::GuildIntegration& guild_integration) {
 		/**
 		 * @brief Sync a guild integration.
 		 *
@@ -824,7 +824,7 @@ namespace discpp {
 		return discpp::Emoji(result);
 	}
 
-	discpp::Emoji Guild::CreateEmoji(std::string name, discpp::Image image, std::vector<discpp::Role> roles) {
+	discpp::Emoji Guild::CreateEmoji(std::string name, discpp::Image image, std::vector<discpp::Role>& roles) {
 		/**
 		 * @brief Create a guild emoji.
 		 *
@@ -856,7 +856,7 @@ namespace discpp {
 		return discpp::Emoji(result);
 	}
 
-	discpp::Emoji Guild::ModifyEmoji(discpp::Emoji emoji, std::string name, std::vector<discpp::Role> roles) {
+	discpp::Emoji Guild::ModifyEmoji(discpp::Emoji& emoji, std::string name, std::vector<discpp::Role>& roles) {
 		/**
 		 * @brief Modify a guild emoji.
 		 *
@@ -892,7 +892,7 @@ namespace discpp {
 		return em;
 	}
 
-	void Guild::DeleteEmoji(discpp::Emoji emoji) {
+	void Guild::DeleteEmoji(discpp::Emoji& emoji) {
 		/**
 		 * @brief Delete a guild emoji.
 		 *
