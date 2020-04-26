@@ -96,7 +96,7 @@ namespace discpp {
 		bool mention_everyone;
 		std::vector<discpp::Member> mentions;
 		std::vector<discpp::Role> mentioned_roles;
-		std::vector<discpp::Channel> mention_channels;
+		std::vector<discpp::GuildChannel> mention_channels;
 		std::vector<discpp::Attachment> attachments;
 		std::vector<discpp::EmbedBuilder> embeds;
 		std::vector<discpp::Reaction> reactions;
