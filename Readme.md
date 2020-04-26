@@ -1,16 +1,23 @@
 <h1 align="center">DisC++</h1>
-<p align="center">
-  Master:
-  <a href="https://dev.azure.com/seanomik/DisCPP/_build">
-    <img src="https://dev.azure.com/seanomik/DisCPP/_apis/build/status/DisCPP.DisCPP?branchName=master">
-  </a>
-  Development
-  <a href="https://dev.azure.com/seanomik/DisCPP/_build">
-    <img src="https://dev.azure.com/seanomik/DisCPP/_apis/build/status/DisCPP.DisCPP?branchName=development">
-  </a>	
-</p>
+
 <p align="center">
 Discord API Wrapper Written in Modern C++ aimed towards ease of use.
+</p>
+<p align="center">
+ <table align="center">
+  <tr>
+    <th>Master</th>
+    <th>Development</th> 
+  </tr>
+  <tr>
+    <td align="center"><a href="https://dev.azure.com/seanomik/DisCPP/_build">
+    <img src="https://dev.azure.com/seanomik/DisCPP/_apis/build/status/DisCPP.DisCPP?branchName=master">
+  </a></td>
+    <td align="center"><a href="https://dev.azure.com/seanomik/DisCPP/_build">
+    <img src="https://dev.azure.com/seanomik/DisCPP/_apis/build/status/DisCPP.DisCPP?branchName=development">
+  </a></td>
+  </tr>
+</table>
 </p>
 
 ## DisC++
