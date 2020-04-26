@@ -43,23 +43,6 @@ namespace discpp {
 		last_pin_timestamp = GetDataSafely<std::string>(json, "last_pin_timestamp");
 	}
 
-	discpp::Message Channel::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<discpp::File> files) {
-		/**
-		 * @brief Constructs a discpp::Channel object from json with a guild id.
-		 *
-		 * ```cpp
-		 *      discpp::Channel channel(json, 583251190591258624);
-		 * ```
-		 *
-		 * @param[in] json The json data for the channel.
-		 * @param[in] guild_id The guild id for this channel.
-		 *
-		 * @return discpp::Bot, this is a constructor.
-		 */
-
-		this->guild_id = guild_id;
-	}
-
 	discpp::Message Channel::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<File> files) {
 		/**
 		 * @brief Send a message in this channel.
