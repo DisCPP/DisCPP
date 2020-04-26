@@ -140,8 +140,9 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
+
 		if (discpp::globals::bot_instance->bot_user.id != this->owner_id) {
-			throw new NotGuildOwner();
+			throw new NotGuildOwnerException();
 		}
 		SendDeleteRequest(Endpoint("/guilds/" + id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}

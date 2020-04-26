@@ -98,9 +98,9 @@ namespace discpp {
 		NoPermissionException (Permission reqPerm) : std::runtime_error("Required permission " + PermissionToString(reqPerm) + " not met.") {}
 	};
 
-	class NotGuildOwner : public std::runtime_error {
+	class NotGuildOwnerException : public std::runtime_error {
 	public: 
-		NotGuildOwner() : std::runtime_error("Ownership of guild requirement not met.") {}
+		NotGuildOwnerException() : std::runtime_error("Ownership of guild requirement not met.") {}
 	};
 
 	class Permissions {
