@@ -58,7 +58,7 @@ namespace discpp {
              */
             code = json["code"];
             guild_id = (json.contains("guild")) ? json["guild"]["id"].get<snowflake>() : "";
-            channel = discpp::Channel(json["channel"]);
+            channel = discpp::GuildChannel(json["channel"]);
             inviter = (json.contains("inviter")) ? discpp::User(json["inviter"]) : discpp::User();
             target_user = (json.contains("target_user")) ? discpp::User(json["target_user"]) : discpp::User();
             target_user_type = static_cast<TargetUserType>(GetDataSafely<int>(json, "target_user_type"));
@@ -67,7 +67,7 @@ namespace discpp {
         }
         std::string code; /**< The invite code (unique ID). */
         snowflake guild_id; /**< GThe guild this invite is for. */
-        discpp::Channel channel; /**< The channel this invite is for. */
+        discpp::GuildChannel channel; /**< The channel this invite is for. */
         discpp::User inviter; /**< he user who created the invite. */
         discpp::User target_user; /**< The target user for this invite. */
         TargetUserType target_user_type; /**< The type of user target for this invite. */
@@ -261,8 +261,9 @@ namespace discpp {
 
 		discpp::Guild Modify(GuildModifyRequests modify_requests);
 		void DeleteGuild();
-		std::vector<discpp::Channel> GetChannels();
-		discpp::Channel CreateChannel(std::string name, std::string topic = "", ChannelType type = ChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discpp::Permissions> permission_overwrites = {}, discpp::Channel category = {}, bool nsfw = false);
+		std::vector<discpp::GuildChannel> GetChannels();
+        discpp::GuildChannel GetChannel(snowflake id);
+		discpp::GuildChannel CreateChannel(std::string name, std::string topic = "", ChannelType type = ChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discpp::Permissions> permission_overwrites = {}, discpp::Channel category = {}, bool nsfw = false);
 		void ModifyChannelPositions(std::vector<discpp::Channel> new_channel_positions);
 		discpp::Member GetMember(snowflake id);
 		void EnsureBotPermission(Permission reqPerm);
@@ -331,7 +332,7 @@ namespace discpp {
 		int member_count; /**< Total number of members in this guild. */
 		std::vector<discpp::VoiceState> voice_states; /**< Array of partial voice state objects. */
 		std::unordered_map<snowflake, Member> members; /**< Users in the guild. */
-		std::unordered_map<snowflake, Channel> channels; /**< Channels in the guild. */
+		std::unordered_map<snowflake, GuildChannel> channels; /**< Channels in the guild. */
 		int max_presences; /**< The maximum amount of presences for the guild (the default value, currently 25000, is in effect when null is returned). */
 		int max_members; /**< The maximum amount of members for the guild. */
 		std::string vanity_url_code; /**< The vanity url code for the guild. */

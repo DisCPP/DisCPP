@@ -37,52 +37,13 @@ namespace discpp {
 
 		id = GetDataSafely<snowflake>(json, "id");
 		type = GetDataSafely<ChannelType>(json, "type");
-		if (json.contains("guild_id")) { // Can't use GetDataSafely so it doesn't over write the other constructor.
-			guild_id = json["guild_id"].get<snowflake>();
-		}
-		position = GetDataSafely<int>(json, "position");
-		if (json.contains("permission_overwrites")) {
-			for (auto permission_overwrite : json["permission_overwrites"]) {
-				permissions.push_back(discpp::Permissions(permission_overwrite));
-			}
-		}
 		name = GetDataSafely<std::string>(json, "name");
 		topic = GetDataSafely<std::string>(json, "topic");
-		nsfw = GetDataSafely<bool>(json, "nsfw");
 		last_message_id = GetDataSafely<snowflake>(json, "last_message_id");
-		bitrate = GetDataSafely<int>(json, "bitrate");
-		user_limit = GetDataSafely<int>(json, "user_limit");
-		rate_limit_per_user = GetDataSafely<int>(json, "rate_limit_per_user");
-		if (json.contains("recipients")) {
-			for (auto recipient : json["recipients"]) {
-				recipients.push_back(discpp::User(recipient));
-			}
-		}
-		icon = GetDataSafely<std::string>(json, "icon");
-		owner_id = GetDataSafely<snowflake>(json, "owner_id");
-		application_id = GetDataSafely<snowflake>(json, "application_id");
-		category_id = GetDataSafely<snowflake>(json, "parent_id");
 		last_pin_timestamp = GetDataSafely<std::string>(json, "last_pin_timestamp");
 	}
 
-	Channel::Channel(nlohmann::json json, snowflake guild_id) : Channel(json) {
-		/**
-		 * @brief Constructs a discpp::Channel object from json with a guild id.
-		 *
-		 * ```cpp
-		 *      discpp::Channel channel(json, 583251190591258624);
-		 * ```
-		 *
-		 * @param[in] json The json data for the channel.
-		 * @param[in] guild_id The guild id for this channel.
-		 *
-		 * @return discpp::Bot, this is a constructor.
-		 */
-
-		this->guild_id = guild_id;
-	}
-
-	discpp::Message Channel::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<File>& files) {
+	discpp::Message Channel::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<discpp::File> files) {
 		/**
 		 * @brief Send a message in this channel.
 		 *
@@ -277,78 +238,6 @@ namespace discpp {
 		return discpp::Message(result);
 	}
 
-	void Channel::BulkDeleteMessage(std::vector<snowflake>& messages) {
-		/**
-		 * @brief Delete several messages (2-100).
-		 *
-		 * ```cpp
-		 *      channel.BulkDeleteMessage({message_a, message_b, message_c});
-		 * ```
-		 *
-		 * @param[in] messages The messages to delete.
-		 *
-		 * @return void
-		 */
-
-		std::string endpoint = Endpoint("/channels/" + id + "/messages/bulk-delete");
-
-		std::string combined_message = "";
-		for (snowflake message : messages) {
-			if (message == messages[0]) {
-				combined_message += "\"" + message + "\"";
-			}
-			else {
-				combined_message += ", \"" + message + "\"";
-			}
-		}
-
-		cpr::Body body("{\"messages\": [" + combined_message + "]}");
-		nlohmann::json result = SendPostRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
-	}
-
-	std::vector<discpp::GuildInvite> Channel::GetInvites() {
-		/**
-		 * @brief Get all the channel invites.
-		 *
-		 * ```cpp
-		 *     std::vector<discpp::GuildInvite> invites = channel.GetInvites();
-		 * ```
-		 *
-		 * @return std::vector<discpp::GuildInvite>
-		 */
-
-		nlohmann::json result = SendGetRequest(Endpoint("/channels/" + id + "/invites"), DefaultHeaders(), {}, {});
-		std::vector<discpp::GuildInvite> invites;
-		for (auto invite : result) {
-			invites.push_back(discpp::GuildInvite(invite));
-		}
-
-		return invites;
-	}
-
-	discpp::GuildInvite Channel::CreateInvite(int max_age, int max_uses, bool temporary, bool unique) {
-		/**
-		 * @brief Create an invite for the channel.
-		 *
-		 * ```cpp
-		 *      discpp::GuildInvite invite = channel.CreateInvite(86400, 5, true, true);
-		 * ```
-		 *
-		 * @param[in] max_age How long the invite will last for.
-		 * @param[in] max_uses Max uses of the invite.
-		 * @param[in] temporary Whether this invite only grants temporary membership.
-		 * @param[in] If true, dont try to reuse similar invites.
-		 *
-		 * @return discpp::GuildInvite
-		 */
-
-		cpr::Body body("{\"max_age\": " + std::to_string(max_age) + ", \"max_uses\": " + std::to_string(max_uses) + ", \"temporary\": " + std::to_string(temporary) + ", \"unique\": " + std::to_string(unique) + "}");
-		nlohmann::json result = SendPostRequest(Endpoint("/channels/" + id + "/invites"), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
-		discpp::GuildInvite invite(result);
-
-		return invite;
-	}
-
 	void Channel::TriggerTypingIndicator() {
 		/**
 		 * @brief Triggers a typing indicator.
@@ -384,7 +273,178 @@ namespace discpp {
 		return messages;
 	}
 
-	void Channel::GroupDMAddRecipient(discpp::User& user) {
+	GuildChannel::GuildChannel(nlohmann::json json) : Channel(json) {
+		/**
+		 * @brief Constructs a discpp::GuildChannel object from json.
+		 *
+		 * ```cpp
+		 *      discpp::GuildChannel GuildChannel(json);
+		 * ```
+		 *
+		 * @param[in] json The json data for the guild channel.
+		 *
+		 * @return discpp::GuildChannel, this is a constructor.
+		 */
+
+		guild_id = GetDataSafely<snowflake>(json, "guild_id");
+		position = GetDataSafely<int>(json, "position");
+		if (json.contains("permission_overwrites")) {
+			for (auto permission_overwrite : json["permission_overwrites"]) {
+				permissions.push_back(discpp::Permissions(permission_overwrite));
+			}
+		}
+		nsfw = GetDataSafely<bool>(json, "nsfw");
+		bitrate = GetDataSafely<int>(json, "bitrate");
+		user_limit = GetDataSafely<int>(json, "user_limit");
+		rate_limit_per_user = GetDataSafely<int>(json, "rate_limit_per_user");
+		category_id = GetDataSafely<snowflake>(json, "parent_id");
+	}
+
+	GuildChannel::GuildChannel(snowflake id, snowflake guild_id) : Channel(id) {
+		/**
+		 * @brief Constructs a discpp::GuildChannel from id and guild
+		 *
+		 * ```cpp
+		 *      discpp::GuildChannel GuildChannel(json);
+		 * ```
+		 *
+		 * @param[in] id the id of the channel
+		 * @param[in] guild_id the guild id
+		 *
+		 * @return discpp::GuildChannel, this is a constructor.
+		 */
+
+		discpp::Guild guild(guild_id);
+		std::unordered_map<snowflake, GuildChannel>::iterator channels = guild.channels.find(id);
+		if (channels != guild.channels.end()) {
+			*this = channels->second;
+		}
+	}
+
+	void GuildChannel::BulkDeleteMessage(std::vector<snowflake>& messages) {
+		/**
+		 * @brief Delete several messages (2-100).
+		 *
+		 * ```cpp
+		 *      channel.BulkDeleteMessage({message_a, message_b, message_c});
+		 * ```
+		 *
+		 * @param[in] messages The messages to delete.
+		 *
+		 * @return void
+		 */
+
+		std::string endpoint = Endpoint("/channels/" + id + "/messages/bulk-delete");
+
+		std::string combined_message = "";
+		for (snowflake message : messages) {
+			if (message == messages[0]) {
+				combined_message += "\"" + message + "\"";
+			}
+			else {
+				combined_message += ", \"" + message + "\"";
+			}
+		}
+
+		cpr::Body body("{\"messages\": [" + combined_message + "]}");
+		nlohmann::json result = SendPostRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+	}
+
+	std::vector<discpp::GuildInvite> GuildChannel::GetInvites() {
+		/**
+		 * @brief Get all the channel invites.
+		 *
+		 * ```cpp
+		 *     std::vector<discpp::GuildInvite> invites = channel.GetInvites();
+		 * ```
+		 *
+		 * @return std::vector<discpp::GuildInvite>
+		 */
+
+		nlohmann::json result = SendGetRequest(Endpoint("/channels/" + id + "/invites"), DefaultHeaders(), {}, {});
+		std::vector<discpp::GuildInvite> invites;
+		for (auto invite : result) {
+			invites.push_back(discpp::GuildInvite(invite));
+		}
+
+		return invites;
+	}
+
+	discpp::GuildInvite GuildChannel::CreateInvite(int max_age, int max_uses, bool temporary, bool unique) {
+		/**
+		 * @brief Create an invite for the channel.
+		 *
+		 * ```cpp
+		 *      discpp::GuildInvite invite = channel.CreateInvite(86400, 5, true, true);
+		 * ```
+		 *
+		 * @param[in] max_age How long the invite will last for.
+		 * @param[in] max_uses Max uses of the invite.
+		 * @param[in] temporary Whether this invite only grants temporary membership.
+		 * @param[in] If true, dont try to reuse similar invites.
+		 *
+		 * @return discpp::GuildInvite
+		 */
+
+		cpr::Body body("{\"max_age\": " + std::to_string(max_age) + ", \"max_uses\": " + std::to_string(max_uses) + ", \"temporary\": " + std::to_string(temporary) + ", \"unique\": " + std::to_string(unique) + "}");
+		nlohmann::json result = SendPostRequest(Endpoint("/channels/" + id + "/invites"), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+		discpp::GuildInvite invite(result);
+
+		return invite;
+	}
+
+	void GuildChannel::EditPermissions(discpp::Permissions& permissions) {
+		/**
+		 * @brief Edit permission overwrites for this channel.
+		 *
+		 * ```cpp
+		 *      channel.EditPermissions(permissions);
+		 * ```
+		 *
+		 * @param[in] permissions The permissions that the channels permission overwrites will be set to.
+		 *
+		 * @return void
+		 */
+
+		std::string s_type = (permissions.permission_type == PermissionType::MEMBER) ? "member" : "role";
+
+		nlohmann::json j_body = {
+				{"allow" , permissions.allow_perms.value},
+				{"deny", permissions.deny_perms.value},
+				{"type", s_type}
+		};
+
+		nlohmann::json result = SendPutRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(j_body.dump()));
+	}
+
+	void GuildChannel::DeletePermission(discpp::Permissions& permissions) {
+		/**
+		 * @brief Remove permission overwrites for this channel.
+		 *
+		 * ```cpp
+		 *      channel.DeletePermission(permissions);
+		 * ```
+		 *
+		 * @param[in] permissions The permissions that will be removed
+		 *
+		 * @return void
+		 */
+
+		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+	}
+
+	DMChannel::DMChannel(nlohmann::json json) : Channel(json) {
+		if (json.contains("recipients")) {
+			for (auto recipient : json["recipients"]) {
+				recipients.push_back(discpp::User(recipient));
+			}
+		}
+		icon = GetDataSafely<std::string>(json, "icon");
+		owner_id = GetDataSafely<snowflake>(json, "owner_id");
+		application_id = GetDataSafely<snowflake>(json, "application_id");
+	}
+
+	void DMChannel::GroupDMAddRecipient(discpp::User& user) {
 		/**
 		 * @brief Add a recipient to the group dm.
 		 *
@@ -400,7 +460,7 @@ namespace discpp {
 		nlohmann::json result = SendPutRequest(Endpoint("/channels/" + id + "/recipients/" + user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 
-	void Channel::GroupDMRemoveRecipient(discpp::User& user) {
+	void DMChannel::GroupDMRemoveRecipient(discpp::User& user) {
 		/**
 		 * @brief Remove a recipient from the group dm.
 		 *
@@ -415,44 +475,4 @@ namespace discpp {
 
 		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/" + id + "/recipients/" + user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
-
-    void Channel::EditPermissions(discpp::Permissions& permissions) {
-        /**
-         * @brief Edit permission overwrites for this channel.
-         *
-         * ```cpp
-         *      channel.EditPermissions(permissions);
-         * ```
-         *
-         * @param[in] permissions The permissions that the channels permission overwrites will be set to.
-         *
-         * @return void
-         */
-
-        std::string s_type = (permissions.permission_type == PermissionType::MEMBER) ? "member" : "role";
-
-        nlohmann::json j_body = {
-                {"allow" , permissions.allow_perms.value},
-                {"deny", permissions.deny_perms.value},
-                {"type", s_type}
-        };
-
-        nlohmann::json result = SendPutRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(j_body.dump()));
-    }
-
-    void Channel::DeletePermission(discpp::Permissions& permissions) {
-        /**
-         * @brief Remove permission overwrites for this channel.
-         *
-         * ```cpp
-         *      channel.DeletePermission(permissions);
-         * ```
-         *
-         * @param[in] permissions The permissions that will be removed
-         *
-         * @return void
-         */
-
-        nlohmann::json result = SendDeleteRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
-    }
 }

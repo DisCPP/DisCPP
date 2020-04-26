@@ -82,8 +82,8 @@ namespace discpp {
 		}
 		if (json.contains("channels")) {
 			for (auto& channel : json["channels"]) {
-				discpp::Channel tmp = discpp::Channel(channel);
-				channels.insert(std::make_pair<snowflake, Channel>(static_cast<discpp::snowflake>(tmp.id), static_cast<discpp::Channel>(tmp)));
+				discpp::GuildChannel tmp = discpp::GuildChannel(channel);
+				channels.insert(std::make_pair<snowflake, GuildChannel>(static_cast<discpp::snowflake>(tmp.id), static_cast<discpp::GuildChannel>(tmp)));
 			}
 		}
 		max_presences = GetDataSafely<int>(json, "max_presences");
@@ -146,7 +146,7 @@ namespace discpp {
 		SendDeleteRequest(Endpoint("/guilds/" + id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-	std::vector<discpp::Channel> Guild::GetChannels() {
+	std::vector<discpp::GuildChannel> Guild::GetChannels() {
 		/**
 		 * @brief Gets a list of channels in this guild.
 		 *
@@ -158,14 +158,18 @@ namespace discpp {
 		 */
 
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + id + "/channels"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
-		std::vector<discpp::Channel> channels;
+		std::vector<discpp::GuildChannel> channels;
 		for (auto& channel : result) {
-			channels.push_back(discpp::Channel(channel));
+			channels.push_back(discpp::GuildChannel(channel));
 		}
 		return channels;
 	}
 
-	discpp::Channel Guild::CreateChannel(std::string name, std::string topic, ChannelType type, int bitrate, int user_limit, int rate_limit_per_user, int position, std::vector<discpp::Permissions> permission_overwrites, discpp::Channel category, bool nsfw) {
+	discpp::GuildChannel Guild::GetChannel(snowflake id) {
+		return this->channels.find(id)->second;
+	}
+
+	discpp::GuildChannel Guild::CreateChannel(std::string name, std::string topic, ChannelType type, int bitrate, int user_limit, int rate_limit_per_user, int position, std::vector<discpp::Permissions> permission_overwrites, discpp::Channel category, bool nsfw) {
 		/**
 		 * @brief Creates a channel for this Guild.
 		 *
@@ -221,8 +225,8 @@ namespace discpp {
 
 		cpr::Body body(json_raw.dump());
 		nlohmann::json result = SendPostRequest(Endpoint("/guilds/" + id + "/channels"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::CHANNEL, body);
-		discpp::Channel channel(result);
-		channels.insert(std::pair<snowflake, Channel>(static_cast<snowflake>(channel.id), static_cast<Channel>(channel)));
+		discpp::GuildChannel channel(result);
+		channels.insert(std::pair<snowflake, GuildChannel>(static_cast<snowflake>(channel.id), static_cast<GuildChannel>(channel)));
 
 		return channel;
 	}

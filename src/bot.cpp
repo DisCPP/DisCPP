@@ -489,7 +489,7 @@ namespace discpp {
     }
 
     void Bot::ChannelCreateEvent(nlohmann::json result) {
-        discpp::Channel new_channel = discpp::Channel(result, result["id"].get<snowflake>());
+        discpp::Channel new_channel = discpp::Channel(result);
         channels.insert(std::pair<snowflake, Channel>(static_cast<snowflake>(new_channel.id),
                                                       static_cast<Channel>(new_channel)));
 
@@ -516,7 +516,6 @@ namespace discpp {
     void Bot::ChannelPinsUpdateEvent(nlohmann::json result) {
         discpp::Channel new_channel = discpp::Channel(result["channel_id"].get<snowflake>());
         new_channel.last_pin_timestamp = GetDataSafely<std::string>(result, "last_pin_timestamp");
-        new_channel.guild_id = result["guild_id"].get<snowflake>();
 
         std::unordered_map<snowflake, Channel>::iterator it = channels.find(new_channel.id);
         if (it != channels.end()) {
@@ -535,9 +534,9 @@ namespace discpp {
         members.insert(guild.members.begin(), guild.members.end());
 
         for (auto &channel : result["channels"]) {
-            discpp::Channel _channel = Channel(channel, guild_id);
-            channels.insert(
-                    std::pair<snowflake, Channel>(static_cast<snowflake>(_channel.id), static_cast<Channel>(_channel)));
+            discpp::GuildChannel _channel = GuildChannel(channel);
+            _channel.guild_id = guild_id;
+            channels.insert(std::pair<snowflake, Channel>(static_cast<snowflake>(_channel.id), static_cast<Channel>(_channel)));
         }
 
         discpp::DispatchEvent(discpp::GuildCreateEvent(guild));
@@ -727,7 +726,6 @@ namespace discpp {
 
             if (result.contains("guild_id")) {
                 message->second.guild = discpp::Guild(result["guild_id"].get<snowflake>());
-                channel.guild_id = result["guild_id"].get<snowflake>();
             }
 
             discpp::Emoji emoji(result["emoji"]);
@@ -761,10 +759,6 @@ namespace discpp {
             discpp::Channel channel = channels.find(result["channel_id"].get<snowflake>())->second;
             message->second.channel = channel;
 
-            if (result.contains("guild_id")) {
-                channel.guild_id = result["guild_id"].get<snowflake>();
-            }
-
             discpp::Emoji emoji(result["emoji"]);
             discpp::User user(result["user_id"].get<snowflake>());
 
@@ -794,10 +788,6 @@ namespace discpp {
             discpp::Channel channel = channels.find(result["channel_id"].get<snowflake>())->second;
             message->second.channel = channel;
 
-            if (result.contains("guild_id")) {
-                channel.guild_id = result["guild_id"].get<snowflake>();
-            }
-
             discpp::DispatchEvent(discpp::MessageReactionRemoveAllEvent(message->second));
         }
     }
@@ -809,7 +799,6 @@ namespace discpp {
     void Bot::TypingStartEvent(nlohmann::json result) {
         discpp::User user(result["user_id"].get<snowflake>());
         discpp::Channel channel(result["channel_id"].get<snowflake>());
-        if (result.contains("guild_id")) channel.guild_id = result["guild_id"].get<snowflake>();
         int timestamp = result["timestamp"].get<int>();
 
         discpp::DispatchEvent(discpp::TypingStartEvent(user, channel, timestamp));
@@ -830,7 +819,7 @@ namespace discpp {
     }
 
     void Bot::WebhooksUpdateEvent(nlohmann::json result) {
-        discpp::Channel channel(result["channel_id"].get<snowflake>());
+        discpp::GuildChannel channel(result["channel_id"].get<snowflake>());
         channel.guild_id = result["guild_id"].get<snowflake>();
 
         discpp::DispatchEvent(discpp::WebhooksUpdateEvent(channel));
