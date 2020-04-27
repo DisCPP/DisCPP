@@ -14,6 +14,10 @@
 namespace discpp {
 	class EventDispatcher {
 	private:
+        inline static std::unordered_map<std::string, std::function<void(nlohmann::json &)>> internal_event_map = {};
+
+        static void RunEvent(const std::function<void(nlohmann::json &)>& func, nlohmann::json& json);
+
 		void ReadyEvent(nlohmann::json& result);
 		void ResumedEvent(nlohmann::json& result);
 		void ReconnectEvent(nlohmann::json& result);

@@ -2,6 +2,8 @@
 #include "discpp/event_handler.h"
 #include "events/all_discord_events.h"
 
+#include "events/all_discord_events.h"
+
 namespace discpp {
     void EventDispatcher::ReadyEvent(nlohmann::json& result) {
         // Check if we're just resuming, and if we are dont try to create a new thread.
@@ -371,7 +373,6 @@ namespace discpp {
     }
 
     void EventDispatcher::BindEvents() {
-        std::unordered_map<std::string, std::function<void(nlohmann::json)>> internal_event_map = discpp::globals::bot_instance->internal_event_map;
         internal_event_map["READY"] = [&](nlohmann::json& result) { discpp::EventDispatcher::ReadyEvent(result); };
         internal_event_map["RESUMED"] = [&](nlohmann::json& result) { discpp::EventDispatcher::ChannelCreateEvent(result); };
         internal_event_map["INVALID_SESSION"] = [&](nlohmann::json& result) { discpp::EventDispatcher::InvalidSessionEvent(result); };
@@ -408,16 +409,19 @@ namespace discpp {
         internal_event_map["WEBHOOKS_UPDATE"] = [&](nlohmann::json& result) { discpp::EventDispatcher::WebhooksUpdateEvent(result); };
     }
 
+    void EventDispatcher::RunEvent(const std::function<void(nlohmann::json &)>& func, nlohmann::json& json) {
+        func(json);
+    }
+
     void EventDispatcher::HandleDiscordEvent(nlohmann::json&  j, std::string event_name) {
         nlohmann::json data = j["d"];
         discpp::globals::bot_instance->last_sequence_number = (j.contains("s") && j["s"].is_number()) ? j["s"].get<int>() : -1;
 
-        if (discpp::globals::bot_instance->internal_event_map.find(event_name) != discpp::globals::bot_instance->internal_event_map.end()) {
+        if (internal_event_map.find(event_name) != internal_event_map.end()) {
             if (discpp::globals::bot_instance->ready) {
-                discpp::globals::bot_instance->internal_event_map[event_name](data);
-            }
-            else {
-                discpp::globals::bot_instance->futures.push_back(std::async(std::launch::async, discpp::globals::bot_instance->internal_event_map[event_name], data));
+                internal_event_map[event_name](data);
+            } else {
+                discpp::globals::bot_instance->futures.push_back(std::async(std::launch::async, [&]{ internal_event_map[event_name](data); }));
             }
         }
     }

@@ -105,8 +105,6 @@ namespace discpp {
 
 		int message_cache_count = config.messageCacheSize;
 
-		std::unordered_map<std::string, std::function<void(nlohmann::json)>> internal_event_map;
-
 		// Websocket Methods
 		void WebSocketStart();
 		void OnWebSocketPacket(websocket_incoming_message msg);
