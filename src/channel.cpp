@@ -15,7 +15,6 @@ namespace discpp {
 		 *
 		 * @return discpp::Channel, this is a constructor.
 		 */
-
 		std::unordered_map<snowflake, Channel>::iterator it = discpp::globals::bot_instance->channels.find(id);
 		if (it != discpp::globals::bot_instance->channels.end()) {
 			*this = it->second;
