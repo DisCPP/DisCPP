@@ -16,7 +16,7 @@
 
 namespace discpp {
 	class Guild;
-
+    class VoiceState;
 	struct GuildBan {
 		GuildBan(std::string reason, discpp::User user) : reason(reason), user(user) {
             /**
@@ -177,49 +177,6 @@ namespace discpp {
 		BANNER4
 	};
 
-	class VoiceState {
-	public:
-	    VoiceState() = default;
-	    VoiceState(nlohmann::json json) {
-            /**
-             * @brief Constructs a discpp::VoiceState object from json.
-             *
-             * ```cpp
-             *      discpp::VoiceState voice_state(json);
-             * ```
-             *
-             * @param[in] json The json data for the voice state.
-             *
-             * @return discpp::VoiceState, this is a constructor.
-             */
-            guild_id = GetDataSafely<snowflake>(json, guild_id);
-            channel_id = GetDataSafely<snowflake>(json, guild_id);
-            user_id = json[guild_id].get<snowflake>();
-            if (json.contains("member")) {
-                member = discpp::Member(json["member"]);
-            }
-            session_id = json["session_id"];
-            deaf = json["deaf"].get<bool>();
-            deaf = json["mute"].get<bool>();
-            deaf = json["self_deaf"].get<bool>();
-            deaf = json["self_mute"].get<bool>();
-            deaf = json["self_stream"].get<bool>();
-            deaf = json["suppress"].get<bool>();
-	    }
-
-	    snowflake guild_id; /**< The guild id this voice state is for. */
-	    snowflake channel_id; /**< The channel id this user is connected to. */
-	    snowflake user_id; /**< The user id this voice state is for. */
-	    discpp::Member member; /**< The guild member this voice state is for. */
-	    std::string session_id; /**< The session id for this voice state. */
-	    bool deaf; /**< Whether this user is deafened by the server. */
-	    bool mute; /**< Whether this user is muted by the server. */
-	    bool self_deaf; /**< Whether this user is locally deafened. */
-	    bool self_mute; /**< Whether this user is locally muted. */
-	    bool self_stream; /**< Whether this user is streaming using "Go Live". */
-	    bool suppress; /**< Whether this user is muted by the current user. */
-	};
-
     enum class GuildProperty : int {
         NAME,
         REGION,
@@ -343,6 +300,47 @@ namespace discpp {
 		std::string preferred_locale; /**< The preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults to "en-US". */
 		std::string created_at; /**< The id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */
 	};
+
+    class VoiceState {
+    public:
+        VoiceState() = default;
+        VoiceState(nlohmann::json json) {
+            /**
+             * @brief Constructs a discpp::VoiceState object from json.
+             *
+             * ```cpp
+             *      discpp::VoiceState voice_state(json);
+             * ```
+             *
+             * @param[in] json The json data for the voice state.
+             *
+             * @return discpp::VoiceState, this is a constructor.
+             */
+            guild_id = GetDataSafely<snowflake>(json, "guild_id");
+            channel_id = GetDataSafely<snowflake>(json, "channel_id");
+            user_id = json["user_id"].get<snowflake>();
+            member = (json.contains("member") && !json["member"].is_null()) ? discpp::Member(json["member"], discpp::Guild(guild_id)) : discpp::Member();
+            session_id = json["session_id"];
+            deaf = json["deaf"].get<bool>();
+            mute = json["mute"].get<bool>();
+            self_deaf = json["self_deaf"].get<bool>();
+            self_mute = json["self_mute"].get<bool>();
+            self_stream = GetDataSafely<bool>(json, "self_stream");
+            suppress = json["suppress"].get<bool>();
+        }
+
+        snowflake guild_id; /**< The guild id this voice state is for. */
+        snowflake channel_id; /**< The channel id this user is connected to. */
+        snowflake user_id; /**< The user id this voice state is for. */
+        discpp::Member member; /**< The guild member this voice state is for. */
+        std::string session_id; /**< The session id for this voice state. */
+        bool deaf; /**< Whether this user is deafened by the server. */
+        bool mute; /**< Whether this user is muted by the server. */
+        bool self_deaf; /**< Whether this user is locally deafened. */
+        bool self_mute; /**< Whether this user is locally muted. */
+        bool self_stream; /**< Whether this user is streaming using "Go Live". */
+        bool suppress; /**< Whether this user is muted by the current user. */
+    };
 }
 
 #endif
