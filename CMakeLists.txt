@@ -17,19 +17,6 @@ add_library(discpp STATIC ${source_list} ${events_source_list})
 
 target_include_directories(discpp PUBLIC include PRIVATE include/discpp)
 
-# Set object file format to bigobj
-if(MSVC)
-    target_compile_options(discpp PUBLIC "/bigobj")
-else()
-    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-        # Testing 
-    elseif(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
-        # Not an issue with clang
-    else()
-        message("Unknown compiler \"${CMAKE_CXX_COMPILER_ID}\"!")
-    endif()
-endif()
-
 target_link_libraries(discpp PUBLIC nlohmann_json::nlohmann_json)
 target_link_libraries(discpp PUBLIC OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(discpp PUBLIC cpr)
