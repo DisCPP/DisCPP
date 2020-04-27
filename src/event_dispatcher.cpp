@@ -406,7 +406,7 @@ namespace discpp {
     }
 
     void EventDispatcher::BindEvents() {
-        std::unordered_map<std::string, std::function<void(nlohmann::json)>>& internal_event_map = discpp::globals::bot_instance->internal_event_map;
+        std::unordered_map<std::string, std::function<void(nlohmann::json)>> internal_event_map = discpp::globals::bot_instance->internal_event_map;
         internal_event_map["READY"] = [&](nlohmann::json& result) { discpp::EventDispatcher::ReadyEvent(result); };
         internal_event_map["RESUMED"] = [&](nlohmann::json& result) { discpp::EventDispatcher::ChannelCreateEvent(result); };
         internal_event_map["INVALID_SESSION"] = [&](nlohmann::json& result) { discpp::EventDispatcher::InvalidSessionEvent(result); };
