@@ -1,5 +1,6 @@
 #include "guild.h"
 #include "bot.h"
+#include <climits>
 
 namespace discpp {
 	Member::Member(snowflake id, discpp::Guild guild) : discpp::DiscordObject(id) {
@@ -70,7 +71,7 @@ namespace discpp {
 			}
 		}
 		if (guild.owner_id == this->id) {
-			hierarchy = std::numeric_limits<int>::max();
+            hierarchy = INT_MAX;
 		} else {
             hierarchy = highest_hiearchy;
         }
