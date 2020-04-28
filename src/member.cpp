@@ -2,25 +2,30 @@
 #include "bot.h"
 
 namespace discpp {
-	Member::Member(snowflake id) : discpp::DiscordObject(id) {
+	Member::Member(snowflake id, discpp::Guild guild) : discpp::DiscordObject(id) {
 		/**
 		 * @brief Constructs a discpp::Member object using its id.
 		 *
 		 * This constructor searches the member cache to get a member object.
 		 *
 		 * ```cpp
-		 *      discpp::Member member(657246994997444614);
+		 *      discpp::Member member("222189653795667968", guild);
 		 * ```
 		 *
 		 * @param[in] id The id of the member.
+		 * @param[in] guild The guild containing the member.
 		 *
 		 * @return discpp::Member, this is a constructor.
 		 */
 
-		std::unordered_map<snowflake, Member>::iterator it = discpp::globals::bot_instance->members.find(id);
+		*this = guild.GetMember(id);
+
+		/*auto it = std::find_if(discpp::globals::bot_instance->members.begin(), discpp::globals::bot_instance->members.end(),
+		        [](std::unordered_map<snowflake, Member>::) {});
+
 		if (it != discpp::globals::bot_instance->members.end()) {
 			*this = it->second;
-		}
+		}*/
 	}
 
 	Member::Member(nlohmann::json json, discpp::Guild guild) : guild_id(guild.id) {
@@ -43,15 +48,15 @@ namespace discpp {
 		} else {
 			user = discpp::User();
 		}
-
+        int highest_hiearchy = 0;
 		nick = GetDataSafely<std::string>(json, "nick");
 		if (json.contains("roles")) {
-            int highest_hiearchy = 0;
 			for (auto& role : json["roles"]) {
 				discpp::Role r(role.get<snowflake>(), guild);
+                if (r.position > highest_hiearchy) {
+                    highest_hiearchy = r.position;
+                }
 
-                highest_hiearchy = std::max(r.position, highest_hiearchy);
-                hierarchy = std::max(r.position, highest_hiearchy);
 				// Save permissions
 				if (json["roles"][0] == role) {
 					permissions.allow_perms.value = r.permissions.allow_perms.value;
@@ -66,7 +71,9 @@ namespace discpp {
 		}
 		if (guild.owner_id == this->id) {
 			hierarchy = std::numeric_limits<int>::max();
-		}
+		} else {
+            hierarchy = highest_hiearchy;
+        }
 		joined_at = GetDataSafely<std::string>(json, "joined_at");
 		premium_since = GetDataSafely<std::string>(json, "premium_since");
 		deaf = GetDataSafely<bool>(json, "deaf");

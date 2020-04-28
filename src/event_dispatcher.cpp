@@ -151,7 +151,7 @@ namespace discpp {
 
     void EventDispatcher::GuildMemberRemoveEvent(nlohmann::json& result) {
         discpp::Guild guild(result["guild_id"].get<snowflake>());
-        discpp::Member member(result["user"]["id"].get<snowflake>());
+        discpp::Member member(result["user"]["id"].get<snowflake>(), guild);
         discpp::globals::bot_instance->members.erase(member.id);
 
         discpp::DispatchEvent(discpp::GuildMemberRemoveEvent(guild, member));
@@ -165,7 +165,7 @@ namespace discpp {
             member = it->second;
         }
         else {
-            member = discpp::Member(result["user"]["id"].get<snowflake>());
+            member = discpp::Member(result["user"]["id"].get<snowflake>(), guild);
             guild.members.insert(std::pair<snowflake, Member>(static_cast<snowflake>(member.id), static_cast<discpp::Member>(member)));
         }
         member.roles.clear();

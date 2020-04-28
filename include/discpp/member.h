@@ -14,7 +14,7 @@ namespace discpp {
 	class Member : public DiscordObject{
 	public:
 		Member() = default;
-		Member(snowflake id);
+		Member(snowflake id, discpp::Guild guild);
 		Member(nlohmann::json json, discpp::Guild guild);
 
 		void ModifyMember(std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf, snowflake channel_id);

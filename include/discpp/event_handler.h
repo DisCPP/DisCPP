@@ -5,11 +5,9 @@
 #include "utils.h"
 #include "bot.h"
 
-#include <climits>
-
 namespace discpp {
 	struct EventListenerHandle {
-		unsigned int id = UINT_MAX;
+		unsigned int id = std::numeric_limits<unsigned int>::max();
 	};
 
 	template<typename T>

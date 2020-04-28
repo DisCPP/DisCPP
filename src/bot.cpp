@@ -11,8 +11,7 @@
 #include "event_dispatcher.h"
 
 namespace discpp {
-    Bot::Bot(std::string token, BotConfig config) : token(
-            token), config(config) {
+    Bot::Bot(std::string token, BotConfig config) : token(token), config(config) {
         /**
          * @brief Constructs a discpp::Bot object.
          *

@@ -40,7 +40,7 @@ namespace discpp {
 		icon = GetDataSafely<std::string>(json, "icon");
 		name = GetDataSafely<std::string>(json, "name");
 		splash = GetDataSafely<std::string>(json, "splash");
-		owner = GetDataSafely<bool>(json, owner);
+		owner = GetDataSafely<bool>(json, "owner");
 		owner_id = GetDataSafely<snowflake>(json, "owner_id");
 		permissions = GetDataSafely<int>(json, "permissions");
 		region = GetDataSafely<std::string>(json, "region");
@@ -257,12 +257,22 @@ namespace discpp {
 		nlohmann::json result = SendPatchRequest(Endpoint("/guilds/" + id + "/channels"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::CHANNEL, body);
 	}
 
+    template<typename K, typename V>
+    std::vector<V> GetAllValues(std::unordered_map<K, V> map) {
+        std::vector<V> vector;
+        for (auto const& pair : map) {
+            vector.push_back(pair.second);
+        }
+
+        return vector;
+    }
+
 	discpp::Member Guild::GetMember(snowflake id) {
 		/**
 		 * @brief Gets a discpp::Member from this guild.
 		 *
 		 * ```cpp
-		 *      discpp::Member member = guild.GetMember(228846961774559232);
+		 *      discpp::Member member = guild.GetMember("228846961774559232");
 		 * ```
 		 *
 		 * @param[in] id The member's id
@@ -270,12 +280,15 @@ namespace discpp {
 		 * @return discpp::Member
 		 */
 
-		std::unordered_map<snowflake, Member>::iterator it = discpp::globals::bot_instance->members.find(id);
-		if (it != discpp::globals::bot_instance->members.end()) {
-			return it->second;
-		}
-		//throw std::runtime_error("Member not found!");
-		return discpp::Member();
+		auto it = std::find_if(discpp::globals::bot_instance->members.begin(), discpp::globals::bot_instance->members.end(),
+		        [&](const std::pair<snowflake, Member>& pair) { return pair.second.guild_id == this->id; });
+
+        if (it != discpp::globals::bot_instance->members.end()) {
+            return it->second;
+        }
+
+		globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Member not found (Exceptions like these should be handled)!");
+		throw std::runtime_error("Member not found (Exceptions like these should be handled)!");
 	}
 
 	void Guild::EnsureBotPermission(Permission reqPerm) {
@@ -325,7 +338,7 @@ namespace discpp {
 
 		cpr::Body body("{\"access_token\": \"" + access_token + "\", \"nick\": \"" + nick + "\", \"roles\": " + json_roles + ", \"mute\": " + std::to_string(mute) + ", \"deaf\": " + std::to_string(deaf) + "}");
 		nlohmann::json result = SendPutRequest(Endpoint("/guilds/" + this->id + "/members/" + id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
-		return (result == "{}") ? discpp::Member(id) : discpp::Member(result, id); // If the member is already added, return it.
+		return (result == "{}") ? discpp::Member(id, *this) : discpp::Member(result, id); // If the member is already added, return it.
 	}
 
 	void Guild::RemoveMember(discpp::Member& member) {

@@ -38,7 +38,7 @@ void discpp::FireCommand(discpp::Bot* bot, discpp::Message message) {
 
     argument_vec.erase(argument_vec.begin()); // Erase the command from the arguments
 
-    discpp::Member member(message.author.id);
+    discpp::Member member(message.author.id, message.guild);
 
     std::string remainder = "d";
     if (!argument_vec.empty()) remainder = CombineStringVector(argument_vec);
