@@ -43,15 +43,15 @@ namespace discpp {
 		} else {
 			user = discpp::User();
 		}
-		int maxVal = 0;
+
 		nick = GetDataSafely<std::string>(json, "nick");
 		if (json.contains("roles")) {
-			discpp::Permissions permissions;
+            int highest_hiearchy = 0;
 			for (auto& role : json["roles"]) {
 				discpp::Role r(role.get<snowflake>(), guild);
-				if (r.position > maxVal) {
-					maxVal = r.position;
-				}
+
+                highest_hiearchy = std::max(r.position, highest_hiearchy);
+                hierarchy = std::max(r.position, highest_hiearchy);
 				// Save permissions
 				if (json["roles"][0] == role) {
 					permissions.allow_perms.value = r.permissions.allow_perms.value;
@@ -63,14 +63,9 @@ namespace discpp {
 
 				roles.push_back(r);
 			}
-
-			this->permissions = permissions;
 		}
 		if (guild.owner_id == this->id) {
 			hierarchy = std::numeric_limits<int>::max();
-		}
-		else {
-			hierarchy = maxVal;
 		}
 		joined_at = GetDataSafely<std::string>(json, "joined_at");
 		premium_since = GetDataSafely<std::string>(json, "premium_since");

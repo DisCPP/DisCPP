@@ -15,7 +15,7 @@ namespace discpp {
 		Role(snowflake role_id, discpp::Guild& guild);
 		Role(nlohmann::json json);
 
-		snowflake id;  /**< Id of the current role */
+		//snowflake id;  /**< Id of the current role */
 		std::string name; /**< Name of the current role */
 		int color; /**< Color of the current role */
 		bool hoist; /**< Whether or not the role displays in member list */

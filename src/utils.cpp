@@ -375,7 +375,7 @@ int discpp::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bu
 	}
 
 	if (rlmt->remaining_limit == 0) {
-		double milisecond_time = rlmt->ratelimit_reset * 1000 - time(NULL) * 1000 + 15;
+		double milisecond_time = rlmt->ratelimit_reset * 1000 - time(NULL) * 1000;
 
 		if (milisecond_time > 0) {
 			globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Rate limit wait time: " + std::to_string(milisecond_time) + " miliseconds");
