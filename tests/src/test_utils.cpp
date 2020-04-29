@@ -3,6 +3,9 @@
 #include <vector>
 #include <string>
 
+TEST(Utils, Endpoint) {
+	EXPECT_EQ("https://discordapp.com/api/v6/", discpp::Endpoint(""));
+}
 TEST(Utils, StartsWithPrefix) {
 	EXPECT_EQ(true, discpp::StartsWith("~test", "~"));
 }
