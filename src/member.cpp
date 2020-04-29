@@ -5,9 +5,9 @@
 namespace discpp {
 	Member::Member(snowflake id, discpp::Guild guild) : discpp::DiscordObject(id) {
 		/**
-		 * @brief Constructs a discpp::Member object using its id.
+		 * @brief Constructs a discpp::Member object using its id and the guild that it is in.
 		 *
-		 * This constructor searches the member cache to get a member object.
+		 * This constructor searches the guild's member cache to get a member object.
 		 *
 		 * ```cpp
 		 *      discpp::Member member("222189653795667968", guild);
