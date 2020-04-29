@@ -2,8 +2,8 @@
 #define DISCPP_WEBHOOK_H
 
 #include <string>
-#include <discpp\channel.h>
-#include <discpp\embed_builder.h>
+#include <discpp/channel.h>
+#include <discpp/embed_builder.h>
 
 namespace discpp {
 	class WebhookClient : DiscordObject {
