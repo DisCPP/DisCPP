@@ -9,8 +9,6 @@ option(BUILD_TESTS "Build unit tests" OFF)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(cpr REQUIRED)
-find_package(cpprestsdk CONFIG REQUIRED NAMES)
-find_package(Boost COMPONENTS system date_time serialization REQUIRED)
 find_package(ixwebsocket REQUIRED)
 
 # Add source files
@@ -22,9 +20,6 @@ target_include_directories(discpp PUBLIC include PRIVATE include/discpp)
 target_link_libraries(discpp PUBLIC nlohmann_json::nlohmann_json)
 target_link_libraries(discpp PUBLIC OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(discpp PUBLIC cpr)
-target_link_libraries(discpp PUBLIC Boost::date_time)
-target_link_libraries(discpp PUBLIC Boost::serialization)
-target_link_libraries(discpp PUBLIC cpprestsdk::cpprest cpprestsdk::cpprestsdk_zlib_internal cpprestsdk::cpprestsdk_boost_internal)
 
 if (WIN32)
 	target_link_libraries(discpp PUBLIC wsock32 ws2_32 shlwapi)

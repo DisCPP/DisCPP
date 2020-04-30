@@ -2,7 +2,7 @@
 #include "guild.h"
 
 namespace discpp {
-	Emoji::Emoji(std::string name, snowflake id) : name(EscapeString(name)), DiscordObject(id) {
+	Emoji::Emoji(std::string name, snowflake id) : name(EscapeString(name)), id(id) {
 		/**
 		 * @brief Constructs a discpp::Emoji object with a name and id.
 		 *
@@ -17,7 +17,7 @@ namespace discpp {
 		 */
 	}
 
-	Emoji::Emoji(discpp::Guild guild, snowflake id) : DiscordObject(id) {
+	Emoji::Emoji(discpp::Guild guild, snowflake id) : id(id) {
 		/**
 		 * @brief Constructs a discpp::Emoji object using a guild object and id.
 		 *

@@ -5,7 +5,6 @@
 #include "channel.h"
 #include "message.h"
 #include "member.h"
-#include "role.h"
 #include "activity.h"
 #include "event_handler.h"
 #include "event_dispatcher.h"
@@ -101,8 +100,7 @@ namespace discpp {
          * @return discpp::User
          */
 
-        nlohmann::json result = SendPatchRequest(Endpoint("/users/@me"), DefaultHeaders(), 0,
-                                                 discpp::RateLimitBucketType::GLOBAL);
+        nlohmann::json result = SendPatchRequest(Endpoint("/users/@me"), DefaultHeaders(), 0, discpp::RateLimitBucketType::GLOBAL);
 
         bot_user = discpp::User(result);
 

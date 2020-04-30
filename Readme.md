@@ -25,15 +25,14 @@ DisC++ is a Discord API wrapper written in modern C++ aimed towards ease of use.
 ## Dependencies
 - [Nlohmann JSON](https://github.com/nlohmann/json)
 - [cpr](https://github.com/whoshuu/cpr)
-- [cpprestsdk](https://github.com/microsoft/cpprestsdk.git)
-- [Boost Serialization](https://www.boost.org/doc/libs/1_72_0/libs/serialization/doc/index.html)
+- [IXWebSocket](https://github.com/machinezone/IXWebSocket)
 
 ## Contributing
 Please follow [Google's styling guide](https://google.github.io/styleguide/cppguide.html#Naming) for naming convention.
 
 ## Building
 1. Install vcpkg onto the root of your C drive.
-2. Install dependencies by running command: `vcpkg install nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization`.
+2. Install dependencies by running command: `vcpkg install nlohmann-json cpr ixwebsocket`.
 3. Then run `vcpkg integrate install`.
     * Should get an output similar to: `"-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"`.
     * Save the directory that was given (Ex. `C:/vcpkg/scripts/buildsystems/vcpkg.cmake`).
@@ -81,17 +80,18 @@ target_link_libraries(main PRIVATE discpp)
 - [ ] Sending audio through a voice connection.
 
 ## Documentation
-Currently the only documentation is from Doxygen; its currently completely up to date. You can view it [here](https://discpp.github.io/). If you want to generate documentation you need to install Doxygen and run doxygen in the root DisCPP directory. ```doxygen Doxyfile```
+Currently the only documentation is from Doxygen; its currently completely up to date. You can view it [here](https://discpp.github.io/). If you want to generate documentation you need to install Doxygen and run doxygen in the root DisCPP directory and run the terminal command: ```doxygen Doxyfile```
 
 ## Examples
 There may be more inside the [Examples](examples) folder.
 ```cpp
+/*
+	Basic bot showing off commands
+*/
+
 #include <discpp/bot.h>
 #include <discpp/context.h>
 #include <discpp/command_handler.h>
-#include <discpp/channel.h>
-#include <discpp/activity.h>
-#include <discpp/command.h>
 
 // Events
 #include <discpp/event_handler.h>
@@ -99,18 +99,15 @@ There may be more inside the [Examples](examples) folder.
 #include <discpp/events/guild_member_add_event.h>
 #include <discpp/events/channel_pins_update_event.h>
 
-#include <iostream>
-#include <fstream>
-
 #include "ping_command.h"
 
 int main(int argc, const char* argv[]) {
 	std::ifstream token_file("token.txt", std::ios::out);
 	std::string token;
 	std::getline(token_file, token);
-	
-	discpp::BotConfig config {{"!"}};
-	discpp::Bot bot{ token, config }; // Token, config.
+
+	discpp::BotConfig config{ {"!"} };
+	discpp::Bot bot{ token, config }; // Token, config 
 
 	PingCommand(); // This runs the constructor which will register the command.
 
