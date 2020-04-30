@@ -9,7 +9,6 @@
 
 #include <nlohmann/json.hpp>
 
-#include <cpprest/ws_client.h>
 #include <ixwebsocket/IXWebSocket.h>
 
 #include "channel.h"
@@ -24,8 +23,6 @@ namespace discpp {
 	class User;
 	class Activity;
 	class BotConfig;
-
-	using namespace web::websockets::client;
 
 	class Bot {
 	public:
