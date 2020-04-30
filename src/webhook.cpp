@@ -1,6 +1,8 @@
 #include "webhook.h"
-#include "discpp/utils.h"
+#include "utils.h"
 #include "message.h"
+
+#include <fstream>
 
 namespace discpp {
 	WebhookClient::WebhookClient(discpp::snowflake id, std::string token) : DiscordObject(id) {
