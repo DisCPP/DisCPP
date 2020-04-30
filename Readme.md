@@ -44,8 +44,8 @@ Please follow [Google's styling guide](https://google.github.io/styleguide/cppgu
 6. Go into CMake settings and set the CMake toolchain to the directory you saved above.
     * Click on `Project > CMake Settings`
     * Scroll to the CMake toolchain file text box and enter the directory you saved.
-7. While inside CMake settings, make sure your compiling in x86-Debug.
-	* Scroll to `Toolset` and set it to a x86 compiler of your choosing (ex: msvc_x86)
+7. While inside CMake settings, make sure your compiling in x64-Debug.
+	* Scroll to `Toolset` and set it to a x64 compiler of your choosing (ex: msvc_x64)
 ## Setting up a Bot Project
 First follow the [building](#Building) steps above to make sure Disc++ will compile.
 1. Currently you need to create a thirdparty folder in the root of your bot project directory.

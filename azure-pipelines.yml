@@ -14,7 +14,7 @@ trigger:
 - development
 
 jobs:
-  - job: Windows_VS2019_x86
+  - job: Windows_VS2019_x64
     pool:
       vmImage: 'windows-latest'
     steps:
@@ -29,7 +29,7 @@ jobs:
         vcpkgDirectory: '$(vcpkgLocation)'
         vcpkgArguments: $(vcpkgArgs) --triplet x64-windows
         vcpkgGitCommitId: $(vcpkgGitRef)
-        vcpkgTriplet: 'x86-windows'
+        vcpkgTriplet: 'x64-windows'
         vcpkgGitURL: https://github.com/microsoft/vcpkg.git
     - task: run-cmake@0
       displayName: 'Run CMake with Ninja'
@@ -38,7 +38,7 @@ jobs:
         cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
         cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
         useVcpkgToolchainFile: true
-        vcpkgTriplet: 'x86-windows'
+        vcpkgTriplet: 'x64-windows'
         buildDirectory: '$(Build.ArtifactStagingDirectory)'
         buildWithCMakeArgs: '-- -v'
   - job: Linux_Latest

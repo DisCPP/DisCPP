@@ -7,8 +7,6 @@
 
 #include <cpr/cpr.h>
 
-#include <boost/date_time.hpp>
-
 #include <unordered_map>
 
 namespace discpp {
