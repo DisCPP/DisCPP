@@ -1,5 +1,6 @@
 # CMakeLists.txt
 cmake_minimum_required (VERSION 3.6)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 project(discpp)
 
 option(BUILD_EXAMPLES "Build example bots" OFF)
@@ -10,7 +11,7 @@ find_package(OpenSSL REQUIRED)
 find_package(cpr REQUIRED)
 find_package(cpprestsdk CONFIG REQUIRED NAMES)
 find_package(Boost COMPONENTS system date_time serialization REQUIRED)
-find_package(uvw CONFIG REQUIRED)
+find_package(ixwebsocket REQUIRED)
 
 # Add source files
 file(GLOB_RECURSE source_list src/*.cpp)
@@ -24,7 +25,16 @@ target_link_libraries(discpp PUBLIC cpr)
 target_link_libraries(discpp PUBLIC Boost::date_time)
 target_link_libraries(discpp PUBLIC Boost::serialization)
 target_link_libraries(discpp PUBLIC cpprestsdk::cpprest cpprestsdk::cpprestsdk_zlib_internal cpprestsdk::cpprestsdk_boost_internal)
-target_link_libraries(discpp PUBLIC uvw::uvw)
+
+if (WIN32)
+	target_link_libraries(discpp PUBLIC wsock32 ws2_32 shlwapi)
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+
+	if (USE_TLS)
+		target_link_libraries(discpp PUBLIC Crypt32)
+	endif()
+endif()
+target_link_libraries(discpp PUBLIC ${IXWEBSOCKET_LIBRARY})
 
 # Unit tests
 if (BUILD_TESTS)

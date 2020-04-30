@@ -10,6 +10,7 @@
 #include <nlohmann/json.hpp>
 
 #include <cpprest/ws_client.h>
+#include <ixwebsocket/IXWebSocket.h>
 
 #include "channel.h"
 #include "message.h"
@@ -61,7 +62,7 @@ namespace discpp {
 		discpp::User ModifyCurrentUser(std::string username);
 		void LeaveGuild(discpp::Guild guild);
 		void UpdatePresence(discpp::Activity activity);
-		void CreateWebsocketRequest(nlohmann::json json);
+		void CreateWebsocketRequest(nlohmann::json json, std::string message = "");
 		void SetCommandHandler(std::function<void(discpp::Bot*, discpp::Message)> command_handler);
 		void DisconnectWebsocket();
 		void ReconnectToWebsocket();
@@ -97,7 +98,9 @@ namespace discpp {
 		std::thread heartbeat_thread;
 
 		std::mutex websocket_client_mutex;
-		websocket_callback_client websocket_client;
+		//websocket_callback_client websocket_client;
+
+		ix::WebSocket websocket;
 
 		bool heartbeat_acked;
 		int last_sequence_number;
@@ -107,8 +110,9 @@ namespace discpp {
 
 		// Websocket Methods
 		void WebSocketStart();
-		void OnWebSocketPacket(websocket_incoming_message msg);
-		void HandleDiscordDisconnect(websocket_close_status close_status, utility::string_t reason, std::error_code error_code);
+		void OnWebSocketListen(const ix::WebSocketMessagePtr& msg);
+		void OnWebSocketPacket(const nlohmann::json& result);
+		void HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg);
 		void HandleHeartbeat();
 		nlohmann::json GetIdentifyPacket();
 
