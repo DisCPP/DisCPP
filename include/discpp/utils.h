@@ -122,7 +122,7 @@ namespace discpp {
 	std::string CombineStringVector(std::vector<std::string> v, std::string delimiter = " ", int offset = 0);
 	std::string ReadEntireFile(std::ifstream& file);
 	std::string Base64Encode(std::string text);
-	std::string ReplaceAll(std::string data, std::string toSearch, std::string replaceStr);
+	std::string ReplaceAll(std::string data, std::string to_search, std::string replace_str);
 	std::string EscapeString(std::string string);
 	time_t TimeFromSnowflake(snowflake snow);
 	std::string FormatTimeFromSnowflake(snowflake snow);

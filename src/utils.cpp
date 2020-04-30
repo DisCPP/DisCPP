@@ -1,9 +1,6 @@
 #include "utils.h"
 #include "bot.h"
 
-#include <boost/archive/iterators/base64_from_binary.hpp>
-#include <boost/archive/iterators/transform_width.hpp>
-
 std::string discpp::GetOsName() {
 	/**
 	 * @brief Get the OS name this application is running on.
@@ -19,16 +16,16 @@ std::string discpp::GetOsName() {
 		return "Windows 32-bit";
 	#elif _WIN64
 		return "Windows 64-bit";
-	#elif __APPLE__ || __MACH__
-		return "Mac OSX";
-	#elif __linux__
-		return "Linux";
-	#elif __FreeBSD__
-		return "FreeBSD";
-	#elif __unix || __unix__
-		return "Unix";
-	#else
-		return "Other";
+        #elif __APPLE__ || __MACH__
+                return "Mac OSX";
+        #elif __linux__
+            return "Linux";
+        #elif __FreeBSD__
+            return "FreeBSD";
+        #elif __unix || __unix__
+            return "Unix";
+        #else
+            return "Other";
 	#endif
 }
 
@@ -219,7 +216,7 @@ std::vector<std::string> discpp::SplitString(std::string str, std::string delimi
 	 * @brief Split a string into a vector.
 	 *
 	 * ```cpp
-	 *      std::vector<std::string> argument_vec = discpp::SplitString(message.content, ' ');
+	 *      std::vector<std::string> argument_vec = discpp::SplitString(message.content, " ");
 	 * ```
 	 *
 	 * @param[in] str The string to split
@@ -228,10 +225,21 @@ std::vector<std::string> discpp::SplitString(std::string str, std::string delimi
 	 * @return std::vector<std::string>
 	 */
 
-	std::vector<std::string> out;
-	boost::split(out, str, boost::is_any_of(delimiter), boost::token_compress_on);
+    size_t pos = 0;
+    std::vector<std::string> tokens;
+    std::string token;
+    while ((pos = str.find(delimiter)) != std::string::npos) {
+        token = str.substr(0, pos);
+        tokens.push_back(token);
+        str.erase(0, pos + delimiter.length());
+    }
 
-	return out;
+    // If the vector is empty, then just return a vector filled with the given string.
+    if (tokens.empty()) {
+        return { str };
+    }
+
+	return tokens;
 }
 
 std::string discpp::CombineStringVector(std::vector<std::string> vector, std::string delimiter, int offset) {
@@ -270,6 +278,11 @@ std::string discpp::ReadEntireFile(std::ifstream& file) {
 	return std::string((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
 }
 
+static const std::string base64_chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz"
+        "0123456789+/";
+
 std::string discpp::Base64Encode(std::string text) {
 	/**
 	 * @brief Encode Base64.
@@ -283,13 +296,51 @@ std::string discpp::Base64Encode(std::string text) {
 	 * @return std::string
 	 */
 
-	using namespace boost::archive::iterators;
-	using It = base64_from_binary<transform_width<std::string::const_iterator, 6, 8>>;
-	auto tmp = std::string(It(std::begin(text)), It(std::end(text)));
-	return tmp.append((3 - text.size() % 3) % 3, '=');
+    unsigned char* buf = (unsigned char *) text.c_str();
+    unsigned int buf_len = text.size();
+    std::string ret;
+    int i = 0;
+    int j = 0;
+    unsigned char char_array_3[3];
+    unsigned char char_array_4[4];
+
+    while (buf_len--) {
+        char_array_3[i++] = *(buf++);
+        if (i == 3) {
+            char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+            char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+            char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+            char_array_4[3] = char_array_3[2] & 0x3f;
+
+            for (i = 0; (i < 4); i++)
+                ret += base64_chars[char_array_4[i]];
+            i = 0;
+        }
+    }
+
+    if (i) {
+        for (j = i; j < 3; j++) {
+            char_array_3[j] = '\0';
+        }
+
+        char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+        char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+        char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+        char_array_4[3] = char_array_3[2] & 0x3f;
+
+        for (j = 0; (j < i + 1); j++) {
+            ret += base64_chars[char_array_4[j]];
+        }
+
+        while ((i++ < 3)) {
+            ret += '=';
+        }
+    }
+
+    return ret;
 }
 
-std::string discpp::ReplaceAll(std::string data, std::string toSearch, std::string replaceStr) {
+std::string discpp::ReplaceAll(std::string data, std::string to_search, std::string replace_str) {
 	/**
 	 * @brief Replace all occurences of sub strings
 	 *
@@ -302,7 +353,16 @@ std::string discpp::ReplaceAll(std::string data, std::string toSearch, std::stri
 	 * @return std::string
 	 */
 
-	boost::replace_all(data, toSearch, replaceStr);
+    // Get the first occurrence
+    size_t pos = data.find(to_search);
+
+    // Repeat till end is reached
+    while(pos != std::string::npos) {
+        // Replace this occurrence of Sub String
+        data.replace(pos, to_search.size(), replace_str);
+        // Get the next occurrence from the current position
+        pos = data.find(to_search, pos + replace_str.size());
+    }
 
 	return data;
 }
