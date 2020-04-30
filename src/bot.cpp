@@ -251,9 +251,9 @@ namespace discpp {
     void Bot::HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg) {
         // if we're reconnecting this just stop here.
         if (reconnecting) {
-            logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Websocket was closed with error: " + std::to_string(msg->closeInfo.code) + ", " + msg->closeInfo.reason + "! Attempting reconnect in 10 seconds...");
-        } else {
             logger.Log(LogSeverity::SEV_DEBUG, "Websocket was closed for reconnecting...");
+        } else {
+            logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Websocket was closed with error: " + std::to_string(msg->closeInfo.code) + ", " + msg->closeInfo.reason + "! Attempting reconnect in 10 seconds...");
         }
 
         heartbeat_acked = false;
@@ -333,7 +333,7 @@ namespace discpp {
 
                 break;
             default:
-                EventDispatcher::HandleDiscordEvent(const_cast<nlohmann::json &>(result), result["t"]);
+                EventDispatcher::HandleDiscordEvent(const_cast<nlohmann::json &>(result), result["t"].get<std::string>());
                 break;
         }
 
