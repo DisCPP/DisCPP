@@ -92,7 +92,8 @@ namespace discpp {
 		 */
 
 		cpr::Body body("{\"recipient_id\": \"" + id + "\"}");
-		nlohmann::json result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders(), id, RateLimitBucketType::CHANNEL, body);
+		nlohmann::json result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders({ {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
+
 		return discpp::Channel(result);
 	}
 
