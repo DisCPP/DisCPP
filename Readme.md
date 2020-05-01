@@ -1,11 +1,11 @@
 <h1 align="center">DisC++</h1>
 
 <p align="center">
-Discord API Wrapper Written in Modern C++ aimed towards ease of use.
+Simplified, but feature rich Discord API wrapper written in modern C++.
 </p>
 
 ## DisC++
-DisC++ is a Discord API wrapper written in modern C++ aimed towards ease of use. This is one of the few that can compile on Windows and Linux. Its also focused on being multi threaded so commands and event listeners are ran on seperate threads, this means you dont have to worry about slowing the bot down with a certain command.
+DisC++ is a simplified, but feature rich Discord API wrapper written in modern C++. It can run on Linux and Windows. Its also focused on being multi threaded so commands and event listeners are ran on seperate threads, this means you dont have to worry about slowing the bot down with a certain command.
 
 <table align="center">
   <tr>
