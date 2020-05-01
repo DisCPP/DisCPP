@@ -55,14 +55,20 @@ namespace discpp {
 
 		Bot(std::string token, BotConfig config);
 		int Run();
-		discpp::Guild GetGuild(snowflake guild_id);
-		discpp::User ModifyCurrentUser(std::string username);
-		void LeaveGuild(discpp::Guild guild);
-		void UpdatePresence(discpp::Activity activity);
 		void CreateWebsocketRequest(nlohmann::json json, std::string message = "");
 		void SetCommandHandler(std::function<void(discpp::Bot*, discpp::Message)> command_handler);
 		void DisconnectWebsocket();
 		void ReconnectToWebsocket();
+
+		// Discord based methods.
+        discpp::Guild GetGuild(snowflake guild_id);
+        discpp::User ModifyCurrentUser(std::string username, discpp::Image avatar);
+        void LeaveGuild(discpp::Guild guild);
+        void UpdatePresence(discpp::Activity activity);
+		discpp::User GetUser(discpp::snowflake id);
+        std::vector<discpp::Connection> GetBotUserConnections();
+        // std::vector<discpp::Channel> GetUserDMs(); // Not supported by bots.
+        // discpp::Channel CreateGroupDM(std::vector<discpp::User> users); // Deprecated and will not be shown in the discord client.
 
 		template <typename FType, typename... T>
 		void DoFunctionLater(FType&& func, T&&... args) {

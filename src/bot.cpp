@@ -87,20 +87,22 @@ namespace discpp {
         throw std::runtime_error("Guild not found!");
     }
 
-    discpp::User Bot::ModifyCurrentUser(std::string username) {
+    discpp::User Bot::ModifyCurrentUser(std::string username, discpp::Image avatar) {
         /**
          * @brief Modify the bot's username.
          *
          * ```cpp
-         *      discpp::User user = bot.ModifyCurrent("New bot name!");
+         *      discpp::User user = bot.ModifyCurrent("New bot name!", new_avatar);
          * ```
          *
          * @param[in] username The new username.
+         * @param[in] avatar The new avatar.
          *
          * @return discpp::User
          */
 
-        nlohmann::json result = SendPatchRequest(Endpoint("/users/@me"), DefaultHeaders(), 0, discpp::RateLimitBucketType::GLOBAL);
+        cpr::Body body("{\"username\": \"" + username + "\", \"avatar\": " + avatar.ToDataURI() + "}");
+        nlohmann::json result = SendPatchRequest(Endpoint("/users/@me"), DefaultHeaders(), 0, discpp::RateLimitBucketType::GLOBAL, body);
 
         bot_user = discpp::User(result);
 
@@ -121,6 +123,45 @@ namespace discpp {
          */
 
         SendDeleteRequest(Endpoint("/users/@me/guilds/" + guild.id), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+    }
+
+    discpp::User Bot::GetUser(discpp::snowflake id) {
+        /**
+         * @brief Get a user.
+         *
+         * ```cpp
+         *      bot.GetUser("150312037426135041");
+         * ```
+         *
+         * @param[in] id The user to get with this id.
+         *
+         * @return discpp::User
+         */
+
+        nlohmann::json result = SendGetRequest(Endpoint("/users/" + id), DefaultHeaders(), "", RateLimitBucketType::GLOBAL);
+
+        return discpp::User(result);
+    }
+
+    std::vector<discpp::Connection> Bot::GetBotUserConnections() {
+        /**
+         * @brief Get the bot user connections.
+         *
+         * ```cpp
+         *      bot.GetBotUserConnections();
+         * ```
+         *
+         * @return std::vector<discpp::Connection>
+         */
+
+        nlohmann::json result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), "", RateLimitBucketType::GLOBAL);
+
+        std::vector<discpp::Connection> connections;
+        for (auto const& connection : result) {
+            connections.push_back(discpp::Connection(connection));
+        }
+
+        return connections;
     }
 
     void Bot::UpdatePresence(discpp::Activity activity) {
@@ -192,8 +233,8 @@ namespace discpp {
         std::lock_guard<std::mutex> lock(websocket_client_mutex);
         logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::YELLOW + "Closing websocket connection...");
 
-        //websocket.close(ix::WebSocketCloseConstants::kNormalClosureCode);
-        websocket.stop(ix::WebSocketCloseConstants::kNormalClosureCode, "Reconnect");
+        websocket.close(ix::WebSocketCloseConstants::kNormalClosureCode);
+        websocket.stop(ix::WebSocketCloseConstants::kNormalClosureCode);
         //websocket_client.close(web::websockets::client::websocket_close_status::server_terminate).wait();
     }
 
@@ -277,11 +318,15 @@ namespace discpp {
         } else if (msg->type == ix::WebSocketMessageType::Error) {
             logger.Log(LogSeverity::SEV_INFO, LogTextColor::RED + "Error: " + msg->errorInfo.reason);
         } else if (msg->type == ix::WebSocketMessageType::Message) {
+            nlohmann::json result;
             try {
-                nlohmann::json result = nlohmann::json::parse(msg->str);
+                result = nlohmann::json::parse(msg->str);
+            } catch(const nlohmann::json::exception& e) {
+                logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::YELLOW + "A non json payload was received and ignored: \"" + msg->str + "\" (Error: " + e.what() + ")");
+            }
+
+            if (!result.empty()) {
                 OnWebSocketPacket(result);
-            } catch(const std::exception& e) {
-                logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::YELLOW + "A non json payload was received and ignored (" + msg->str + ")");
             }
         } else {
             logger.Log(LogSeverity::SEV_INFO, LogTextColor::RED + "Known message sent");
@@ -386,9 +431,9 @@ namespace discpp {
     }
 
     void Bot::ReconnectToWebsocket() {
-        logger.Log(LogSeverity::SEV_INFO, LogTextColor::YELLOW + "Reconnecting to Discord gateway!");
-
         if (!reconnecting) {
+            logger.Log(LogSeverity::SEV_INFO, LogTextColor::YELLOW + "Reconnecting to Discord gateway!");
+
             reconnecting = true;
 
             DisconnectWebsocket();
