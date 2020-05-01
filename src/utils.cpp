@@ -230,9 +230,18 @@ std::vector<std::string> discpp::SplitString(std::string str, std::string delimi
     std::string token;
     while ((pos = str.find(delimiter)) != std::string::npos) {
         token = str.substr(0, pos);
-        tokens.push_back(token);
+
+        // If the string is not empty then add it to the vector.
+        if (!token.empty()) {
+            tokens.push_back(token);
+        }
+
         str.erase(0, pos + delimiter.length());
     }
+
+    // Push back the last token from the string.
+    size_t last_token = str.find_last_of(delimiter);
+    tokens.push_back(str.substr(last_token + 1));
 
     // If the vector is empty, then just return a vector filled with the given string.
     if (tokens.empty()) {
