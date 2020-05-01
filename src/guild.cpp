@@ -280,10 +280,9 @@ namespace discpp {
 		 * @return discpp::Member
 		 */
 
-		auto it = std::find_if(discpp::globals::bot_instance->members.begin(), discpp::globals::bot_instance->members.end(),
-		        [&](const std::pair<snowflake, Member>& pair) { return pair.second.guild_id == this->id && pair.second.id == id; });
+		auto it = members.find(id);
 
-        if (it != discpp::globals::bot_instance->members.end()) {
+        if (it != members.end()) {
             return it->second;
         }
 
