@@ -77,6 +77,7 @@ target_link_libraries(main PRIVATE discpp)
 - [x] Finish tons of unimplemented methods in certain classes.
 - [x] Convert the default command handler to use command classes.
 - [x] Convert the event system to use a more object oriented system, similar to the new command handler.
+- [ ] Make sure all endpoints are implemented and add them if they aren't.
 - [ ] Voice websocket connection.
 - [ ] Sending audio through a voice connection.
 
