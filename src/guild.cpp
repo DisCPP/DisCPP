@@ -290,20 +290,23 @@ namespace discpp {
 		throw std::runtime_error("Member not found (Exceptions like these should be handled)!");
 	}
 
-	void Guild::EnsureBotPermission(Permission reqPerm) {
+	void Guild::EnsureBotPermission(Permission req_perm) {
 		/**
-		 * @brief Ensures the bot has permission
+		 * @brief Ensures the bot has a permission.
+		 *
+		 * If the bot does not have the permission a discpp::NoPermissionException will be thrown.
 		 *
 		 * ```cpp
 		 *      Guild::EnsureBotPermission(Permission::MANAGE_CHANNELS);
 		 * ```
 		 *
-		 * @param[in] reqPerm the permission in question
+		 * @param[in] req_perm The permission to check if the bot has.
 		 *
 		 */
 		Member tmp = this->GetMember(discpp::globals::bot_instance->bot_user.id);
-		if ((this->owner_id != tmp.id) || (!tmp.HasPermission(reqPerm)) || (!tmp.HasPermission(Permission::ADMINISTRATOR))) {
-			throw new NoPermissionException(reqPerm);
+		if (this->owner_id != tmp.id && !tmp.HasPermission(req_perm) && !tmp.HasPermission(Permission::ADMINISTRATOR)) {
+			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "The bot does not have permission: " + PermissionToString(req_perm) + " (Exceptions like these should be handled)!");
+			throw new NoPermissionException(req_perm);
 		}
 	}
 
