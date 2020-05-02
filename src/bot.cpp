@@ -198,8 +198,10 @@ namespace discpp {
          * @return void
          */
 
+        std::string json_payload = json.dump();
+
         if (message.empty()) {
-            logger.Log(LogSeverity::SEV_DEBUG, "Sending gateway payload: " + json.dump());
+            logger.Log(LogSeverity::SEV_DEBUG, "Sending gateway payload: " + json_payload);
         } else {
             logger.Log(LogSeverity::SEV_DEBUG, message);
         }
@@ -207,7 +209,7 @@ namespace discpp {
         WaitForRateLimits(bot_user.id, RateLimitBucketType::GLOBAL);
 
         std::lock_guard<std::mutex> lock = std::lock_guard(websocket_client_mutex);
-        websocket.sendBinary(json);
+        websocket.sendText(json_payload);
     }
 
     void Bot::SetCommandHandler(std::function<void(discpp::Bot *, discpp::Message)> command_handler) {
@@ -235,7 +237,6 @@ namespace discpp {
 
         websocket.close(ix::WebSocketCloseConstants::kNormalClosureCode);
         websocket.stop(ix::WebSocketCloseConstants::kNormalClosureCode);
-        //websocket_client.close(web::websockets::client::websocket_close_status::server_terminate).wait();
     }
 
     void Bot::WebSocketStart() {
@@ -299,10 +300,10 @@ namespace discpp {
 
         heartbeat_acked = false;
         disconnected = true;
-        reconnecting = true;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(10000));
         if (disconnected && !reconnecting) {
+            reconnecting = true;
             ReconnectToWebsocket();
         }
     }
@@ -356,7 +357,7 @@ namespace discpp {
                 } else {
                     hello_packet = result;
 
-                    CreateWebsocketRequest(GetIdentifyPacket().dump());
+                    CreateWebsocketRequest(GetIdentifyPacket());
                 }
                 break;
             }
@@ -397,7 +398,7 @@ namespace discpp {
                     data["d"] = last_sequence_number;
                 }
 
-                CreateWebsocketRequest(data.dump(), "Sending heartbeat payload: " + data.dump());
+                CreateWebsocketRequest(data, "Sending heartbeat payload: " + data.dump());
 
                 heartbeat_acked = false;
 
@@ -440,4 +441,4 @@ namespace discpp {
             WebSocketStart();
         }
     }
-}                                                                                   
+}
