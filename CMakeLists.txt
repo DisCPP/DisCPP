@@ -9,6 +9,9 @@ option(BUILD_TESTS "Build unit tests" OFF)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(cpr REQUIRED)
+if (WIN32)
+	find_package(mbedtls REQUIRED)
+endif()
 find_package(ixwebsocket REQUIRED)
 
 # Add source files
@@ -22,6 +25,7 @@ target_link_libraries(discpp PUBLIC OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(discpp PUBLIC cpr)
 
 if (WIN32)
+	target_link_libraries(discpp PUBLIC ${MBEDTLS_LIBRARY})
 	target_link_libraries(discpp PUBLIC wsock32 ws2_32 shlwapi)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
