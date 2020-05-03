@@ -72,7 +72,7 @@ namespace discpp {
 		 * @brief Constructs a discpp::Emoji object with a std::wstring unicode representation.
 		 *
 		 * ```cpp
-		 *      discpp::Emoji emoji(L"\u0030");
+		 *      discpp::Emoji emoji( (std::wstring) L"\u0030");
 		 * ```
 		 *
 		 * @param[in] w_unicode The std::wstring unicode representation of this emoji.
@@ -86,7 +86,7 @@ namespace discpp {
          * @brief Constructs a discpp::Emoji object with a std::string unicode representation.
          *
          * ```cpp
-         *      discpp::Emoji emoji("\u0030");
+         *      discpp::Emoji emoji( (std::string) "\u0030");
          * ```
          *
          * @param[in] s_unicode The std::string unicode representation of this emoji.

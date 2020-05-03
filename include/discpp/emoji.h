@@ -81,9 +81,32 @@ namespace discpp {
                    (!other.unicode.empty() && unicode.empty() && other.unicode == unicode);
         }
 
-		std::string ToString() {
+        std::string ToString() {
+            /**
+			 * @brief Gets a string representation of this emoji for sending through messages.
+			 *
+			 * ```cpp
+			 *      ctx.Send(emoji.ToString() + " Failed to make request!");
+			 * ```
+			 *
+			 * @return std::string
+			 */
+
+            auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
+
+            if (name.empty() && id.empty()) {
+                return wstr_converter.to_bytes(unicode);
+            } else// if (!name.empty() && id.empty()) {
+            {
+                return name;
+            }
+        }
+
+		std::string ToURL() {
 			/**
-			 * @brief Gets a string representation of this emoji, if its for messages or reactions.
+			 * @brief Gets a URL representation of this emoji for adding reactions.
+			 *
+			 * This URI encodes the emoji and returns the string result.
 			 *
 			 * ```cpp
 			 *      std::string endpoint = Endpoint("/channels/%/messages/%/reactions/%/@me", channel.id, id, emoji);
@@ -92,16 +115,16 @@ namespace discpp {
 			 * @return std::string
 			 */
 
-			auto converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
+            auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
 
 			std::wstring emoji;
 			if (name.empty()) {
 				emoji = unicode;
 			} else {
-				emoji = converter.from_bytes(name) + L":" + converter.from_bytes(id);
+				emoji = wstr_converter.from_bytes(name) + L":" + wstr_converter.from_bytes(id);
 			}
 
-			return EncodeURI(converter.to_bytes(emoji));
+			return EncodeURI(wstr_converter.to_bytes(emoji));
 		}
 
 		discpp::snowflake id; /**< ID of the current emoji */
