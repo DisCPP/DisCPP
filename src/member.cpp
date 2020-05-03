@@ -193,10 +193,10 @@ namespace discpp {
 
 	bool Member::HasPermission(discpp::Permission perm) {
 		/**
-		 * @brief Check if this member has a permission
+		 * @brief Check if this member has a permission. It will also check if it has the Administrator permission or is guild owner.
 		 *
 		 * ```cpp
-		 *      bool has_perm = member.HasPermission(discpp::Permission::ADMINISTRATOR);
+		 *      bool has_perm = member.HasPermission(discpp::Permission::MANAGE_CHANNELS);
 		 * ```
 		 *
 		 * @param[in] perm The permission to check that the member has.
@@ -204,22 +204,11 @@ namespace discpp {
 		 * @return bool
 		 */
 
-		discpp::Permissions permissions;
+		// Check if the member has the permission, has the admin permission, or is the guild owner.
+		bool has_perm = permissions.allow_perms.HasPermission(perm) && !permissions.deny_perms.HasPermission(perm);
+		has_perm = has_perm || (permissions.allow_perms.HasPermission(Permission::ADMINISTRATOR) && !permissions.deny_perms.HasPermission(Permission::ADMINISTRATOR));
+		has_perm = has_perm || discpp::Guild(guild_id).owner_id == this->id;
 
-		if (roles.size() > 0) {
-			for (discpp::Role role : roles) {
-				if (roles.front() == role) {
-					permissions.allow_perms.value = role.permissions.allow_perms.value;
-					permissions.deny_perms.value = role.permissions.deny_perms.value;
-				} else {
-					permissions.allow_perms.value |= role.permissions.allow_perms.value;
-					permissions.deny_perms.value |= role.permissions.deny_perms.value;
-				}
-			}
-		}
-
-		this->permissions = permissions;
-
-		return permissions.allow_perms.HasPermission(perm) && !permissions.deny_perms.HasPermission(perm);
+		return has_perm;
 	}
 }
