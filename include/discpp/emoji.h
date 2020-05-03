@@ -77,8 +77,18 @@ namespace discpp {
 		Emoji(std::string s_unicode);
 
         bool operator==(Emoji& other) const {
-            return (!other.name.empty() && !name.empty() && !other.id.empty() && id.empty() && other.name == name && other.id == id) ||
-                   (!other.unicode.empty() && unicode.empty() && other.unicode == unicode);
+            auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
+
+            // If the other's name is empty but mine is not then it must have unicode.
+            if (other.name.empty() && !name.empty() && unicode.empty()) {
+                return wstr_converter.to_bytes(other.unicode) == name;
+            } else if (!other.name.empty() && name.empty() && !unicode.empty()) {
+                return wstr_converter.to_bytes(unicode) == other.name;
+            } else if (!other.id.empty() && !id.empty() && !other.name.empty() && !name.empty()) {
+                return other.id == id && other.name == name;
+            }
+            
+            return false; // Hopefully this never runs.
         }
 
         std::string ToString() {
