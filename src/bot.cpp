@@ -28,7 +28,7 @@ namespace discpp {
          * @return discpp::Bot, this is a constructor.
          */
 
-        fire_command_method = std::bind(&discpp::FireCommand, std::placeholders::_1, std::placeholders::_2);
+        fire_command_method = std::bind(discpp::FireCommand, std::placeholders::_1, std::placeholders::_2);
 
         discpp::globals::bot_instance = this;
 
