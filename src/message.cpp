@@ -1,5 +1,5 @@
 #include "message.h"
-#include "bot.h"
+#include "client.h"
 
 namespace discpp {
 	Message::Message(snowflake id) : discpp::DiscordObject(id) {
@@ -15,9 +15,9 @@ namespace discpp {
 		 * @return discpp::Member, this is a constructor.
 		 */
 
-		auto message = discpp::globals::bot_instance->messages.find(id);
+		auto message = discpp::globals::client_instance->messages.find(id);
 
-		if (message != discpp::globals::bot_instance->messages.end()) {
+		if (message != discpp::globals::client_instance->messages.end()) {
 			*this = message->second;
 		}
 	}

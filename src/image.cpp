@@ -1,7 +1,7 @@
 #include <discpp/log.h>
 #include "image.h"
 #include "utils.h"
-#include "bot.h"
+#include "client.h"
 
 namespace discpp {
 	std::string GetFileExtension(std::string file_name) {
@@ -50,13 +50,13 @@ namespace discpp {
 			} else if (ext == "gif") {
 				data_uri_ext = "gif";
 			} else {
-				globals::bot_instance->logger->Error(LogTextColor::RED + "The file extension, \"" + ext + "\" is not supported by Discord!");
+				globals::client_instance->logger->Error(LogTextColor::RED + "The file extension, \"" + ext + "\" is not supported by Discord!");
 				throw std::runtime_error("The file extension, \"" + ext + "\" is not supported by Discord!");
 			}
 
 			return "data:image/" + data_uri_ext + ";base64," + Base64Encode(buffer.str());
 		} else {
-			globals::bot_instance->logger->Error(LogTextColor::RED + "Failed to open image!");
+			globals::client_instance->logger->Error(LogTextColor::RED + "Failed to open image!");
 			throw std::runtime_error("Failed to open image!");
 		}
 	}

@@ -1,7 +1,7 @@
 #include "command.h"
 #include "command_handler.h"
 
-void discpp::FireCommand(discpp::Bot* bot, discpp::Message message) {
+void discpp::FireCommand(discpp::Client* bot, discpp::Message message) {
     /**
      * @brief Detects if a command has ran, and if it has then execute it.
      *

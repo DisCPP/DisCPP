@@ -10,10 +10,10 @@
 #include <unordered_map>
 
 namespace discpp {
-	class Bot;
+	class Client;
 
 	namespace globals {
-		inline discpp::Bot* bot_instance;
+		inline discpp::Client* client_instance;
 	}
 
 	namespace specials {

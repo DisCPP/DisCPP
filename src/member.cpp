@@ -1,5 +1,5 @@
 #include "guild.h"
-#include "bot.h"
+#include "client.h"
 #include <climits>
 
 namespace discpp {

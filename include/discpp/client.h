@@ -16,20 +16,20 @@
 #include "member.h"
 #include "guild.h"
 #include "log.h"
-#include "bot_config.h"
+#include "client_config.h"
 
 namespace discpp {
 	class Role;
 	class User;
 	class Activity;
-	class BotConfig;
+	class ClientConfig;
 
-	class Bot {
+	class Client {
 	public:
 		std::string token; /**< Token for the current bot */
-		BotConfig config; /**< Configuration for the current bot */
+		ClientConfig config; /**< Configuration for the current bot */
 
-		discpp::User bot_user; /**< discpp::User object representing current bot */
+		discpp::User client_user; /**< discpp::User object representing current user */
 		discpp::Logger* logger; /**< discpp::Logger object representing current logger */
 
 		std::unordered_map<snowflake, Channel> channels; /**< List of channels the current bot can access */
@@ -53,10 +53,10 @@ namespace discpp {
 			heartbeat_ack = 11			// Receive
 		};
 
-		Bot(std::string token, BotConfig config);
+		Client(std::string token, ClientConfig config);
 		int Run();
 		void CreateWebsocketRequest(nlohmann::json json, std::string message = "");
-		void SetCommandHandler(std::function<void(discpp::Bot*, discpp::Message)> command_handler);
+		void SetCommandHandler(std::function<void(discpp::Client*, discpp::Message)> command_handler);
 		void DisconnectWebsocket();
 		void ReconnectToWebsocket();
 
@@ -120,7 +120,7 @@ namespace discpp {
 		nlohmann::json GetIdentifyPacket();
 
 		// Commands
-		std::function<void(discpp::Bot*, discpp::Message)> fire_command_method;
+		std::function<void(discpp::Client*, discpp::Message)> fire_command_method;
 	};
 }
 

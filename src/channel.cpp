@@ -1,6 +1,6 @@
 #include "channel.h"
 #include "utils.h"
-#include "bot.h"
+#include "client.h"
 
 namespace discpp {
 	Channel::Channel(snowflake id) : discpp::DiscordObject(id) {
@@ -15,8 +15,8 @@ namespace discpp {
 		 *
 		 * @return discpp::Channel, this is a constructor.
 		 */
-		std::unordered_map<snowflake, Channel>::iterator it = discpp::globals::bot_instance->channels.find(id);
-		if (it != discpp::globals::bot_instance->channels.end()) {
+		std::unordered_map<snowflake, Channel>::iterator it = discpp::globals::client_instance->channels.find(id);
+		if (it != discpp::globals::client_instance->channels.end()) {
 			*this = it->second;
 		}
 	}

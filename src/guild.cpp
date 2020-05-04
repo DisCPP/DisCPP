@@ -1,5 +1,5 @@
 #include "guild.h"
-#include "bot.h"
+#include "client.h"
 
 namespace discpp {
 	Guild::Guild(snowflake id) : DiscordObject(id) {
@@ -17,8 +17,8 @@ namespace discpp {
 		 * @return discpp::Guild, this is a constructor.
 		 */
 
-		std::unordered_map<snowflake, Guild>::iterator it = discpp::globals::bot_instance->guilds.find(id);
-		if (it != discpp::globals::bot_instance->guilds.end()) {
+		std::unordered_map<snowflake, Guild>::iterator it = discpp::globals::client_instance->guilds.find(id);
+		if (it != discpp::globals::client_instance->guilds.end()) {
 			*this = it->second;
 		}
 	}
@@ -141,7 +141,7 @@ namespace discpp {
 		 * @return void
 		 */
 
-		if (discpp::globals::bot_instance->bot_user.id != this->owner_id) {
+		if (discpp::globals::client_instance->client_user.id != this->owner_id) {
 			throw new NotGuildOwnerException();
 		}
 		SendDeleteRequest(Endpoint("/guilds/" + id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
@@ -286,7 +286,7 @@ namespace discpp {
             return it->second;
         }
 
-		globals::bot_instance->logger->Error(LogTextColor::RED + "Member not found (Exceptions like these should be handled)!");
+		globals::client_instance->logger->Error(LogTextColor::RED + "Member not found (Exceptions like these should be handled)!");
 		throw std::runtime_error("Member not found (Exceptions like these should be handled)!");
 	}
 
@@ -303,9 +303,9 @@ namespace discpp {
 		 * @param[in] req_perm The permission to check if the bot has.
 		 *
 		 */
-		Member tmp = this->GetMember(discpp::globals::bot_instance->bot_user.id);
+		Member tmp = this->GetMember(discpp::globals::client_instance->client_user.id);
 		if (this->owner_id != tmp.id && !tmp.HasPermission(req_perm) && !tmp.HasPermission(Permission::ADMINISTRATOR)) {
-			globals::bot_instance->logger->Error(LogTextColor::RED + "The bot does not have permission: " + PermissionToString(req_perm) + " (Exceptions like these should be handled)!");
+			globals::client_instance->logger->Error(LogTextColor::RED + "The bot does not have permission: " + PermissionToString(req_perm) + " (Exceptions like these should be handled)!");
 			throw new NoPermissionException(req_perm);
 		}
 	}
