@@ -1,6 +1,8 @@
 #ifndef DISCPP_BOT_H
 #define DISCPP_BOT_H
 
+#define RAPIDJSON_HAS_STDSTRING 1
+
 #include <string>
 #include <future>
 #include <string_view>
@@ -8,7 +10,9 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
-
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 #include <ixwebsocket/IXWebSocket.h>
 
 #include "channel.h"
@@ -56,6 +60,7 @@ namespace discpp {
 		Bot(std::string token, BotConfig config);
 		int Run();
 		void CreateWebsocketRequest(nlohmann::json json, std::string message = "");
+		void CreateWebsocketRequest(rapidjson::Document json, std::string message = "");
 		void SetCommandHandler(std::function<void(discpp::Bot*, discpp::Message)> command_handler);
 		void DisconnectWebsocket();
 		void ReconnectToWebsocket();
@@ -97,6 +102,7 @@ namespace discpp {
 		std::string gateway_endpoint;
 
 		nlohmann::json hello_packet;
+		rapidjson::Document hello_packet_1;
 
 		std::thread heartbeat_thread;
 
@@ -115,9 +121,11 @@ namespace discpp {
 		void WebSocketStart();
 		void OnWebSocketListen(const ix::WebSocketMessagePtr& msg);
 		void OnWebSocketPacket(const nlohmann::json& result);
+		void OnWebSocketPacket(const rapidjson::Document& result);
 		void HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg);
 		void HandleHeartbeat();
 		nlohmann::json GetIdentifyPacket();
+		rapidjson::Document GetIdentifyPacket_1();
 
 		// Commands
 		std::function<void(discpp::Bot*, discpp::Message)> fire_command_method;
