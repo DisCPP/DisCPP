@@ -87,7 +87,7 @@ namespace discpp {
         if (it != discpp::globals::client_instance->guilds.end()) {
             return it->second;
         }
-        throw std::runtime_error("Guild not found!");
+        throw new InvalidGuildException();
     }
 
     discpp::User Client::ModifyCurrentUser(std::string username, discpp::Image avatar) {
@@ -105,14 +105,14 @@ namespace discpp {
          */
 
         cpr::Body body("{\"username\": \"" + username + "\", \"avatar\": " + avatar.ToDataURI() + "}");
-        nlohmann::json result = SendPatchRequest(Endpoint("/users/@me"), DefaultHeaders(), 0, discpp::RateLimitBucketType::GLOBAL, body);
+        rapidjson::Document result = SendPatchRequest(Endpoint("/users/@me"), DefaultHeaders(), 0, discpp::RateLimitBucketType::GLOBAL, body);
 
         client_user = discpp::User(result);
 
         return client_user;
     }
 
-    void Client::LeaveGuild(discpp::Guild guild) {
+    void Client::LeaveGuild(discpp::Guild& guild) {
         /**
          * @brief Leave the guild
          *
@@ -141,7 +141,7 @@ namespace discpp {
          * @return discpp::User
          */
 
-        nlohmann::json result = SendGetRequest(Endpoint("/users/" + id), DefaultHeaders(), "", RateLimitBucketType::GLOBAL);
+        rapidjson::Document result = SendGetRequest(Endpoint("/users/" + id), DefaultHeaders(), "", RateLimitBucketType::GLOBAL);
 
         return discpp::User(result);
     }
@@ -157,17 +157,19 @@ namespace discpp {
          * @return std::vector<discpp::Connection>
          */
 
-        nlohmann::json result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), "", RateLimitBucketType::GLOBAL);
+        rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), "", RateLimitBucketType::GLOBAL);
 
         std::vector<discpp::Connection> connections;
-        for (auto const& connection : result) {
-            connections.push_back(discpp::Connection(connection));
+        for (auto const& connection : result.GetArray()) {
+            rapidjson::Document connection_json;
+            connection_json.CopyFrom(connection, connection_json.GetAllocator());
+            connections.push_back(discpp::Connection(connection_json));
         }
 
         return connections;
     }
 
-    void Client::UpdatePresence(discpp::Activity activity) {
+    void Client::UpdatePresence(discpp::Activity& activity) {
         /**
          * @brief Updates the bot's presence.
          *
@@ -180,42 +182,16 @@ namespace discpp {
          * @return void
          */
 
-        nlohmann::json payload = nlohmann::json({ {"op", 3}, {"d", activity.ToJson()} });
+        rapidjson::Document payload;
+        payload.SetObject();
+        rapidjson::Document::AllocatorType& payload_allocator = payload.GetAllocator();
+        payload.AddMember("op", 3, payload_allocator);
+        payload.AddMember("d", activity.ToJson(), payload_allocator);
 
         CreateWebsocketRequest(payload);
     }
 
-    void discpp::Client::CreateWebsocketRequest(nlohmann::json json, std::string message) {
-        /**
-         * @brief Send a request to the websocket.
-         *
-         * Be cautious with this as it may close the websocket connection if it is invalid.
-         *
-         * ```cpp
-         *      bot.CreateWebsocketRequest(request_json);
-         * ```
-         *
-         * @param[in] json The request to send to the websocket.
-         * @param[in] message The message to print to the debug log. If this is empty it will be set to default. (Default: "Sending gateway payload" + payload)
-         *
-         * @return void
-         */
-
-        std::string json_payload = json.dump();
-
-        if (message.empty()) {
-            logger->Debug("Sending gateway payload: " + json_payload);
-        } else {
-            logger->Debug(message);
-        }
-
-        WaitForRateLimits(client_user.id, RateLimitBucketType::GLOBAL);
-
-        std::lock_guard<std::mutex> lock = std::lock_guard(websocket_client_mutex);
-        websocket.sendText(json_payload);
-    }
-
-    void discpp::Client::CreateWebsocketRequest_1(rapidjson::Document& json, std::string message) {
+    void discpp::Client::CreateWebsocketRequest(rapidjson::Document& json, std::string message) {
         /**
          * @brief Send a request to the websocket.
          *
@@ -248,7 +224,7 @@ namespace discpp {
         websocket.sendText(json_payload);
     }
 
-    void Client::SetCommandHandler(std::function<void(discpp::Client *, discpp::Message)> command_handler) {
+    void Client::SetCommandHandler(std::function<void(discpp::Client*, discpp::Message)> command_handler) {
         /**
          * @brief Change the command handler.
          *
@@ -279,10 +255,10 @@ namespace discpp {
         rapidjson::Document gateway_request;
         switch (config->type) {
         case TokenType::USER:
-            gateway_request = SendGetRequest_1(Endpoint("/gateway"), { {"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
+            gateway_request = SendGetRequest(Endpoint("/gateway"), { {"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
             break;
         case TokenType::BOT:
-            gateway_request = SendGetRequest_1(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
+            gateway_request = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
             break;
         }
 
@@ -408,7 +384,7 @@ namespace discpp {
                 resume_d.AddMember("session_id", session_id, resume_allocator);
                 resume_d.AddMember("seq", std::to_string(last_sequence_number), resume_allocator);
                 resume.AddMember("d", resume_d, resume_allocator);
-                CreateWebsocketRequest_1(resume);
+                CreateWebsocketRequest(resume);
 
                 // Heartbeat just to be safe
                 rapidjson::Document data;
@@ -426,7 +402,7 @@ namespace discpp {
             else {
                 hello_packet_1.Accept(result);
 
-                CreateWebsocketRequest_1(GetIdentifyPacket());
+                CreateWebsocketRequest(GetIdentifyPacket());
             }
             break;
         }
@@ -448,11 +424,11 @@ namespace discpp {
                 d.AddMember("session_id", session_id, allocator);
                 d.AddMember("seq", std::to_string(last_sequence_number), allocator);
                 resume.AddMember("d", d, allocator);
-                CreateWebsocketRequest_1(resume);
+                CreateWebsocketRequest(resume);
             }
             else {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-                CreateWebsocketRequest_1(GetIdentifyPacket());
+                CreateWebsocketRequest(GetIdentifyPacket());
             }
 
             break;
@@ -483,7 +459,7 @@ namespace discpp {
                 rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
                 data.Accept(writer);
                 std::string json_payload = buffer.GetString();
-                CreateWebsocketRequest_1(data, "Sending heartbeat payload: " + json_payload);
+                CreateWebsocketRequest(data, "Sending heartbeat payload: " + json_payload);
 
                 heartbeat_acked = false;
 

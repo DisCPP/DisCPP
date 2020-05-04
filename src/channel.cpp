@@ -60,12 +60,14 @@ namespace discpp {
 		 */
 
 		std::string escaped_text = EscapeString(text);
-		nlohmann::json message_json = nlohmann::json::parse("{\"content\":\"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}");
+		rapidjson::Document message_json;
+		std::string message_json_str = "{\"content\":\"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
+		message_json.Parse(message_json_str);
 
 		if (escaped_text.size() >= 2000) {
 			// Write message to file
 			std::ofstream message("message.txt", std::ios::out | std::ios::binary);
-			message << message_json["content"];
+			message << message_json["content"].GetString();
 			message.close();
 
 			// Ensure the file will be deleted even if it runs into an exception sending the file.
@@ -108,9 +110,13 @@ namespace discpp {
 			return discpp::Message(nlohmann::json::parse(response.text));
 		}
 		else {
-			body = cpr::Body(message_json.dump());
+			rapidjson::StringBuffer buffer;
+			rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+			message_json.Accept(writer);
+			std::string json_payload = buffer.GetString();
+			body = cpr::Body(json_payload);
 		}
-		nlohmann::json result = SendPostRequest(Endpoint("/channels/" + id + "/messages"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+		rapidjson::Document result = SendPostRequest(Endpoint("/channels/" + id + "/messages"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
 		return discpp::Message(result);
 	}
@@ -172,7 +178,7 @@ namespace discpp {
         }
 
 		cpr::Body body(j_body.dump());
-		nlohmann::json result = SendPatchRequest(Endpoint("/channels/" + id), headers, id, RateLimitBucketType::CHANNEL, body);
+		rapidjson::Document result = SendPatchRequest(Endpoint("/channels/" + id), headers, id, RateLimitBucketType::CHANNEL, body);
 		
 		*this = discpp::Channel(result);
 		return *this;
@@ -189,7 +195,7 @@ namespace discpp {
 		 * @return discpp::Channel - Returns a default channel object
 		 */
 
-		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/" + id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		rapidjson::Document result = SendDeleteRequest(Endpoint("/channels/" + id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 		*this = discpp::Channel();
 		return *this;
 	}
@@ -208,12 +214,14 @@ namespace discpp {
 		 * @return std::vector<discpp::Message>
 		 */
 		
-		nlohmann::json result = SendGetRequest(Endpoint("/channels/" + id + "/messages"), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + id + "/messages"), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 
 		std::vector<discpp::Message> messages;
 
-		for (nlohmann::json message : result) {
-			messages.push_back(discpp::Message(message));
+		for (auto& message : result.GetArray()) {
+			rapidjson::Document message_json;
+			message_json.CopyFrom(message, message_json.GetAllocator());
+			messages.push_back(discpp::Message(message_json));
 		}
 
 		return messages;
@@ -232,7 +240,7 @@ namespace discpp {
 		 * @return discpp::Message
 		 */
 
-		nlohmann::json result = SendGetRequest(Endpoint("/channels/" + id + "/messages/" + message_id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + id + "/messages/" + message_id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 		return discpp::Message(result);
 	}
 
@@ -247,7 +255,7 @@ namespace discpp {
 		 * @return void
 		 */
 
-		nlohmann::json result = SendPostRequest(Endpoint("/channels/" + id + "/typing"), DefaultHeaders(), {}, {});
+		rapidjson::Document result = SendPostRequest(Endpoint("/channels/" + id + "/typing"), DefaultHeaders(), {}, {});
 	}
 
 	std::vector<discpp::Message> Channel::GetPinnedMessages() {
@@ -261,11 +269,13 @@ namespace discpp {
 		 * @return std::vector<discpp::Message>
 		 */
 
-		nlohmann::json result = SendGetRequest(Endpoint("/channels/" + id = "/pins"), DefaultHeaders(), {}, {});
+		rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + id = "/pins"), DefaultHeaders(), {}, {});
 		
 		std::vector<discpp::Message> messages;
-		for (auto message : result) {
-			messages.push_back(discpp::Message(message));
+		for (auto& message : result.GetArray()) {
+			rapidjson::Document message_json;
+			message_json.CopyFrom(message, message_json.GetAllocator());
+			messages.push_back(discpp::Message(message_json));
 		}
 
 		return messages;
@@ -289,7 +299,9 @@ namespace discpp {
 		rapidjson::Value::ConstMemberIterator itr = json.FindMember("permission_overwrites");
 		if (itr != json.MemberEnd()) {
 			for (auto& permission_overwrite : json["permission_overwrites"].GetArray()) {
-				permissions.push_back(discpp::Permissions(permission_overwrite.GetString()));
+				rapidjson::Document permission_json;
+				permission_json.CopyFrom(permission_overwrite, permission_json.GetAllocator());
+				permissions.push_back(discpp::Permissions(permission_json));
 			}
 		}
 		nsfw = json["nsfw"].GetBool();
@@ -346,7 +358,7 @@ namespace discpp {
 		}
 
 		cpr::Body body("{\"messages\": [" + combined_message + "]}");
-		nlohmann::json result = SendPostRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+		rapidjson::Document result = SendPostRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 	}
 
 	std::vector<discpp::GuildInvite> GuildChannel::GetInvites() {
@@ -360,10 +372,12 @@ namespace discpp {
 		 * @return std::vector<discpp::GuildInvite>
 		 */
 
-		nlohmann::json result = SendGetRequest(Endpoint("/channels/" + id + "/invites"), DefaultHeaders(), {}, {});
+		rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + id + "/invites"), DefaultHeaders(), {}, {});
 		std::vector<discpp::GuildInvite> invites;
-		for (auto invite : result) {
-			invites.push_back(discpp::GuildInvite(invite));
+		for (auto& invite : result.GetArray()) {
+			rapidjson::Document invite_json;
+			invite_json.CopyFrom(invite, invite_json.GetAllocator());
+			invites.push_back(discpp::GuildInvite(invite_json));
 		}
 
 		return invites;
@@ -386,7 +400,7 @@ namespace discpp {
 		 */
 
 		cpr::Body body("{\"max_age\": " + std::to_string(max_age) + ", \"max_uses\": " + std::to_string(max_uses) + ", \"temporary\": " + std::to_string(temporary) + ", \"unique\": " + std::to_string(unique) + "}");
-		nlohmann::json result = SendPostRequest(Endpoint("/channels/" + id + "/invites"), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+		rapidjson::Document result = SendPostRequest(Endpoint("/channels/" + id + "/invites"), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 		discpp::GuildInvite invite(result);
 
 		return invite;
@@ -407,13 +421,19 @@ namespace discpp {
 
 		std::string s_type = (permissions.permission_type == PermissionType::MEMBER) ? "member" : "role";
 
-		nlohmann::json j_body = {
-				{"allow" , permissions.allow_perms.value},
-				{"deny", permissions.deny_perms.value},
-				{"type", s_type}
-		};
+		rapidjson::Document permission_json;
+		permission_json.SetObject();
+		rapidjson::Document::AllocatorType& permission_allocator = permission_json.GetAllocator();
+		permission_json.AddMember("allow", permissions.allow_perms.value, permission_allocator);
+		permission_json.AddMember("deny", permissions.deny_perms.value, permission_allocator);
+		permission_json.AddMember("type", s_type, permission_allocator);
 
-		nlohmann::json result = SendPutRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(j_body.dump()));
+		rapidjson::StringBuffer buffer;
+		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+		permission_json.Accept(writer);
+		std::string json_payload = buffer.GetString();
+
+		rapidjson::Document result = SendPutRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(json_payload));
 	}
 
 	void GuildChannel::DeletePermission(discpp::Permissions& permissions) {
@@ -429,14 +449,16 @@ namespace discpp {
 		 * @return void
 		 */
 
-		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		rapidjson::Document result = SendDeleteRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 
 	DMChannel::DMChannel(rapidjson::Document& json) : Channel(json) {
 		rapidjson::Value::ConstMemberIterator itr = json.FindMember("recipients");
 		if (itr != json.MemberEnd()) {
 			for (auto& recipient : json["recipients"].GetArray()) {
-				recipients.push_back(discpp::User(recipient));
+				rapidjson::Document user_json;
+				user_json.CopyFrom(recipient, user_json.GetAllocator());
+				recipients.push_back(discpp::User(user_json));
 			}
 		}
 		icon = json["icon"].GetString();
@@ -457,7 +479,7 @@ namespace discpp {
 		 * @return void
 		 */
 
-		nlohmann::json result = SendPutRequest(Endpoint("/channels/" + id + "/recipients/" + user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		rapidjson::Document result = SendPutRequest(Endpoint("/channels/" + id + "/recipients/" + user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 
 	void DMChannel::GroupDMRemoveRecipient(discpp::User& user) {
@@ -473,6 +495,6 @@ namespace discpp {
 		 * @return void
 		 */
 
-		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/" + id + "/recipients/" + user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		rapidjson::Document result = SendDeleteRequest(Endpoint("/channels/" + id + "/recipients/" + user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 }

@@ -1,6 +1,8 @@
 #ifndef DISCPP_CHANNEL_H
 #define DISCPP_CHANNEL_H
 
+#define RAPIDJSON_HAS_STDSTRING 1
+
 #include "discord_object.h"
 #include "permission.h"
 #include "embed_builder.h"

@@ -44,7 +44,7 @@ namespace discpp {
 	    };
 
 		GuildInvite() = default;
-		GuildInvite(nlohmann::json json) {
+		GuildInvite(rapidjson::Document& json) {
             /**
              * @brief Constructs a discpp::GuildInvite object from json.
              *
@@ -56,14 +56,15 @@ namespace discpp {
              *
              * @return discpp::GuildInvite, this is a constructor.
              */
-            code = json["code"];
+
+            code = json["code"].GetString();
             guild_id = (json.contains("guild")) ? json["guild"]["id"].get<snowflake>() : "";
             channel = discpp::GuildChannel(json["channel"]);
             inviter = (json.contains("inviter")) ? discpp::User(json["inviter"]) : discpp::User();
             target_user = (json.contains("target_user")) ? discpp::User(json["target_user"]) : discpp::User();
-            target_user_type = static_cast<TargetUserType>(GetDataSafely<int>(json, "target_user_type"));
-            approximate_presence_count = GetDataSafely<int>(json, "approximate_presence_count");
-            approximate_member_count = GetDataSafely<int>(json, "approximate_member_count");
+            target_user_type = static_cast<TargetUserType>(json["target_user_type"].GetInt());
+            approximate_presence_count = json["approximate_presence_count"].GetInt();
+            approximate_member_count = json["approximate_member_count"].GetInt();
         }
         std::string code; /**< The invite code (unique ID). */
         snowflake guild_id; /**< GThe guild this invite is for. */
@@ -78,7 +79,7 @@ namespace discpp {
 	class GuildIntegrationAccount : public DiscordObject {
 	public:
         GuildIntegrationAccount() = default;
-        GuildIntegrationAccount(nlohmann::json json) {
+        GuildIntegrationAccount(rapidjson::Document& json) {
             /**
              * @brief Constructs a discpp::GuildIntegrationAccount object from json.
              *
@@ -90,8 +91,8 @@ namespace discpp {
              *
              * @return discpp::GuildIntegrationAccount, this is a constructor.
              */
-			id = json["id"];
-			name = json["name"];
+			id = json["id"].GetString();
+			name = json["name"].GetString();
 		}
 
         std::string name; /**< Name of the account. */
@@ -105,7 +106,7 @@ namespace discpp {
 	    };
 
 		GuildIntegration() = default;
-        GuildIntegration(nlohmann::json json) {
+        GuildIntegration(rapidjson::Document& json) {
             /**
              * @brief Constructs a discpp::GuildIntegration object from json.
              *
@@ -118,17 +119,21 @@ namespace discpp {
              * @return discpp::GuildIntegration, this is a constructor.
              */
 
-            id = json["id"].get<snowflake>();
-            name = json["name"];
-            type = json["type"];
-            enabled = json["enabled"].get<bool>();
-            syncing = json["syncing"].get<bool>();
-            role = discpp::Role(json["role_id"].get<snowflake>());
-            expire_behavior = static_cast<IntegrationExpireBehavior>(json["expire_behavior"].get<int>());
-            expire_grace_period = json["expire_grace_period"].get<int>();
-            user = discpp::User(json["user"]);
-            account = discpp::GuildIntegrationAccount(json["account"]);
-            synced_at = json["synced_at"];
+            id = static_cast<snowflake>(json["id"].GetString());
+            name = json["name"].GetString();
+            type = json["type"].GetString();
+            enabled = json["enabled"].GetBool();
+            syncing = json["syncing"].GetBool();
+            role = discpp::Role(static_cast<snowflake>(json["role_id"].GetString()));
+            expire_behavior = static_cast<IntegrationExpireBehavior>(json["expire_behavior"].GetInt());
+            expire_grace_period = json["expire_grace_period"].GetInt();
+            rapidjson::Document user_json;
+            user_json.CopyFrom(json["user"], user_json.GetAllocator());
+            user = discpp::User(user_json);
+            rapidjson::Document guildintegration_json;
+            guildintegration_json.CopyFrom(json["account"], guildintegration_json.GetAllocator());
+            account = discpp::GuildIntegrationAccount(guildintegration_json);
+            synced_at = json["synced_at"].GetString();
         }
 
         std::string name; /**< Integration name. */

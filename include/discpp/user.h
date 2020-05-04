@@ -29,14 +29,14 @@ namespace discpp {
 		ConnectionVisibility visibility;
 
 		Connection() = default;
-		Connection(nlohmann::json json);
+		Connection(rapidjson::Document& json);
 	};
 
 	class User : public DiscordObject {
 	public:
 		User() = default;
 		User(snowflake id);
-		User(nlohmann::json json);
+		User(rapidjson::Document& json);
 
 		discpp::Channel CreateDM();
 		std::vector<Connection> GetUserConnections();

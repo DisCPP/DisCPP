@@ -23,7 +23,7 @@ namespace discpp {
 		}
 	}
 
-	User::User(nlohmann::json json) {
+	User::User(rapidjson::Document& json) {
 		/**
 		 * @brief Constructs a discpp::User object by parsing json.
 		 *
@@ -35,24 +35,30 @@ namespace discpp {
 		 *
 		 * @return discpp::User, this is a constructor.
 		 */
-
-		id = GetDataSafely<snowflake>(json, "id");
-		username = GetDataSafely<std::string>(json, "username");
-		discriminator = GetDataSafely<std::string>(json, "discriminator");
-		avatar = GetDataSafely<std::string>(json, "avatar");
-		bot = GetDataSafely<bool>(json, "bot");
-		system = GetDataSafely<bool>(json, "system");
-		mfa_enabled = GetDataSafely<bool>(json, "mfa_enabled");
-		locale = GetDataSafely<std::string>(json, "locale");
-		verified = GetDataSafely<bool>(json, "verified");
-		flags = GetDataSafely<int>(json, "flags");
-		premium_type = (json.contains("premium_type")) ? static_cast<discpp::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type")) : discpp::specials::NitroSubscription::NO_NITRO;
-		public_flags = GetDataSafely<int>(json, "public_flags");
+		
+		id = static_cast<snowflake>(json["id"].GetString());
+		username = json["username"].GetString();
+		discriminator = json["discriminator"].GetString();
+		avatar = json["avatar"].GetString();
+		bot = json["bot"].GetBool();
+		system = json["system"].GetBool();
+		mfa_enabled = json["mfa_enabled"].GetBool();
+		locale = json["locale"].GetString();
+		verified = json["verified"].GetBool();
+		flags = json["flags"].GetInt();
+		rapidjson::Value::ConstMemberIterator itr = json.FindMember("premium_type");
+		if (itr != json.MemberEnd()) {
+			premium_type = static_cast<discpp::specials::NitroSubscription>(json["premium_type"].GetInt());
+		}
+		else {
+			premium_type = discpp::specials::NitroSubscription::NO_NITRO;
+		}
+		public_flags = json["public_flags"].GetInt();
 		created_at = FormatTimeFromSnowflake(id);
 		mention = "<@" + id + ">";
 	}
 
-	Connection::Connection(nlohmann::json json) {
+	Connection::Connection(rapidjson::Document& json) {
 		/**
 		 * @brief Constructs a discpp::Connection object by parsing json.
 		 *
@@ -65,19 +71,31 @@ namespace discpp {
 		 * @return discpp::Connection, this is a constructor.
 		 */
 
-		id = GetDataSafely<snowflake>(json, "id");
-		name = GetDataSafely<std::string>(json, "name");
-		type = GetDataSafely<std::string>(json, "type");
-		revoked = GetDataSafely<bool>(json, "revoked");
-		if (json.contains("integrations")) {
-			for (auto& integration : json["integrations"]) {
-				integrations.push_back(discpp::GuildIntegration(integration));
+		id = static_cast<snowflake>(json["id"].GetString());
+		name = json["name"].GetString();
+		type = json["type"].GetString();
+		revoked = json["revoked"].GetBool();
+
+		rapidjson::Value::ConstMemberIterator itr = json.FindMember("integrations");
+
+		if (itr != json.MemberEnd()) {
+			for (auto& integration : json["integrations"].GetArray()) {
+				rapidjson::Document integration_json;
+				integration_json.CopyFrom(integration, integration_json.GetAllocator());
+				integrations.push_back(discpp::GuildIntegration(integration_json));
 			}
 		}
-		verified = GetDataSafely<bool>(json, "verified");
-		friend_sync = GetDataSafely<bool>(json, "friend_sync");
-		show_activity = GetDataSafely<bool>(json, "show_activity");
-		visibility = (json.contains("visibility")) ? static_cast<ConnectionVisibility>(GetDataSafely<int>(json, "visibility")) : ConnectionVisibility::NONE;
+		verified = json["verified"].GetBool();
+		friend_sync = json["friend_sync"].GetBool();
+		show_activity = json["show_activity"].GetBool();
+		
+		itr = json.FindMember("visibility");
+		if (itr != json.MemberEnd()){
+			visibility = static_cast<ConnectionVisibility>(json["visibility"].GetInt());
+		}
+		else {
+			visibility = ConnectionVisibility::NONE;
+		}
 	}
 
 	discpp::Channel User::CreateDM() {
@@ -92,7 +110,7 @@ namespace discpp {
 		 */
 
 		cpr::Body body("{\"recipient_id\": \"" + id + "\"}");
-		nlohmann::json result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders({ {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
+		rapidjson::Document result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders({ {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
 
 		return discpp::Channel(result);
 	}
@@ -108,12 +126,15 @@ namespace discpp {
 		 * @return std::vector<discpp::Connection>
 		 */
 
-		nlohmann::json result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
+		rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
 
 		std::vector<Connection> connections;
-		for (auto& connection : result) {
-			connections.push_back(discpp::Connection(connection));
+		for (auto const& connection : result.GetArray()) {
+			rapidjson::Document connection_json;
+			connection_json.CopyFrom(connection, connection_json.GetAllocator());
+			connections.push_back(discpp::Connection(connection_json));
 		}
+
 		return connections;
 	}
 	

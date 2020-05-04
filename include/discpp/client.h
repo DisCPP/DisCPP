@@ -29,6 +29,11 @@ namespace discpp {
 	class Activity;
 	class ClientConfig;
 
+	class InvalidGuildException : public std::runtime_error {
+	public: 
+		InvalidGuildException() : std::runtime_error("Guild not found") {}
+	};
+
 	class StartLimitException : public std::runtime_error {
 	public:
 		StartLimitException() : std::runtime_error("Maximum start limit reached") {}
@@ -70,8 +75,7 @@ namespace discpp {
 
 		Client(std::string token, ClientConfig* config);
 		int Run();
-		void CreateWebsocketRequest(nlohmann::json json, std::string message = "");
-		void CreateWebsocketRequest_1(rapidjson::Document& json, std::string message = "");
+		void CreateWebsocketRequest(rapidjson::Document& json, std::string message = "");
 		void SetCommandHandler(std::function<void(discpp::Client*, discpp::Message)> command_handler);
 		void DisconnectWebsocket();
 		void ReconnectToWebsocket();
@@ -79,8 +83,8 @@ namespace discpp {
 		// Discord based methods.
         discpp::Guild GetGuild(snowflake guild_id);
         discpp::User ModifyCurrentUser(std::string username, discpp::Image avatar);
-        void LeaveGuild(discpp::Guild guild);
-        void UpdatePresence(discpp::Activity activity);
+        void LeaveGuild(discpp::Guild& guild);
+        void UpdatePresence(discpp::Activity& activity);
 		discpp::User GetUser(discpp::snowflake id);
         std::vector<discpp::Connection> GetBotUserConnections();
         // std::vector<discpp::Channel> GetUserDMs(); // Not supported by bots.

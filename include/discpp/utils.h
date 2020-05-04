@@ -109,18 +109,12 @@ namespace discpp {
 	inline void HandleRateLimits(cpr::Header header, snowflake object, RateLimitBucketType ratelimit_bucket);
 	// End of rate limits
 
-	extern nlohmann::json HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket);
-	extern rapidjson::Document HandleResponse_1(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket);
-	extern nlohmann::json SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern rapidjson::Document SendGetRequest_1(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern nlohmann::json SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern rapidjson::Document SendPostRequest_1(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern nlohmann::json SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern rapidjson::Document SendPutRequest_1(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern nlohmann::json SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern rapidjson::Document SendPatchRequest_1(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern nlohmann::json SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket);
-	extern rapidjson::Document SendDeleteRequest_1(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket);
+	extern rapidjson::Document HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket);
+	extern rapidjson::Document SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
+	extern rapidjson::Document SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
+	extern rapidjson::Document SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
+	extern rapidjson::Document SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
+	extern rapidjson::Document SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket);
 
 	cpr::Header DefaultHeaders(cpr::Header add = {});
 	bool StartsWith(std::string string, std::string prefix);
