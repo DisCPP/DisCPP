@@ -4,14 +4,12 @@
 #include "../event.h"
 #include "../user.h"
 
-#include <nlohmann/json.hpp>
-
 namespace discpp {
 	class VoiceStateUpdateEvent : public Event {
 	public:
-		inline VoiceStateUpdateEvent(nlohmann::json json) : json(json) { }
+		inline VoiceStateUpdateEvent(rapidjson::Document& json) : json(json) { }
 
-		nlohmann::json json;
+		rapidjson::Document& json;
 	};
 }
 

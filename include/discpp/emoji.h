@@ -71,8 +71,8 @@ namespace discpp {
 	public:
 		Emoji() = default;
 		Emoji(std::string name, snowflake id);
-		Emoji(discpp::Guild guild, snowflake id);
-		Emoji(nlohmann::json json);
+		Emoji(discpp::Guild& guild, snowflake id);
+		Emoji(rapidjson::Document& json);
 		Emoji(std::wstring w_unicode);
 		Emoji(std::string s_unicode);
 

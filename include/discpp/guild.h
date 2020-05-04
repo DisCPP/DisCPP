@@ -1,6 +1,8 @@
 #ifndef DISCPP_GUILD_H
 #define DISCPP_GUILD_H
 
+#define RAPIDJSON_HAS_STDSTRING 1
+
 #include "discord_object.h"
 #include "emoji.h"
 #include "member.h"
@@ -58,10 +60,34 @@ namespace discpp {
              */
 
             code = json["code"].GetString();
-            guild_id = (json.contains("guild")) ? json["guild"]["id"].get<snowflake>() : "";
-            channel = discpp::GuildChannel(json["channel"]);
-            inviter = (json.contains("inviter")) ? discpp::User(json["inviter"]) : discpp::User();
-            target_user = (json.contains("target_user")) ? discpp::User(json["target_user"]) : discpp::User();
+            rapidjson::Value::ConstMemberIterator itr = json.FindMember("guild");
+            if (itr != json.MemberEnd()) {
+                guild_id = static_cast<snowflake>(json["guild"]["id"].GetString());
+            }
+            else {
+                guild_id = "";
+            }
+            itr = json.FindMember("channel");
+            if (itr != json.MemberEnd()) {
+                rapidjson::Document channel_json;
+                channel_json.CopyFrom(json["channel"], channel_json.GetAllocator());
+                channel = discpp::GuildChannel(channel_json);
+            }
+            itr = json.FindMember("inviter");
+            if (itr != json.MemberEnd()) {
+                rapidjson::Document inviter_json;
+                inviter_json.CopyFrom(json["inviter"], inviter_json.GetAllocator());
+                inviter = discpp::User(inviter_json);
+            }
+            else {
+                inviter = discpp::User();
+            }
+            itr = json.FindMember("target_user");
+            if (itr != json.MemberEnd()) {
+                rapidjson::Document target_json;
+                target_json.CopyFrom(json["target_user"], target_json.GetAllocator());
+                target_user = discpp::User(target_json);
+            }
             target_user_type = static_cast<TargetUserType>(json["target_user_type"].GetInt());
             approximate_presence_count = json["approximate_presence_count"].GetInt();
             approximate_member_count = json["approximate_member_count"].GetInt();
@@ -153,7 +179,7 @@ namespace discpp {
 	class GuildEmbed : public DiscordObject {
 	public:
         GuildEmbed() = default;
-		GuildEmbed(nlohmann::json json) {
+		GuildEmbed(rapidjson::Document& json) {
             /**
              * @brief Constructs a discpp::GuildEmbed object from json.
              *
@@ -166,8 +192,8 @@ namespace discpp {
              * @return discpp::GuildEmbed, this is a constructor.
              */
 
-            enabled = json["enabled"].get<bool>();
-			channel_id = json["channel_id"].get<snowflake>();
+            enabled = json["enabled"].GetBool();
+			channel_id = static_cast<snowflake>(json["channel_id"].GetString());
 		}
 
         bool enabled; /**< Whether the embed is enabled. */

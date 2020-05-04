@@ -16,7 +16,7 @@ namespace discpp {
 	private:
         inline static std::unordered_map<std::string, std::function<void(rapidjson::Document &)>> internal_event_map = {};
 
-        static void RunEvent(const std::function<void(const rapidjson::Document &)>& func, rapidjson::Document& json);
+        static void RunEvent(const std::function<void(rapidjson::Document &)>& func, rapidjson::Document& json);
 
 		void ReadyEvent(rapidjson::Document& result);
 		void ResumedEvent(rapidjson::Document& result);
