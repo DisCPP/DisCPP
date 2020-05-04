@@ -1,8 +1,7 @@
-#include "discpp/event_dispatcher.h"
-#include "discpp/event_handler.h"
+#include "event_dispatcher.h"
+#include "event_handler.h"
 #include "events/all_discord_events.h"
-
-#include "events/all_discord_events.h"
+#include "client_config.h"
 
 namespace discpp {
     void EventDispatcher::ReadyEvent(const nlohmann::json& result) {
@@ -209,7 +208,10 @@ namespace discpp {
         }
         discpp::globals::client_instance->messages.insert({ message.id, message });
 
-        discpp::globals::client_instance->DoFunctionLater(discpp::globals::client_instance->fire_command_method, discpp::globals::client_instance, message);
+        if (discpp::globals::client_instance->config->type == discpp::TokenType::BOT) {
+            discpp::globals::client_instance->DoFunctionLater(discpp::globals::client_instance->fire_command_method, discpp::globals::client_instance, message);
+        }
+
         discpp::DispatchEvent(discpp::MessageCreateEvent(message));
     }
 
