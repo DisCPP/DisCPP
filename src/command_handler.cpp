@@ -1,5 +1,6 @@
 #include "command.h"
 #include "command_handler.h"
+#include "client_config.h"
 
 void discpp::FireCommand(discpp::Client* bot, discpp::Message message) {
     /**

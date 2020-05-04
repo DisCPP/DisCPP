@@ -16,7 +16,6 @@
 #include "member.h"
 #include "guild.h"
 #include "log.h"
-#include "client_config.h"
 
 namespace discpp {
 	class Role;
