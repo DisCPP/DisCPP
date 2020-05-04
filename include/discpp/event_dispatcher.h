@@ -3,7 +3,7 @@
 
 #include "event.h"
 #include "utils.h"
-#include "bot.h"
+#include "client.h"
 #include <string>
 #include <future>
 #include <string_view>

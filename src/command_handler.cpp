@@ -1,7 +1,8 @@
 #include "command.h"
 #include "command_handler.h"
+#include "client_config.h"
 
-void discpp::FireCommand(discpp::Bot* bot, discpp::Message message) {
+void discpp::FireCommand(discpp::Client* bot, discpp::Message message) {
     /**
      * @brief Detects if a command has ran, and if it has then execute it.
      *
@@ -13,7 +14,7 @@ void discpp::FireCommand(discpp::Bot* bot, discpp::Message message) {
 
     int prefixSize = 0;
     bool trigger = false;
-    for (std::string const& prefix : bot->config.prefixes) {
+    for (std::string const& prefix : bot->config->prefixes) {
         prefixSize = prefix.size();
         if (message.author.bot) {
             return;

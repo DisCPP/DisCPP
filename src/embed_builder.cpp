@@ -2,7 +2,7 @@
 #include "color.h"
 #include "utils.h"
 
-#include <discpp/bot.h>
+#include <discpp/client.h>
 
 namespace discpp {
 	EmbedBuilder::EmbedBuilder() : embed_json(nlohmann::json({})) { }
@@ -55,7 +55,7 @@ namespace discpp {
 		 */
 
 		if (title.size() < 0 || title.size() > 256) {
-			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Embed title can only be 0-256 characters!");
+			globals::client_instance->logger->Error(LogTextColor::RED + "Embed title can only be 0-256 characters!");
 			throw std::runtime_error("Embed title can only be 0-256 characters");
 		}
 		embed_json["title"] = EscapeString(title);
@@ -92,7 +92,7 @@ namespace discpp {
 		 */
 
 		if (description.size() < 0 || description.size() > 2048) {
-			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Embed descriptions can only be 0-2048 characters!");
+			globals::client_instance->logger->Error(LogTextColor::RED + "Embed descriptions can only be 0-2048 characters!");
 			throw std::runtime_error("Embed descriptions can only be 0-2048 characters!");
 		}
 		embed_json["description"] = EscapeString(description);
@@ -166,7 +166,7 @@ namespace discpp {
 
 		embed_json["footer"] = nlohmann::json({});
 		if (text.size() > 2048) {
-			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Embed footer text can only be up to 0-2048 characters!");
+			globals::client_instance->logger->Error(LogTextColor::RED + "Embed footer text can only be up to 0-2048 characters!");
 			throw std::runtime_error("Embed footer text can only be up to 0-2048 characters!");
 		}
 		embed_json["footer"]["text"] = text;
@@ -291,7 +291,7 @@ namespace discpp {
 
 		embed_json["author"] = nlohmann::json({});
 		if (name.size() > 256) {
-			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Embed author names can only be up to 0-256 characters!");
+			globals::client_instance->logger->Error(LogTextColor::RED + "Embed author names can only be up to 0-256 characters!");
 			throw std::runtime_error("Embed author names can only be up to 0-256 characters");
 		}
 		embed_json["author"]["name"] = EscapeString(name);
@@ -320,27 +320,27 @@ namespace discpp {
 		 */
 
 		if (name.empty()) {
-			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "You can not have an empty or null field name!");
+			globals::client_instance->logger->Error(LogTextColor::RED + "You can not have an empty or null field name!");
 			throw std::runtime_error("You can not have an empty or null field title!");
 		} else if (value.empty()) {
-			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "You can not have an empty or null field value!");
+			globals::client_instance->logger->Error(LogTextColor::RED + "You can not have an empty or null field value!");
 			throw std::runtime_error("You can not have an empty or null field value!");
 		}
 
 		if (!embed_json.contains("fields")) {
 			embed_json["fields"] = nlohmann::json::array();
 		} else if (embed_json["fields"].size() > 25) {
-			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Embeds can only have 25 field objects!");
+			globals::client_instance->logger->Error(LogTextColor::RED + "Embeds can only have 25 field objects!");
 			throw std::runtime_error("Embeds can only have 25 field objects!");
 		}
 
 		if (name.size() > 256) {
-			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Embed field names can only be up to 1-256 characters!");
+			globals::client_instance->logger->Error(LogTextColor::RED + "Embed field names can only be up to 1-256 characters!");
 			throw std::runtime_error("Embed field names can only be up to 1-256 characters!");
 		}
 
 		if (value.size() > 1024) {
-			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Embed field values can only be up to 1-1024 characters!");
+			globals::client_instance->logger->Error(LogTextColor::RED + "Embed field values can only be up to 1-1024 characters!");
 			throw std::runtime_error("Embed field values can only be up to 1-1024 characters!");
 		}
 

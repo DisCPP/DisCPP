@@ -1,5 +1,5 @@
 #include "user.h"
-#include "bot.h"
+#include "client.h"
 
 namespace discpp {
 	User::User(snowflake id) : discpp::DiscordObject(id) {
@@ -17,8 +17,8 @@ namespace discpp {
 		 * @return discpp::User, this is a constructor.
 		 */
 
-		std::unordered_map<snowflake, Member>::iterator it = discpp::globals::bot_instance->members.find(id);
-		if (it != discpp::globals::bot_instance->members.end()) {
+		std::unordered_map<snowflake, Member>::iterator it = discpp::globals::client_instance->members.find(id);
+		if (it != discpp::globals::client_instance->members.end()) {
 			*this = it->second.user;
 		}
 	}

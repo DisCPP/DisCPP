@@ -2,7 +2,7 @@
 	Basic bot showing off commands
 */
 
-#include <discpp/bot.h>
+#include <discpp/client.h>
 #include <discpp/context.h>
 #include <discpp/command_handler.h>
 
@@ -19,8 +19,8 @@ int main(int argc, const char* argv[]) {
 	std::string token;
 	std::getline(token_file, token);
 
-	discpp::BotConfig config{ {"!"} };
-	discpp::Bot bot{ token, config }; // Token, config 
+	discpp::ClientConfig config{ {"!"} };
+	discpp::Client bot{ token, config }; // Token, config 
 
 	PingCommand(); // This runs the constructor which will register the command.
 
@@ -33,8 +33,8 @@ int main(int argc, const char* argv[]) {
 	// New event system
 	discpp::EventHandler<discpp::ReadyEvent>::RegisterListener([&bot](discpp::ReadyEvent event) {
 		std::cout << "Ready!" << std::endl
-			<< "Logged in as: " << bot.bot_user.username << "#" << bot.bot_user.discriminator << std::endl
-			<< "ID: " << bot.bot_user.id << std::endl << "-----------------------------" << std::endl;
+			<< "Logged in as: " << bot.client_user.username << "#" << bot.client_user.discriminator << std::endl
+			<< "ID: " << bot.client_user.id << std::endl << "-----------------------------" << std::endl;
 
 		// Will show "Playing With Crashes!"
 		discpp::Activity activity = discpp::Activity("With Crashes!", discpp::presence::ActivityType::GAME, discpp::presence::Status::idle);

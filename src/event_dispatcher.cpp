@@ -1,22 +1,21 @@
-#include "discpp/event_dispatcher.h"
-#include "discpp/event_handler.h"
+#include "event_dispatcher.h"
+#include "event_handler.h"
 #include "events/all_discord_events.h"
-
-#include "events/all_discord_events.h"
+#include "client_config.h"
 
 namespace discpp {
     void EventDispatcher::ReadyEvent(const nlohmann::json& result) {
         // Check if we're just resuming, and if we are dont try to create a new thread.
-        if (!discpp::globals::bot_instance->heartbeat_thread.joinable()) {
-            discpp::globals::bot_instance->heartbeat_thread = std::thread{ &Bot::HandleHeartbeat, discpp::globals::bot_instance };
+        if (!discpp::globals::client_instance->heartbeat_thread.joinable()) {
+            discpp::globals::client_instance->heartbeat_thread = std::thread{ &Client::HandleHeartbeat, discpp::globals::client_instance };
         }
 
-        discpp::globals::bot_instance->ready = true;
-        discpp::globals::bot_instance->session_id = result["session_id"];
+        discpp::globals::client_instance->ready = true;
+        discpp::globals::client_instance->session_id = result["session_id"];
 
         // Get the bot user 
         nlohmann::json user_json = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
-        discpp::globals::bot_instance->bot_user = discpp::User(user_json);
+        discpp::globals::client_instance->client_user = discpp::User(user_json);
 
         discpp::DispatchEvent(discpp::ReadyEvent());
     }
@@ -35,7 +34,7 @@ namespace discpp {
 
     void EventDispatcher::ChannelCreateEvent(const nlohmann::json& result) {
         discpp::Channel new_channel = discpp::Channel(result);
-        discpp::globals::bot_instance->channels.insert(std::pair<snowflake, Channel>(static_cast<snowflake>(new_channel.id),
+        discpp::globals::client_instance->channels.insert(std::pair<snowflake, Channel>(static_cast<snowflake>(new_channel.id),
             static_cast<Channel>(new_channel)));
 
         discpp::DispatchEvent(discpp::ChannelCreateEvent(new_channel));
@@ -44,8 +43,8 @@ namespace discpp {
     void EventDispatcher::ChannelUpdateEvent(const nlohmann::json& result) {
         discpp::Channel new_channel = discpp::Channel(result);
 
-        std::unordered_map<snowflake, Channel>::iterator it = discpp::globals::bot_instance->channels.find(new_channel.id);
-        if (it != discpp::globals::bot_instance->channels.end()) {
+        std::unordered_map<snowflake, Channel>::iterator it = discpp::globals::client_instance->channels.find(new_channel.id);
+        if (it != discpp::globals::client_instance->channels.end()) {
             it->second = new_channel;
         }
 
@@ -53,7 +52,7 @@ namespace discpp {
     }
 
     void EventDispatcher::ChannelDeleteEvent(const nlohmann::json& result) {
-        discpp::globals::bot_instance->channels.erase(result["id"].get<snowflake>());
+        discpp::globals::client_instance->channels.erase(result["id"].get<snowflake>());
 
         discpp::DispatchEvent(discpp::ChannelDeleteEvent(discpp::Channel(result)));
     }
@@ -62,8 +61,8 @@ namespace discpp {
         discpp::Channel new_channel = discpp::Channel(result["channel_id"].get<snowflake>());
         new_channel.last_pin_timestamp = GetDataSafely<std::string>(result, "last_pin_timestamp");
 
-        std::unordered_map<snowflake, Channel>::iterator it = discpp::globals::bot_instance->channels.find(new_channel.id);
-        if (it != discpp::globals::bot_instance->channels.end()) {
+        std::unordered_map<snowflake, Channel>::iterator it = discpp::globals::client_instance->channels.find(new_channel.id);
+        if (it != discpp::globals::client_instance->channels.end()) {
             it->second = new_channel;
         }
 
@@ -73,15 +72,15 @@ namespace discpp {
     void EventDispatcher::GuildCreateEvent(const nlohmann::json& result) {
         snowflake guild_id = result["id"].get<snowflake>();
         discpp::Guild guild(result);
-        discpp::globals::bot_instance->logger.LogToConsole(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Connected to " + guild.name);
-        discpp::globals::bot_instance->guilds.insert(std::pair<snowflake, Guild>(static_cast<snowflake>(guild.id), static_cast<Guild>(guild)));
+        //discpp::globals::client_instance->logger->LogToConsole(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Connected to " + guild.name);
+        discpp::globals::client_instance->guilds.insert(std::pair<snowflake, Guild>(static_cast<snowflake>(guild.id), static_cast<Guild>(guild)));
 
-        discpp::globals::bot_instance->members.insert(guild.members.begin(), guild.members.end());
+        discpp::globals::client_instance->members.insert(guild.members.begin(), guild.members.end());
 
         for (auto& channel : result["channels"]) {
             discpp::GuildChannel _channel = GuildChannel(channel);
             _channel.guild_id = guild_id;
-            discpp::globals::bot_instance->channels.insert(std::pair<snowflake, Channel>(static_cast<snowflake>(_channel.id), static_cast<Channel>(_channel)));
+            discpp::globals::client_instance->channels.insert(std::pair<snowflake, Channel>(static_cast<snowflake>(_channel.id), static_cast<Channel>(_channel)));
         }
 
         discpp::DispatchEvent(discpp::GuildCreateEvent(guild));
@@ -89,8 +88,8 @@ namespace discpp {
 
     void EventDispatcher::GuildUpdateEvent(const nlohmann::json& result) {
         discpp::Guild guild(result);
-        std::unordered_map<snowflake, Guild>::iterator it = discpp::globals::bot_instance->guilds.find(guild.id);
-        if (it != discpp::globals::bot_instance->guilds.end()) {
+        std::unordered_map<snowflake, Guild>::iterator it = discpp::globals::client_instance->guilds.find(guild.id);
+        if (it != discpp::globals::client_instance->guilds.end()) {
             it->second = guild;
         }
         discpp::DispatchEvent(discpp::GuildUpdateEvent(guild));
@@ -100,7 +99,7 @@ namespace discpp {
         discpp::Guild guild;
         guild.id = result["id"].get<snowflake>();
         guild.unavailable = true;
-        discpp::globals::bot_instance->guilds.erase(guild.id);
+        discpp::globals::client_instance->guilds.erase(guild.id);
 
         discpp::DispatchEvent(discpp::GuildDeleteEvent(guild));
     }
@@ -128,8 +127,8 @@ namespace discpp {
         }
 
         guild.emojis = emojis;
-        std::unordered_map<snowflake, Guild>::iterator it = discpp::globals::bot_instance->guilds.find(guild.id);
-        if (it != discpp::globals::bot_instance->guilds.end()) {
+        std::unordered_map<snowflake, Guild>::iterator it = discpp::globals::client_instance->guilds.find(guild.id);
+        if (it != discpp::globals::client_instance->guilds.end()) {
             it->second = guild;
         }
 
@@ -144,7 +143,7 @@ namespace discpp {
     void EventDispatcher::GuildMemberAddEvent(const nlohmann::json& result) {
         discpp::Guild guild(result["guild_id"].get<snowflake>());
         discpp::Member member(result, guild.id);
-        discpp::globals::bot_instance->members.insert(std::pair<snowflake, Member>(static_cast<snowflake>(member.id), static_cast<Member>(member)));
+        discpp::globals::client_instance->members.insert(std::pair<snowflake, Member>(static_cast<snowflake>(member.id), static_cast<Member>(member)));
 
         discpp::DispatchEvent(discpp::GuildMemberAddEvent(guild, member));
     }
@@ -152,7 +151,7 @@ namespace discpp {
     void EventDispatcher::GuildMemberRemoveEvent(const nlohmann::json& result) {
         discpp::Guild guild(result["guild_id"].get<snowflake>());
         discpp::Member member(result["user"]["id"].get<snowflake>(), guild);
-        discpp::globals::bot_instance->members.erase(member.id);
+        discpp::globals::client_instance->members.erase(member.id);
 
         discpp::DispatchEvent(discpp::GuildMemberRemoveEvent(guild, member));
     }
@@ -204,21 +203,24 @@ namespace discpp {
 
     void EventDispatcher::MessageCreateEvent(const nlohmann::json& result) {
         discpp::Message message(result);
-        if (discpp::globals::bot_instance->messages.size() >= discpp::globals::bot_instance->message_cache_count) {
-            discpp::globals::bot_instance->messages.erase(discpp::globals::bot_instance->messages.begin());
+        if (discpp::globals::client_instance->messages.size() >= discpp::globals::client_instance->message_cache_count) {
+            discpp::globals::client_instance->messages.erase(discpp::globals::client_instance->messages.begin());
         }
-        discpp::globals::bot_instance->messages.insert({ message.id, message });
+        discpp::globals::client_instance->messages.insert({ message.id, message });
 
-        discpp::globals::bot_instance->DoFunctionLater(discpp::globals::bot_instance->fire_command_method, discpp::globals::bot_instance, message);
+        if (discpp::globals::client_instance->config->type == discpp::TokenType::BOT) {
+            discpp::globals::client_instance->DoFunctionLater(discpp::globals::client_instance->fire_command_method, discpp::globals::client_instance, message);
+        }
+
         discpp::DispatchEvent(discpp::MessageCreateEvent(message));
     }
 
     void EventDispatcher::MessageUpdateEvent(const nlohmann::json& result) {
-        auto message = discpp::globals::bot_instance->messages.find(result["id"].get<snowflake>());
+        auto message = discpp::globals::client_instance->messages.find(result["id"].get<snowflake>());
 
-        if (message != discpp::globals::bot_instance->messages.end()) {
-            if (discpp::globals::bot_instance->messages.size() >= discpp::globals::bot_instance->message_cache_count) {
-                discpp::globals::bot_instance->messages.erase(discpp::globals::bot_instance->messages.begin());
+        if (message != discpp::globals::client_instance->messages.end()) {
+            if (discpp::globals::client_instance->messages.size() >= discpp::globals::client_instance->message_cache_count) {
+                discpp::globals::client_instance->messages.erase(discpp::globals::client_instance->messages.begin());
             }
 
             discpp::Message old_message(result["id"].get<snowflake>());
@@ -231,21 +233,21 @@ namespace discpp {
     }
 
     void EventDispatcher::MessageDeleteEvent(const nlohmann::json& result) {
-        auto message = discpp::globals::bot_instance->messages.find(result["id"].get<snowflake>());
+        auto message = discpp::globals::client_instance->messages.find(result["id"].get<snowflake>());
 
-        if (message != discpp::globals::bot_instance->messages.end()) {
+        if (message != discpp::globals::client_instance->messages.end()) {
             discpp::DispatchEvent(discpp::MessageDeleteEvent(message->second));
 
-            discpp::globals::bot_instance->messages.erase(message);
+            discpp::globals::client_instance->messages.erase(message);
         }
     }
 
     void EventDispatcher::MessageDeleteBulkEvent(const nlohmann::json& result) {
         std::vector<discpp::Message> msgs;
         for (auto id : result["ids"]) {
-            auto message = discpp::globals::bot_instance->messages.find(id.get<snowflake>());
+            auto message = discpp::globals::client_instance->messages.find(id.get<snowflake>());
 
-            if (message != discpp::globals::bot_instance->messages.end()) {
+            if (message != discpp::globals::client_instance->messages.end()) {
                 message->second.channel = discpp::Channel(result["channel_id"].get<snowflake>());
                 if (result.contains("guild_id")) {
                     message->second.guild = discpp::Guild(result["guild_id"].get<snowflake>());
@@ -256,17 +258,17 @@ namespace discpp {
         }
 
         for (discpp::Message message : msgs) {
-            discpp::globals::bot_instance->messages.erase(message.id);
+            discpp::globals::client_instance->messages.erase(message.id);
         }
 
         discpp::DispatchEvent(discpp::MessageBulkDeleteEvent(msgs));
     }
 
     void EventDispatcher::MessageReactionAddEvent(const nlohmann::json& result) {
-        auto message = discpp::globals::bot_instance->messages.find(result["message_id"].get<snowflake>());
+        auto message = discpp::globals::client_instance->messages.find(result["message_id"].get<snowflake>());
 
-        if (message != discpp::globals::bot_instance->messages.end()) {
-            discpp::Channel channel = discpp::globals::bot_instance->channels.find(result["channel_id"].get<snowflake>())->second;
+        if (message != discpp::globals::client_instance->messages.end()) {
+            discpp::Channel channel = discpp::globals::client_instance->channels.find(result["channel_id"].get<snowflake>())->second;
             message->second.channel = channel;
 
             if (result.contains("guild_id")) {
@@ -299,10 +301,10 @@ namespace discpp {
     }
 
     void EventDispatcher::MessageReactionRemoveEvent(const nlohmann::json& result) {
-        auto message = discpp::globals::bot_instance->messages.find(result["message_id"].get<snowflake>());
+        auto message = discpp::globals::client_instance->messages.find(result["message_id"].get<snowflake>());
 
-        if (message != discpp::globals::bot_instance->messages.end()) {
-            discpp::Channel channel = discpp::globals::bot_instance->channels.find(result["channel_id"].get<snowflake>())->second;
+        if (message != discpp::globals::client_instance->messages.end()) {
+            discpp::Channel channel = discpp::globals::client_instance->channels.find(result["channel_id"].get<snowflake>())->second;
             message->second.channel = channel;
 
             discpp::Emoji emoji(result["emoji"]);
@@ -329,10 +331,10 @@ namespace discpp {
     }
 
     void EventDispatcher::MessageReactionRemoveAllEvent(const nlohmann::json& result) {
-        auto message = discpp::globals::bot_instance->messages.find(result["message_id"].get<snowflake>());
+        auto message = discpp::globals::client_instance->messages.find(result["message_id"].get<snowflake>());
 
-        if (message != discpp::globals::bot_instance->messages.end()) {
-            discpp::Channel channel = discpp::globals::bot_instance->channels.find(result["channel_id"].get<snowflake>())->second;
+        if (message != discpp::globals::client_instance->messages.end()) {
+            discpp::Channel channel = discpp::globals::client_instance->channels.find(result["channel_id"].get<snowflake>())->second;
             message->second.channel = channel;
 
             discpp::DispatchEvent(discpp::MessageReactionRemoveAllEvent(message->second));
@@ -415,11 +417,11 @@ namespace discpp {
 
     void EventDispatcher::HandleDiscordEvent(const nlohmann::json&  j, std::string event_name) {
         nlohmann::json& data = (nlohmann::json &) j["d"];
-        discpp::globals::bot_instance->last_sequence_number = (j.contains("s") && j["s"].is_number()) ? j["s"].get<int>() : -1;
+        discpp::globals::client_instance->last_sequence_number = (j.contains("s") && j["s"].is_number()) ? j["s"].get<int>() : -1;
 
         if (internal_event_map.find(event_name) != internal_event_map.end()) {
             // Ignore this intellisense error, it compiles fine, and works.
-            globals::bot_instance->DoFunctionLater(internal_event_map[event_name], data);
+            globals::client_instance->DoFunctionLater(internal_event_map[event_name], data);
         }
     }
 }
