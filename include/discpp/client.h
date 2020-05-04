@@ -8,7 +8,7 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
-
+#include <rapidjson/document.h>
 #include <ixwebsocket/IXWebSocket.h>
 
 #include "channel.h"
@@ -54,6 +54,7 @@ namespace discpp {
 
 		Client(std::string token, ClientConfig* config);
 		int Run();
+		void CreateWebsocketRequest_1(rapidjson::Document json, std::string message = "");
 		void CreateWebsocketRequest(nlohmann::json json, std::string message = "");
 		void SetCommandHandler(std::function<void(discpp::Client*, discpp::Message)> command_handler);
 		void DisconnectWebsocket();
@@ -96,6 +97,7 @@ namespace discpp {
 		std::string gateway_endpoint;
 
 		nlohmann::json hello_packet;
+		rapidjson::Document hello_packet_1;
 
 		std::thread heartbeat_thread;
 
