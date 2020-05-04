@@ -4,6 +4,7 @@
 #include "discord_object.h"
 
 #include <nlohmann/json.hpp>
+#include <rapidjson/document.h>
 
 #include <cpr/cpr.h>
 
@@ -109,7 +110,9 @@ namespace discpp {
 	// End of rate limits
 
 	extern nlohmann::json HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket);
+	extern rapidjson::Document HandleResponse_1(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket);
 	extern nlohmann::json SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
+	extern rapidjson::Document SendGetRequest_1(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
 	extern nlohmann::json SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
 	extern nlohmann::json SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
 	extern nlohmann::json SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});

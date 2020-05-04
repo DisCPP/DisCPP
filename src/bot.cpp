@@ -9,6 +9,7 @@
 #include "event_handler.h"
 #include "event_dispatcher.h"
 
+#include <rapidjson/document.h>
 #include <ixwebsocket/IXNetSystem.h>
 
 namespace discpp {
@@ -240,20 +241,24 @@ namespace discpp {
     }
 
     void Bot::WebSocketStart() {
+        rapidjson::Document gateway_request_1 = SendGetRequest_1(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token}, {"User-Agent", "discppBot (https://github.com/seanomik/DISCPP, v0.0.0)"} }, {}, {});
         nlohmann::json gateway_request = SendGetRequest(Endpoint("/gateway/bot"), {{"Authorization", "Bot " + token}, {"User-Agent", "discppBot (https://github.com/seanomik/DISCPP, v0.0.0)"}}, {}, {});
 
-        if (gateway_request.contains("url")) {
+        rapidjson::Value::ConstMemberIterator itr = gateway_request_1.FindMember("url");
+
+        if (itr != gateway_request_1.MemberEnd()) {
             logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::YELLOW + "Connecting to gateway...");
 
-            if (gateway_request["session_start_limit"]["remaining"].get<int>() == 0) {
+            if (gateway_request_1["session_start_limit"]["remaining"].GetInt() == 0) {
                 logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "GATEWAY ERROR: Maximum start limit reached");
-                throw std::runtime_error{"GATEWAY ERROR: Maximum start limit reached"};
+                throw std::runtime_error{ "GATEWAY ERROR: Maximum start limit reached" };
             }
 
             // Specify version and encoding just ot be safe
-            gateway_endpoint = gateway_request["url"].get<std::string>() + "/?v=6&encoding=json";
+            std::string url = gateway_request_1["url"].GetString();
+            gateway_endpoint = url + "/?v=6&encoding=json";
 
-            std::thread bindthread {&EventDispatcher::BindEvents, EventDispatcher()};
+            std::thread bindthread{ &EventDispatcher::BindEvents, EventDispatcher() };
 
 #ifdef _WIN32
             if (!reconnecting) {
@@ -270,7 +275,7 @@ namespace discpp {
                 websocket.setUrl(gateway_endpoint);
                 websocket.disableAutomaticReconnection();
 
-                websocket.setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
+                websocket.setOnMessageCallback([this](const ix::WebSocketMessagePtr& msg) {
                     OnWebSocketListen(msg);
                 });
 
@@ -284,7 +289,8 @@ namespace discpp {
             disconnected = false;
 
             bindthread.join();
-        } else {
+        }
+        else {
             logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Improper token, failed to connect to discord gateway!");
             throw std::runtime_error("Improper token, failed to connect to discord gateway!");
         }

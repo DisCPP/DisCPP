@@ -49,6 +49,27 @@ nlohmann::json discpp::HandleResponse(cpr::Response response, snowflake object, 
 	return nlohmann::json::parse((!response.text.empty()) ? response.text : "{}");
 }
 
+rapidjson::Document discpp::HandleResponse_1(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket) {
+	/**
+	 * @brief Handles a response from the discpp servers.
+	 *
+	 * ```cpp
+	 *      nlohmann::json response = discpp::HandleResponse(cpr_response, object, discpp::RateLimitBucketType::CHANNEL);
+	 * ```
+	 *
+	 * @param[in] reponse The cpr response from the servers.
+	 * @param[in] object The object id to handle the ratelimits for.
+	 * @param[in] ratelimit_bucket The rate limit bucket.
+	 *
+	 * @return nlohmann::json
+	 */
+	rapidjson::Document tmp;
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Received requested payload: " + response.text);
+	HandleRateLimits(response.header, object, ratelimit_bucket);
+	tmp.Parse((!response.text.empty() ? response.text.c_str() : "{}"));
+	return tmp;
+}
+
 std::string CprBodyToString(cpr::Body body) {
 	if (body.empty()) {
 		return "Empty";
@@ -79,6 +100,30 @@ nlohmann::json discpp::SendGetRequest(std::string url, cpr::Header headers, snow
 	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
 }
+
+rapidjson::Document discpp::SendGetRequest_1(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+	/**
+	 * @brief Sends a get request to a url.
+	 *
+	 * ```cpp
+	 *      nlohmann::json response = discpp::SendGetRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+	 * ```
+	 *
+	 * @param[in] url The url to create a request to.
+	 * @param[in] headers The http header.
+	 * @param[in] object The object id to handle the ratelimits for.
+	 * @param[in] ratelimit_bucket The rate limit bucket.
+	 * @param[in] The cpr response body.
+	 *
+	 * @return nlohmann::json
+	 */
+
+	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
+	WaitForRateLimits(object, ratelimit_bucket);
+	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
+	return HandleResponse_1(result, object, ratelimit_bucket);
+}
+
 
 nlohmann::json discpp::SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
 	/**
