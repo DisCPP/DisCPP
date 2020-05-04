@@ -2,7 +2,6 @@
 #define DISCPP_CLIENT_CONFIG_H
 
 #include "log.h"
-#include "client.h"
 #include <string>
 #include <vector>
 
