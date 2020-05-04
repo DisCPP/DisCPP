@@ -240,7 +240,15 @@ namespace discpp {
     }
 
     void Client::WebSocketStart() {
-        nlohmann::json gateway_request = SendGetRequest(Endpoint("/gateway/bot"), {{"Authorization", "Bot " + token}, {"User-Agent", "discppBot (https://github.com/seanomik/DISCPP, v0.0.0)"}}, {}, {});
+        nlohmann::json gateway_request;
+        switch (config.type) {
+        case TokenType::USER:
+            gateway_request = SendGetRequest(Endpoint("/gateway"), { {"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
+            break;
+        case TokenType::BOT:
+            gateway_request = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
+            break;
+        }
 
         if (gateway_request.contains("url")) {
             logger->Debug(LogTextColor::YELLOW + "Connecting to gateway...");

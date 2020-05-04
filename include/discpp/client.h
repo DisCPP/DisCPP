@@ -24,9 +24,14 @@ namespace discpp {
 	class Activity;
 	class ClientConfig;
 
+	enum class TokenType {
+		USER,
+		BOT
+	};
+
 	class Client {
 	public:
-		std::string token; /**< Token for the current bot */
+		std::string token; /**< Token for the current client */
 		ClientConfig config; /**< Configuration for the current bot */
 
 		discpp::User client_user; /**< discpp::User object representing current user */
