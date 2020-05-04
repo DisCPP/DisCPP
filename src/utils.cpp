@@ -64,7 +64,7 @@ rapidjson::Document discpp::HandleResponse_1(cpr::Response response, snowflake o
 	 * @return nlohmann::json
 	 */
 	rapidjson::Document tmp;
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Received requested payload: " + response.text);
+	globals::client_instance->logger->Debug("Received requested payload: " + response.text);
 	HandleRateLimits(response.header, object, ratelimit_bucket);
 	tmp.Parse((!response.text.empty() ? response.text.c_str() : "{}"));
 	return tmp;
@@ -118,7 +118,7 @@ rapidjson::Document discpp::SendGetRequest_1(std::string url, cpr::Header header
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
+	globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
 	return HandleResponse_1(result, object, ratelimit_bucket);
