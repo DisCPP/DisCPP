@@ -256,7 +256,7 @@ namespace discpp {
         if (gateway_request.contains("url")) {
             logger->Debug(LogTextColor::YELLOW + "Connecting to gateway...");
 
-            if (gateway_request["session_start_limit"]["remaining"].get<int>() == 0) {
+            if (gateway_request.contains("session_start_limit") && gateway_request["session_start_limit"]["remaining"].get<int>() == 0) {
                 logger->Debug(LogTextColor::RED + "GATEWAY ERROR: Maximum start limit reached");
                 throw std::runtime_error{"GATEWAY ERROR: Maximum start limit reached"};
             }
