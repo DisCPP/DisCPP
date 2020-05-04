@@ -54,7 +54,7 @@ namespace discpp {
          * @return int, currently only returns zero.
          */
 
-        WebSocketStart();
+        WebSocketStart_1();
         while (true) {
             for (size_t i = 0; i < futures.size(); i++) {
                 if (!futures[i].valid() ||
@@ -215,6 +215,39 @@ namespace discpp {
         websocket.sendText(json_payload);
     }
 
+    void discpp::Client::CreateWebsocketRequest_1(rapidjson::Document& json, std::string message) {
+        /**
+         * @brief Send a request to the websocket.
+         *
+         * Be cautious with this as it may close the websocket connection if it is invalid.
+         *
+         * ```cpp
+         *      bot.CreateWebsocketRequest(request_json);
+         * ```
+         *
+         * @param[in] json The request to send to the websocket.
+         * @param[in] message The message to print to the debug log. If this is empty it will be set to default. (Default: "Sending gateway payload" + payload)
+         *
+         * @return void
+         */
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        json.Accept(writer);
+        std::string json_payload = buffer.GetString();
+
+        if (message.empty()) {
+            logger->Debug("Sending gateway payload: " + json_payload);
+        }
+        else {
+            logger->Debug(message);
+        }
+
+        WaitForRateLimits(client_user.id, RateLimitBucketType::GLOBAL);
+
+        std::lock_guard<std::mutex> lock = std::lock_guard(websocket_client_mutex);
+        websocket.sendText(json_payload);
+    }
+
     void Client::SetCommandHandler(std::function<void(discpp::Client *, discpp::Message)> command_handler) {
         /**
          * @brief Change the command handler.
@@ -301,6 +334,70 @@ namespace discpp {
         }
     }
 
+    void Client::WebSocketStart_1() {
+        rapidjson::Document gateway_request;
+        switch (config->type) {
+        case TokenType::USER:
+            gateway_request = SendGetRequest_1(Endpoint("/gateway"), { {"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
+            break;
+        case TokenType::BOT:
+            gateway_request = SendGetRequest_1(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
+            break;
+        }
+
+        rapidjson::Value::ConstMemberIterator itr = gateway_request.FindMember("url");
+        
+        if (itr != gateway_request.MemberEnd()) {
+            logger->Debug(LogTextColor::YELLOW + "Connecting to gateway...");
+
+            itr = gateway_request.FindMember("session_start_limit");
+            if (itr != gateway_request.MemberEnd() && gateway_request["session_start_limit"]["remaining"].GetInt() == 0) {
+                logger->Debug(LogTextColor::RED + "GATEWAY ERROR: Maximum start limit reached");
+                throw new StartLimitException();
+            }
+
+            // Specify version and encoding just ot be safe
+            std::string url = gateway_request["url"].GetString();
+            gateway_endpoint = url + "/?v=6&encoding=json";
+
+            std::thread bindthread{ &EventDispatcher::BindEvents, EventDispatcher() };
+
+#ifdef _WIN32
+            if (!reconnecting) {
+                ix::initNetSystem();
+            }
+#endif
+
+            {
+                std::lock_guard<std::mutex> lock(websocket_client_mutex);
+                if (reconnecting) {
+
+                }
+
+                websocket.setUrl(gateway_endpoint);
+                websocket.disableAutomaticReconnection();
+
+                websocket.setOnMessageCallback([this](const ix::WebSocketMessagePtr& msg) {
+                    OnWebSocketListen(msg);
+                });
+
+                /*ix::SocketTLSOptions tls_options;
+                tls_options.certFile = "cacert.pem";
+                websocket.setTLSOptions(tls_options);*/
+
+                websocket.start();
+            }
+
+            disconnected = false;
+
+            bindthread.join();
+        }
+        else {
+            logger->Error(LogTextColor::RED + "Improper token, failed to connect to discord gateway!");
+            throw new InvalidTokenException();
+        }
+    }
+
     void Client::HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg) {
         // if we're reconnecting this just stop here.
         if (reconnecting) {
@@ -341,6 +438,35 @@ namespace discpp {
                 OnWebSocketPacket(result);
             }
         } else {
+            logger->Info(LogTextColor::RED + "Known message sent");
+        }
+    }
+
+    void Client::OnWebSocketListen_1(const ix::WebSocketMessagePtr& msg) {
+        if (msg->type == ix::WebSocketMessageType::Open) {
+            logger->Info(LogTextColor::GREEN + "Connected to gateway!");
+
+            disconnected = false;
+            reconnecting = false;
+        }
+        else if (msg->type == ix::WebSocketMessageType::Close) {
+            HandleDiscordDisconnect(msg);
+        }
+        else if (msg->type == ix::WebSocketMessageType::Error) {
+            logger->Info(LogTextColor::RED + "Error: " + msg->errorInfo.reason);
+        }
+        else if (msg->type == ix::WebSocketMessageType::Message) {
+            rapidjson::Document result;
+            result.Parse(msg->str);
+            if (result.HasParseError()) {
+                logger->Debug(LogTextColor::YELLOW + "A non json payload was received and ignored: \"" + msg->str);
+            }
+
+            if (!result.Empty()) {
+                OnWebSocketPacket_1(result);
+            }
+        }
+        else {
             logger->Info(LogTextColor::RED + "Known message sent");
         }
     }
@@ -397,6 +523,85 @@ namespace discpp {
         packet_counter++;
     }
 
+    void Client::OnWebSocketPacket_1(rapidjson::Document& result) {
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        result.Accept(writer);
+        std::string json_payload = buffer.GetString();
+        logger->Debug("Received payload: " + json_payload);
+
+        switch (result["op"].GetInt()) {
+        case (hello): {
+            if (reconnecting) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1200));
+                logger->Info(LogTextColor::GREEN + "Reconnected!");
+
+                rapidjson::Document resume;
+                resume.SetObject();
+                rapidjson::Document::AllocatorType& resume_allocator = resume.GetAllocator();
+                resume.AddMember("op", 6, resume_allocator);
+                rapidjson::Value resume_d(rapidjson::kObjectType);
+                resume_d.AddMember("token", token, resume_allocator);
+                resume_d.AddMember("session_id", session_id, resume_allocator);
+                resume_d.AddMember("seq", std::to_string(last_sequence_number), resume_allocator);
+                resume.AddMember("d", resume_d, resume_allocator);
+                CreateWebsocketRequest_1(resume);
+
+                // Heartbeat just to be safe
+                rapidjson::Document data;
+                data.SetObject();
+                rapidjson::Document::AllocatorType& data_allocator = data.GetAllocator();
+                data.AddMember("op", packet_opcode::heartbeat, data_allocator);
+                data.AddMember("d", NULL, data_allocator);
+                if (last_sequence_number != -1) {
+                    data["d"] = last_sequence_number;
+                }
+
+                heartbeat_acked = true;
+                reconnecting = false;
+            }
+            else {
+                hello_packet_1.Accept(result);
+
+                CreateWebsocketRequest_1(GetIdentifyPacket_1());
+            }
+            break;
+        }
+        case heartbeat_ack:
+            heartbeat_acked = true;
+            break;
+        case reconnect:
+            ReconnectToWebsocket();
+            break;
+        case invalid_session:
+            // Check if the session is resumable
+            if (result["d"].GetBool()) {
+                rapidjson::Document resume;
+                resume.SetObject();
+                rapidjson::Document::AllocatorType& allocator = resume.GetAllocator();
+                resume.AddMember("op", 6, allocator);
+                rapidjson::Value d(rapidjson::kObjectType);
+                d.AddMember("token", token, allocator);
+                d.AddMember("session_id", session_id, allocator);
+                d.AddMember("seq", std::to_string(last_sequence_number), allocator);
+                resume.AddMember("d", d, allocator);
+                CreateWebsocketRequest_1(resume);
+            }
+            else {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                CreateWebsocketRequest_1(GetIdentifyPacket_1());
+            }
+
+            break;
+        default:
+            nlohmann::json json = nlohmann::json::parse(json_payload);
+            EventDispatcher::HandleDiscordEvent(const_cast<nlohmann::json&>(json), result["t"].GetString());
+            break;
+        }
+
+        packet_counter++;
+    }
+
     void Client::HandleHeartbeat() {
         try {
             while (true) {
@@ -429,6 +634,46 @@ namespace discpp {
         }
     }
 
+    void Client::HandleHeartbeat_1() {
+        try {
+            while (true) {
+                // Make sure that it doesn't try to do anything while its trying to reconnect.
+                while (reconnecting) {}
+
+                rapidjson::Document data;
+                data.SetObject();
+                rapidjson::Document::AllocatorType& data_allocator = data.GetAllocator();
+                data.AddMember("op", packet_opcode::heartbeat, data_allocator);
+                data.AddMember("d", NULL, data_allocator);
+                if (last_sequence_number != -1) {
+                    data["d"] = last_sequence_number;
+                }
+
+                rapidjson::StringBuffer buffer;
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                data.Accept(writer);
+                std::string json_payload = buffer.GetString();
+                CreateWebsocketRequest_1(data, "Sending heartbeat payload: " + json_payload);
+
+                heartbeat_acked = false;
+
+                logger->Debug("Waiting for next heartbeat (" + std::to_string(hello_packet["d"]["heartbeat_interval"].get<int>() / 1000.0 - 10) + " seconds)...");
+                // Wait for the required heartbeat interval, while waiting it should be acked from another thread.
+                std::this_thread::sleep_for(std::chrono::milliseconds(hello_packet["d"]["heartbeat_interval"].get<int>() - 10));
+
+                if (!heartbeat_acked) {
+                    logger->Warn(LogTextColor::YELLOW + "Heartbeat wasn't acked, trying to reconnect...");
+                    disconnected = true;
+
+                    ReconnectToWebsocket();
+                }
+            }
+        }
+        catch (std::exception& e) {
+            logger->Error(LogTextColor::RED + "ERROR: " + e.what());
+        }
+    }
+
     nlohmann::json Client::GetIdentifyPacket() {
         nlohmann::json obj = {{"op", packet_opcode::identify},
                               {"d",
@@ -440,6 +685,24 @@ namespace discpp {
                                              {"compress", false},
                                              {"large_threshold", 250}}}};
         return obj;
+    }
+
+    rapidjson::Document Client::GetIdentifyPacket_1() {
+        rapidjson::Document document;
+        document.SetObject();
+        rapidjson::Document::AllocatorType& allocator = document.GetAllocator();
+        document.AddMember("op", packet_opcode::identify, allocator);
+        rapidjson::Value d(rapidjson::kObjectType);
+        d.AddMember("token", token, allocator);
+        rapidjson::Value properties(rapidjson::kObjectType);
+        properties.AddMember("$os", GetOsName(), allocator);
+        properties.AddMember("$browser", "DISCPP", allocator);
+        properties.AddMember("$device", "DISCPP", allocator);
+        d.AddMember("properties", properties, allocator);
+        d.AddMember("compress", false, allocator);
+        d.AddMember("large_threshold", 250, allocator);
+        document.AddMember("d", d, allocator);
+        return document;
     }
 
     void Client::ReconnectToWebsocket() {

@@ -1,6 +1,8 @@
 #ifndef DISCPP_BOT_H
 #define DISCPP_BOT_H
 
+#define RAPIDJSON_HAS_STDSTRING 1
+
 #include <string>
 #include <future>
 #include <string_view>
@@ -8,7 +10,11 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
+
 #include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
+
 #include <ixwebsocket/IXWebSocket.h>
 
 #include "channel.h"
@@ -22,6 +28,16 @@ namespace discpp {
 	class User;
 	class Activity;
 	class ClientConfig;
+
+	class StartLimitException : public std::runtime_error {
+	public:
+		StartLimitException() : std::runtime_error("Maximum start limit reached") {}
+	};
+
+	class InvalidTokenException : public std::runtime_error {
+	public:
+		InvalidTokenException() : std::runtime_error("Invalid token, failed to connect to gateway") {}
+	};
 
 	class Client {
 	public:
@@ -54,8 +70,8 @@ namespace discpp {
 
 		Client(std::string token, ClientConfig* config);
 		int Run();
-		void CreateWebsocketRequest_1(rapidjson::Document json, std::string message = "");
 		void CreateWebsocketRequest(nlohmann::json json, std::string message = "");
+		void CreateWebsocketRequest_1(rapidjson::Document& json, std::string message = "");
 		void SetCommandHandler(std::function<void(discpp::Client*, discpp::Message)> command_handler);
 		void DisconnectWebsocket();
 		void ReconnectToWebsocket();
@@ -114,11 +130,17 @@ namespace discpp {
 
 		// Websocket Methods
 		void WebSocketStart();
+		void WebSocketStart_1();
 		void OnWebSocketListen(const ix::WebSocketMessagePtr& msg);
+		void OnWebSocketListen_1(const ix::WebSocketMessagePtr& msg);
 		void OnWebSocketPacket(const nlohmann::json& result);
+		void OnWebSocketPacket_1(rapidjson::Document& result);
 		void HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg);
+		void HandleDiscordDisconnect_1(const ix::WebSocketMessagePtr& msg);
 		void HandleHeartbeat();
+		void HandleHeartbeat_1();
 		nlohmann::json GetIdentifyPacket();
+		rapidjson::Document GetIdentifyPacket_1();
 
 		// Commands
 		std::function<void(discpp::Client*, discpp::Message)> fire_command_method;

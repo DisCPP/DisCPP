@@ -7,7 +7,7 @@ namespace discpp {
     void EventDispatcher::ReadyEvent(const nlohmann::json& result) {
         // Check if we're just resuming, and if we are dont try to create a new thread.
         if (!discpp::globals::client_instance->heartbeat_thread.joinable()) {
-            discpp::globals::client_instance->heartbeat_thread = std::thread{ &Client::HandleHeartbeat, discpp::globals::client_instance };
+            discpp::globals::client_instance->heartbeat_thread = std::thread{ &Client::HandleHeartbeat_1, discpp::globals::client_instance };
         }
 
         discpp::globals::client_instance->ready = true;
