@@ -4,14 +4,14 @@
 #include "client_config.h"
 
 namespace discpp {
-    void EventDispatcher::ReadyEvent(const nlohmann::json& result) {
+    void EventDispatcher::ReadyEvent(rapidjson::Document& result) {
         // Check if we're just resuming, and if we are dont try to create a new thread.
         if (!discpp::globals::client_instance->heartbeat_thread.joinable()) {
             discpp::globals::client_instance->heartbeat_thread = std::thread{ &Client::HandleHeartbeat_1, discpp::globals::client_instance };
         }
 
         discpp::globals::client_instance->ready = true;
-        discpp::globals::client_instance->session_id = result["session_id"];
+        discpp::globals::client_instance->session_id = result["session_id"].GetString();
 
         // Get the bot user 
         nlohmann::json user_json = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
@@ -20,19 +20,19 @@ namespace discpp {
         discpp::DispatchEvent(discpp::ReadyEvent());
     }
 
-    void EventDispatcher::ResumedEvent(const nlohmann::json& result) {
+    void EventDispatcher::ResumedEvent(rapidjson::Document& result) {
         discpp::DispatchEvent(discpp::ResumedEvent());
     }
 
-    void EventDispatcher::ReconnectEvent(const nlohmann::json& result) {
+    void EventDispatcher::ReconnectEvent(rapidjson::Document& result) {
         discpp::DispatchEvent(discpp::ReconnectEvent());
     }
 
-    void EventDispatcher::InvalidSessionEvent(const nlohmann::json& result) {
+    void EventDispatcher::InvalidSessionEvent(rapidjson::Document& result) {
         discpp::DispatchEvent(discpp::InvalidSessionEvent());
     }
 
-    void EventDispatcher::ChannelCreateEvent(const nlohmann::json& result) {
+    void EventDispatcher::ChannelCreateEvent(rapidjson::Document& result) {
         discpp::Channel new_channel = discpp::Channel(result);
         discpp::globals::client_instance->channels.insert(std::pair<snowflake, Channel>(static_cast<snowflake>(new_channel.id),
             static_cast<Channel>(new_channel)));
@@ -40,7 +40,7 @@ namespace discpp {
         discpp::DispatchEvent(discpp::ChannelCreateEvent(new_channel));
     }
 
-    void EventDispatcher::ChannelUpdateEvent(const nlohmann::json& result) {
+    void EventDispatcher::ChannelUpdateEvent(rapidjson::Document& result) {
         discpp::Channel new_channel = discpp::Channel(result);
 
         std::unordered_map<snowflake, Channel>::iterator it = discpp::globals::client_instance->channels.find(new_channel.id);
@@ -51,13 +51,13 @@ namespace discpp {
         discpp::DispatchEvent(discpp::ChannelUpdateEvent(new_channel));
     }
 
-    void EventDispatcher::ChannelDeleteEvent(const nlohmann::json& result) {
+    void EventDispatcher::ChannelDeleteEvent(rapidjson::Document& result) {
         discpp::globals::client_instance->channels.erase(result["id"].get<snowflake>());
 
         discpp::DispatchEvent(discpp::ChannelDeleteEvent(discpp::Channel(result)));
     }
 
-    void EventDispatcher::ChannelPinsUpdateEvent(const nlohmann::json& result) {
+    void EventDispatcher::ChannelPinsUpdateEvent(rapidjson::Document& result) {
         discpp::Channel new_channel = discpp::Channel(result["channel_id"].get<snowflake>());
         new_channel.last_pin_timestamp = GetDataSafely<std::string>(result, "last_pin_timestamp");
 
@@ -69,7 +69,7 @@ namespace discpp {
         discpp::DispatchEvent(discpp::ChannelPinsUpdateEvent(new_channel));
     }
 
-    void EventDispatcher::GuildCreateEvent(const nlohmann::json& result) {
+    void EventDispatcher::GuildCreateEvent(rapidjson::Document& result) {
         snowflake guild_id = result["id"].get<snowflake>();
         discpp::Guild guild(result);
         //discpp::globals::client_instance->logger->LogToConsole(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Connected to " + guild.name);
@@ -86,7 +86,7 @@ namespace discpp {
         discpp::DispatchEvent(discpp::GuildCreateEvent(guild));
     }
 
-    void EventDispatcher::GuildUpdateEvent(const nlohmann::json& result) {
+    void EventDispatcher::GuildUpdateEvent(rapidjson::Document& result) {
         discpp::Guild guild(result);
         std::unordered_map<snowflake, Guild>::iterator it = discpp::globals::client_instance->guilds.find(guild.id);
         if (it != discpp::globals::client_instance->guilds.end()) {
@@ -95,7 +95,7 @@ namespace discpp {
         discpp::DispatchEvent(discpp::GuildUpdateEvent(guild));
     }
 
-    void EventDispatcher::GuildDeleteEvent(const nlohmann::json& result) {
+    void EventDispatcher::GuildDeleteEvent(rapidjson::Document& result) {
         discpp::Guild guild;
         guild.id = result["id"].get<snowflake>();
         guild.unavailable = true;
@@ -104,21 +104,21 @@ namespace discpp {
         discpp::DispatchEvent(discpp::GuildDeleteEvent(guild));
     }
 
-    void EventDispatcher::GuildBanAddEvent(const nlohmann::json& result) {
+    void EventDispatcher::GuildBanAddEvent(rapidjson::Document& result) {
         discpp::Guild guild(result["guild_id"].get<snowflake>());
         discpp::User user(result["user"]);
 
         discpp::DispatchEvent(discpp::GuildBanAddEvent(guild, user));
     }
 
-    void EventDispatcher::GuildBanRemoveEvent(const nlohmann::json& result) {
+    void EventDispatcher::GuildBanRemoveEvent(rapidjson::Document& result) {
         discpp::Guild guild(result["guild_id"].get<snowflake>());
         discpp::User user(result["user"]);
 
         discpp::DispatchEvent(discpp::GuildBanRemoveEvent(guild, user));
     }
 
-    void EventDispatcher::GuildEmojisUpdateEvent(const nlohmann::json& result) {
+    void EventDispatcher::GuildEmojisUpdateEvent(rapidjson::Document& result) {
         discpp::Guild guild(result["guild_id"].get<snowflake>());
         std::unordered_map<snowflake, Emoji> emojis;
         for (nlohmann::json emoji : result["emojis"]) {
@@ -135,12 +135,12 @@ namespace discpp {
         discpp::DispatchEvent(discpp::GuildEmojisUpdateEvent(guild));
     }
 
-    void EventDispatcher::GuildIntegrationsUpdateEvent(const nlohmann::json& result) {
+    void EventDispatcher::GuildIntegrationsUpdateEvent(rapidjson::Document& result) {
         discpp::DispatchEvent(
             discpp::GuildIntegrationsUpdateEvent(discpp::Guild(result["guild_id"].get<snowflake>())));
     }
 
-    void EventDispatcher::GuildMemberAddEvent(const nlohmann::json& result) {
+    void EventDispatcher::GuildMemberAddEvent(rapidjson::Document& result) {
         discpp::Guild guild(result["guild_id"].get<snowflake>());
         discpp::Member member(result, guild.id);
         discpp::globals::client_instance->members.insert(std::pair<snowflake, Member>(static_cast<snowflake>(member.id), static_cast<Member>(member)));
@@ -148,7 +148,7 @@ namespace discpp {
         discpp::DispatchEvent(discpp::GuildMemberAddEvent(guild, member));
     }
 
-    void EventDispatcher::GuildMemberRemoveEvent(const nlohmann::json& result) {
+    void EventDispatcher::GuildMemberRemoveEvent(rapidjson::Document& result) {
         discpp::Guild guild(result["guild_id"].get<snowflake>());
         discpp::Member member(result["user"]["id"].get<snowflake>(), guild);
         discpp::globals::client_instance->members.erase(member.id);
@@ -156,7 +156,7 @@ namespace discpp {
         discpp::DispatchEvent(discpp::GuildMemberRemoveEvent(guild, member));
     }
 
-    void EventDispatcher::GuildMemberUpdateEvent(const nlohmann::json& result) {
+    void EventDispatcher::GuildMemberUpdateEvent(rapidjson::Document& result) {
         discpp::Guild guild(result["guild_id"].get<snowflake>());
         std::unordered_map<snowflake, Member>::iterator it = guild.members.find(result["user"]["id"]);
         discpp::Member member;
@@ -177,23 +177,23 @@ namespace discpp {
         discpp::DispatchEvent(discpp::GuildMemberUpdateEvent(guild, member));
     }
 
-    void EventDispatcher::GuildMembersChunkEvent(const nlohmann::json& result) {
+    void EventDispatcher::GuildMembersChunkEvent(rapidjson::Document& result) {
         discpp::DispatchEvent(discpp::GuildMembersChunkEvent());
     }
 
-    void EventDispatcher::GuildRoleCreateEvent(const nlohmann::json& result) {
+    void EventDispatcher::GuildRoleCreateEvent(rapidjson::Document& result) {
         discpp::Role role(result["role"]);
 
         discpp::DispatchEvent(discpp::GuildRoleCreateEvent(role));
     }
 
-    void EventDispatcher::GuildRoleUpdateEvent(const nlohmann::json& result) {
+    void EventDispatcher::GuildRoleUpdateEvent(rapidjson::Document& result) {
         discpp::Role role(result["role"]);
 
         discpp::DispatchEvent(discpp::GuildRoleUpdateEvent(role));
     }
 
-    void EventDispatcher::GuildRoleDeleteEvent(const nlohmann::json& result) {
+    void EventDispatcher::GuildRoleDeleteEvent(rapidjson::Document& result) {
         discpp::Guild guild(result["guild_id"].get<snowflake>());
         discpp::Role role(result["role"]);
         guild.roles.erase(role.id);
@@ -201,7 +201,7 @@ namespace discpp {
         discpp::DispatchEvent(discpp::GuildRoleDeleteEvent(role));
     }
 
-    void EventDispatcher::MessageCreateEvent(const nlohmann::json& result) {
+    void EventDispatcher::MessageCreateEvent(rapidjson::Document& result) {
         discpp::Message message(result);
         if (discpp::globals::client_instance->messages.size() >= discpp::globals::client_instance->message_cache_count) {
             discpp::globals::client_instance->messages.erase(discpp::globals::client_instance->messages.begin());
@@ -215,7 +215,7 @@ namespace discpp {
         discpp::DispatchEvent(discpp::MessageCreateEvent(message));
     }
 
-    void EventDispatcher::MessageUpdateEvent(const nlohmann::json& result) {
+    void EventDispatcher::MessageUpdateEvent(rapidjson::Document& result) {
         auto message = discpp::globals::client_instance->messages.find(result["id"].get<snowflake>());
 
         if (message != discpp::globals::client_instance->messages.end()) {
@@ -232,7 +232,7 @@ namespace discpp {
         }
     }
 
-    void EventDispatcher::MessageDeleteEvent(const nlohmann::json& result) {
+    void EventDispatcher::MessageDeleteEvent(rapidjson::Document& result) {
         auto message = discpp::globals::client_instance->messages.find(result["id"].get<snowflake>());
 
         if (message != discpp::globals::client_instance->messages.end()) {
@@ -242,7 +242,7 @@ namespace discpp {
         }
     }
 
-    void EventDispatcher::MessageDeleteBulkEvent(const nlohmann::json& result) {
+    void EventDispatcher::MessageDeleteBulkEvent(rapidjson::Document& result) {
         std::vector<discpp::Message> msgs;
         for (auto id : result["ids"]) {
             auto message = discpp::globals::client_instance->messages.find(id.get<snowflake>());
@@ -264,7 +264,7 @@ namespace discpp {
         discpp::DispatchEvent(discpp::MessageBulkDeleteEvent(msgs));
     }
 
-    void EventDispatcher::MessageReactionAddEvent(const nlohmann::json& result) {
+    void EventDispatcher::MessageReactionAddEvent(rapidjson::Document& result) {
         auto message = discpp::globals::client_instance->messages.find(result["message_id"].get<snowflake>());
 
         if (message != discpp::globals::client_instance->messages.end()) {
@@ -300,7 +300,7 @@ namespace discpp {
         }
     }
 
-    void EventDispatcher::MessageReactionRemoveEvent(const nlohmann::json& result) {
+    void EventDispatcher::MessageReactionRemoveEvent(rapidjson::Document& result) {
         auto message = discpp::globals::client_instance->messages.find(result["message_id"].get<snowflake>());
 
         if (message != discpp::globals::client_instance->messages.end()) {
@@ -330,7 +330,7 @@ namespace discpp {
         }
     }
 
-    void EventDispatcher::MessageReactionRemoveAllEvent(const nlohmann::json& result) {
+    void EventDispatcher::MessageReactionRemoveAllEvent(rapidjson::Document& result) {
         auto message = discpp::globals::client_instance->messages.find(result["message_id"].get<snowflake>());
 
         if (message != discpp::globals::client_instance->messages.end()) {
@@ -341,11 +341,11 @@ namespace discpp {
         }
     }
 
-    void EventDispatcher::PresenceUpdateEvent(const nlohmann::json& result) {
+    void EventDispatcher::PresenceUpdateEvent(rapidjson::Document& result) {
         discpp::DispatchEvent(discpp::PresenseUpdateEvent(discpp::User(result["user"])));
     }
 
-    void EventDispatcher::TypingStartEvent(const nlohmann::json& result) {
+    void EventDispatcher::TypingStartEvent(rapidjson::Document& result) {
         discpp::User user(result["user_id"].get<snowflake>());
         discpp::Channel channel(result["channel_id"].get<snowflake>());
         int timestamp = result["timestamp"].get<int>();
@@ -353,21 +353,21 @@ namespace discpp {
         discpp::DispatchEvent(discpp::TypingStartEvent(user, channel, timestamp));
     }
 
-    void EventDispatcher::UserUpdateEvent(const nlohmann::json& result) {
+    void EventDispatcher::UserUpdateEvent(rapidjson::Document& result) {
         discpp::User user(result);
 
         discpp::DispatchEvent(discpp::UserUpdateEvent(user));
     }
 
-    void EventDispatcher::VoiceStateUpdateEvent(const nlohmann::json& result) {
+    void EventDispatcher::VoiceStateUpdateEvent(rapidjson::Document& result) {
         discpp::DispatchEvent(discpp::VoiceStateUpdateEvent(result));
     }
 
-    void EventDispatcher::VoiceServerUpdateEvent(const nlohmann::json& result) {
+    void EventDispatcher::VoiceServerUpdateEvent(rapidjson::Document& result) {
         discpp::DispatchEvent(discpp::VoiceServerUpdateEvent(result));
     }
 
-    void EventDispatcher::WebhooksUpdateEvent(const nlohmann::json& result) {
+    void EventDispatcher::WebhooksUpdateEvent(rapidjson::Document& result) {
         discpp::GuildChannel channel(result["channel_id"].get<snowflake>());
         channel.guild_id = result["guild_id"].get<snowflake>();
 
@@ -375,47 +375,47 @@ namespace discpp {
     }
 
     void EventDispatcher::BindEvents() {
-        internal_event_map["READY"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::ReadyEvent(result); };
-        internal_event_map["RESUMED"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::ChannelCreateEvent(result); };
-        internal_event_map["INVALID_SESSION"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::InvalidSessionEvent(result); };
-        internal_event_map["CHANNEL_CREATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::ChannelCreateEvent(result); };
-        internal_event_map["CHANNEL_UPDATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::ChannelUpdateEvent(result); };
-        internal_event_map["CHANNEL_DELETE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::ChannelDeleteEvent(result); };
-        internal_event_map["CHANNEL_PINS_UPDATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::ChannelPinsUpdateEvent(result); };
-        internal_event_map["GUILD_CREATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::GuildCreateEvent(result); };
-        internal_event_map["GUILD_UPDATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::GuildUpdateEvent(result); };
-        internal_event_map["GUILD_DELETE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::GuildDeleteEvent(result); };
-        internal_event_map["GUILD_BAN_ADD"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::GuildBanAddEvent(result); };
-        internal_event_map["GUILD_BAN_REMOVE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::GuildBanRemoveEvent(result); };
-        internal_event_map["GUILD_EMOJIS_UPDATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::GuildEmojisUpdateEvent(result); };
-        internal_event_map["GUILD_INTEGRATIONS_UPDATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::GuildIntegrationsUpdateEvent(result); };
-        internal_event_map["GUILD_MEMBER_ADD"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::GuildMemberAddEvent(result); };
-        internal_event_map["GUILD_MEMBER_REMOVE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::GuildMemberRemoveEvent(result); };
-        internal_event_map["GUILD_MEMBER_UPDATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::GuildMemberUpdateEvent(result); };
-        internal_event_map["GUILD_MEMBERS_CHUNK"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::GuildMembersChunkEvent(result); };
-        internal_event_map["GUILD_ROLE_CREATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::GuildRoleCreateEvent(result); };
-        internal_event_map["GUILD_ROLE_UPDATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::GuildRoleUpdateEvent(result); };
-        internal_event_map["GUILD_ROLE_DELETE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::GuildRoleDeleteEvent(result); };
-        internal_event_map["MESSAGE_CREATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::MessageCreateEvent(result); };
-        internal_event_map["MESSAGE_UPDATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::MessageUpdateEvent(result); };
-        internal_event_map["MESSAGE_DELETE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::MessageDeleteEvent(result); };
-        internal_event_map["MESSAGE_DELETE_BULK"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::MessageDeleteBulkEvent(result); };
-        internal_event_map["MESSAGE_REACTION_ADD"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::MessageReactionAddEvent(result); };
-        internal_event_map["MESSAGE_REACTION_REMOVE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::MessageReactionRemoveEvent(result); };
-        internal_event_map["MESSAGE_REACTION_REMOVE_ALL"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::MessageReactionRemoveAllEvent(result); };
-        internal_event_map["PRESENCE_UPDATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::PresenceUpdateEvent(result); };
-        internal_event_map["TYPING_START"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::TypingStartEvent(result); };
-        internal_event_map["USER_UPDATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::UserUpdateEvent(result); };
-        internal_event_map["VOICE_STATE_UPDATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::VoiceStateUpdateEvent(result); };
-        internal_event_map["VOICE_SERVER_UPDATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::VoiceServerUpdateEvent(result); };
-        internal_event_map["WEBHOOKS_UPDATE"] = [&](const nlohmann::json& result) { discpp::EventDispatcher::WebhooksUpdateEvent(result); };
+        internal_event_map["READY"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::ReadyEvent(result); };
+        internal_event_map["RESUMED"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::ChannelCreateEvent(result); };
+        internal_event_map["INVALID_SESSION"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::InvalidSessionEvent(result); };
+        internal_event_map["CHANNEL_CREATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::ChannelCreateEvent(result); };
+        internal_event_map["CHANNEL_UPDATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::ChannelUpdateEvent(result); };
+        internal_event_map["CHANNEL_DELETE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::ChannelDeleteEvent(result); };
+        internal_event_map["CHANNEL_PINS_UPDATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::ChannelPinsUpdateEvent(result); };
+        internal_event_map["GUILD_CREATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::GuildCreateEvent(result); };
+        internal_event_map["GUILD_UPDATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::GuildUpdateEvent(result); };
+        internal_event_map["GUILD_DELETE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::GuildDeleteEvent(result); };
+        internal_event_map["GUILD_BAN_ADD"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::GuildBanAddEvent(result); };
+        internal_event_map["GUILD_BAN_REMOVE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::GuildBanRemoveEvent(result); };
+        internal_event_map["GUILD_EMOJIS_UPDATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::GuildEmojisUpdateEvent(result); };
+        internal_event_map["GUILD_INTEGRATIONS_UPDATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::GuildIntegrationsUpdateEvent(result); };
+        internal_event_map["GUILD_MEMBER_ADD"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::GuildMemberAddEvent(result); };
+        internal_event_map["GUILD_MEMBER_REMOVE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::GuildMemberRemoveEvent(result); };
+        internal_event_map["GUILD_MEMBER_UPDATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::GuildMemberUpdateEvent(result); };
+        internal_event_map["GUILD_MEMBERS_CHUNK"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::GuildMembersChunkEvent(result); };
+        internal_event_map["GUILD_ROLE_CREATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::GuildRoleCreateEvent(result); };
+        internal_event_map["GUILD_ROLE_UPDATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::GuildRoleUpdateEvent(result); };
+        internal_event_map["GUILD_ROLE_DELETE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::GuildRoleDeleteEvent(result); };
+        internal_event_map["MESSAGE_CREATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::MessageCreateEvent(result); };
+        internal_event_map["MESSAGE_UPDATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::MessageUpdateEvent(result); };
+        internal_event_map["MESSAGE_DELETE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::MessageDeleteEvent(result); };
+        internal_event_map["MESSAGE_DELETE_BULK"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::MessageDeleteBulkEvent(result); };
+        internal_event_map["MESSAGE_REACTION_ADD"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::MessageReactionAddEvent(result); };
+        internal_event_map["MESSAGE_REACTION_REMOVE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::MessageReactionRemoveEvent(result); };
+        internal_event_map["MESSAGE_REACTION_REMOVE_ALL"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::MessageReactionRemoveAllEvent(result); };
+        internal_event_map["PRESENCE_UPDATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::PresenceUpdateEvent(result); };
+        internal_event_map["TYPING_START"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::TypingStartEvent(result); };
+        internal_event_map["USER_UPDATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::UserUpdateEvent(result); };
+        internal_event_map["VOICE_STATE_UPDATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::VoiceStateUpdateEvent(result); };
+        internal_event_map["VOICE_SERVER_UPDATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::VoiceServerUpdateEvent(result); };
+        internal_event_map["WEBHOOKS_UPDATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::WebhooksUpdateEvent(result); };
     }
 
-    void EventDispatcher::RunEvent(const std::function<void(const nlohmann::json &)>& func, nlohmann::json& json) {
+    void EventDispatcher::RunEvent(const std::function<void(rapidjson::Document &)>& func, rapidjson::Document& json) {
         func(json);
     }
 
-    void EventDispatcher::HandleDiscordEvent(const nlohmann::json&  j, std::string event_name) {
+    void EventDispatcher::HandleDiscordEvent(rapidjson::Document& j, std::string event_name) {
         nlohmann::json& data = (nlohmann::json &) j["d"];
         discpp::globals::client_instance->last_sequence_number = (j.contains("s") && j["s"].is_number()) ? j["s"].get<int>() : -1;
 

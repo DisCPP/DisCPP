@@ -54,7 +54,7 @@ namespace discpp {
          * @return int, currently only returns zero.
          */
 
-        WebSocketStart_1();
+        WebSocketStart();
         while (true) {
             for (size_t i = 0; i < futures.size(); i++) {
                 if (!futures[i].valid() ||
@@ -276,65 +276,6 @@ namespace discpp {
     }
 
     void Client::WebSocketStart() {
-        nlohmann::json gateway_request;
-        switch (config->type) {
-        case TokenType::USER:
-            gateway_request = SendGetRequest(Endpoint("/gateway"), { {"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
-            break;
-        case TokenType::BOT:
-            gateway_request = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
-            break;
-        }
-
-        if (gateway_request.contains("url")) {
-            logger->Debug(LogTextColor::YELLOW + "Connecting to gateway...");
-
-            if (gateway_request.contains("session_start_limit") && gateway_request["session_start_limit"]["remaining"].get<int>() == 0) {
-                logger->Debug(LogTextColor::RED + "GATEWAY ERROR: Maximum start limit reached");
-                throw std::runtime_error{"GATEWAY ERROR: Maximum start limit reached"};
-            }
-
-            // Specify version and encoding just ot be safe
-            gateway_endpoint = gateway_request["url"].get<std::string>() + "/?v=6&encoding=json";
-
-            std::thread bindthread {&EventDispatcher::BindEvents, EventDispatcher()};
-
-#ifdef _WIN32
-            if (!reconnecting) {
-                ix::initNetSystem();
-            }
-#endif
-
-            {
-                std::lock_guard<std::mutex> lock(websocket_client_mutex);
-                if (reconnecting) {
-
-                }
-
-                websocket.setUrl(gateway_endpoint);
-                websocket.disableAutomaticReconnection();
-
-                websocket.setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
-                    OnWebSocketListen(msg);
-                });
-
-                /*ix::SocketTLSOptions tls_options;
-                tls_options.certFile = "cacert.pem";
-                websocket.setTLSOptions(tls_options);*/
-
-                websocket.start();
-            }
-
-            disconnected = false;
-
-            bindthread.join();
-        } else {
-            logger->Error(LogTextColor::RED + "Improper token, failed to connect to discord gateway!");
-            throw std::runtime_error("Improper token, failed to connect to discord gateway!");
-        }
-    }
-
-    void Client::WebSocketStart_1() {
         rapidjson::Document gateway_request;
         switch (config->type) {
         case TokenType::USER:
@@ -422,32 +363,6 @@ namespace discpp {
 
             disconnected = false;
             reconnecting = false;
-        } else if (msg->type == ix::WebSocketMessageType::Close) {
-            HandleDiscordDisconnect(msg);
-        } else if (msg->type == ix::WebSocketMessageType::Error) {
-            logger->Info(LogTextColor::RED + "Error: " + msg->errorInfo.reason);
-        } else if (msg->type == ix::WebSocketMessageType::Message) {
-            nlohmann::json result;
-            try {
-                result = nlohmann::json::parse(msg->str);
-            } catch(const nlohmann::json::exception& e) {
-                logger->Debug(LogTextColor::YELLOW + "A non json payload was received and ignored: \"" + msg->str + "\" (Error: " + e.what() + ")");
-            }
-
-            if (!result.empty()) {
-                OnWebSocketPacket(result);
-            }
-        } else {
-            logger->Info(LogTextColor::RED + "Known message sent");
-        }
-    }
-
-    void Client::OnWebSocketListen_1(const ix::WebSocketMessagePtr& msg) {
-        if (msg->type == ix::WebSocketMessageType::Open) {
-            logger->Info(LogTextColor::GREEN + "Connected to gateway!");
-
-            disconnected = false;
-            reconnecting = false;
         }
         else if (msg->type == ix::WebSocketMessageType::Close) {
             HandleDiscordDisconnect(msg);
@@ -463,7 +378,7 @@ namespace discpp {
             }
 
             if (!result.Empty()) {
-                OnWebSocketPacket_1(result);
+                OnWebSocketPacket(result);
             }
         }
         else {
@@ -471,59 +386,7 @@ namespace discpp {
         }
     }
 
-    void Client::OnWebSocketPacket(const nlohmann::json& result) {
-        logger->Debug("Received payload: " + result.dump());
-
-        switch (result["op"].get<int>()) {
-            case (hello): {
-                if (reconnecting) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1200));
-                    logger->Info(LogTextColor::GREEN + "Reconnected!");
-
-                    std::string resume = "{ \"op\": 6, \"d\": { \"token\": \"" + token + "\", \"session_id\": \"" + session_id + "\", \"seq\": " + std::to_string(last_sequence_number) + "} }";
-                    CreateWebsocketRequest(nlohmann::json::parse(resume));
-
-                    // Heartbeat just to be safe
-                    nlohmann::json data = {{"op", packet_opcode::heartbeat}, {"d",  nullptr}};
-                    if (last_sequence_number != -1) {
-                        data["d"] = last_sequence_number;
-                    }
-
-                    heartbeat_acked = true;
-                    reconnecting = false;
-                } else {
-                    hello_packet = result;
-
-                    CreateWebsocketRequest(GetIdentifyPacket());
-                }
-                break;
-            }
-            case heartbeat_ack:
-                heartbeat_acked = true;
-                break;
-            case reconnect:
-                ReconnectToWebsocket();
-                break;
-            case invalid_session:
-                // Check if the session is resumable
-                if (result["d"].get<bool>()) {
-                    std::string resume = "{ \"op\": 6, \"d\": { \"token\": \"" + token + "\", \"session_id\": \"" + session_id + "\", \"seq\": " + std::to_string(last_sequence_number) + "} }";
-                    CreateWebsocketRequest(nlohmann::json::parse(resume));
-                } else {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-                    CreateWebsocketRequest(GetIdentifyPacket());
-                }
-
-                break;
-            default:
-                EventDispatcher::HandleDiscordEvent(const_cast<nlohmann::json &>(result), result["t"].get<std::string>());
-                break;
-        }
-
-        packet_counter++;
-    }
-
-    void Client::OnWebSocketPacket_1(rapidjson::Document& result) {
+    void Client::OnWebSocketPacket(rapidjson::Document& result) {
         rapidjson::StringBuffer buffer;
         rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         result.Accept(writer);
@@ -563,7 +426,7 @@ namespace discpp {
             else {
                 hello_packet_1.Accept(result);
 
-                CreateWebsocketRequest_1(GetIdentifyPacket_1());
+                CreateWebsocketRequest_1(GetIdentifyPacket());
             }
             break;
         }
@@ -589,13 +452,12 @@ namespace discpp {
             }
             else {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-                CreateWebsocketRequest_1(GetIdentifyPacket_1());
+                CreateWebsocketRequest_1(GetIdentifyPacket());
             }
 
             break;
         default:
-            nlohmann::json json = nlohmann::json::parse(json_payload);
-            EventDispatcher::HandleDiscordEvent(const_cast<nlohmann::json&>(json), result["t"].GetString());
+            EventDispatcher::HandleDiscordEvent(result, result["t"].GetString());
             break;
         }
 
@@ -603,38 +465,6 @@ namespace discpp {
     }
 
     void Client::HandleHeartbeat() {
-        try {
-            while (true) {
-                // Make sure that it doesn't try to do anything while its trying to reconnect.
-                while (reconnecting) {}
-
-                nlohmann::json data = {{"op", packet_opcode::heartbeat},
-                                       {"d",  nullptr}};
-                if (last_sequence_number != -1) {
-                    data["d"] = last_sequence_number;
-                }
-
-                CreateWebsocketRequest(data, "Sending heartbeat payload: " + data.dump());
-
-                heartbeat_acked = false;
-
-                logger->Debug("Waiting for next heartbeat (" + std::to_string(hello_packet["d"]["heartbeat_interval"].get<int>() / 1000.0 - 10) + " seconds)...");
-                // Wait for the required heartbeat interval, while waiting it should be acked from another thread.
-                std::this_thread::sleep_for(std::chrono::milliseconds(hello_packet["d"]["heartbeat_interval"].get<int>() - 10));
-
-                if (!heartbeat_acked) {
-                    logger->Warn(LogTextColor::YELLOW + "Heartbeat wasn't acked, trying to reconnect...");
-                    disconnected = true;
-
-                    ReconnectToWebsocket();
-                }
-            }
-        } catch (std::exception &e) {
-            logger->Error(LogTextColor::RED + "ERROR: " + e.what());
-        }
-    }
-
-    void Client::HandleHeartbeat_1() {
         try {
             while (true) {
                 // Make sure that it doesn't try to do anything while its trying to reconnect.
@@ -674,20 +504,7 @@ namespace discpp {
         }
     }
 
-    nlohmann::json Client::GetIdentifyPacket() {
-        nlohmann::json obj = {{"op", packet_opcode::identify},
-                              {"d",
-                                     {{"token", token},
-                                             {"properties",
-                                                     {{"$os", GetOsName()},
-                                                             {"$browser", "DISCPP"},
-                                                             {"$device", "DISCPP"}}},
-                                             {"compress", false},
-                                             {"large_threshold", 250}}}};
-        return obj;
-    }
-
-    rapidjson::Document Client::GetIdentifyPacket_1() {
+    rapidjson::Document Client::GetIdentifyPacket() {
         rapidjson::Document document;
         document.SetObject();
         rapidjson::Document::AllocatorType& allocator = document.GetAllocator();

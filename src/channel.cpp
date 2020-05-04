@@ -21,7 +21,7 @@ namespace discpp {
 		}
 	}
 
-	Channel::Channel(nlohmann::json json) {
+	Channel::Channel(rapidjson::Document& json) {
 		/**
 		 * @brief Constructs a discpp::Channel object from json.
 		 *
@@ -33,13 +33,12 @@ namespace discpp {
 		 *
 		 * @return discpp::Channel, this is a constructor.
 		 */
-
-		id = GetDataSafely<snowflake>(json, "id");
-		type = GetDataSafely<ChannelType>(json, "type");
-		name = GetDataSafely<std::string>(json, "name");
-		topic = GetDataSafely<std::string>(json, "topic");
-		last_message_id = GetDataSafely<snowflake>(json, "last_message_id");
-		last_pin_timestamp = GetDataSafely<std::string>(json, "last_pin_timestamp");
+		id = static_cast<snowflake>(json["id"].GetString());
+		type = static_cast<ChannelType>(json["type"].GetInt());
+		name = json["name"].GetString();
+		topic = json["topic"].GetString();
+		last_message_id = static_cast<snowflake>(json["last_message_id"].GetString());
+		last_pin_timestamp = json["last_pin_timestamp"].GetString();
 	}
 
 	discpp::Message Channel::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<File> files) {
@@ -272,7 +271,7 @@ namespace discpp {
 		return messages;
 	}
 
-	GuildChannel::GuildChannel(nlohmann::json json) : Channel(json) {
+	GuildChannel::GuildChannel(rapidjson::Document& json) : Channel(json) {
 		/**
 		 * @brief Constructs a discpp::GuildChannel object from json.
 		 *
@@ -285,18 +284,19 @@ namespace discpp {
 		 * @return discpp::GuildChannel, this is a constructor.
 		 */
 
-		guild_id = GetDataSafely<snowflake>(json, "guild_id");
-		position = GetDataSafely<int>(json, "position");
-		if (json.contains("permission_overwrites")) {
-			for (auto permission_overwrite : json["permission_overwrites"]) {
-				permissions.push_back(discpp::Permissions(permission_overwrite));
+		guild_id = static_cast<snowflake>(json["guild_id"].GetString());
+		position = json["position"].GetInt();
+		rapidjson::Value::ConstMemberIterator itr = json.FindMember("permission_overwrites");
+		if (itr != json.MemberEnd()) {
+			for (auto& permission_overwrite : json["permission_overwrites"].GetArray()) {
+				permissions.push_back(discpp::Permissions(permission_overwrite.GetString()));
 			}
 		}
-		nsfw = GetDataSafely<bool>(json, "nsfw");
-		bitrate = GetDataSafely<int>(json, "bitrate");
-		user_limit = GetDataSafely<int>(json, "user_limit");
-		rate_limit_per_user = GetDataSafely<int>(json, "rate_limit_per_user");
-		category_id = GetDataSafely<snowflake>(json, "parent_id");
+		nsfw = json["nsfw"].GetBool();
+		bitrate = json["bitrate"].GetInt();
+		user_limit = json["user_limit"].GetInt();
+		rate_limit_per_user = json["rate_limit_per_user"].GetInt();
+		category_id = static_cast<snowflake>(json["parent_id"].GetString());
 	}
 
 	GuildChannel::GuildChannel(snowflake id, snowflake guild_id) : Channel(id) {
@@ -432,15 +432,16 @@ namespace discpp {
 		nlohmann::json result = SendDeleteRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 
-	DMChannel::DMChannel(nlohmann::json json) : Channel(json) {
-		if (json.contains("recipients")) {
-			for (auto recipient : json["recipients"]) {
+	DMChannel::DMChannel(rapidjson::Document& json) : Channel(json) {
+		rapidjson::Value::ConstMemberIterator itr = json.FindMember("recipients");
+		if (itr != json.MemberEnd()) {
+			for (auto& recipient : json["recipients"].GetArray()) {
 				recipients.push_back(discpp::User(recipient));
 			}
 		}
-		icon = GetDataSafely<std::string>(json, "icon");
-		owner_id = GetDataSafely<snowflake>(json, "owner_id");
-		application_id = GetDataSafely<snowflake>(json, "application_id");
+		icon = json["icon"].GetString();
+		owner_id = static_cast<snowflake>(json["owner_id"].GetString());
+		application_id = static_cast<snowflake>(json["application_id"].GetString());
 	}
 
 	void DMChannel::GroupDMAddRecipient(discpp::User& user) {

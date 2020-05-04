@@ -130,17 +130,11 @@ namespace discpp {
 
 		// Websocket Methods
 		void WebSocketStart();
-		void WebSocketStart_1();
 		void OnWebSocketListen(const ix::WebSocketMessagePtr& msg);
-		void OnWebSocketListen_1(const ix::WebSocketMessagePtr& msg);
-		void OnWebSocketPacket(const nlohmann::json& result);
-		void OnWebSocketPacket_1(rapidjson::Document& result);
+		void OnWebSocketPacket(rapidjson::Document& result);
 		void HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg);
-		void HandleDiscordDisconnect_1(const ix::WebSocketMessagePtr& msg);
 		void HandleHeartbeat();
-		void HandleHeartbeat_1();
-		nlohmann::json GetIdentifyPacket();
-		rapidjson::Document GetIdentifyPacket_1();
+		rapidjson::Document GetIdentifyPacket();
 
 		// Commands
 		std::function<void(discpp::Client*, discpp::Message)> fire_command_method;
