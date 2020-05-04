@@ -29,27 +29,7 @@ std::string discpp::GetOsName() {
 	#endif
 }
 
-nlohmann::json discpp::HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket) {
-	/**
-	 * @brief Handles a response from the discpp servers.
-	 *
-	 * ```cpp
-	 *      nlohmann::json response = discpp::HandleResponse(cpr_response, object, discpp::RateLimitBucketType::CHANNEL);
-	 * ```
-	 *
-	 * @param[in] reponse The cpr response from the servers.
-	 * @param[in] object The object id to handle the ratelimits for.
-	 * @param[in] ratelimit_bucket The rate limit bucket.
-	 *
-	 * @return nlohmann::json
-	 */
-
-	globals::client_instance->logger->Debug("Received requested payload: " + response.text);
-	HandleRateLimits(response.header, object, ratelimit_bucket);
-	return nlohmann::json::parse((!response.text.empty()) ? response.text : "{}");
-}
-
-rapidjson::Document discpp::HandleResponse_1(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket) {
+rapidjson::Document discpp::HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket) {
 	/**
 	 * @brief Handles a response from the discpp servers.
 	 *
@@ -78,7 +58,7 @@ std::string CprBodyToString(cpr::Body body) {
 	return body;
 }
 
-nlohmann::json discpp::SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
 	/**
 	 * @brief Sends a get request to a url.
 	 *
@@ -101,31 +81,7 @@ nlohmann::json discpp::SendGetRequest(std::string url, cpr::Header headers, snow
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendGetRequest_1(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
-	/**
-	 * @brief Sends a get request to a url.
-	 *
-	 * ```cpp
-	 *      nlohmann::json response = discpp::SendGetRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
-	 * ```
-	 *
-	 * @param[in] url The url to create a request to.
-	 * @param[in] headers The http header.
-	 * @param[in] object The object id to handle the ratelimits for.
-	 * @param[in] ratelimit_bucket The rate limit bucket.
-	 * @param[in] The cpr response body.
-	 *
-	 * @return nlohmann::json
-	 */
-
-	globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
-	WaitForRateLimits(object, ratelimit_bucket);
-	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
-	return HandleResponse_1(result, object, ratelimit_bucket);
-}
-
-
-nlohmann::json discpp::SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
 	/**
 	 * @brief Sends a post request to a url.
 	 *
@@ -148,30 +104,7 @@ nlohmann::json discpp::SendPostRequest(std::string url, cpr::Header headers, sno
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendPostRequest_1(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
-	/**
-	 * @brief Sends a post request to a url.
-	 *
-	 * ```cpp
-	 *      nlohmann::json response = discpp::SendPostRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
-	 * ```
-	 *
-	 * @param[in] url The url to create a request to.
-	 * @param[in] headers The http header.
-	 * @param[in] object The object id to handle the ratelimits for.
-	 * @param[in] ratelimit_bucket The rate limit bucket.
-	 * @param[in] The cpr response body.
-	 *
-	 * @return nlohmann::json
-	 */
-
-	globals::client_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + CprBodyToString(body));
-	WaitForRateLimits(object, ratelimit_bucket);
-	cpr::Response result = cpr::Post(cpr::Url{ url }, headers, body);
-	return HandleResponse_1(result, object, ratelimit_bucket);
-}
-
-nlohmann::json discpp::SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
 	/**
 	 * @brief Sends a put request to a url.
 	 *
@@ -194,30 +127,7 @@ nlohmann::json discpp::SendPutRequest(std::string url, cpr::Header headers, snow
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendPutRequest_1(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
-	/**
-	 * @brief Sends a put request to a url.
-	 *
-	 * ```cpp
-	 *      nlohmann::Json response = discpp::SendPutRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
-	 * ```
-	 *
-	 * @param[in] url The url to create a request to.
-	 * @param[in] headers The http header.
-	 * @param[in] object The object id to handle the ratelimits for.
-	 * @param[in] ratelimit_bucket The rate limit bucket.
-	 * @param[in] The cpr response body.
-	 *
-	 * @return nlohmann::json
-	 */
-
-	globals::client_instance->logger->Debug("Sending put request, URL: " + url + ", body: " + CprBodyToString(body));
-	WaitForRateLimits(object, ratelimit_bucket);
-	cpr::Response result = cpr::Put(cpr::Url{ url }, headers, body);
-	return HandleResponse_1(result, object, ratelimit_bucket);
-}
-
-nlohmann::json discpp::SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
 	/**
 	 * @brief Sends a patch request to a url.
 	 *
@@ -240,30 +150,7 @@ nlohmann::json discpp::SendPatchRequest(std::string url, cpr::Header headers, sn
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendPatchRequest_1(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
-	/**
-	 * @brief Sends a patch request to a url.
-	 *
-	 * ```cpp
-	 *      nlohmann::json response = discpp::SendPatchRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
-	 * ```
-	 *
-	 * @param[in] url The url to create a request to.
-	 * @param[in] headers The http header.
-	 * @param[in] object The object id to handle the ratelimits for.
-	 * @param[in] ratelimit_bucket The rate limit bucket.
-	 * @param[in] The cpr response body.
-	 *
-	 * @return nlohmann::json
-	 */
-
-	globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + CprBodyToString(body));
-	WaitForRateLimits(object, ratelimit_bucket);
-	cpr::Response result = cpr::Patch(cpr::Url{ url }, headers, body);
-	return HandleResponse_1(result, object, ratelimit_bucket);
-}
-
-nlohmann::json discpp::SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket) {
+rapidjson::Document discpp::SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket) {
 	/**
 	 * @brief Sends a delete request to a url.
 	 *
@@ -283,28 +170,6 @@ nlohmann::json discpp::SendDeleteRequest(std::string url, cpr::Header headers, s
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Delete(cpr::Url{ url }, headers);
 	return HandleResponse(result, object, ratelimit_bucket);
-}
-
-rapidjson::Document discpp::SendDeleteRequest_1(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket) {
-	/**
-	 * @brief Sends a delete request to a url.
-	 *
-	 * ```cpp
-	 *      nlohmann::json response = discpp::SendDeleteRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL);
-	 * ```
-	 *
-	 * @param[in] url The url to create a request to.
-	 * @param[in] headers The http header.
-	 * @param[in] object The object id to handle the ratelimits for.
-	 * @param[in] ratelimit_bucket The rate limit bucket.
-	 *
-	 * @return nlohmann::json
-	 */
-
-	globals::client_instance->logger->Debug("Sending delete request, URL: " + url);
-	WaitForRateLimits(object, ratelimit_bucket);
-	cpr::Response result = cpr::Delete(cpr::Url{ url }, headers);
-	return HandleResponse_1(result, object, ratelimit_bucket);
 }
 
 cpr::Header discpp::DefaultHeaders(cpr::Header add) {
