@@ -8,11 +8,12 @@
 #include "activity.h"
 #include "event_handler.h"
 #include "event_dispatcher.h"
+#include "client_config.h"
 
 #include <ixwebsocket/IXNetSystem.h>
 
 namespace discpp {
-    Client::Client(std::string token, ClientConfig config) : token(token), config(config) {
+    Client::Client(std::string token, ClientConfig* config) : token(token), config(config) {
         /**
          * @brief Constructs a discpp::Bot object.
          *
@@ -32,10 +33,12 @@ namespace discpp {
 
         discpp::globals::client_instance = this;
 
-        if (config.logger_path.empty()) {
-            logger = new discpp::Logger(config.logger_flags);
+        message_cache_count = config->message_cache_size;
+
+        if (config->logger_path.empty()) {
+            logger = new discpp::Logger(config->logger_flags);
         } else {
-            logger = new discpp::Logger(config.logger_path, config.logger_flags);
+            logger = new discpp::Logger(config->logger_path, config->logger_flags);
         }
     }
 
@@ -241,7 +244,7 @@ namespace discpp {
 
     void Client::WebSocketStart() {
         nlohmann::json gateway_request;
-        switch (config.type) {
+        switch (config->type) {
         case TokenType::USER:
             gateway_request = SendGetRequest(Endpoint("/gateway"), { {"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
             break;

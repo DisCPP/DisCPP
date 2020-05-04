@@ -24,15 +24,10 @@ namespace discpp {
 	class Activity;
 	class ClientConfig;
 
-	enum class TokenType {
-		USER,
-		BOT
-	};
-
 	class Client {
 	public:
 		std::string token; /**< Token for the current client */
-		ClientConfig config; /**< Configuration for the current bot */
+		ClientConfig* config; /**< Configuration for the current bot */
 
 		discpp::User client_user; /**< discpp::User object representing current user */
 		discpp::Logger* logger; /**< discpp::Logger object representing current logger */
@@ -58,7 +53,7 @@ namespace discpp {
 			heartbeat_ack = 11			// Receive
 		};
 
-		Client(std::string token, ClientConfig config);
+		Client(std::string token, ClientConfig* config);
 		int Run();
 		void CreateWebsocketRequest(nlohmann::json json, std::string message = "");
 		void SetCommandHandler(std::function<void(discpp::Client*, discpp::Message)> command_handler);
@@ -114,7 +109,7 @@ namespace discpp {
 		int last_sequence_number;
 		long long packet_counter;
 
-		int message_cache_count = config.messageCacheSize;
+		int message_cache_count;
 
 		// Websocket Methods
 		void WebSocketStart();

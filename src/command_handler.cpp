@@ -13,7 +13,7 @@ void discpp::FireCommand(discpp::Client* bot, discpp::Message message) {
 
     int prefixSize = 0;
     bool trigger = false;
-    for (std::string const& prefix : bot->config.prefixes) {
+    for (std::string const& prefix : bot->config->prefixes) {
         prefixSize = prefix.size();
         if (message.author.bot) {
             return;
