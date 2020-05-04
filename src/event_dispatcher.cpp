@@ -73,7 +73,7 @@ namespace discpp {
     void EventDispatcher::GuildCreateEvent(const nlohmann::json& result) {
         snowflake guild_id = result["id"].get<snowflake>();
         discpp::Guild guild(result);
-        discpp::globals::bot_instance->logger.LogToConsole(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Connected to " + guild.name);
+        //discpp::globals::bot_instance->logger->LogToConsole(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Connected to " + guild.name);
         discpp::globals::bot_instance->guilds.insert(std::pair<snowflake, Guild>(static_cast<snowflake>(guild.id), static_cast<Guild>(guild)));
 
         discpp::globals::bot_instance->members.insert(guild.members.begin(), guild.members.end());

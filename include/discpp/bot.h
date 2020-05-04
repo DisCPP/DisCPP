@@ -30,7 +30,7 @@ namespace discpp {
 		BotConfig config; /**< Configuration for the current bot */
 
 		discpp::User bot_user; /**< discpp::User object representing current bot */
-		discpp::Logger logger; /**< discpp::Logger object representing current logger */
+		discpp::Logger* logger; /**< discpp::Logger object representing current logger */
 
 		std::unordered_map<snowflake, Channel> channels; /**< List of channels the current bot can access */
 		std::unordered_map<snowflake, Member> members; /**< List of members the current bot can access */

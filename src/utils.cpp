@@ -44,7 +44,7 @@ nlohmann::json discpp::HandleResponse(cpr::Response response, snowflake object, 
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Received requested payload: " + response.text);
+	globals::bot_instance->logger->Debug("Received requested payload: " + response.text);
 	HandleRateLimits(response.header, object, ratelimit_bucket);
 	return nlohmann::json::parse((!response.text.empty()) ? response.text : "{}");
 }
@@ -74,7 +74,7 @@ nlohmann::json discpp::SendGetRequest(std::string url, cpr::Header headers, snow
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
+	globals::bot_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -97,7 +97,7 @@ nlohmann::json discpp::SendPostRequest(std::string url, cpr::Header headers, sno
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending post request, URL: " + url + ", body: " + CprBodyToString(body));
+	globals::bot_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Post(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -120,7 +120,7 @@ nlohmann::json discpp::SendPutRequest(std::string url, cpr::Header headers, snow
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending put request, URL: " + url + ", body: " + CprBodyToString(body));
+	globals::bot_instance->logger->Debug("Sending put request, URL: " + url + ", body: " + CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Put(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -143,7 +143,7 @@ nlohmann::json discpp::SendPatchRequest(std::string url, cpr::Header headers, sn
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending patch request, URL: " + url + ", body: " + CprBodyToString(body));
+	globals::bot_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Patch(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -165,7 +165,7 @@ nlohmann::json discpp::SendDeleteRequest(std::string url, cpr::Header headers, s
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending delete request, URL: " + url);
+	globals::bot_instance->logger->Debug("Sending delete request, URL: " + url);
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Delete(cpr::Url{ url }, headers);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -437,7 +437,7 @@ int discpp::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bu
 			rlmt = &global_ratelimit;
 			break;
 		default:
-			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "RateLimitBucketType is invalid!");
+			globals::bot_instance->logger->Error(LogTextColor::RED + "RateLimitBucketType is invalid!");
 			throw std::runtime_error("RateLimitBucketType is invalid!");
 			break;
 		}
@@ -447,7 +447,7 @@ int discpp::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bu
 		double milisecond_time = rlmt->ratelimit_reset * 1000 - time(NULL) * 1000;
 
 		if (milisecond_time > 0) {
-			globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Rate limit wait time: " + std::to_string(milisecond_time) + " miliseconds");
+			globals::bot_instance->logger->Debug("Rate limit wait time: " + std::to_string(milisecond_time) + " miliseconds");
 			std::this_thread::sleep_for(std::chrono::milliseconds((int)milisecond_time));
 		}
 	}

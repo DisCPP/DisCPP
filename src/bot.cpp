@@ -22,7 +22,7 @@ namespace discpp {
          *
          * @param[in] token The discpp token the bot needs to run.
          * @param[in] prefixes The bot's prefixes that will be used for command handling.
-         * @param[in] logger_flags The flags that will be passed to the logger.
+         * @param[in] logger_flags The flags that will be passed to the logger->
          * @param[in] logger_path The file path for the logger, doesn't need one as it can just log to console/terminal instead.
          *
          * @return discpp::Bot, this is a constructor.
@@ -33,9 +33,9 @@ namespace discpp {
         discpp::globals::bot_instance = this;
 
         if (config.logger_path.empty()) {
-            logger = discpp::Logger(config.logger_flags);
+            logger = new discpp::Logger(config.logger_flags);
         } else {
-            logger = discpp::Logger(config.logger_path, config.logger_flags);
+            logger = new discpp::Logger(config.logger_path, config.logger_flags);
         }
     }
 
@@ -201,9 +201,9 @@ namespace discpp {
         std::string json_payload = json.dump();
 
         if (message.empty()) {
-            logger.Log(LogSeverity::SEV_DEBUG, "Sending gateway payload: " + json_payload);
+            logger->Debug("Sending gateway payload: " + json_payload);
         } else {
-            logger.Log(LogSeverity::SEV_DEBUG, message);
+            logger->Debug(message);
         }
 
         WaitForRateLimits(bot_user.id, RateLimitBucketType::GLOBAL);
@@ -231,9 +231,9 @@ namespace discpp {
     }
 
     void Bot::DisconnectWebsocket() {
-        logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::YELLOW + "Locking Mutex before disconnect...");
+        logger->Debug(LogTextColor::YELLOW + "Locking Mutex before disconnect...");
         std::lock_guard<std::mutex> lock(websocket_client_mutex);
-        logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::YELLOW + "Closing websocket connection...");
+        logger->Debug(LogTextColor::YELLOW + "Closing websocket connection...");
 
         websocket.close(ix::WebSocketCloseConstants::kNormalClosureCode);
         websocket.stop(ix::WebSocketCloseConstants::kNormalClosureCode);
@@ -243,10 +243,10 @@ namespace discpp {
         nlohmann::json gateway_request = SendGetRequest(Endpoint("/gateway/bot"), {{"Authorization", "Bot " + token}, {"User-Agent", "discppBot (https://github.com/seanomik/DISCPP, v0.0.0)"}}, {}, {});
 
         if (gateway_request.contains("url")) {
-            logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::YELLOW + "Connecting to gateway...");
+            logger->Debug(LogTextColor::YELLOW + "Connecting to gateway...");
 
             if (gateway_request["session_start_limit"]["remaining"].get<int>() == 0) {
-                logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "GATEWAY ERROR: Maximum start limit reached");
+                logger->Debug(LogTextColor::RED + "GATEWAY ERROR: Maximum start limit reached");
                 throw std::runtime_error{"GATEWAY ERROR: Maximum start limit reached"};
             }
 
@@ -285,7 +285,7 @@ namespace discpp {
 
             bindthread.join();
         } else {
-            logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Improper token, failed to connect to discord gateway!");
+            logger->Error(LogTextColor::RED + "Improper token, failed to connect to discord gateway!");
             throw std::runtime_error("Improper token, failed to connect to discord gateway!");
         }
     }
@@ -293,9 +293,9 @@ namespace discpp {
     void Bot::HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg) {
         // if we're reconnecting this just stop here.
         if (reconnecting) {
-            logger.Log(LogSeverity::SEV_DEBUG, "Websocket was closed for reconnecting...");
+            logger->Debug("Websocket was closed for reconnecting...");
         } else {
-            logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Websocket was closed with error: " + std::to_string(msg->closeInfo.code) + ", " + msg->closeInfo.reason + "! Attempting reconnect in 10 seconds...");
+            logger->Error(LogTextColor::RED + "Websocket was closed with error: " + std::to_string(msg->closeInfo.code) + ", " + msg->closeInfo.reason + "! Attempting reconnect in 10 seconds...");
         }
 
         heartbeat_acked = false;
@@ -310,38 +310,38 @@ namespace discpp {
 
     void Bot::OnWebSocketListen(const ix::WebSocketMessagePtr& msg) {
         if (msg->type == ix::WebSocketMessageType::Open) {
-            logger.Log(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Connected to gateway!");
+            logger->Info(LogTextColor::GREEN + "Connected to gateway!");
 
             disconnected = false;
             reconnecting = false;
         } else if (msg->type == ix::WebSocketMessageType::Close) {
             HandleDiscordDisconnect(msg);
         } else if (msg->type == ix::WebSocketMessageType::Error) {
-            logger.Log(LogSeverity::SEV_INFO, LogTextColor::RED + "Error: " + msg->errorInfo.reason);
+            logger->Info(LogTextColor::RED + "Error: " + msg->errorInfo.reason);
         } else if (msg->type == ix::WebSocketMessageType::Message) {
             nlohmann::json result;
             try {
                 result = nlohmann::json::parse(msg->str);
             } catch(const nlohmann::json::exception& e) {
-                logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::YELLOW + "A non json payload was received and ignored: \"" + msg->str + "\" (Error: " + e.what() + ")");
+                logger->Debug(LogTextColor::YELLOW + "A non json payload was received and ignored: \"" + msg->str + "\" (Error: " + e.what() + ")");
             }
 
             if (!result.empty()) {
                 OnWebSocketPacket(result);
             }
         } else {
-            logger.Log(LogSeverity::SEV_INFO, LogTextColor::RED + "Known message sent");
+            logger->Info(LogTextColor::RED + "Known message sent");
         }
     }
 
     void Bot::OnWebSocketPacket(const nlohmann::json& result) {
-        logger.Log(LogSeverity::SEV_DEBUG, "Received payload: " + result.dump());
+        logger->Debug("Received payload: " + result.dump());
 
         switch (result["op"].get<int>()) {
             case (hello): {
                 if (reconnecting) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(1200));
-                    logger.Log(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Reconnected!");
+                    logger->Info(LogTextColor::GREEN + "Reconnected!");
 
                     std::string resume = "{ \"op\": 6, \"d\": { \"token\": \"" + token + "\", \"session_id\": \"" + session_id + "\", \"seq\": " + std::to_string(last_sequence_number) + "} }";
                     CreateWebsocketRequest(nlohmann::json::parse(resume));
@@ -402,19 +402,19 @@ namespace discpp {
 
                 heartbeat_acked = false;
 
-                logger.Log(LogSeverity::SEV_DEBUG, "Waiting for next heartbeat (" + std::to_string(hello_packet["d"]["heartbeat_interval"].get<int>() / 1000.0 - 10) + " seconds)...");
+                logger->Debug("Waiting for next heartbeat (" + std::to_string(hello_packet["d"]["heartbeat_interval"].get<int>() / 1000.0 - 10) + " seconds)...");
                 // Wait for the required heartbeat interval, while waiting it should be acked from another thread.
                 std::this_thread::sleep_for(std::chrono::milliseconds(hello_packet["d"]["heartbeat_interval"].get<int>() - 10));
 
                 if (!heartbeat_acked) {
-                    logger.Log(LogSeverity::SEV_WARNING, LogTextColor::YELLOW + "Heartbeat wasn't acked, trying to reconnect...");
+                    logger->Warn(LogTextColor::YELLOW + "Heartbeat wasn't acked, trying to reconnect...");
                     disconnected = true;
 
                     ReconnectToWebsocket();
                 }
             }
         } catch (std::exception &e) {
-            logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "ERROR: " + e.what());
+            logger->Error(LogTextColor::RED + "ERROR: " + e.what());
         }
     }
 
@@ -433,12 +433,14 @@ namespace discpp {
 
     void Bot::ReconnectToWebsocket() {
         if (!reconnecting) {
-            logger.Log(LogSeverity::SEV_INFO, LogTextColor::YELLOW + "Reconnecting to Discord gateway!");
+            logger->Info(LogTextColor::YELLOW + "Reconnecting to Discord gateway!");
 
             reconnecting = true;
 
             DisconnectWebsocket();
-            WebSocketStart();
+            // Connect with a 20 second timeout.
+            websocket.connect(20);
+            //WebSocketStart();
         }
     }
 }

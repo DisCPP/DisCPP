@@ -286,7 +286,7 @@ namespace discpp {
             return it->second;
         }
 
-		globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "Member not found (Exceptions like these should be handled)!");
+		globals::bot_instance->logger->Error(LogTextColor::RED + "Member not found (Exceptions like these should be handled)!");
 		throw std::runtime_error("Member not found (Exceptions like these should be handled)!");
 	}
 
@@ -305,7 +305,7 @@ namespace discpp {
 		 */
 		Member tmp = this->GetMember(discpp::globals::bot_instance->bot_user.id);
 		if (this->owner_id != tmp.id && !tmp.HasPermission(req_perm) && !tmp.HasPermission(Permission::ADMINISTRATOR)) {
-			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "The bot does not have permission: " + PermissionToString(req_perm) + " (Exceptions like these should be handled)!");
+			globals::bot_instance->logger->Error(LogTextColor::RED + "The bot does not have permission: " + PermissionToString(req_perm) + " (Exceptions like these should be handled)!");
 			throw new NoPermissionException(req_perm);
 		}
 	}

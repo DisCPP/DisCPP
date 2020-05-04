@@ -87,7 +87,7 @@ namespace discpp {
             } else if (!other.id.empty() && !id.empty() && !other.name.empty() && !name.empty()) {
                 return other.id == id && other.name == name;
             }
-            
+
             return false; // Hopefully this never runs.
         }
 

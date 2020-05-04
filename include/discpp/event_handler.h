@@ -38,7 +38,7 @@ namespace discpp {
 			// Make sure that the given event class derives from discpp::Event
 			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
-			discpp::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::GREEN + "Event listener registered: " + typeid(T).name());
+			discpp::globals::bot_instance->logger->Debug(LogTextColor::GREEN + "Event listener registered: " + typeid(T).name());
 
 			auto id = GetNextId();
 			GetHandlers()[id] = listener;
@@ -67,7 +67,7 @@ namespace discpp {
 
 			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
-			discpp::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Event listener removed: " + std::string(typeid(T).name()));
+			discpp::globals::bot_instance->logger->Debug("Event listener removed: " + std::string(typeid(T).name()));
 
 			GetHandlers().erase(handle.id);
 		}
@@ -89,7 +89,7 @@ namespace discpp {
 
 			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
-			discpp::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Event listener triggered: " + std::string(typeid(T).name()));
+			discpp::globals::bot_instance->logger->Debug("Event listener triggered: " + std::string(typeid(T).name()));
 
 			for (std::pair<IdType, std::function<void(const T&)>> handler : GetHandlers()) {
 				discpp::globals::bot_instance->futures.push_back(std::async(std::launch::async, handler.second, e));
