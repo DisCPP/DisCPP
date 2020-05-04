@@ -5,12 +5,23 @@
 #include <fstream>
 
 namespace discpp {
-	WebhookClient::WebhookClient(discpp::snowflake id, std::string token) : DiscordObject(id) {
+    Webhook::Webhook(nlohmann::json json) {
+        id = json["id"];
+        type = static_cast<WebhookType>(json["type"].get<int>());
+        guild = (json.contains("guild_id")) ? &discpp::Guild(json["guild_id"].get<snowflake>()) : &discpp::Guild();
+        channel = (json.contains("channel_id")) ? &discpp::Channel(json["channel_id"].get<snowflake>()) : &discpp::Channel();
+        user = (json.contains("user")) ? &discpp::User(json["user"]) : &discpp::User();
+        name = GetDataSafely<std::string>(json, "name");
+        avatar = GetDataSafely<std::string>(json, "avatar");
+        token = GetDataSafely<std::string>(json, "token");
+    }
+
+	Webhook::Webhook(discpp::snowflake id, std::string token) : DiscordObject(id) {
 		this->token = token;
 		this->id = id;
 	};
 
-	discpp::Message WebhookClient::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<discpp::File> files) {
+	discpp::Message Webhook::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<discpp::File> files) {
 
 		std::string escaped_text = EscapeString(text);
 		nlohmann::json message_json = nlohmann::json::parse("{\"content\":\"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}");
@@ -69,12 +80,12 @@ namespace discpp {
 		return discpp::Message(result);
 	}
 
-	void WebhookClient::EditName(std::string& name) {
+	void Webhook::EditName(std::string& name) {
 		nlohmann::json j = { "name", name };
 		discpp::SendPatchRequest(discpp::Endpoint("/webhooks/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK, cpr::Body(j.dump()));
 	}
 
-	void WebhookClient::Remove() {
+	void Webhook::Remove() {
 		discpp::SendDeleteRequest(discpp::Endpoint("/webhooks/" + id + "/" + token), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK);
 	}
 }

@@ -71,7 +71,7 @@ namespace discpp {
 		revoked = GetDataSafely<bool>(json, "revoked");
 		if (json.contains("integrations")) {
 			for (auto& integration : json["integrations"]) {
-				integrations.push_back(discpp::GuildIntegration(integration));
+				integrations.push_back(discpp::Integration(integration));
 			}
 		}
 		verified = GetDataSafely<bool>(json, "verified");

@@ -641,22 +641,22 @@ namespace discpp {
 		return guild_invites;
 	}
 
-	std::vector<discpp::GuildIntegration> Guild::GetIntegrations() {
+	std::vector<discpp::Integration> Guild::GetIntegrations() {
 		/**
 		 * @brief Get guild integrations.
 		 *
 		 * ```cpp
-		 *      std::vector<discpp::GuildIntegration> integration = guild.GetIntegrations();
+		 *      std::vector<discpp::Integration> integration = guild.GetIntegrations();
 		 * ```
 		 *
-		 * @return std::vector<discpp::GuildIntegration>
+		 * @return std::vector<discpp::Integration>
 		 */
 
 		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + id + "/integrations"), DefaultHeaders(), {}, {});
 
-		std::vector<discpp::GuildIntegration> guild_integrations;
+		std::vector<discpp::Integration> guild_integrations;
 		for (auto& guild_integration : result) {
-			guild_integrations.push_back(discpp::GuildIntegration(guild_integration));
+			guild_integrations.push_back(discpp::Integration(guild_integration));
 		}
 
 		return guild_integrations;
@@ -680,7 +680,7 @@ namespace discpp {
 		SendPostRequest(Endpoint("/guilds/" + this->id + "/integrations"), DefaultHeaders(), this->id, RateLimitBucketType::GUILD, body);
 	}
 
-	void Guild::ModifyIntegration(discpp::GuildIntegration& guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons) {
+	void Guild::ModifyIntegration(discpp::Integration& guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons) {
 		/**
 		 * @brief Modify a guild integration.
 		 *
@@ -700,7 +700,7 @@ namespace discpp {
 		SendPostRequest(Endpoint("/guilds/" + id + "/integrations/" + guild_integration.id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 	}
 
-	void Guild::DeleteIntegration(discpp::GuildIntegration& guild_integration) {
+	void Guild::DeleteIntegration(discpp::Integration& guild_integration) {
 		/**
 		 * @brief Delete a guild integration.
 		 *
@@ -716,7 +716,7 @@ namespace discpp {
 		SendDeleteRequest(Endpoint("/guilds/" + id + "/integrations/" + guild_integration.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-	void Guild::SyncIntegration(discpp::GuildIntegration& guild_integration) {
+	void Guild::SyncIntegration(discpp::Integration& guild_integration) {
 		/**
 		 * @brief Sync a guild integration.
 		 *
@@ -1058,5 +1058,11 @@ namespace discpp {
 	    nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + id + "/vanity-url"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 
         return discpp::GuildInvite(result);
+    }
+
+    discpp::AuditLog Guild::GetAuditLog() {
+        nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + id + "/audit-logs"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
+
+        return discpp::AuditLog(result);
     }
 }

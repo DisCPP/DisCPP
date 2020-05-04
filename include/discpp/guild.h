@@ -3,11 +3,12 @@
 
 #include "discord_object.h"
 #include "emoji.h"
-#include "member.h"
 #include "channel.h"
+#include "member.h"
 #include "utils.h"
 #include "role.h"
 #include "image.h"
+#include "audit_log.h"
 
 #include <nlohmann/json.hpp>
 
@@ -75,20 +76,20 @@ namespace discpp {
         int approximate_member_count; /**< Approximate count of total members. */
 	};
 
-	class GuildIntegrationAccount : public DiscordObject {
+	class IntegrationAccount : public DiscordObject {
 	public:
-        GuildIntegrationAccount() = default;
-        GuildIntegrationAccount(nlohmann::json json) {
+        IntegrationAccount() = default;
+        IntegrationAccount(nlohmann::json json) {
             /**
-             * @brief Constructs a discpp::GuildIntegrationAccount object from json.
+             * @brief Constructs a discpp::IntegrationAccount object from json.
              *
              * ```cpp
-             *      discpp::GuildIntegrationAccount guild_integration_account(json);
+             *      discpp::IntegrationAccount guild_integration_account(json);
              * ```
              *
              * @param[in] json The json data for the integration account.
              *
-             * @return discpp::GuildIntegrationAccount, this is a constructor.
+             * @return discpp::IntegrationAccount, this is a constructor.
              */
 			id = json["id"];
 			name = json["name"];
@@ -97,25 +98,25 @@ namespace discpp {
         std::string name; /**< Name of the account. */
     };
 
-	class GuildIntegration : public DiscordObject {
+	class Integration : public DiscordObject {
 	public:
 	    enum class IntegrationExpireBehavior : int {
 	        REMOVE_ROLE = 0,
 	        KICK = 1
 	    };
 
-		GuildIntegration() = default;
-        GuildIntegration(nlohmann::json json) {
+        Integration() = default;
+        Integration(nlohmann::json json) {
             /**
-             * @brief Constructs a discpp::GuildIntegration object from json.
+             * @brief Constructs a discpp::Integration object from json.
              *
              * ```cpp
-             *      discpp::GuildIntegration guild_integration(json);
+             *      discpp::Integration integration(json);
              * ```
              *
              * @param[in] json The json data for the guild integration.
              *
-             * @return discpp::GuildIntegration, this is a constructor.
+             * @return discpp::Integration, this is a constructor.
              */
 
             id = json["id"].get<snowflake>();
@@ -127,7 +128,7 @@ namespace discpp {
             expire_behavior = static_cast<IntegrationExpireBehavior>(json["expire_behavior"].get<int>());
             expire_grace_period = json["expire_grace_period"].get<int>();
             user = discpp::User(json["user"]);
-            account = discpp::GuildIntegrationAccount(json["account"]);
+            account = discpp::IntegrationAccount(json["account"]);
             synced_at = json["synced_at"];
         }
 
@@ -140,7 +141,7 @@ namespace discpp {
         IntegrationExpireBehavior expire_behavior; /**< The behavior of expiring subscribers. */
         int expire_grace_period; /**< The grace period (in days) before expiring subscribers. */
         discpp::User user; /**< User for this integration. */
-        discpp::GuildIntegrationAccount account; /**< Integration account information. */
+        discpp::IntegrationAccount account; /**< Integration account information. */
         // @TODO: Convert to iso8601Time
         std::string synced_at; /**< When this integration was last synced. */
 	};
@@ -239,11 +240,11 @@ namespace discpp {
 		int GetPruneAmount(int days);
 		void BeginPrune(int days);
 		std::vector<discpp::GuildInvite> GetInvites();
-		std::vector<discpp::GuildIntegration> GetIntegrations();
+		std::vector<discpp::Integration> GetIntegrations();
 		void CreateIntegration(snowflake id, std::string type);
-		void ModifyIntegration(discpp::GuildIntegration& guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons);
-		void DeleteIntegration(discpp::GuildIntegration& guild_integration);
-		void SyncIntegration(discpp::GuildIntegration& guild_integration);
+		void ModifyIntegration(discpp::Integration& guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons);
+		void DeleteIntegration(discpp::Integration& guild_integration);
+		void SyncIntegration(discpp::Integration& guild_integration);
 		GuildEmbed GetGuildEmbed();
 		GuildEmbed ModifyGuildEmbed(snowflake channel_id, bool enabled);
 		discpp::GuildInvite GetVanityURL();
@@ -256,6 +257,7 @@ namespace discpp {
 		void DeleteEmoji(discpp::Emoji& emoji);
 		std::string GetIconURL(discpp::ImageType imgType = discpp::ImageType::AUTO);
 		discpp::Member GetOwnerObject();
+		discpp::AuditLog GetAuditLog();
 
 		std::string name; /**< Guild name. */
 		std::string icon; /**< Hashed guild icon. */

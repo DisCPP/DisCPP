@@ -80,6 +80,7 @@ target_link_libraries(main PRIVATE discpp)
 - [ ] Make sure all endpoints are implemented and add them if they aren't.
 - [ ] Voice websocket connection.
 - [ ] Sending audio through a voice connection.
+- [ ] Make the audit log cleaner and easier to use.
 
 ## Documentation
 Currently the only documentation is from Doxygen; its currently completely up to date. You can view it [here](https://discpp.github.io/). If you want to generate documentation you need to install Doxygen and run doxygen in the root DisCPP directory and run the terminal command: ```doxygen Doxyfile```
