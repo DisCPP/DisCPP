@@ -29,7 +29,7 @@ namespace discpp {
 		}*/
 	}
 
-	Member::Member(nlohmann::json json, discpp::Guild guild) : guild_id(guild.id) {
+	Member::Member(rapidjson::Document& json, discpp::Guild guild) : guild_id(guild.id) {
 		/**
 		 * @brief Constructs a discpp::Member object by parsing json and stores the guild_id.
 		 *
@@ -43,26 +43,34 @@ namespace discpp {
 		 * @return discpp::Member, this is a constructor.
 		 */
 
-		if (json.contains("user")) {
-			user = discpp::User(json["user"]);
+		rapidjson::Value::ConstMemberIterator itr = json.FindMember("user");
+		if (itr != json.MemberEnd()) {
+			rapidjson::Document user_json; 
+			user_json.CopyFrom(json["user"], user_json.GetAllocator());
+			user = discpp::User(user_json);
 			id = user.id;
-		} else {
+		}
+		else {
 			user = discpp::User();
 		}
         int highest_hiearchy = 0;
-		nick = GetDataSafely<std::string>(json, "nick");
-		if (json.contains("roles")) {
-			for (auto& role : json["roles"]) {
-				discpp::Role r(role.get<snowflake>(), guild);
-                if (r.position > highest_hiearchy) {
-                    highest_hiearchy = r.position;
-                }
+		nick = json["nick"].GetString();
+		itr = json.FindMember("roles");
+		if (itr != json.MemberEnd()) {
+			for (auto& role : json["roles"].GetArray()) {
+				rapidjson::Document role_json;
+				role_json.CopyFrom(role, role_json.GetAllocator());
+				discpp::Role r(static_cast<snowflake>(role_json.GetString()), guild);
+				if (r.position > highest_hiearchy) {
+					highest_hiearchy = r.position;
+				}
 
 				// Save permissions
 				if (json["roles"][0] == role) {
 					permissions.allow_perms.value = r.permissions.allow_perms.value;
 					permissions.deny_perms.value = r.permissions.deny_perms.value;
-				} else {
+				}
+				else {
 					permissions.allow_perms.value |= r.permissions.allow_perms.value;
 					permissions.deny_perms.value |= r.permissions.deny_perms.value;
 				}
@@ -75,10 +83,10 @@ namespace discpp {
 		} else {
             hierarchy = highest_hiearchy;
         }
-		joined_at = GetDataSafely<std::string>(json, "joined_at");
-		premium_since = GetDataSafely<std::string>(json, "premium_since");
-		deaf = GetDataSafely<bool>(json, "deaf");
-		mute = GetDataSafely<bool>(json, "mute");
+		joined_at = json["joined_at"].GetString();
+		premium_since = json["premium_since"].GetString();
+		deaf = json["deaf"].GetBool();
+		mute = json["mute"].GetBool();
 		std::string _id = this->id.c_str();
 		user.mention = "<@!" + _id + ">";
 	}
@@ -171,8 +179,9 @@ namespace discpp {
 		 * @return bool
 		 */
 
-		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + guild_id + "/bans/" + id), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
-		return result.contains("reason");
+		rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + guild_id + "/bans/" + id), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
+		rapidjson::Value::ConstMemberIterator itr = result.FindMember("reason");
+		return itr != result.MemberEnd();
 	}
 
 	bool Member::HasRole(discpp::Role role) {

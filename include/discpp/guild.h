@@ -245,7 +245,7 @@ namespace discpp {
 	public:
 		Guild() = default;
 		Guild(snowflake id);
-		Guild(nlohmann::json json);
+		Guild(rapidjson::Document& json);
 
 		discpp::Guild Modify(GuildModifyRequests modify_requests);
 		void DeleteGuild();
@@ -335,7 +335,7 @@ namespace discpp {
     class VoiceState {
     public:
         VoiceState() = default;
-        VoiceState(nlohmann::json json) {
+        VoiceState(rapidjson::Document& json) {
             /**
              * @brief Constructs a discpp::VoiceState object from json.
              *
@@ -347,17 +347,22 @@ namespace discpp {
              *
              * @return discpp::VoiceState, this is a constructor.
              */
-            guild_id = GetDataSafely<snowflake>(json, "guild_id");
-            channel_id = GetDataSafely<snowflake>(json, "channel_id");
-            user_id = json["user_id"].get<snowflake>();
-            member = (json.contains("member") && !json["member"].is_null()) ? discpp::Member(json["member"], discpp::Guild(guild_id)) : discpp::Member();
-            session_id = json["session_id"];
-            deaf = json["deaf"].get<bool>();
-            mute = json["mute"].get<bool>();
-            self_deaf = json["self_deaf"].get<bool>();
-            self_mute = json["self_mute"].get<bool>();
-            self_stream = GetDataSafely<bool>(json, "self_stream");
-            suppress = json["suppress"].get<bool>();
+            guild_id = static_cast<snowflake>(json["guild_id"].GetString());
+            channel_id = static_cast<snowflake>(json["channel_id"].GetString());
+            user_id = static_cast<snowflake>(json["user_id"].GetString());
+            rapidjson::Value::ConstMemberIterator itr = json.FindMember("member");
+            if (itr != json.MemberEnd() && !json["member"].IsNull()) {
+                rapidjson::Document member_json; 
+                member_json.CopyFrom(json["member"], member_json.GetAllocator());
+                member = discpp::Member(member_json, discpp::Guild(guild_id));
+            }
+            session_id = json["session_id"].GetString();
+            deaf = json["deaf"].GetBool();
+            mute = json["mute"].GetBool();
+            self_deaf = json["self_deaf"].GetBool();
+            self_mute = json["self_mute"].GetBool();
+            self_stream = json["self_stream"].GetBool();
+            suppress = json["suppress"].GetBool();
         }
 
         snowflake guild_id; /**< The guild id this voice state is for. */

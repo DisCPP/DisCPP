@@ -15,7 +15,7 @@ namespace discpp {
 	public:
 		Member() = default;
 		Member(snowflake id, discpp::Guild guild);
-		Member(nlohmann::json json, discpp::Guild guild);
+		Member(rapidjson::Document& json, discpp::Guild guild);
 
 		void ModifyMember(std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf, snowflake channel_id);
 		void AddRole(discpp::Role role);
