@@ -9,7 +9,7 @@
 namespace discpp {
 	enum ImageType : int { AUTO, WEBP, PNG, JPEG, GIF };
 	class Channel;
-	class GuildIntegration;
+	class Integration;
 
 	enum class ConnectionVisibility : int {
 		NONE = 0,
@@ -22,7 +22,7 @@ namespace discpp {
 		std::string name;
 		std::string type;
 		bool revoked;
-		std::vector<GuildIntegration> integrations;
+		std::vector<Integration> integrations;
 		bool verified;
 		bool friend_sync;
 		bool show_activity;

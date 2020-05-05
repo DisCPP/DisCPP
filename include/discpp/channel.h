@@ -9,6 +9,8 @@
 
 #include <variant>
 
+#include <rapidjson/document.h>
+
 namespace discpp {
 	class Message;
 	class GuildInvite;

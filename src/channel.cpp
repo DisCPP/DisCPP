@@ -80,8 +80,7 @@ namespace discpp {
 
 				// Delete the temporary message file
 				remove("message.txt");
-			}
-			catch (std::exception e) {
+			} catch (std::exception e) {
 				// Delete the temporary message file
 				remove("message.txt");
 
@@ -108,8 +107,7 @@ namespace discpp {
 			HandleRateLimits(response.header, id, RateLimitBucketType::CHANNEL);
 
 			return discpp::Message(nlohmann::json::parse(response.text));
-		}
-		else {
+		} else {
 			rapidjson::StringBuffer buffer;
 			rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
 			message_json.Accept(writer);
@@ -296,11 +294,11 @@ namespace discpp {
 
 		guild_id = static_cast<snowflake>(json["guild_id"].GetString());
 		position = json["position"].GetInt();
-		rapidjson::Value::ConstMemberIterator itr = json.FindMember("permission_overwrites");
-		if (itr != json.MemberEnd()) {
+		if (ContainsNotNull(json, "permission_overwrites")) {
 			for (auto& permission_overwrite : json["permission_overwrites"].GetArray()) {
 				rapidjson::Document permission_json;
 				permission_json.CopyFrom(permission_overwrite, permission_json.GetAllocator());
+
 				permissions.push_back(discpp::Permissions(permission_json));
 			}
 		}

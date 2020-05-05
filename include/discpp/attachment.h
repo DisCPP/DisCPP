@@ -3,6 +3,8 @@
 
 #include "discord_object.h"
 
+#include <rapidjson/document.h>
+
 namespace discpp {
 	class Attachment : DiscordObject {
 	public:

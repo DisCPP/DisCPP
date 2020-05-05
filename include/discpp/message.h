@@ -30,8 +30,8 @@ namespace discpp {
 		std::string party_id;
 
 		MessageActivity() = default;
-		MessageActivity(nlohmann::json json) {
-			type = static_cast<ActivityType>(json["type"]);
+		MessageActivity(rapidjson::Document json) {
+			type = static_cast<ActivityType>(json["type"].GetInt());
 			party_id = GetDataSafely<std::string>(json, "pary_id");
 		}
 	};
@@ -44,12 +44,12 @@ namespace discpp {
 		std::string name;
 
 		MessageApplication() = default;
-		MessageApplication(nlohmann::json json) {
-			id = json["id"].get<snowflake>();
+		MessageApplication(rapidjson::Document json) {
+			id = json["id"].GetString();
 			cover_image = GetDataSafely<std::string>(json, "cover_image");
-			description = json["description"];
-			icon = json["icon"];
-			name = json["name"];
+			description = json["description"].GetString();
+			icon = json["icon"].GetString();
+			name = json["name"].GetString();
 		}
 	};
 
@@ -59,9 +59,9 @@ namespace discpp {
 		snowflake guild_id;
 
 		MessageReference() = default;
-		MessageReference(nlohmann::json json) {
+		MessageReference(rapidjson::Document json) {
 			message_id = GetDataSafely<snowflake>(json, "message_id");
-			channel_id = json["channel_id"].get<snowflake>();
+			channel_id = json["channel_id"].GetString();
 			guild_id = GetDataSafely<snowflake>(json, "guild_id");
 		}
 	};
@@ -70,7 +70,7 @@ namespace discpp {
 	public:
 		Message() = default;
 		Message(snowflake id);
-		Message(nlohmann::json json);
+		Message(rapidjson::Document& json);
 
 		void AddReaction(discpp::Emoji emoji);
 		void RemoveBotReaction(discpp::Emoji emoji);

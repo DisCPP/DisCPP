@@ -277,7 +277,7 @@ namespace discpp {
             std::string url = gateway_request["url"].GetString();
             gateway_endpoint = url + "/?v=6&encoding=json";
 
-            std::thread bindthread{ &EventDispatcher::BindEvents, EventDispatcher() };
+            std::thread bindthread{ &EventDispatcher::BindEvents };
 
 #ifdef _WIN32
             if (!reconnecting) {
@@ -480,21 +480,27 @@ namespace discpp {
         }
     }
 
-    rapidjson::Document Client::GetIdentifyPacket() {
+    rapidjson::Document& Client::GetIdentifyPacket() {
         rapidjson::Document document;
         document.SetObject();
+
         rapidjson::Document::AllocatorType& allocator = document.GetAllocator();
         document.AddMember("op", packet_opcode::identify, allocator);
+
         rapidjson::Value d(rapidjson::kObjectType);
         d.AddMember("token", token, allocator);
+
         rapidjson::Value properties(rapidjson::kObjectType);
         properties.AddMember("$os", GetOsName(), allocator);
         properties.AddMember("$browser", "DISCPP", allocator);
         properties.AddMember("$device", "DISCPP", allocator);
+
         d.AddMember("properties", properties, allocator);
         d.AddMember("compress", false, allocator);
         d.AddMember("large_threshold", 250, allocator);
+
         document.AddMember("d", d, allocator);
+
         return document;
     }
 

@@ -138,7 +138,7 @@ namespace discpp {
 		void OnWebSocketPacket(rapidjson::Document& result);
 		void HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg);
 		void HandleHeartbeat();
-		rapidjson::Document GetIdentifyPacket();
+		rapidjson::Document& GetIdentifyPacket();
 
 		// Commands
 		std::function<void(discpp::Client*, discpp::Message)> fire_command_method;

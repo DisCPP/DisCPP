@@ -43,18 +43,12 @@ namespace discpp {
 		 * @return discpp::Member, this is a constructor.
 		 */
 
-		rapidjson::Value::ConstMemberIterator itr = json.FindMember("user");
-		if (itr != json.MemberEnd()) {
-			rapidjson::Document user_json; 
-			user_json.CopyFrom(json["user"], user_json.GetAllocator());
-			user = discpp::User(user_json);
-			id = user.id;
-		}
-		else {
-			user = discpp::User();
-		}
-        int highest_hiearchy = 0;
+		user = GetDiscppObject(json, "user", discpp::User());
+		if (!user.id.empty()) id = user.id;
 		nick = json["nick"].GetString();
+
+        int highest_hiearchy = 0;
+        rapidjson::Value::ConstMemberIterator itr = json.FindMember("roles");
 		itr = json.FindMember("roles");
 		if (itr != json.MemberEnd()) {
 			for (auto& role : json["roles"].GetArray()) {
@@ -78,17 +72,17 @@ namespace discpp {
 				roles.push_back(r);
 			}
 		}
+
 		if (guild.owner_id == this->id) {
             hierarchy = INT_MAX;
 		} else {
             hierarchy = highest_hiearchy;
         }
 		joined_at = json["joined_at"].GetString();
-		premium_since = json["premium_since"].GetString();
+		premium_since = GetStringSafely(json, "premium_since");
 		deaf = json["deaf"].GetBool();
 		mute = json["mute"].GetBool();
-		std::string _id = this->id.c_str();
-		user.mention = "<@!" + _id + ">";
+		user.mention = "<@!" + id + ">";
 	}
 
 	void Member::ModifyMember(std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf, snowflake channel_id) {

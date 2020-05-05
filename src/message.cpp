@@ -22,7 +22,7 @@ namespace discpp {
 		}
 	}
 
-	Message::Message(nlohmann::json json) {
+	Message::Message(rapidjson::Document& json) {
 		/**
 		 * @brief Constructs a discpp::Message object by parsing json
 		 *
@@ -36,34 +36,43 @@ namespace discpp {
 		 */
 
 		id = GetDataSafely<snowflake>(json, "id");
-		channel = (json.contains("channel_id")) ? discpp::Channel(json["channel_id"].get<snowflake>()) : discpp::Channel();
-		if (json.contains("guild_id")) {
-			guild = discpp::Guild(json["guild_id"].get<snowflake>());
-		}
-		author = (json.contains("author")) ? discpp::User(json["author"]) : discpp::User();
+		channel = GetDiscppObject(json, "channel_id", discpp::Channel(), true);
+        guild = GetDiscppObject(json, "guild_id", discpp::Guild(), true);
+		author = GetDiscppObject(json, "author", discpp::User(), false);
 		content = GetDataSafely<std::string>(json, "content");
 		timestamp = GetDataSafely<std::string>(json, "timestamp");
 		edited_timestamp = GetDataSafely<std::string>(json, "edited_timestamp");
 		tts = GetDataSafely<bool>(json, "tts");
 		mention_everyone = GetDataSafely<bool>(json, "mention_everyone");
-		for (auto& mention : json["mentions"]) { // This has a weird layout, thats why theres so much json stuff. 
-												 // The API docs says this type is an, "array of user objects, with an additional partial member field"
-			nlohmann::json new_member_json = {
-				{"user", {
-					{"id", mention["id"]},
-					{"username", mention["username"]},
-					{"discriminator", mention["discriminator"]},
-					{"avatar", mention["avatar"]}}
-				},
-				{"deaf", mention["member"]["deaf"]},
-				{"hoisted_role", mention["member"]["hoisted_role"]},
-				{"joined_at", mention["member"]["joined_at"]},
-				{"mute", mention["member"]["mute"]},
-				{"roles", mention["member"]["roles"]}
-			};
+        for (auto const& mention : json["mentions"].GetArray()) {
+            if (!mention.IsNull()) {
+                // This has a weird layout, thats why theres so much json stuff.
+                // The API docs says this type is an, "array of user objects, with an additional partial member field"
 
-			mentions.push_back(discpp::Member(new_member_json, guild.id));
-		}
+                rapidjson::Document mention_json;
+                mention_json.CopyFrom(mention, mention_json.GetAllocator());
+
+                rapidjson::Document new_member_json;
+                new_member_json.SetObject();
+
+                rapidjson::Document::AllocatorType& allocator = new_member_json.GetAllocator();
+                new_member_json.AddMember("deaf", mention_json["member"]["deaf"], allocator);
+                new_member_json.AddMember("deaf", mention_json["member"]["hoisted_role"], allocator);
+                new_member_json.AddMember("deaf", mention_json["member"]["joined_at"], allocator);
+                new_member_json.AddMember("deaf", mention_json["member"]["mute"], allocator);
+                new_member_json.AddMember("deaf", mention_json["member"]["roles"], allocator);
+
+                rapidjson::Value user(rapidjson::kObjectType);
+                user.AddMember("id", mention_json["id"], allocator);
+                user.AddMember("username", mention_json["username"], allocator);
+                user.AddMember("discriminator", mention_json["discriminator"], allocator);
+                user.AddMember("avatar", mention_json["avatar"], allocator);
+
+                new_member_json.AddMember("user", user, allocator);
+
+                mentions.push_back(discpp::Member(new_member_json, guild.id));
+            }
+        }
 		for (auto& mentioned_role : json["mentioned_roles"]) {
 			mentioned_roles.push_back(discpp::Role(mentioned_role.get<snowflake>()));
 		}

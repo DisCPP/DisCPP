@@ -1,9 +1,12 @@
 #ifndef DISCPP_ACTIVITY_H
 #define DISCPP_ACTIVITY_H
 
-#include <string>
+#define RAPIDJSON_HAS_STDSTRING 1
 
-#include <nlohmann/json.hpp>
+#include <rapidjson/document.h>
+
+#include <string>
+#include <ctime>
 
 #include "utils.h"
 
@@ -44,21 +47,14 @@ namespace discpp {
 
 		Activity(std::string text, presence::ActivityType type, std::string status = "online", bool afk = false, std::string url = "") : text(text), type(type), status(status), afk(afk), url(url) {}
 
-		nlohmann::json ToJson() {
-			nlohmann::json json = nlohmann::json({
-				{"since", nullptr},
-				{"game", {
-					{"name", text},
-					{"type", static_cast<int>(type)}}
-				},
-				{"status", status},
-				{"afk", std::to_string(afk)}
-			});
+		rapidjson::Document ToJson() {
+            rapidjson::Document result;
 
-			if (!url.empty()) {
-				json["game"]["url"] = url;
-			}
-			return json;
+            std::string str_activity = "{ \"status\": \"" + status + "\", \"afk\": \"" + std::to_string(afk) + "\", \"game\": " + \
+                    "{ \"name\": \"" + text + "\", \"type\": " + std::to_string(static_cast<int>(type)) + ((!url.empty()) ? ", \"url\": \"" + url + "\"" : "") + "} }";
+            result.Parse(str_activity.c_str());
+
+			return result;
 		}
 	};
 }

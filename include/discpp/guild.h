@@ -102,20 +102,20 @@ namespace discpp {
         int approximate_member_count; /**< Approximate count of total members. */
 	};
 
-	class GuildIntegrationAccount : public DiscordObject {
+	class IntegrationAccount : public DiscordObject {
 	public:
-        GuildIntegrationAccount() = default;
-        GuildIntegrationAccount(rapidjson::Document& json) {
+        IntegrationAccount() = default;
+        IntegrationAccount(rapidjson::Document& json) {
             /**
-             * @brief Constructs a discpp::GuildIntegrationAccount object from json.
+             * @brief Constructs a discpp::IntegrationAccount object from json.
              *
              * ```cpp
-             *      discpp::GuildIntegrationAccount guild_integration_account(json);
+             *      discpp::IntegrationAccount integration_account(json);
              * ```
              *
              * @param[in] json The json data for the integration account.
              *
-             * @return discpp::GuildIntegrationAccount, this is a constructor.
+             * @return discpp::IntegrationAccount, this is a constructor.
              */
 			id = json["id"].GetString();
 			name = json["name"].GetString();
@@ -124,25 +124,25 @@ namespace discpp {
         std::string name; /**< Name of the account. */
     };
 
-	class GuildIntegration : public DiscordObject {
+	class Integration : public DiscordObject {
 	public:
 	    enum class IntegrationExpireBehavior : int {
 	        REMOVE_ROLE = 0,
 	        KICK = 1
 	    };
 
-		GuildIntegration() = default;
-        GuildIntegration(rapidjson::Document& json) {
+		Integration() = default;
+        Integration(rapidjson::Document& json) {
             /**
-             * @brief Constructs a discpp::GuildIntegration object from json.
+             * @brief Constructs a discpp::Integration object from json.
              *
              * ```cpp
-             *      discpp::GuildIntegration guild_integration(json);
+             *      discpp::Integration integration(json);
              * ```
              *
-             * @param[in] json The json data for the guild integration.
+             * @param[in] json The json data for the integration.
              *
-             * @return discpp::GuildIntegration, this is a constructor.
+             * @return discpp::dIntegration, this is a constructor.
              */
 
             id = static_cast<snowflake>(json["id"].GetString());
@@ -150,15 +150,12 @@ namespace discpp {
             type = json["type"].GetString();
             enabled = json["enabled"].GetBool();
             syncing = json["syncing"].GetBool();
-            role = discpp::Role(static_cast<snowflake>(json["role_id"].GetString()));
+            role_id = json["role_id"].GetString();
+            enable_emoticons = GetDataSafely<bool>(json, "enable_emoticons");
             expire_behavior = static_cast<IntegrationExpireBehavior>(json["expire_behavior"].GetInt());
             expire_grace_period = json["expire_grace_period"].GetInt();
-            rapidjson::Document user_json;
-            user_json.CopyFrom(json["user"], user_json.GetAllocator());
-            user = discpp::User(user_json);
-            rapidjson::Document guildintegration_json;
-            guildintegration_json.CopyFrom(json["account"], guildintegration_json.GetAllocator());
-            account = discpp::GuildIntegrationAccount(guildintegration_json);
+            user = ConstructDiscppObjectFromJson(json, "user", discpp::User());
+            account = ConstructDiscppObjectFromJson(json, "account", discpp::IntegrationAccount());
             synced_at = json["synced_at"].GetString();
         }
 
@@ -166,12 +163,12 @@ namespace discpp {
         std::string type; /**< Integration type (twitch, youtube, etc). */
         bool enabled; /**< Is this integration enabled? */
         bool syncing; /**< Is this integration syncing? */
-        discpp::Role role; /**< Role that this integration uses for "subscribers". */
+        discpp::snowflake role_id; /**< ID that this integration uses for "subscribers". */
         bool enable_emoticons; /**< Whether emoticons should be synced for this integration (twitch only currently). */
         IntegrationExpireBehavior expire_behavior; /**< The behavior of expiring subscribers. */
         int expire_grace_period; /**< The grace period (in days) before expiring subscribers. */
         discpp::User user; /**< User for this integration. */
-        discpp::GuildIntegrationAccount account; /**< Integration account information. */
+        discpp::IntegrationAccount account; /**< Integration account information. */
         // @TODO: Convert to iso8601Time
         std::string synced_at; /**< When this integration was last synced. */
 	};
@@ -193,7 +190,8 @@ namespace discpp {
              */
 
             enabled = json["enabled"].GetBool();
-			channel_id = static_cast<snowflake>(json["channel_id"].GetString());
+			//channel_id = ContainsNotNull(json, "channel_id") ? json["channel_id"].GetString() : "";
+			channel_id = GetDataSafely<discpp::snowflake>(json, "channel_id");
 		}
 
         bool enabled; /**< Whether the embed is enabled. */
@@ -249,7 +247,7 @@ namespace discpp {
 
 		discpp::Guild Modify(GuildModifyRequests modify_requests);
 		void DeleteGuild();
-		std::vector<discpp::GuildChannel> GetChannels();
+		std::unordered_map<discpp::snowflake, discpp::GuildChannel> GetChannels();
         discpp::GuildChannel GetChannel(snowflake id);
 		discpp::GuildChannel CreateChannel(std::string name, std::string topic = "", ChannelType type = ChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discpp::Permissions> permission_overwrites = {}, discpp::Channel category = {}, bool nsfw = false);
 		void ModifyChannelPositions(std::vector<discpp::Channel>& new_channel_positions);
@@ -258,7 +256,7 @@ namespace discpp {
 		discpp::Member AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discpp::Role>& roles, bool mute, bool deaf);
 		void RemoveMember(discpp::Member& member);
 		std::vector<discpp::GuildBan> GetBans();
-		std::optional<std::string> GetMemberBanReason(discpp::Member& member);
+		std::string GetMemberBanReason(discpp::Member& member);
 		void BanMember(discpp::Member& member, std::string reason = "");
 		void UnbanMember(discpp::Member& member);
 		void KickMember(discpp::Member& member);
@@ -270,11 +268,11 @@ namespace discpp {
 		int GetPruneAmount(int days);
 		void BeginPrune(int days);
 		std::vector<discpp::GuildInvite> GetInvites();
-		std::vector<discpp::GuildIntegration> GetIntegrations();
+		std::vector<discpp::Integration> GetIntegrations();
 		void CreateIntegration(snowflake id, std::string type);
-		void ModifyIntegration(discpp::GuildIntegration& guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons);
-		void DeleteIntegration(discpp::GuildIntegration& guild_integration);
-		void SyncIntegration(discpp::GuildIntegration& guild_integration);
+		void ModifyIntegration(discpp::Integration& guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons);
+		void DeleteIntegration(discpp::Integration& guild_integration);
+		void SyncIntegration(discpp::Integration& guild_integration);
 		GuildEmbed GetGuildEmbed();
 		GuildEmbed ModifyGuildEmbed(snowflake channel_id, bool enabled);
 		discpp::GuildInvite GetVanityURL();
@@ -329,6 +327,9 @@ namespace discpp {
 		discpp::specials::NitroTier premium_tier; /**< Premium tier (Server Boost level). */
 		int premium_subscription_count; /**< The number of boosts this server currently has. */
 		std::string preferred_locale; /**< The preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults to "en-US". */
+		discpp::GuildChannel public_updates_channel; /**< The channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */
+		int approximate_member_count; /**< Approximate number of members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
+		int approximate_presence_count; /**< Approximate number of online members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
 		std::string created_at; /**< The id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */
 	};
 

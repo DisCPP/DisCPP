@@ -2,7 +2,7 @@
 #define DISCPP_PERMISSION_H
 
 #include <unordered_map>
-#include <nlohmann/json.hpp>
+#include <rapidjson/document.h>
 
 namespace discpp {
 	typedef std::string snowflake;
@@ -107,8 +107,8 @@ namespace discpp {
 	public:
 		Permissions() = default;
 		Permissions(PermissionType permission_type, int byte_set);
-		Permissions(nlohmann::json json);
-		nlohmann::json ToJson();
+		Permissions(rapidjson::Document& json);
+        rapidjson::Document ToJson();
 
 		snowflake role_user_id;
 		PermissionOverwrite allow_perms;

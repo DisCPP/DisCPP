@@ -178,7 +178,8 @@ namespace discpp {
         for (auto& role : result["roles"].GetArray()) {
             rapidjson::Document role_json;
             role_json.CopyFrom(role, role_json.GetAllocator());
-            member.roles.push_back(discpp::Role(role_json, guild));
+
+            member.roles.push_back(discpp::Role(role_json.GetString(), guild));
         }
         rapidjson::Value::ConstMemberIterator itr = result.FindMember("nick");
         if (itr != result.MemberEnd() && !result["nick"].IsNull()) {
@@ -192,20 +193,25 @@ namespace discpp {
     }
 
     void EventDispatcher::GuildRoleCreateEvent(rapidjson::Document& result) {
-        discpp::Role role(result["role"]);
+        rapidjson::Document role_json = GetDocumentInsideJson(result, "role");
+        discpp::Role role(role_json);
 
         discpp::DispatchEvent(discpp::GuildRoleCreateEvent(role));
     }
 
     void EventDispatcher::GuildRoleUpdateEvent(rapidjson::Document& result) {
-        discpp::Role role(result["role"]);
+        rapidjson::Document role_json = GetDocumentInsideJson(result, "role");
+        discpp::Role role(role_json);
 
         discpp::DispatchEvent(discpp::GuildRoleUpdateEvent(role));
     }
 
     void EventDispatcher::GuildRoleDeleteEvent(rapidjson::Document& result) {
         discpp::Guild guild(static_cast<snowflake>(result["guild_id"].GetString()));
-        discpp::Role role(result["role"]);
+
+        rapidjson::Document role_json = GetDocumentInsideJson(result, "role");
+        discpp::Role role(role_json);
+
         guild.roles.erase(role.id);
 
         discpp::DispatchEvent(discpp::GuildRoleDeleteEvent(role));
@@ -444,8 +450,10 @@ namespace discpp {
         }
 
         if (internal_event_map.find(event_name) != internal_event_map.end()) {
-            // Ignore this intellisense error, it compiles fine, and works.
-            globals::client_instance->DoFunctionLater(internal_event_map[event_name], data);
+            // Mot really sure if this will actually work or not
+            globals::client_instance->futures.push_back(std::async(std::launch::async, [&] {
+                internal_event_map[event_name](data);
+            }));
         }
     }
 }

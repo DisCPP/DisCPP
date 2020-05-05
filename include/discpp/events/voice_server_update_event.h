@@ -9,7 +9,7 @@ namespace discpp {
 	public:
 		inline VoiceServerUpdateEvent(rapidjson::Document& json) : json(json) { }
 
-		rapidjson::Document json;
+		rapidjson::Document& json;
 	};
 }
 

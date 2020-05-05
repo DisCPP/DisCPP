@@ -1,17 +1,20 @@
 #ifndef DISCPP_UTILS_H
 #define DISCPP_UTILS_H
 
+#define RAPIDJSON_HAS_STDSTRING 1
+
 #include "discord_object.h"
 
-#include <nlohmann/json.hpp>
 #include <rapidjson/document.h>
 
 #include <cpr/cpr.h>
 
 #include <unordered_map>
+#include <climits>
 
 namespace discpp {
 	class Client;
+	class Role;
 
 	namespace globals {
 		inline discpp::Client* client_instance;
@@ -71,20 +74,68 @@ namespace discpp {
 		return nullptr;
 	}
 
-	template<typename T>
-	inline T GetDataSafely(nlohmann::json json, std::string value_name) {
+	/*template<typename T>
+	inline T GetDataSafely(nlohmann::json& json, std::string value_name) {
 		return (json.contains(value_name) && json[value_name] != nullptr) ? json[value_name].get<T>() : T();
+	}*/
+
+	rapidjson::Document GetDocumentInsideJson(rapidjson::Document &json, const char* value_name);
+
+    template<typename T>
+    inline T GetDataSafely(rapidjson::Document & json, const char* value_name) {
+        rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
+        if (itr != json.MemberEnd()) {
+            if (!json[value_name].IsNull()) {
+                rapidjson::Document t_doc;
+                t_doc.CopyFrom(json[value_name], t_doc.GetAllocator());
+
+                return t_doc.Get<T>();
+            }
+        }
+
+        return T();
+    }
+
+    template<class T>
+    inline T ConstructDiscppObjectFromID(rapidjson::Document& doc, const char* value_name, T default_val) {
+        rapidjson::Value::ConstMemberIterator itr = doc.FindMember(value_name);
+        if (itr != doc.MemberEnd()) {
+            if (!doc[value_name].IsNull()) {
+                rapidjson::Document t_doc;
+                t_doc.CopyFrom(doc[value_name], t_doc.GetAllocator());
+
+                return T(t_doc.GetString());
+            }
+        }
+
+        return default_val;
+    }
+
+	template<class T>
+	inline T ConstructDiscppObjectFromJson(rapidjson::Document& doc, const char* value_name, T default_val) {
+        rapidjson::Value::ConstMemberIterator itr = doc.FindMember(value_name);
+        if (itr != doc.MemberEnd()) {
+            if (!doc[value_name].IsNull()) {
+                rapidjson::Document t_doc;
+                t_doc.CopyFrom(doc[value_name], t_doc.GetAllocator());
+
+                return T(t_doc);
+            }
+        }
+
+        return default_val;
 	}
 
-	template<typename type, typename func>
-	inline type GetIf(std::vector<type>& items, func const& predicate) {
-		auto item = std::find_if(items.begin(), items.end(), predicate);
+    template<typename T>
+    inline void AddValue(rapidjson::Document& json, const char* value_name, T value) {
+	    rapidjson::Value val;
+	    val.Set(value);
 
-		if (item != items.end()) {
-			return *item;
-		}
-		return type();
+        json.AddMember(rapidjson::StringRef(value_name), val, json.GetAllocator());
 	}
+
+	void IterateThroughNotNullJson(rapidjson::Document& json, std::function<void(rapidjson::Document&)> func);
+    bool ContainsNotNull(rapidjson::Document& json, char * value_name);
 
 	// Rate limits
 	struct RateLimit {

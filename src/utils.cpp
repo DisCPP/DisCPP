@@ -531,3 +531,30 @@ std::string discpp::FormatTimeFromSnowflake(snowflake snow) {
 
 	return buffer;
 }
+
+bool discpp::ContainsNotNull(rapidjson::Document &json, char *value_name) {
+    rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
+    if (itr != json.MemberEnd()) {
+        return !json[value_name].IsNull();
+    }
+
+    return false;
+}
+
+void discpp::IterateThroughNotNullJson(rapidjson::Document &json, std::function<void(rapidjson::Document&)> func) {
+    for (auto const& object : json.GetArray()) {
+        if (!object.IsNull()) {
+            rapidjson::Document object_json;
+            object_json.CopyFrom(object, object_json.GetAllocator());
+
+            func(object_json);
+        }
+    }
+}
+
+rapidjson::Document discpp::GetDocumentInsideJson(rapidjson::Document &json, const char* value_name) {
+    rapidjson::Document inside_json;
+    inside_json.CopyFrom(json[value_name], inside_json.GetAllocator());
+
+    return inside_json;
+}

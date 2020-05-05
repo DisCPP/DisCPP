@@ -82,7 +82,7 @@ namespace discpp {
 			for (auto& integration : json["integrations"].GetArray()) {
 				rapidjson::Document integration_json;
 				integration_json.CopyFrom(integration, integration_json.GetAllocator());
-				integrations.push_back(discpp::GuildIntegration(integration_json));
+				integrations.push_back(discpp::Integration(integration_json));
 			}
 		}
 		verified = json["verified"].GetBool();
