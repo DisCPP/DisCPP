@@ -36,9 +36,9 @@ namespace discpp {
 		 */
 
 		id = GetDataSafely<snowflake>(json, "id");
-		channel = GetDiscppObject(json, "channel_id", discpp::Channel(), true);
-        guild = GetDiscppObject(json, "guild_id", discpp::Guild(), true);
-		author = GetDiscppObject(json, "author", discpp::User(), false);
+		channel = ConstructDiscppObjectFromID(json, "channel_id", discpp::Channel());
+        guild = ConstructDiscppObjectFromID(json, "guild_id", discpp::Guild());
+		author = ConstructDiscppObjectFromJson(json, "author", discpp::User());
 		content = GetDataSafely<std::string>(json, "content");
 		timestamp = GetDataSafely<std::string>(json, "timestamp");
 		edited_timestamp = GetDataSafely<std::string>(json, "edited_timestamp");
@@ -73,34 +73,58 @@ namespace discpp {
                 mentions.push_back(discpp::Member(new_member_json, guild.id));
             }
         }
-		for (auto& mentioned_role : json["mentioned_roles"]) {
-			mentioned_roles.push_back(discpp::Role(mentioned_role.get<snowflake>()));
-		}
-		if (json.contains("mention_channels")) {
-			for (auto& json_chan : json["mention_channels"]) {
-				discpp::GuildChannel channel(json_chan["id"].get<snowflake>());
-				channel.type = json_chan["type"].get<ChannelType>();
-				channel.guild_id = json_chan["guild_id"].get<snowflake>();
-				channel.name = json_chan["name"];
 
-				mention_channels.push_back(channel);
-			}
-		}
-		if (json.contains("attachments")) {
-			for (auto& attachment : json["attachments"]) {
-				attachments.push_back(discpp::Attachment(attachment));
-			}
-		}
-		if (json.contains("embeds")) {
-			for (auto& embed : json["embeds"]) {
-				embeds.push_back(discpp::EmbedBuilder(embed));
-			}
-		}
-		if (json.contains("reactions")) {
-			for (auto& reaction : json["reactions"]) {
-				reactions.push_back(discpp::Reaction(reaction));
-			}
-		}
+        if (ContainsNotNull(json, "mentioned_roles")) {
+            for (auto const& mentioned_role : json["mentioned_roles"].GetArray()) {
+                rapidjson::Document mentioned_role_json;
+                mentioned_role_json.CopyFrom(mentioned_role, mentioned_role_json.GetAllocator());
+
+                discpp::Role tmp = discpp::Role(mentioned_role_json.GetString(), guild);
+                mentioned_roles.insert({ tmp.id, tmp });
+            }
+        }
+
+        if (ContainsNotNull(json, "mention_channels")) {
+            for (auto const& mention_channel : json["mention_channels"].GetArray()) {
+                rapidjson::Document mention_channel_json;
+                mention_channel_json.CopyFrom(mention_channel, mention_channel_json.GetAllocator());
+
+                discpp::GuildChannel channel(mention_channel["id"].GetString(), guild.id);
+                channel.type = static_cast<ChannelType>(mention_channel["type"].GetInt());
+                channel.guild_id = mention_channel["guild_id"].GetString();
+                channel.name = mention_channel["name"].GetString();
+
+                mention_channels.insert({ channel.id, channel });
+            }
+        }
+
+        if (ContainsNotNull(json, "attachments")) {
+            for (auto const& attachment : json["attachments"].GetArray()) {
+                rapidjson::Document attachment_json;
+                attachment_json.CopyFrom(attachment, attachment_json.GetAllocator());
+
+                attachments.push_back(discpp::Attachment(attachment_json));
+            }
+        }
+
+        if (ContainsNotNull(json, "embeds")) {
+            for (auto const& embed : json["embeds"].GetArray()) {
+                rapidjson::Document embed_json;
+                embed_json.CopyFrom(embed, embed_json.GetAllocator());
+
+                embeds.push_back(discpp::EmbedBuilder(embed_json));
+            }
+        }
+
+        if (ContainsNotNull(json, "reactions")) {
+            for (auto const& reaction : json["reactions"].GetArray()) {
+                rapidjson::Document reaction_json;
+                reaction_json.CopyFrom(reaction, reaction_json.GetAllocator());
+
+                discpp::Reaction tmp(reaction_json);
+                reactions.insert({ tmp.id, tmp });
+            }
+        }
 		pinned = GetDataSafely<bool>(json, "pinned");
 		webhook_id = GetDataSafely<snowflake>(json, "webhook_id");
 		type = GetDataSafely<int>(json, "type");

@@ -136,6 +136,7 @@ namespace discpp {
 
 	void IterateThroughNotNullJson(rapidjson::Document& json, std::function<void(rapidjson::Document&)> func);
     bool ContainsNotNull(rapidjson::Document& json, char * value_name);
+    std::string DumpJson(rapidjson::Document& json);
 
 	// Rate limits
 	struct RateLimit {

@@ -3,7 +3,7 @@
 
 #include "discord_object.h"
 
-#include <nlohmann/json.hpp>
+#include <rapidjson/document.h>
 
 namespace discpp {
 	class Color;
@@ -12,7 +12,7 @@ namespace discpp {
 	public:
 		EmbedBuilder();
 		EmbedBuilder(std::string title, std::string description, Color color);
-		EmbedBuilder(nlohmann::json json);
+		EmbedBuilder(rapidjson::Document& json);
 
 		EmbedBuilder& SetTitle(std::string title);
 		EmbedBuilder& SetType(std::string type);
@@ -36,11 +36,10 @@ namespace discpp {
 		std::pair<std::string, std::string> GetFooter();
         std::pair<std::string, std::string> GetProvider();
 
-		nlohmann::json ToJson();
-		operator nlohmann::json();
-		
+        rapidjson::Document ToJson();
+		//operator nlohmann::json();
 	private:
-		nlohmann::json embed_json;
+        rapidjson::Document embed_json;
 	};
 }
 

@@ -5,7 +5,9 @@
 #include <discpp/client.h>
 
 namespace discpp {
-	EmbedBuilder::EmbedBuilder() : embed_json(nlohmann::json({})) { }
+	EmbedBuilder::EmbedBuilder() {
+	    embed_json = rapidjson::Document(rapidjson::kObjectType);
+	}
 
 	EmbedBuilder::EmbedBuilder(std::string title, std::string description, discpp::Color color) {
 		/**
@@ -27,7 +29,7 @@ namespace discpp {
 		SetColor(color);
 	}
 
-	EmbedBuilder::EmbedBuilder(nlohmann::json json) : embed_json(json) {
+	EmbedBuilder::EmbedBuilder(rapidjson::Document& json) {
 		/**
 		 * @brief Constructs a discpp::EmbedBuilder object from json.
 		 *
@@ -39,6 +41,9 @@ namespace discpp {
 		 *
 		 * @return discpp::EmbedBuilder, this is a constructor.
 		 */
+
+		embed_json.SetObject();
+		embed_json.Set(json);
 	}
 
 	EmbedBuilder& EmbedBuilder::SetTitle(std::string title) {
@@ -58,7 +63,8 @@ namespace discpp {
 			globals::client_instance->logger->Error(LogTextColor::RED + "Embed title can only be 0-256 characters!");
 			throw std::runtime_error("Embed title can only be 0-256 characters");
 		}
-		embed_json["title"] = EscapeString(title);
+		embed_json.AddMember("title", EscapeString(title), embed_json.GetAllocator());
+
 		return *this;
 	}
 
@@ -75,7 +81,8 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-		embed_json["type"] = EscapeString(type);
+        embed_json.AddMember("type", EscapeString(type), embed_json.GetAllocator());
+
 		return *this;
 	}
 	EmbedBuilder& EmbedBuilder::SetDescription(std::string description) {
@@ -95,7 +102,9 @@ namespace discpp {
 			globals::client_instance->logger->Error(LogTextColor::RED + "Embed descriptions can only be 0-2048 characters!");
 			throw std::runtime_error("Embed descriptions can only be 0-2048 characters!");
 		}
-		embed_json["description"] = EscapeString(description);
+
+        embed_json.AddMember("description", EscapeString(description), embed_json.GetAllocator());
+
 		return *this;
 	}
 	
@@ -112,7 +121,8 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-		embed_json["url"] = EscapeString(url);
+        embed_json.AddMember("url", EscapeString(url), embed_json.GetAllocator());
+
 		return *this;
 	}
 
@@ -129,7 +139,8 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-		embed_json["timestamp"] = timestamp;
+        embed_json.AddMember("timestamp", EscapeString(timestamp), embed_json.GetAllocator());
+
 		return *this;
 	}
 
@@ -146,7 +157,8 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-		embed_json["color"] = color.color_hex;
+        embed_json.AddMember("color", color.color_hex, embed_json.GetAllocator());
+
 		return *this;
 	}
 
@@ -164,15 +176,19 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-		embed_json["footer"] = nlohmann::json({});
 		if (text.size() > 2048) {
 			globals::client_instance->logger->Error(LogTextColor::RED + "Embed footer text can only be up to 0-2048 characters!");
 			throw std::runtime_error("Embed footer text can only be up to 0-2048 characters!");
 		}
-		embed_json["footer"]["text"] = text;
+
+		rapidjson::Value footer(rapidjson::kObjectType);
+		footer.AddMember("text", text, embed_json.GetAllocator());
 		if (!icon_url.empty()) {
-			embed_json["footer"]["icon_url"] = icon_url;
+            footer.AddMember("icon_url", icon_url, embed_json.GetAllocator());
 		}
+
+		embed_json.AddMember("footer", footer, embed_json.GetAllocator());
+
 		return *this;
 	}
 
@@ -191,14 +207,16 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-		embed_json["image"] = nlohmann::json({});
-		embed_json["image"]["url"] = EscapeString(url);
+        rapidjson::Value image(rapidjson::kObjectType);
+        image.AddMember("url", url, embed_json.GetAllocator());
 		if (height != -1) {
-			embed_json["image"]["height"] = height;
+            image.AddMember("height", height, embed_json.GetAllocator());
 		}
 		if (width != -1) {
-			embed_json["image"]["width"] = width;
+            image.AddMember("width", width, embed_json.GetAllocator());
 		}
+		embed_json.AddMember("image", image, embed_json.GetAllocator());
+
 		return *this;
 	}
 
@@ -217,14 +235,15 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-		embed_json["thumbnail"] = nlohmann::json({});
-		embed_json["thumbnail"]["url"] = EscapeString(url);
-		if (height != -1) {
-			embed_json["thumbnail"]["height"] = height;
-		}
-		if (width != -1) {
-			embed_json["thumbnail"]["width"] = width;
-		}
+		rapidjson::Value thumbnail(rapidjson::kObjectType);
+        thumbnail.AddMember("url", url, embed_json.GetAllocator());
+        if (height != -1) {
+            thumbnail.AddMember("height", height, embed_json.GetAllocator());
+        }
+        if (width != -1) {
+            thumbnail.AddMember("width", width, embed_json.GetAllocator());
+        }
+        embed_json.AddMember("thumbnail", thumbnail, embed_json.GetAllocator());
 		return *this;
 	}
 
@@ -243,14 +262,15 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-		embed_json["video"] = nlohmann::json({});
-		embed_json["video"]["url"] = EscapeString(url);
-		if (height != -1) {
-			embed_json["video"]["height"] = height;
-		}
-		if (width != -1) {
-			embed_json["video"]["width"] = width;
-		}
+        rapidjson::Value video(rapidjson::kObjectType);
+        video.AddMember("url", url, embed_json.GetAllocator());
+        if (height != -1) {
+            video.AddMember("height", height, embed_json.GetAllocator());
+        }
+        if (width != -1) {
+            video.AddMember("width", width, embed_json.GetAllocator());
+        }
+        embed_json.AddMember("video", video, embed_json.GetAllocator());
 		return *this;
 	}
 
@@ -268,9 +288,12 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-		embed_json["provider"] = nlohmann::json({});
-		embed_json["provider"]["name"] = EscapeString(name);
-		embed_json["provider"]["url"] = EscapeString(url);
+        rapidjson::Value provider(rapidjson::kObjectType);
+        provider.AddMember("name", name, embed_json.GetAllocator());
+        provider.AddMember("url", url, embed_json.GetAllocator());
+
+        embed_json.AddMember("provider", provider, embed_json.GetAllocator());
+
 		return *this;
 	}
 
@@ -289,19 +312,22 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-		embed_json["author"] = nlohmann::json({});
 		if (name.size() > 256) {
 			globals::client_instance->logger->Error(LogTextColor::RED + "Embed author names can only be up to 0-256 characters!");
 			throw std::runtime_error("Embed author names can only be up to 0-256 characters");
 		}
-		embed_json["author"]["name"] = EscapeString(name);
+
+        rapidjson::Value author(rapidjson::kObjectType);
+        author.AddMember("name", EscapeString(name), embed_json.GetAllocator());
 
 		if (!url.empty()) {
-			embed_json["author"]["url"] = EscapeString(url);
+            author.AddMember("url", url, embed_json.GetAllocator());
 		}
 		if (!icon_url.empty()) {
-			embed_json["author"]["icon_url"] = EscapeString(icon_url);
+            author.AddMember("icon_url", icon_url, embed_json.GetAllocator());
 		}
+        embed_json.AddMember("author", author, embed_json.GetAllocator());
+
 		return *this;
 	}
 
@@ -327,11 +353,15 @@ namespace discpp {
 			throw std::runtime_error("You can not have an empty or null field value!");
 		}
 
-		if (!embed_json.contains("fields")) {
-			embed_json["fields"] = nlohmann::json::array();
-		} else if (embed_json["fields"].size() > 25) {
-			globals::client_instance->logger->Error(LogTextColor::RED + "Embeds can only have 25 field objects!");
-			throw std::runtime_error("Embeds can only have 25 field objects!");
+        rapidjson::Document fields(rapidjson::kArrayType);
+
+		if (ContainsNotNull(embed_json, "fields")) {
+            fields = GetDocumentInsideJson(embed_json, "fields");
+
+		    if (fields.Size() > 25) {
+		        globals::client_instance->logger->Error(LogTextColor::RED + "Embeds can only have 25 field objects!");
+		        throw std::runtime_error("Embeds can only have 25 field objects!");
+		    }
 		}
 
 		if (name.size() > 256) {
@@ -344,12 +374,12 @@ namespace discpp {
 			throw std::runtime_error("Embed field values can only be up to 1-1024 characters!");
 		}
 
-		nlohmann::json field = nlohmann::json({
-				{"name", EscapeString(name)},
-				{"value", EscapeString(value)},
-				{"inline", is_inline}
-			});
-		embed_json["fields"].push_back(field);
+        rapidjson::Value field(rapidjson::kObjectType);
+		field.AddMember("name", EscapeString(name), embed_json.GetAllocator());
+        field.AddMember("value", EscapeString(value), embed_json.GetAllocator());
+        field.AddMember("inline", is_inline, embed_json.GetAllocator());
+        
+		embed_json.AddMember("fields", field, embed_json.GetAllocator());
 		return *this;
 	}
 
@@ -357,7 +387,7 @@ namespace discpp {
 		/**
 		 * @brief Convert the embed to json.
 		 *
-		 * ```cpp
+		 * ``cpp
 		 *      embed.ToJson();
 		 * ```
 		 *

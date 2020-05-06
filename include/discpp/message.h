@@ -94,12 +94,12 @@ namespace discpp {
 		std::string edited_timestamp; // TODO: Convert to iso8601Time
 		bool tts;
 		bool mention_everyone;
-		std::vector<discpp::Member> mentions;
-		std::vector<discpp::Role> mentioned_roles;
-		std::vector<discpp::GuildChannel> mention_channels;
+		std::unordered_map<discpp::snowflake, discpp::Member> mentions;
+		std::unordered_map<discpp::snowflake, discpp::Role> mentioned_roles;
+		std::unordered_map<discpp::snowflake, discpp::GuildChannel> mention_channels;
 		std::vector<discpp::Attachment> attachments;
 		std::vector<discpp::EmbedBuilder> embeds;
-		std::vector<discpp::Reaction> reactions;
+		std::unordered_map<discpp::snowflake, discpp::Reaction> reactions;
 		bool pinned;
 		snowflake webhook_id;
 		int type;

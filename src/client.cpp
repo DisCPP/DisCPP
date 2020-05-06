@@ -206,15 +206,11 @@ namespace discpp {
          *
          * @return void
          */
-        rapidjson::StringBuffer buffer;
-        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-        json.Accept(writer);
-        std::string json_payload = buffer.GetString();
+        std::string json_payload = DumpJson(json);
 
         if (message.empty()) {
             logger->Debug("Sending gateway payload: " + json_payload);
-        }
-        else {
+        } else {
             logger->Debug(message);
         }
 

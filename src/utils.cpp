@@ -558,3 +558,13 @@ rapidjson::Document discpp::GetDocumentInsideJson(rapidjson::Document &json, con
 
     return inside_json;
 }
+
+std::string discpp::DumpJson(rapidjson::Document &json) {
+    rapidjson::StringBuffer buffer;
+    buffer.Clear();
+
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    json.Accept(writer);
+
+    return std::string(buffer.GetString());
+}

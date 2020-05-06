@@ -122,7 +122,12 @@ namespace discpp {
 		premium_tier = static_cast<discpp::specials::NitroTier>(json["premium_tier"].GetInt());
 		premium_subscription_count = GetDataSafely<int>(json, "premium_subscription_count");
 		preferred_locale = json["preferred_locale"].GetInt();
-		public_updates_channel = GetDiscppObject(json, "public_updates_channel_id", discpp::GuildChannel(), true);
+
+		if (ContainsNotNull(json, "public_updates_channel_id")) {
+            discpp::Channel channel = ConstructDiscppObjectFromID(json, "public_updates_channel_id", discpp::Channel());
+            public_updates_channel = discpp::GuildChannel(channel.id, this->id);
+        }
+
 		created_at = FormatTimeFromSnowflake(id);
 
         if (ContainsNotNull(json, "members")) {
@@ -244,35 +249,37 @@ namespace discpp {
 
 		if (bitrate < 8000) bitrate = 8000;
 
-		nlohmann::json permission_json = nlohmann::json::array();
-		for (auto perm : permission_overwrites) {
-			permission_json.push_back(perm.ToJson());
+		rapidjson::Document channel_json(rapidjson::kObjectType);
+        rapidjson::Document::AllocatorType& allocator = channel_json.GetAllocator();
+
+		rapidjson::Value permission_json_array(rapidjson::kArrayType);
+
+		for (auto permission : permission_overwrites) {
+			permission_json_array.PushBack(permission.ToJson(), allocator);
 		}
 
-		nlohmann::json json_raw = nlohmann::json({
-			{"name", name},
-			{"type", type},
-			{"rate_limit_per_user", rate_limit_per_user},
-			{"position", position},
-			{"nsfw", nsfw}
-		});
+		channel_json.AddMember("name", name, allocator);
+        channel_json.AddMember("type", type, allocator);
+        channel_json.AddMember("rate_limit_per_user", rate_limit_per_user, allocator);
+        channel_json.AddMember("position", position, allocator);
+        channel_json.AddMember("nsfw", nsfw, allocator);
 
-		if (!topic.empty()) json_raw.push_back({ "topic", EscapeString(topic) });
+		if (!topic.empty()) channel_json.AddMember("topic", EscapeString(topic), allocator);
 		if (type == ChannelType::GUILD_VOICE) {
-			json_raw.push_back({ "bitrate", bitrate });
-			json_raw.push_back({ "user_limit", user_limit });
+            channel_json.AddMember("bitrate", bitrate, allocator);
+            channel_json.AddMember("user_limit", user_limit, allocator);
 		}
 
-		if (permission_json.size() > 0) {
-			json_raw.push_back({ "permission_overwrites", permission_json });
+		if (permission_json_array.Size() > 0) {
+            channel_json.AddMember("permission_overwrites", permission_json_array, allocator);
 		}
 
 		if (!category.id.empty()) {
-			json_raw.push_back({ "parent_id", category.id });
+            channel_json.AddMember("parent_id", category.id, allocator);
 		}
 
 
-		cpr::Body body(json_raw.dump());
+		cpr::Body body(DumpJson(channel_json));
 		rapidjson::Document result = SendPostRequest(Endpoint("/guilds/" + id + "/channels"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::CHANNEL, body);
 
 		discpp::GuildChannel channel(result);

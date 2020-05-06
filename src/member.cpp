@@ -43,7 +43,7 @@ namespace discpp {
 		 * @return discpp::Member, this is a constructor.
 		 */
 
-		user = GetDiscppObject(json, "user", discpp::User());
+		user = ConstructDiscppObjectFromJson(json, "user", discpp::User());
 		if (!user.id.empty()) id = user.id;
 		nick = json["nick"].GetString();
 
@@ -79,7 +79,7 @@ namespace discpp {
             hierarchy = highest_hiearchy;
         }
 		joined_at = json["joined_at"].GetString();
-		premium_since = GetStringSafely(json, "premium_since");
+		premium_since = GetDataSafely<std::string>(json, "premium_since");
 		deaf = json["deaf"].GetBool();
 		mute = json["mute"].GetBool();
 		user.mention = "<@!" + id + ">";
