@@ -92,7 +92,7 @@ namespace discpp {
 
 		cpr::Body body;
 		if (embed != nullptr) {
-			body = cpr::Body("{\"embed\": " + embed->ToJson().dump() + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
+			body = cpr::Body("{\"embed\": " + DumpJson(embed->ToJson()) + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
 		} else if (!files.empty()) {
 			cpr::Multipart multipart_data{};
 

@@ -38,7 +38,7 @@ namespace discpp {
 		deny_perms = PermissionOverwrite(json["deny"].GetInt());
 	}
 
-    rapidjson::Document Permissions::ToJson() {
+    rapidjson::Document& Permissions::ToJson() {
 		/**
 		 * @brief Converts this permissions object to json.
 		 *
@@ -49,11 +49,13 @@ namespace discpp {
 		 * @return nlohmann::json
 		 */
 
+		std::string str_type = (permission_type == PermissionType::ROLE) ? "role" : "member";
+
         rapidjson::Document json;
-        AddValue(json, "id", role_user_id);
-        AddValue(json, "type", (permission_type == PermissionType::ROLE) ? "role" : "member");
-        AddValue(json, "allow", allow_perms.value);
-        AddValue(json, "deny", deny_perms.value);
+        json.AddMember("id", role_user_id, json.GetAllocator());
+        json.AddMember("type", str_type, json.GetAllocator());
+        json.AddMember("allow", allow_perms.value, json.GetAllocator());
+        json.AddMember("deny", deny_perms.value, json.GetAllocator());
 
 		return json;
 	}

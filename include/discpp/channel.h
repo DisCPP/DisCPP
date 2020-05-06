@@ -8,6 +8,7 @@
 #include "embed_builder.h"
 
 #include <variant>
+#include <vector>
 
 #include <rapidjson/document.h>
 

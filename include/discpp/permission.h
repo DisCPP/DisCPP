@@ -1,7 +1,10 @@
 #ifndef DISCPP_PERMISSION_H
 #define DISCPP_PERMISSION_H
 
+#define RAPIDJSON_HAS_STDSTRING 1
+
 #include <unordered_map>
+
 #include <rapidjson/document.h>
 
 namespace discpp {
@@ -108,7 +111,7 @@ namespace discpp {
 		Permissions() = default;
 		Permissions(PermissionType permission_type, int byte_set);
 		Permissions(rapidjson::Document& json);
-        rapidjson::Document ToJson();
+        rapidjson::Document& ToJson();
 
 		snowflake role_user_id;
 		PermissionOverwrite allow_perms;

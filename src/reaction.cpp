@@ -1,7 +1,7 @@
 #include "reaction.h"
 
 namespace discpp {
-	Reaction::Reaction(rapidjson::Document json) {
+	Reaction::Reaction(rapidjson::Document& json) {
 		/**
 		 * @brief Constructs a discpp::Reaction object by parsing json.
 		 *

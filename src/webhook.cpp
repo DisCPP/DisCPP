@@ -44,7 +44,7 @@ namespace discpp {
 
 		cpr::Body body;
 		if (embed != nullptr) {
-			body = cpr::Body("{\"embed\": " + embed->ToJson().dump() + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
+			body = cpr::Body("{\"embed\": " + DumpJson(embed->ToJson()) + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
 		}
 		else if (!files.empty()) {
 			cpr::Multipart multipart_data{};
@@ -64,7 +64,7 @@ namespace discpp {
 		else {
 			body = cpr::Body(message_json.dump());
 		}
-		nlohmann::json result = SendPostRequest(Endpoint("/webhooks/" + id + "/" + token), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::WEBHOOK, body);
+		rapidjson::Document result = SendPostRequest(Endpoint("/webhooks/" + id + "/" + token), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::WEBHOOK, body);
 
 		return discpp::Message(result);
 	}

@@ -300,10 +300,20 @@ namespace discpp {
             discpp::User user(static_cast<snowflake>(result["user_id"].GetString()));
 
             auto reaction = std::find_if(message->second.reactions.begin(), message->second.reactions.end(),
-                [emoji](discpp::Reaction react) {
-                    return react.emoji.name == emoji.name || (!react.emoji.id.empty() &&
-                        react.emoji.id == emoji.id);
-                });
+            [emoji](discpp::Reaction react) {
+                 auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
+
+                 // If the other's name is empty but mine is not then it must have unicode.
+                 if (react.emoji.name.empty() && !emoji.name.empty() && emoji.unicode.empty()) {
+                     return wstr_converter.to_bytes(react.emoji.unicode) == emoji.name;
+                 } else if (!react.emoji.name.empty() && emoji.name.empty() && !emoji.unicode.empty()) {
+                     return wstr_converter.to_bytes(emoji.unicode) == emoji.name;
+                 } else if (!react.emoji.id.empty() && !emoji.id.empty() && !react.emoji.name.empty() && !emoji.name.empty()) {
+                     return react.emoji.id == emoji.id && react.emoji.name == emoji.name;
+                 }
+
+                 return false;
+            });
 
             if (reaction != message->second.reactions.end()) {
                 reaction->count++;
@@ -311,8 +321,7 @@ namespace discpp {
                 if (user.bot) {
                     reaction->from_bot = true;
                 }
-            }
-            else {
+            } else {
                 discpp::Reaction r = discpp::Reaction(1, user.bot, emoji);
                 message->second.reactions.push_back(r);
             }
@@ -334,14 +343,24 @@ namespace discpp {
 
             auto reaction = std::find_if(message->second.reactions.begin(), message->second.reactions.end(),
                 [emoji](discpp::Reaction react) {
-                    return react.emoji.name == emoji.name || react.emoji.id == emoji.id;
+                    auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
+
+                    // If the other's name is empty but mine is not then it must have unicode.
+                    if (react.emoji.name.empty() && !emoji.name.empty() && emoji.unicode.empty()) {
+                        return wstr_converter.to_bytes(react.emoji.unicode) == emoji.name;
+                    } else if (!react.emoji.name.empty() && emoji.name.empty() && !emoji.unicode.empty()) {
+                        return wstr_converter.to_bytes(emoji.unicode) == emoji.name;
+                    } else if (!react.emoji.id.empty() && !emoji.id.empty() && !react.emoji.name.empty() && !emoji.name.empty()) {
+                        return react.emoji.id == emoji.id && react.emoji.name == emoji.name;
+                    }
+
+                    return false;
                 });
 
             if (reaction != message->second.reactions.end()) {
                 if (reaction->count == 1) {
                     message->second.reactions.erase(reaction);
-                }
-                else {
+                } else {
                     reaction->count--;
 
                     // @TODO: Add a way to change reaction::from_bot

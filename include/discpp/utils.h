@@ -126,14 +126,6 @@ namespace discpp {
         return default_val;
 	}
 
-    template<typename T>
-    inline void AddValue(rapidjson::Document& json, const char* value_name, T value) {
-	    rapidjson::Value val;
-	    val.Set(value);
-
-        json.AddMember(rapidjson::StringRef(value_name), val, json.GetAllocator());
-	}
-
 	void IterateThroughNotNullJson(rapidjson::Document& json, std::function<void(rapidjson::Document&)> func);
     bool ContainsNotNull(rapidjson::Document& json, char * value_name);
     std::string DumpJson(rapidjson::Document& json);

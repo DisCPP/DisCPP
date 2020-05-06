@@ -6,7 +6,8 @@
 
 namespace discpp {
 	EmbedBuilder::EmbedBuilder() {
-	    embed_json = rapidjson::Document(rapidjson::kObjectType);
+        //rapidjson::Document& json(rapidjson::kObjectType);
+	    embed_json = new rapidjson::Document(rapidjson::kObjectType);
 	}
 
 	EmbedBuilder::EmbedBuilder(std::string title, std::string description, discpp::Color color) {
@@ -42,8 +43,7 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, this is a constructor.
 		 */
 
-		embed_json.SetObject();
-		embed_json.Set(json);
+		embed_json->CopyFrom(json, embed_json->GetAllocator());
 	}
 
 	EmbedBuilder& EmbedBuilder::SetTitle(std::string title) {
@@ -63,7 +63,7 @@ namespace discpp {
 			globals::client_instance->logger->Error(LogTextColor::RED + "Embed title can only be 0-256 characters!");
 			throw std::runtime_error("Embed title can only be 0-256 characters");
 		}
-		embed_json.AddMember("title", EscapeString(title), embed_json.GetAllocator());
+		embed_json->AddMember("title", EscapeString(title), embed_json->GetAllocator());
 
 		return *this;
 	}
@@ -81,7 +81,7 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-        embed_json.AddMember("type", EscapeString(type), embed_json.GetAllocator());
+        embed_json->AddMember("type", EscapeString(type), embed_json->GetAllocator());
 
 		return *this;
 	}
@@ -103,7 +103,7 @@ namespace discpp {
 			throw std::runtime_error("Embed descriptions can only be 0-2048 characters!");
 		}
 
-        embed_json.AddMember("description", EscapeString(description), embed_json.GetAllocator());
+        embed_json->AddMember("description", EscapeString(description), embed_json->GetAllocator());
 
 		return *this;
 	}
@@ -121,7 +121,7 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-        embed_json.AddMember("url", EscapeString(url), embed_json.GetAllocator());
+        embed_json->AddMember("url", EscapeString(url), embed_json->GetAllocator());
 
 		return *this;
 	}
@@ -139,7 +139,7 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-        embed_json.AddMember("timestamp", EscapeString(timestamp), embed_json.GetAllocator());
+        embed_json->AddMember("timestamp", EscapeString(timestamp), embed_json->GetAllocator());
 
 		return *this;
 	}
@@ -157,7 +157,7 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-        embed_json.AddMember("color", color.color_hex, embed_json.GetAllocator());
+        embed_json->AddMember("color", color.color_hex, embed_json->GetAllocator());
 
 		return *this;
 	}
@@ -182,12 +182,12 @@ namespace discpp {
 		}
 
 		rapidjson::Value footer(rapidjson::kObjectType);
-		footer.AddMember("text", text, embed_json.GetAllocator());
+		footer.AddMember("text", text, embed_json->GetAllocator());
 		if (!icon_url.empty()) {
-            footer.AddMember("icon_url", icon_url, embed_json.GetAllocator());
+            footer.AddMember("icon_url", icon_url, embed_json->GetAllocator());
 		}
 
-		embed_json.AddMember("footer", footer, embed_json.GetAllocator());
+		embed_json->AddMember("footer", footer, embed_json->GetAllocator());
 
 		return *this;
 	}
@@ -208,14 +208,14 @@ namespace discpp {
 		 */
 
         rapidjson::Value image(rapidjson::kObjectType);
-        image.AddMember("url", url, embed_json.GetAllocator());
+        image.AddMember("url", url, embed_json->GetAllocator());
 		if (height != -1) {
-            image.AddMember("height", height, embed_json.GetAllocator());
+            image.AddMember("height", height, embed_json->GetAllocator());
 		}
 		if (width != -1) {
-            image.AddMember("width", width, embed_json.GetAllocator());
+            image.AddMember("width", width, embed_json->GetAllocator());
 		}
-		embed_json.AddMember("image", image, embed_json.GetAllocator());
+		embed_json->AddMember("image", image, embed_json->GetAllocator());
 
 		return *this;
 	}
@@ -236,14 +236,15 @@ namespace discpp {
 		 */
 
 		rapidjson::Value thumbnail(rapidjson::kObjectType);
-        thumbnail.AddMember("url", url, embed_json.GetAllocator());
+        thumbnail.AddMember("url", url, embed_json->GetAllocator());
         if (height != -1) {
-            thumbnail.AddMember("height", height, embed_json.GetAllocator());
+            thumbnail.AddMember("height", height, embed_json->GetAllocator());
         }
         if (width != -1) {
-            thumbnail.AddMember("width", width, embed_json.GetAllocator());
+            thumbnail.AddMember("width", width, embed_json->GetAllocator());
         }
-        embed_json.AddMember("thumbnail", thumbnail, embed_json.GetAllocator());
+        embed_json->AddMember("thumbnail", thumbnail, embed_json->GetAllocator());
+
 		return *this;
 	}
 
@@ -263,14 +264,15 @@ namespace discpp {
 		 */
 
         rapidjson::Value video(rapidjson::kObjectType);
-        video.AddMember("url", url, embed_json.GetAllocator());
+        video.AddMember("url", url, embed_json->GetAllocator());
         if (height != -1) {
-            video.AddMember("height", height, embed_json.GetAllocator());
+            video.AddMember("height", height, embed_json->GetAllocator());
         }
         if (width != -1) {
-            video.AddMember("width", width, embed_json.GetAllocator());
+            video.AddMember("width", width, embed_json->GetAllocator());
         }
-        embed_json.AddMember("video", video, embed_json.GetAllocator());
+        embed_json->AddMember("video", video, embed_json->GetAllocator());
+
 		return *this;
 	}
 
@@ -289,10 +291,10 @@ namespace discpp {
 		 */
 
         rapidjson::Value provider(rapidjson::kObjectType);
-        provider.AddMember("name", name, embed_json.GetAllocator());
-        provider.AddMember("url", url, embed_json.GetAllocator());
+        provider.AddMember("name", name, embed_json->GetAllocator());
+        provider.AddMember("url", url, embed_json->GetAllocator());
 
-        embed_json.AddMember("provider", provider, embed_json.GetAllocator());
+        embed_json->AddMember("provider", provider, embed_json->GetAllocator());
 
 		return *this;
 	}
@@ -318,15 +320,15 @@ namespace discpp {
 		}
 
         rapidjson::Value author(rapidjson::kObjectType);
-        author.AddMember("name", EscapeString(name), embed_json.GetAllocator());
+        author.AddMember("name", EscapeString(name), embed_json->GetAllocator());
 
 		if (!url.empty()) {
-            author.AddMember("url", url, embed_json.GetAllocator());
+            author.AddMember("url", url, embed_json->GetAllocator());
 		}
 		if (!icon_url.empty()) {
-            author.AddMember("icon_url", icon_url, embed_json.GetAllocator());
+            author.AddMember("icon_url", icon_url, embed_json->GetAllocator());
 		}
-        embed_json.AddMember("author", author, embed_json.GetAllocator());
+        embed_json->AddMember("author", author, embed_json->GetAllocator());
 
 		return *this;
 	}
@@ -355,8 +357,8 @@ namespace discpp {
 
         rapidjson::Document fields(rapidjson::kArrayType);
 
-		if (ContainsNotNull(embed_json, "fields")) {
-            fields = GetDocumentInsideJson(embed_json, "fields");
+		if (ContainsNotNull(*embed_json, "fields")) {
+            fields = GetDocumentInsideJson(*embed_json, "fields");
 
 		    if (fields.Size() > 25) {
 		        globals::client_instance->logger->Error(LogTextColor::RED + "Embeds can only have 25 field objects!");
@@ -375,15 +377,16 @@ namespace discpp {
 		}
 
         rapidjson::Value field(rapidjson::kObjectType);
-		field.AddMember("name", EscapeString(name), embed_json.GetAllocator());
-        field.AddMember("value", EscapeString(value), embed_json.GetAllocator());
-        field.AddMember("inline", is_inline, embed_json.GetAllocator());
-        
-		embed_json.AddMember("fields", field, embed_json.GetAllocator());
+		field.AddMember("name", EscapeString(name), embed_json->GetAllocator());
+        field.AddMember("value", EscapeString(value), embed_json->GetAllocator());
+        field.AddMember("inline", is_inline, embed_json->GetAllocator());
+
+		embed_json->AddMember("fields", field, embed_json->GetAllocator());
+
 		return *this;
 	}
 
-	nlohmann::json EmbedBuilder::ToJson() {
+    rapidjson::Document& EmbedBuilder::ToJson() {
 		/**
 		 * @brief Convert the embed to json.
 		 *
@@ -391,41 +394,37 @@ namespace discpp {
 		 *      embed.ToJson();
 		 * ```
 		 *
-		 * @return nlohmann::json
+		 * @return rapidjson::Document
 		 */
 
-		return embed_json;
-	}
-
-	EmbedBuilder::operator nlohmann::json() {
-		return embed_json;
+		return *embed_json;
 	}
 
     std::string EmbedBuilder::GetDescription() {
-        return embed_json["description"];
+        return (*embed_json)["description"].GetString();
     }
 
     std::string EmbedBuilder::GetTitle() {
-        return embed_json["title"];
+        return (*embed_json)["title"].GetString();
     }
 
     std::string EmbedBuilder::GetUrl() {
-        return embed_json["url"];
+        return (*embed_json)["url"].GetString();
     }
 
     std::string EmbedBuilder::GetTimestamp() {
-        return embed_json["timestamp"];
+        return (*embed_json)["timestamp"].GetString();
     }
 
     Color EmbedBuilder::GetColor() {
-        return Color();
+        return Color((*embed_json)["color"].GetInt());
     }
 
     std::pair<std::string, std::string> EmbedBuilder::GetFooter() {
-        return std::make_pair<std::string, std::string>(embed_json["footer"]["text"], embed_json["footer"]["icon_url"]);
+        return std::make_pair<std::string, std::string>((*embed_json)["footer"]["text"].GetString(), (*embed_json)["footer"]["icon_url"].GetString());
     }
 
     std::pair<std::string, std::string> EmbedBuilder::GetProvider() {
-        return std::make_pair<std::string, std::string>(embed_json["provider"]["name"], embed_json["provider"]["url"]);
+        return std::make_pair<std::string, std::string>((*embed_json)["provider"]["name"].GetString(), (*embed_json)["provider"]["url"].GetString());
     }
 }

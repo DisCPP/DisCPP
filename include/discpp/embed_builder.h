@@ -1,6 +1,8 @@
 #ifndef DISCPP_EMBED_BUILDER_H
 #define DISCPP_EMBED_BUILDER_H
 
+#define RAPIDJSON_HAS_STDSTRING 1
+
 #include "discord_object.h"
 
 #include <rapidjson/document.h>
@@ -36,10 +38,9 @@ namespace discpp {
 		std::pair<std::string, std::string> GetFooter();
         std::pair<std::string, std::string> GetProvider();
 
-        rapidjson::Document ToJson();
-		//operator nlohmann::json();
+        rapidjson::Document& ToJson();
 	private:
-        rapidjson::Document embed_json;
+        rapidjson::Document* embed_json;
 	};
 }
 
