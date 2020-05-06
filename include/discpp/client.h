@@ -116,8 +116,7 @@ namespace discpp {
 		std::string session_id;
 		std::string gateway_endpoint;
 
-		nlohmann::json hello_packet;
-		rapidjson::Document hello_packet_1;
+		rapidjson::Document hello_packet;
 
 		std::thread heartbeat_thread;
 

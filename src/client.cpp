@@ -349,7 +349,7 @@ namespace discpp {
                 logger->Debug(LogTextColor::YELLOW + "A non json payload was received and ignored: \"" + msg->str);
             }
 
-            if (!result.Empty()) {
+            if (!result.IsNull()) {
                 OnWebSocketPacket(result);
             }
         }
@@ -396,7 +396,7 @@ namespace discpp {
                 reconnecting = false;
             }
             else {
-                hello_packet_1.Accept(result);
+                hello_packet.Accept(result);
 
                 CreateWebsocketRequest(GetIdentifyPacket());
             }
@@ -459,9 +459,9 @@ namespace discpp {
 
                 heartbeat_acked = false;
 
-                logger->Debug("Waiting for next heartbeat (" + std::to_string(hello_packet["d"]["heartbeat_interval"].get<int>() / 1000.0 - 10) + " seconds)...");
+                logger->Debug("Waiting for next heartbeat (" + std::to_string(hello_packet["d"]["heartbeat_interval"].GetInt() / 1000.0 - 10) + " seconds)...");
                 // Wait for the required heartbeat interval, while waiting it should be acked from another thread.
-                std::this_thread::sleep_for(std::chrono::milliseconds(hello_packet["d"]["heartbeat_interval"].get<int>() - 10));
+                std::this_thread::sleep_for(std::chrono::milliseconds(hello_packet["d"]["heartbeat_interval"].GetInt() - 10));
 
                 if (!heartbeat_acked) {
                     logger->Warn(LogTextColor::YELLOW + "Heartbeat wasn't acked, trying to reconnect...");
