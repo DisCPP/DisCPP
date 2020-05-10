@@ -47,7 +47,7 @@ namespace discpp {
 
 		Activity(std::string text, presence::ActivityType type, std::string status = "online", bool afk = false, std::string url = "") : text(text), type(type), status(status), afk(afk), url(url) {}
 
-		rapidjson::Document ToJson() {
+		rapidjson::Document& ToJson() {
             rapidjson::Document result;
 
             std::string str_activity = "{ \"status\": \"" + status + "\", \"afk\": \"" + std::to_string(afk) + "\", \"game\": " + \

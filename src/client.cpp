@@ -248,18 +248,23 @@ namespace discpp {
     }
 
     void Client::WebSocketStart() {
-        rapidjson::Document gateway_request;
+        rapidjson::Document gateway_request(rapidjson::kObjectType);
         switch (config->type) {
-        case TokenType::USER:
-            gateway_request = SendGetRequest(Endpoint("/gateway"), { {"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
+        case TokenType::USER: {
+            rapidjson::Document user_doc = SendGetRequest(Endpoint("/gateway"), {{"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"}}, {}, {});
+            gateway_request.CopyFrom(user_doc, gateway_request.GetAllocator());
+
             break;
-        case TokenType::BOT:
-            gateway_request = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
+        } case TokenType::BOT:
+            rapidjson::Document bot_doc = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
+            gateway_request.CopyFrom(bot_doc, gateway_request.GetAllocator());
+
             break;
         }
 
+
         rapidjson::Value::ConstMemberIterator itr = gateway_request.FindMember("url");
-        
+
         if (itr != gateway_request.MemberEnd()) {
             logger->Debug(LogTextColor::YELLOW + "Connecting to gateway...");
 
@@ -307,7 +312,7 @@ namespace discpp {
         }
         else {
             logger->Error(LogTextColor::RED + "Improper token, failed to connect to discord gateway!");
-            throw new InvalidTokenException();
+            throw AuthenticationException();
         }
     }
 
@@ -335,14 +340,11 @@ namespace discpp {
 
             disconnected = false;
             reconnecting = false;
-        }
-        else if (msg->type == ix::WebSocketMessageType::Close) {
+        } else if (msg->type == ix::WebSocketMessageType::Close) {
             HandleDiscordDisconnect(msg);
-        }
-        else if (msg->type == ix::WebSocketMessageType::Error) {
+        } else if (msg->type == ix::WebSocketMessageType::Error) {
             logger->Info(LogTextColor::RED + "Error: " + msg->errorInfo.reason);
-        }
-        else if (msg->type == ix::WebSocketMessageType::Message) {
+        } else if (msg->type == ix::WebSocketMessageType::Message) {
             rapidjson::Document result;
             result.Parse(msg->str);
             if (result.HasParseError()) {
@@ -352,8 +354,7 @@ namespace discpp {
             if (!result.IsNull()) {
                 OnWebSocketPacket(result);
             }
-        }
-        else {
+        } else {
             logger->Info(LogTextColor::RED + "Known message sent");
         }
     }
@@ -371,15 +372,16 @@ namespace discpp {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1200));
                 logger->Info(LogTextColor::GREEN + "Reconnected!");
 
-                rapidjson::Document resume;
-                resume.SetObject();
-                rapidjson::Document::AllocatorType& resume_allocator = resume.GetAllocator();
-                resume.AddMember("op", 6, resume_allocator);
+                rapidjson::Document resume(rapidjson::kObjectType);
+                resume.AddMember("op", 6, resume.GetAllocator());
+
                 rapidjson::Value resume_d(rapidjson::kObjectType);
-                resume_d.AddMember("token", token, resume_allocator);
-                resume_d.AddMember("session_id", session_id, resume_allocator);
-                resume_d.AddMember("seq", std::to_string(last_sequence_number), resume_allocator);
-                resume.AddMember("d", resume_d, resume_allocator);
+                resume_d.AddMember("token", token, resume.GetAllocator());
+                resume_d.AddMember("session_id", session_id, resume.GetAllocator());
+                resume_d.AddMember("seq", std::to_string(last_sequence_number), resume.GetAllocator());
+
+                resume.AddMember("d", resume_d, resume.GetAllocator());
+
                 CreateWebsocketRequest(resume);
 
                 // Heartbeat just to be safe
@@ -394,11 +396,11 @@ namespace discpp {
 
                 heartbeat_acked = true;
                 reconnecting = false;
-            }
-            else {
+            } else {
                 hello_packet.Accept(result);
 
-                CreateWebsocketRequest(GetIdentifyPacket());
+                rapidjson::Document identify = GetIdentifyPacket();
+                CreateWebsocketRequest(identify);
             }
             break;
         }
@@ -411,20 +413,24 @@ namespace discpp {
         case invalid_session:
             // Check if the session is resumable
             if (result["d"].GetBool()) {
-                rapidjson::Document resume;
-                resume.SetObject();
+                rapidjson::Document resume(rapidjson::kObjectType);
+
                 rapidjson::Document::AllocatorType& allocator = resume.GetAllocator();
                 resume.AddMember("op", 6, allocator);
+
                 rapidjson::Value d(rapidjson::kObjectType);
                 d.AddMember("token", token, allocator);
                 d.AddMember("session_id", session_id, allocator);
                 d.AddMember("seq", std::to_string(last_sequence_number), allocator);
+
                 resume.AddMember("d", d, allocator);
+
                 CreateWebsocketRequest(resume);
-            }
-            else {
+            } else {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-                CreateWebsocketRequest(GetIdentifyPacket());
+
+                rapidjson::Document identify = GetIdentifyPacket();
+                CreateWebsocketRequest(identify);
             }
 
             break;
@@ -476,7 +482,7 @@ namespace discpp {
         }
     }
 
-    rapidjson::Document& Client::GetIdentifyPacket() {
+    rapidjson::Document Client::GetIdentifyPacket() {
         rapidjson::Document document;
         document.SetObject();
 

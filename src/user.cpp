@@ -39,21 +39,15 @@ namespace discpp {
 		id = static_cast<snowflake>(json["id"].GetString());
 		username = json["username"].GetString();
 		discriminator = json["discriminator"].GetString();
-		avatar = json["avatar"].GetString();
-		bot = json["bot"].GetBool();
-		system = json["system"].GetBool();
-		mfa_enabled = json["mfa_enabled"].GetBool();
-		locale = json["locale"].GetString();
-		verified = json["verified"].GetBool();
-		flags = json["flags"].GetInt();
-		rapidjson::Value::ConstMemberIterator itr = json.FindMember("premium_type");
-		if (itr != json.MemberEnd()) {
-			premium_type = static_cast<discpp::specials::NitroSubscription>(json["premium_type"].GetInt());
-		}
-		else {
-			premium_type = discpp::specials::NitroSubscription::NO_NITRO;
-		}
-		public_flags = json["public_flags"].GetInt();
+		avatar = GetDataSafely<std::string>(json, "avatar");
+		bot = GetDataSafely<bool>(json, "bot");
+		system = GetDataSafely<bool>(json, "system");
+		mfa_enabled = GetDataSafely<bool>(json, "mfa_enabled");
+		locale = GetDataSafely<std::string>(json, "locale");
+		verified = GetDataSafely<bool>(json, "verified");
+		flags = GetDataSafely<int>(json, "flags");
+		premium_type = static_cast<discpp::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type"));
+		public_flags = GetDataSafely<int>(json, "public_flags");
 		created_at = FormatTimeFromSnowflake(id);
 		mention = "<@" + id + ">";
 	}

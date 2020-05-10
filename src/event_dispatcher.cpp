@@ -11,7 +11,9 @@ namespace discpp {
         }
 
         discpp::globals::client_instance->ready = true;
-        discpp::globals::client_instance->session_id = result["session_id"].GetString();
+        // @TODO: This for some reason causes an exception.
+        result.SetObject();
+        discpp::globals::client_instance->session_id = GetDataSafely<std::string>(result, "session_id");
 
         // Get the bot user 
         rapidjson::Document user_json = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
@@ -459,19 +461,26 @@ namespace discpp {
     }
 
     void EventDispatcher::HandleDiscordEvent(rapidjson::Document& j, std::string event_name) {
-        rapidjson::Document& data = (rapidjson::Document &) j["d"];
+        std::shared_ptr<rapidjson::Document> data_ptr;
+
+        rapidjson::Document data(rapidjson::kObjectType);
+        data.CopyFrom(j["d"], data.GetAllocator());
+
+        // This shows an error for intellisense but compiles fine.
+#ifndef __INTELLISENSE__
+        data_ptr = std::make_shared<rapidjson::Document>(std::move(data));
+#endif
+
         rapidjson::Value::ConstMemberIterator itr = j.FindMember("s");
         if (itr != j.MemberEnd() && j["s"].IsNumber()) {
             discpp::globals::client_instance->last_sequence_number = j["s"].GetInt();
-        }
-        else {
+        } else {
             discpp::globals::client_instance->last_sequence_number = -1;
         }
 
         if (internal_event_map.find(event_name) != internal_event_map.end()) {
-            // Mot really sure if this will actually work or not
-            globals::client_instance->futures.push_back(std::async(std::launch::async, [&] {
-                internal_event_map[event_name](data);
+            globals::client_instance->futures.push_back(std::async(std::launch::async, [data_ptr, event_name] {
+                internal_event_map[event_name](*data_ptr);
             }));
         }
     }

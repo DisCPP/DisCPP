@@ -33,12 +33,12 @@ namespace discpp {
 		 *
 		 * @return discpp::Channel, this is a constructor.
 		 */
-		id = static_cast<snowflake>(json["id"].GetString());
+		id = json["id"].GetString();
 		type = static_cast<ChannelType>(json["type"].GetInt());
-		name = json["name"].GetString();
-		topic = json["topic"].GetString();
-		last_message_id = static_cast<snowflake>(json["last_message_id"].GetString());
-		last_pin_timestamp = json["last_pin_timestamp"].GetString();
+		name = GetDataSafely<std::string>(json, "name");
+		topic = GetDataSafely<std::string>(json, "topic");
+		last_message_id = GetDataSafely<snowflake>(json, "last_message_id");
+		last_pin_timestamp = GetDataSafely<std::string>(json, "last_pin_timestamp");
 	}
 
 	discpp::Message Channel::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<File> files) {
@@ -292,8 +292,8 @@ namespace discpp {
 		 * @return discpp::GuildChannel, this is a constructor.
 		 */
 
-		guild_id = static_cast<snowflake>(json["guild_id"].GetString());
-		position = json["position"].GetInt();
+		guild_id = GetDataSafely<snowflake>(json, "guild_id");
+		position = GetDataSafely<int>(json, "position");
 		if (ContainsNotNull(json, "permission_overwrites")) {
 			for (auto& permission_overwrite : json["permission_overwrites"].GetArray()) {
 				rapidjson::Document permission_json;
@@ -302,11 +302,11 @@ namespace discpp {
 				permissions.push_back(discpp::Permissions(permission_json));
 			}
 		}
-		nsfw = json["nsfw"].GetBool();
-		bitrate = json["bitrate"].GetInt();
-		user_limit = json["user_limit"].GetInt();
-		rate_limit_per_user = json["rate_limit_per_user"].GetInt();
-		category_id = static_cast<snowflake>(json["parent_id"].GetString());
+		nsfw = GetDataSafely<bool>(json, "nsfw");
+		bitrate = GetDataSafely<int>(json, "bitrate");
+		user_limit = GetDataSafely<int>(json, "user_limit");
+		rate_limit_per_user = GetDataSafely<int>(json, "rate_limit_per_user");
+		category_id = GetDataSafely<discpp::snowflake>(json, "parent_id");
 	}
 
 	GuildChannel::GuildChannel(snowflake id, snowflake guild_id) : Channel(id) {
@@ -431,7 +431,7 @@ namespace discpp {
 		permission_json.Accept(writer);
 		std::string json_payload = buffer.GetString();
 
-		rapidjson::Document result = SendPutRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(json_payload));
+		SendPutRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(json_payload));
 	}
 
 	void GuildChannel::DeletePermission(discpp::Permissions& permissions) {
@@ -447,7 +447,7 @@ namespace discpp {
 		 * @return void
 		 */
 
-		rapidjson::Document result = SendDeleteRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		SendDeleteRequest(Endpoint("/channels/" + id + "/permissions/" + permissions.role_user_id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 
 	DMChannel::DMChannel(rapidjson::Document& json) : Channel(json) {
@@ -459,9 +459,9 @@ namespace discpp {
 				recipients.push_back(discpp::User(user_json));
 			}
 		}
-		icon = json["icon"].GetString();
-		owner_id = static_cast<snowflake>(json["owner_id"].GetString());
-		application_id = static_cast<snowflake>(json["application_id"].GetString());
+		icon = GetDataSafely<std::string>(json, "icon");
+		owner_id = GetDataSafely<discpp::snowflake>(json, "owner_id");
+		application_id = GetDataSafely<discpp::snowflake>(json, "application_id");
 	}
 
 	void DMChannel::GroupDMAddRecipient(discpp::User& user) {
@@ -477,7 +477,7 @@ namespace discpp {
 		 * @return void
 		 */
 
-		rapidjson::Document result = SendPutRequest(Endpoint("/channels/" + id + "/recipients/" + user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		SendPutRequest(Endpoint("/channels/" + id + "/recipients/" + user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 
 	void DMChannel::GroupDMRemoveRecipient(discpp::User& user) {
@@ -493,6 +493,6 @@ namespace discpp {
 		 * @return void
 		 */
 
-		rapidjson::Document result = SendDeleteRequest(Endpoint("/channels/" + id + "/recipients/" + user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		SendDeleteRequest(Endpoint("/channels/" + id + "/recipients/" + user.id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 }

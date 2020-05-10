@@ -39,16 +39,10 @@ namespace discpp {
 		id = static_cast<snowflake>(json["id"].GetString());
 		name = json["name"].GetString();
 		color = json["color"].GetInt();
-		hoist = json["hoist"].GetInt();
+		hoist = json["hoist"].GetBool();
 		position = json["position"].GetInt();
-		rapidjson::Value::ConstMemberIterator itr = json.FindMember("permissions");
-		if (itr != json.MemberEnd()) {
-			permissions = Permissions(PermissionType::ROLE, json["permissions"].GetInt());
-		}
-		else {
-			permissions = Permissions();
-		}
-		managed = json["manages"].GetBool();
+        permissions = Permissions(PermissionType::ROLE, json["permissions"].GetInt());
+		managed = json["managed"].GetBool();
 		mentionable = json["mentionable"].GetBool();
 	}
 }

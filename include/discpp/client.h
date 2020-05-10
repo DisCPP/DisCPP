@@ -39,9 +39,9 @@ namespace discpp {
 		StartLimitException() : std::runtime_error("Maximum start limit reached") {}
 	};
 
-	class InvalidTokenException : public std::runtime_error {
+	class AuthenticationException : public std::runtime_error {
 	public:
-		InvalidTokenException() : std::runtime_error("Invalid token, failed to connect to gateway") {}
+        AuthenticationException() : std::runtime_error("Invalid token, failed to connect to gateway") {}
 	};
 
 	class Client {
@@ -137,7 +137,7 @@ namespace discpp {
 		void OnWebSocketPacket(rapidjson::Document& result);
 		void HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg);
 		void HandleHeartbeat();
-		rapidjson::Document& GetIdentifyPacket();
+		rapidjson::Document GetIdentifyPacket();
 
 		// Commands
 		std::function<void(discpp::Client*, discpp::Message)> fire_command_method;

@@ -45,7 +45,7 @@ namespace discpp {
 
 		user = ConstructDiscppObjectFromJson(json, "user", discpp::User());
 		if (!user.id.empty()) id = user.id;
-		nick = json["nick"].GetString();
+		nick = GetDataSafely<std::string>(json, "nick");
 
         int highest_hiearchy = 0;
         rapidjson::Value::ConstMemberIterator itr = json.FindMember("roles");

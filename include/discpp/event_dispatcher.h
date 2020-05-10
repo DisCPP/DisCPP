@@ -1,6 +1,9 @@
 #ifndef DISCPP_EVENT_DISPATCHER_H
 #define DISCPP_EVENT_DISPATCHER_H
 
+#define RAPIDJSON_HAS_STDSTRING 1
+#include <rapidjson/document.h>
+
 #include "event.h"
 #include "utils.h"
 #include "client.h"
@@ -9,12 +12,12 @@
 #include <string_view>
 #include <optional>
 #include <vector>
-#include <nlohmann/json.hpp>
 
 namespace discpp {
 	class EventDispatcher {
 	private:
-        inline static std::unordered_map<std::string, std::function<void(rapidjson::Document &)>> internal_event_map = {};
+	    inline static std::unordered_map<std::string, std::function<void(rapidjson::Document &)>> internal_event_map = {};
+        static std::unordered_map<int, rapidjson::Document> json_docs;
 
         static void RunEvent(const std::function<void(rapidjson::Document &)>& func, rapidjson::Document& json);
 

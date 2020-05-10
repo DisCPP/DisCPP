@@ -358,7 +358,7 @@ namespace discpp {
         rapidjson::Document fields(rapidjson::kArrayType);
 
 		if (ContainsNotNull(*embed_json, "fields")) {
-            fields = GetDocumentInsideJson(*embed_json, "fields");
+		    fields.CopyFrom((*embed_json)["fields"], fields.GetAllocator());
 
 		    if (fields.Size() > 25) {
 		        globals::client_instance->logger->Error(LogTextColor::RED + "Embeds can only have 25 field objects!");

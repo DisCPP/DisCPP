@@ -74,13 +74,6 @@ namespace discpp {
 		return nullptr;
 	}
 
-	/*template<typename T>
-	inline T GetDataSafely(nlohmann::json& json, std::string value_name) {
-		return (json.contains(value_name) && json[value_name] != nullptr) ? json[value_name].get<T>() : T();
-	}*/
-
-	rapidjson::Document GetDocumentInsideJson(rapidjson::Document &json, const char* value_name);
-
     template<typename T>
     inline T GetDataSafely(rapidjson::Document & json, const char* value_name) {
         rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
@@ -129,6 +122,7 @@ namespace discpp {
 	void IterateThroughNotNullJson(rapidjson::Document& json, std::function<void(rapidjson::Document&)> func);
     bool ContainsNotNull(rapidjson::Document& json, char * value_name);
     std::string DumpJson(rapidjson::Document& json);
+    rapidjson::Document GetDocumentInsideJson(rapidjson::Document &json, const char* value_name);
 
 	// Rate limits
 	struct RateLimit {

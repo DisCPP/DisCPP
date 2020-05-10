@@ -121,7 +121,7 @@ namespace discpp {
 		banner = GetDataSafely<std::string>(json, "banner");
 		premium_tier = static_cast<discpp::specials::NitroTier>(json["premium_tier"].GetInt());
 		premium_subscription_count = GetDataSafely<int>(json, "premium_subscription_count");
-		preferred_locale = json["preferred_locale"].GetInt();
+		preferred_locale = json["preferred_locale"].GetString();
 
 		if (ContainsNotNull(json, "public_updates_channel_id")) {
             discpp::Channel channel = ConstructDiscppObjectFromID(json, "public_updates_channel_id", discpp::Channel());
@@ -149,7 +149,9 @@ namespace discpp {
 
                 if (it != members.end()) {
                     rapidjson::Document activity_json;
-                    activity_json.CopyFrom(json["game"], activity_json.GetAllocator());
+                    if (ContainsNotNull(json, "game")) {
+                        activity_json.CopyFrom(json["game"], activity_json.GetAllocator());
+                    }
 
                     discpp::Activity act;
 

@@ -29,6 +29,7 @@ std::string discpp::GetOsName() {
 	#endif
 }
 
+// @TODO: Test if the json document type returned is what its supposed to be, like an array or object.
 rapidjson::Document discpp::HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket) {
 	/**
 	 * @brief Handles a response from the discpp servers.
@@ -43,11 +44,22 @@ rapidjson::Document discpp::HandleResponse(cpr::Response response, snowflake obj
 	 *
 	 * @return nlohmann::json
 	 */
-	rapidjson::Document tmp;
 	globals::client_instance->logger->Debug("Received requested payload: " + response.text);
+
+    rapidjson::Document tmp;
+    if (!response.text.empty() && response.text[0] == '[' && response.text[response.text.size() - 1] == ']') {
+        tmp.SetArray();
+    } else {
+        tmp.SetObject();
+    }
+
 	HandleRateLimits(response.header, object, ratelimit_bucket);
 	tmp.Parse((!response.text.empty() ? response.text.c_str() : "{}"));
-	return tmp;
+
+    // This shows an error in inteliisense for some reason but compiles fine.
+#ifndef __INTELLISENSE__
+    return std::move(tmp);
+#endif
 }
 
 std::string CprBodyToString(cpr::Body body) {
@@ -78,7 +90,13 @@ rapidjson::Document discpp::SendGetRequest(std::string url, cpr::Header headers,
 	globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
-	return HandleResponse(result, object, ratelimit_bucket);
+
+	rapidjson::Document doc = HandleResponse(result, object, ratelimit_bucket);
+
+    // This shows an error in inteliisense for some reason but compiles fine.
+#ifndef __INTELLISENSE__
+    return std::move(doc);
+#endif
 }
 
 rapidjson::Document discpp::SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
@@ -556,13 +574,14 @@ rapidjson::Document discpp::GetDocumentInsideJson(rapidjson::Document &json, con
     rapidjson::Document inside_json;
     inside_json.CopyFrom(json[value_name], inside_json.GetAllocator());
 
-    return inside_json;
+    // This shows an error in inteliisense for some reason but compiles fine.
+#ifndef __INTELLISENSE__
+    return std::move(inside_json);
+#endif
 }
 
 std::string discpp::DumpJson(rapidjson::Document &json) {
     rapidjson::StringBuffer buffer;
-    buffer.Clear();
-
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     json.Accept(writer);
 	std::string tmp = buffer.GetString();
