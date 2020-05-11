@@ -46,19 +46,19 @@ namespace discpp {
 
 	class Client {
 	public:
-		std::string token; /**< Token for the current client */
-		ClientConfig* config; /**< Configuration for the current bot */
+		std::string token; /**< Token for the current client. */
+		ClientConfig* config; /**< Configuration for the current bot. */
 
-		discpp::User client_user; /**< discpp::User object representing current user */
-		discpp::Logger* logger; /**< discpp::Logger object representing current logger */
+		discpp::User client_user; /**< discpp::User object representing current user. */
+		discpp::Logger* logger; /**< discpp::Logger object representing current logger. */
 
-		std::unordered_map<snowflake, Channel> channels; /**< List of channels the current bot can access */
-		std::unordered_map<snowflake, Member> members; /**< List of members the current bot can access */
-		std::unordered_map<snowflake, Guild> guilds; /**< List of guilds the current bot can access */ 
-		std::unordered_map<snowflake, Message> messages; /**< List of messages the current bot can access */
-        std::unordered_map<discpp::snowflake, discpp::DMChannel> private_channels; /**< List of dm channels the current client can access */
+		std::unordered_map<snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
+		std::unordered_map<snowflake, std::shared_ptr<Member>> members; /**< List of members the current bot can access. */
+		std::unordered_map<snowflake, std::shared_ptr<Guild>> guilds; /**< List of guilds the current bot can access. */
+		std::unordered_map<snowflake, std::shared_ptr<Message>> messages; /**< List of messages the current bot can access. */
+        std::unordered_map<discpp::snowflake, discpp::DMChannel> private_channels; /**< List of dm channels the current client can access. */
 
-		std::vector<std::future<void>> futures; /**< List of events */
+		std::vector<std::future<void>> futures; /**< List of events. */
 
 		enum packet_opcode : int {
 			dispatch = 0,				// Receive
@@ -82,7 +82,7 @@ namespace discpp {
 		void ReconnectToWebsocket();
 
 		// Discord based methods.
-        discpp::Guild GetGuild(snowflake guild_id);
+        std::shared_ptr<discpp::Guild> GetGuild(snowflake guild_id);
         discpp::User ModifyCurrentUser(std::string username, discpp::Image avatar);
         void LeaveGuild(discpp::Guild& guild);
         void UpdatePresence(discpp::Activity& activity);
@@ -122,7 +122,6 @@ namespace discpp {
 		std::thread heartbeat_thread;
 
 		std::mutex websocket_client_mutex;
-		//websocket_callback_client websocket_client;
 
 		ix::WebSocket websocket;
 

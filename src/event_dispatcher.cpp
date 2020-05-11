@@ -58,9 +58,17 @@ namespace discpp {
     }
 
     void EventDispatcher::ChannelCreateEvent(rapidjson::Document& result) {
-        discpp::Channel new_channel = discpp::Channel(result);
-        discpp::globals::client_instance->channels.insert(std::pair<snowflake, Channel>(static_cast<snowflake>(new_channel.id),
-            static_cast<Channel>(new_channel)));
+        //discpp::globals::client_instance->channels.insert(std::pair<snowflake, Channel>(static_cast<snowflake>(new_channel.id), static_cast<Channel>(new_channel)));
+        // If the guild channel is already in guild then it must of been created by the bot, so dont add it again.
+        if (ContainsNotNull(result, "guild_id")) {
+            std::shared_ptr<discpp::GuildChannel> new_channel = std::make_shared<discpp::GuildChannel>(discpp::GuildChannel(result));
+
+            discpp::globals::client_instance->channels.insert({ new_channel->id, new_channel });
+        } else {
+            std::shared_ptr<discpp::Channel> new_channel = std::make_shared<discpp::Channel>(discpp::Channel(result));
+
+            discpp::globals::client_instance->channels.insert({ new_channel->id, new_channel });
+        }
 
         discpp::DispatchEvent(discpp::ChannelCreateEvent(new_channel));
     }
