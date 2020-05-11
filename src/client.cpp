@@ -462,7 +462,7 @@ namespace discpp {
 
                 int heartbeat_interval = hello_packet["d"]["heartbeat_interval"].GetInt();
                 logger->Debug("Waiting for next heartbeat (" + std::to_string(heartbeat_interval / 1000.0 - 10) + " seconds)...");
-                
+
                 // Wait for the required heartbeat interval, while waiting it should be acked from another thread.
                 std::this_thread::sleep_for(std::chrono::milliseconds(heartbeat_interval - 10));
 

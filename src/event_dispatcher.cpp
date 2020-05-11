@@ -15,9 +15,32 @@ namespace discpp {
         result.SetObject();
         discpp::globals::client_instance->session_id = GetDataSafely<std::string>(result, "session_id");
 
-        // Get the bot user 
-        rapidjson::Document user_json = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
-        discpp::globals::client_instance->client_user = discpp::User(user_json);
+        if (discpp::globals::client_instance->config->type == discpp::TokenType::USER) {
+            rapidjson::Document user_json = GetDocumentInsideJson(result, "user");
+
+            discpp::User client_user(user_json);
+            discpp::globals::client_instance->client_user = client_user;
+
+            for (const auto& guild : result["guilds"].GetArray()) {
+                rapidjson::Document guild_json(rapidjson::kObjectType);
+                guild_json.CopyFrom(guild, guild_json.GetAllocator());
+
+                GuildCreateEvent(guild_json);
+            }
+
+            for (const auto& private_channel : result["private_channels"].GetArray()) {
+                rapidjson::Document private_channel_json(rapidjson::kObjectType);
+                private_channel_json.CopyFrom(private_channel, private_channel_json.GetAllocator());
+
+                discpp::DMChannel dm_channel(private_channel_json);
+
+                discpp::globals::client_instance->private_channels.insert({ dm_channel.id, dm_channel });
+            }
+        } else {
+            // Get the bot user
+            rapidjson::Document user_json = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
+            discpp::globals::client_instance->client_user = discpp::User(user_json);
+        }
 
         discpp::DispatchEvent(discpp::ReadyEvent());
     }

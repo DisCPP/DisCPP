@@ -56,6 +56,7 @@ namespace discpp {
 		std::unordered_map<snowflake, Member> members; /**< List of members the current bot can access */
 		std::unordered_map<snowflake, Guild> guilds; /**< List of guilds the current bot can access */ 
 		std::unordered_map<snowflake, Message> messages; /**< List of messages the current bot can access */
+        std::unordered_map<discpp::snowflake, discpp::DMChannel> private_channels; /**< List of dm channels the current client can access */
 
 		std::vector<std::future<void>> futures; /**< List of events */
 
@@ -141,7 +142,7 @@ namespace discpp {
 
 		// Commands
 		std::function<void(discpp::Client*, discpp::Message)> fire_command_method;
-	};
+    };
 }
 
 #endif
