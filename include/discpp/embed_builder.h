@@ -38,9 +38,9 @@ namespace discpp {
 		std::pair<std::string, std::string> GetFooter();
         std::pair<std::string, std::string> GetProvider();
 
-        rapidjson::Document& ToJson();
+        rapidjson::Document ToJson();
 	private:
-        rapidjson::Document* embed_json;
+        std::shared_ptr<rapidjson::Document> embed_json;
 	};
 }
 

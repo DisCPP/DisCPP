@@ -185,7 +185,7 @@ namespace discpp {
         rapidjson::Document payload;
         payload.SetObject();
         rapidjson::Document::AllocatorType& payload_allocator = payload.GetAllocator();
-        payload.AddMember("op", 3, payload_allocator);
+        payload.AddMember("op", status_update, payload_allocator);
         payload.AddMember("d", activity.ToJson(), payload_allocator);
 
         CreateWebsocketRequest(payload);
@@ -360,11 +360,7 @@ namespace discpp {
     }
 
     void Client::OnWebSocketPacket(rapidjson::Document& result) {
-        rapidjson::StringBuffer buffer;
-        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-        result.Accept(writer);
-        std::string json_payload = buffer.GetString();
-        logger->Debug("Received payload: " + json_payload);
+        logger->Debug("Received payload: " + DumpJson(result));
 
         switch (result["op"].GetInt()) {
         case (hello): {
@@ -397,7 +393,7 @@ namespace discpp {
                 heartbeat_acked = true;
                 reconnecting = false;
             } else {
-                hello_packet.Accept(result);
+                hello_packet = std::move(result);
 
                 rapidjson::Document identify = GetIdentifyPacket();
                 CreateWebsocketRequest(identify);
@@ -448,8 +444,7 @@ namespace discpp {
                 // Make sure that it doesn't try to do anything while its trying to reconnect.
                 while (reconnecting) {}
 
-                rapidjson::Document data;
-                data.SetObject();
+                rapidjson::Document data(rapidjson::kObjectType);
                 rapidjson::Document::AllocatorType& data_allocator = data.GetAllocator();
                 data.AddMember("op", packet_opcode::heartbeat, data_allocator);
                 data.AddMember("d", NULL, data_allocator);
@@ -465,9 +460,16 @@ namespace discpp {
 
                 heartbeat_acked = false;
 
-                logger->Debug("Waiting for next heartbeat (" + std::to_string(hello_packet["d"]["heartbeat_interval"].GetInt() / 1000.0 - 10) + " seconds)...");
+                /*rapidjson::Document hello_d(rapidjson::kObjectType);
+                hello_d.CopyFrom(hello_packet["d"], hello_d.GetAllocator());
+                hello_d.SetObject();*/
+
+                logger->Debug("Hello packet_d: " + DumpJson(hello_packet));
+
+                int heartbeat_interval = hello_packet["d"]["heartbeat_interval"].GetInt();
+                logger->Debug("Waiting for next heartbeat (" + std::to_string(heartbeat_interval / 1000.0 - 10) + " seconds)...");
                 // Wait for the required heartbeat interval, while waiting it should be acked from another thread.
-                std::this_thread::sleep_for(std::chrono::milliseconds(hello_packet["d"]["heartbeat_interval"].GetInt() - 10));
+                std::this_thread::sleep_for(std::chrono::milliseconds(heartbeat_interval - 10));
 
                 if (!heartbeat_acked) {
                     logger->Warn(LogTextColor::YELLOW + "Heartbeat wasn't acked, trying to reconnect...");
@@ -476,8 +478,7 @@ namespace discpp {
                     ReconnectToWebsocket();
                 }
             }
-        }
-        catch (std::exception& e) {
+        } catch (std::exception& e) {
             logger->Error(LogTextColor::RED + "ERROR: " + e.what());
         }
     }
@@ -503,7 +504,7 @@ namespace discpp {
 
         document.AddMember("d", d, allocator);
 
-        return document;
+        return std::move(document);
     }
 
     void Client::ReconnectToWebsocket() {

@@ -6,11 +6,12 @@
 
 namespace discpp {
 	EmbedBuilder::EmbedBuilder() {
-        //rapidjson::Document& json(rapidjson::kObjectType);
-	    embed_json = new rapidjson::Document(rapidjson::kObjectType);
+	    //embed_json = std::move(rapidjson::Document(rapidjson::kObjectType));
+	    rapidjson::Document doc(rapidjson::kObjectType);
+	    embed_json = std::make_shared<rapidjson::Document>(std::move(doc));
 	}
 
-	EmbedBuilder::EmbedBuilder(std::string title, std::string description, discpp::Color color) {
+	EmbedBuilder::EmbedBuilder(std::string title, std::string description, discpp::Color color) : EmbedBuilder() {
 		/**
 		 * @brief Constructs a discpp::EmbedBuilder object with a title, description, and color.
 		 *
@@ -43,6 +44,8 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, this is a constructor.
 		 */
 
+        rapidjson::Document doc(rapidjson::kObjectType);
+        embed_json = std::make_shared<rapidjson::Document>(std::move(doc));
 		embed_json->CopyFrom(json, embed_json->GetAllocator());
 	}
 
@@ -63,7 +66,9 @@ namespace discpp {
 			globals::client_instance->logger->Error(LogTextColor::RED + "Embed title can only be 0-256 characters!");
 			throw std::runtime_error("Embed title can only be 0-256 characters");
 		}
-		embed_json->AddMember("title", EscapeString(title), embed_json->GetAllocator());
+		auto& allocator = embed_json->GetAllocator();
+
+		embed_json->AddMember("title", EscapeString(title), allocator);
 
 		return *this;
 	}
@@ -359,11 +364,15 @@ namespace discpp {
 
 		if (ContainsNotNull(*embed_json, "fields")) {
 		    fields.CopyFrom((*embed_json)["fields"], fields.GetAllocator());
+		    fields.SetArray();
 
 		    if (fields.Size() > 25) {
 		        globals::client_instance->logger->Error(LogTextColor::RED + "Embeds can only have 25 field objects!");
 		        throw std::runtime_error("Embeds can only have 25 field objects!");
 		    }
+		} else {
+		    fields.SetArray();
+            embed_json->AddMember("fields", fields, embed_json->GetAllocator());
 		}
 
 		if (name.size() > 256) {
@@ -381,12 +390,15 @@ namespace discpp {
         field.AddMember("value", EscapeString(value), embed_json->GetAllocator());
         field.AddMember("inline", is_inline, embed_json->GetAllocator());
 
-		embed_json->AddMember("fields", field, embed_json->GetAllocator());
+        fields.SetArray();
+        fields.GetArray().PushBack(field, fields.GetAllocator());
+
+        (*embed_json)["fields"].CopyFrom(fields, embed_json->GetAllocator());
 
 		return *this;
 	}
 
-    rapidjson::Document& EmbedBuilder::ToJson() {
+    rapidjson::Document EmbedBuilder::ToJson() {
 		/**
 		 * @brief Convert the embed to json.
 		 *
@@ -397,7 +409,8 @@ namespace discpp {
 		 * @return rapidjson::Document
 		 */
 
-		return *embed_json;
+
+		return std::move(*embed_json);
 	}
 
     std::string EmbedBuilder::GetDescription() {
