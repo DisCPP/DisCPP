@@ -4,7 +4,7 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 
 #include "discord_object.h"
-
+#include <memory>
 #include <rapidjson/document.h>
 
 namespace discpp {

@@ -11,6 +11,7 @@
 #include <discpp/events/ready_event.h>
 #include <discpp/events/guild_member_add_event.h>
 #include <discpp/events/channel_pins_update_event.h>
+#include <discpp/client_config.h>
 
 #include "ping_command.h"
 
@@ -19,7 +20,7 @@ int main(int argc, const char* argv[]) {
 	std::string token;
 	std::getline(token_file, token);
 
-	discpp::ClientConfig config{ {"!"} };
+	discpp::ClientConfig* config = new discpp::ClientConfig({"!"});
 	discpp::Client bot{ token, config }; // Token, config 
 
 	PingCommand(); // This runs the constructor which will register the command.
