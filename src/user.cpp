@@ -35,10 +35,10 @@ namespace discpp {
 		 *
 		 * @return discpp::User, this is a constructor.
 		 */
-		
-		id = static_cast<snowflake>(json["id"].GetString());
-		username = json["username"].GetString();
-		discriminator = json["discriminator"].GetString();
+
+		id = json["id"].GetString();
+		username = GetDataSafely<std::string>(json, "username");
+		discriminator = GetDataSafely<std::string>(json, "discriminator");
 		avatar = GetDataSafely<std::string>(json, "avatar");
 		bot = GetDataSafely<bool>(json, "bot");
 		system = GetDataSafely<bool>(json, "system");

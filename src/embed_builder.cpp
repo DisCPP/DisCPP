@@ -360,18 +360,15 @@ namespace discpp {
 			throw std::runtime_error("You can not have an empty or null field value!");
 		}
 
-        rapidjson::Document fields(rapidjson::kArrayType);
-
 		if (ContainsNotNull(*embed_json, "fields")) {
-		    fields.CopyFrom((*embed_json)["fields"], fields.GetAllocator());
-		    fields.SetArray();
+            rapidjson::Value& fields = (*embed_json)["fields"];
 
 		    if (fields.Size() > 25) {
 		        globals::client_instance->logger->Error(LogTextColor::RED + "Embeds can only have 25 field objects!");
 		        throw std::runtime_error("Embeds can only have 25 field objects!");
 		    }
 		} else {
-		    fields.SetArray();
+		    rapidjson::Value fields(rapidjson::kArrayType);
             embed_json->AddMember("fields", fields, embed_json->GetAllocator());
 		}
 
@@ -390,10 +387,7 @@ namespace discpp {
         field.AddMember("value", EscapeString(value), embed_json->GetAllocator());
         field.AddMember("inline", is_inline, embed_json->GetAllocator());
 
-        fields.SetArray();
-        fields.GetArray().PushBack(field, fields.GetAllocator());
-
-        (*embed_json)["fields"].CopyFrom(fields, embed_json->GetAllocator());
+        (*embed_json)["fields"].GetArray().PushBack(field, embed_json->GetAllocator());
 
 		return *this;
 	}

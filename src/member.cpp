@@ -48,9 +48,7 @@ namespace discpp {
 		nick = GetDataSafely<std::string>(json, "nick");
 
         int highest_hiearchy = 0;
-        rapidjson::Value::ConstMemberIterator itr = json.FindMember("roles");
-		itr = json.FindMember("roles");
-		if (itr != json.MemberEnd()) {
+		if (ContainsNotNull(json, "roles")) {
 			for (auto& role : json["roles"].GetArray()) {
 				rapidjson::Document role_json;
 				role_json.CopyFrom(role, role_json.GetAllocator());
@@ -63,8 +61,7 @@ namespace discpp {
 				if (json["roles"][0] == role) {
 					permissions.allow_perms.value = r.permissions.allow_perms.value;
 					permissions.deny_perms.value = r.permissions.deny_perms.value;
-				}
-				else {
+				} else {
 					permissions.allow_perms.value |= r.permissions.allow_perms.value;
 					permissions.deny_perms.value |= r.permissions.deny_perms.value;
 				}
@@ -78,10 +75,10 @@ namespace discpp {
 		} else {
             hierarchy = highest_hiearchy;
         }
-		joined_at = json["joined_at"].GetString();
+		joined_at = GetDataSafely<std::string>(json, "joined_at");
 		premium_since = GetDataSafely<std::string>(json, "premium_since");
-		deaf = json["deaf"].GetBool();
-		mute = json["mute"].GetBool();
+		deaf = GetDataSafely<bool>(json, "deaf");
+		mute = GetDataSafely<bool>(json, "mute");
 		user.mention = "<@!" + id + ">";
 	}
 

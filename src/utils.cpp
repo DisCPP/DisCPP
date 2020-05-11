@@ -588,3 +588,12 @@ std::string discpp::DumpJson(rapidjson::Document &json) {
 
     return tmp;
 }
+
+std::string discpp::DumpJson(rapidjson::Value &json) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    json.Accept(writer);
+    std::string tmp = buffer.GetString();
+
+    return tmp;
+}

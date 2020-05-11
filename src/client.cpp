@@ -182,11 +182,11 @@ namespace discpp {
          * @return void
          */
 
-        rapidjson::Document payload;
-        payload.SetObject();
-        rapidjson::Document::AllocatorType& payload_allocator = payload.GetAllocator();
-        payload.AddMember("op", status_update, payload_allocator);
-        payload.AddMember("d", activity.ToJson(), payload_allocator);
+        rapidjson::Document payload(rapidjson::kObjectType);
+        rapidjson::Document activity_json = activity.ToJson();
+
+        payload.AddMember("op", status_update, payload.GetAllocator());
+        payload.AddMember("d", activity_json, payload.GetAllocator());
 
         CreateWebsocketRequest(payload);
     }
@@ -460,14 +460,9 @@ namespace discpp {
 
                 heartbeat_acked = false;
 
-                /*rapidjson::Document hello_d(rapidjson::kObjectType);
-                hello_d.CopyFrom(hello_packet["d"], hello_d.GetAllocator());
-                hello_d.SetObject();*/
-
-                logger->Debug("Hello packet_d: " + DumpJson(hello_packet));
-
                 int heartbeat_interval = hello_packet["d"]["heartbeat_interval"].GetInt();
                 logger->Debug("Waiting for next heartbeat (" + std::to_string(heartbeat_interval / 1000.0 - 10) + " seconds)...");
+                
                 // Wait for the required heartbeat interval, while waiting it should be acked from another thread.
                 std::this_thread::sleep_for(std::chrono::milliseconds(heartbeat_interval - 10));
 

@@ -47,14 +47,14 @@ namespace discpp {
 
 		Activity(std::string text, presence::ActivityType type, std::string status = "online", bool afk = false, std::string url = "") : text(text), type(type), status(status), afk(afk), url(url) {}
 
-		rapidjson::Document& ToJson() {
+		rapidjson::Document ToJson() {
             rapidjson::Document result;
 
-            std::string str_activity = "{ \"status\": \"" + status + "\", \"afk\": \"" + std::to_string(afk) + "\", \"game\": " + \
-                    "{ \"name\": \"" + text + "\", \"type\": " + std::to_string(static_cast<int>(type)) + ((!url.empty()) ? ", \"url\": \"" + url + "\"" : "") + "} }";
+            std::string str_activity = "{\"status\": \"" + status + "\", \"afk\": " + ((afk) ? "true" : "false") + ", \"game\": " + \
+                    "{\"name\": \"" + text + "\", \"type\": " + std::to_string(static_cast<int>(type)) + ((!url.empty()) ? ", \"url\": \"" + url + "\"" : "") + "}, \"since\": \"" + std::to_string(time(NULL) - 10) + "\"}";
             result.Parse(str_activity.c_str());
 
-			return result;
+			return std::move(result);
 		}
 	};
 }
