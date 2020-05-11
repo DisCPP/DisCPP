@@ -29,7 +29,7 @@ namespace discpp {
 		}*/
 	}
 
-	Member::Member(nlohmann::json json, discpp::Guild guild) : guild_id(guild.id) {
+	Member::Member(rapidjson::Document& json, discpp::Guild guild) : guild_id(guild.id) {
 		/**
 		 * @brief Constructs a discpp::Member object by parsing json and stores the guild_id.
 		 *
@@ -43,20 +43,19 @@ namespace discpp {
 		 * @return discpp::Member, this is a constructor.
 		 */
 
-		if (json.contains("user")) {
-			user = discpp::User(json["user"]);
-			id = user.id;
-		} else {
-			user = discpp::User();
-		}
-        int highest_hiearchy = 0;
+		user = ConstructDiscppObjectFromJson(json, "user", discpp::User());
+		if (!user.id.empty()) id = user.id;
 		nick = GetDataSafely<std::string>(json, "nick");
-		if (json.contains("roles")) {
-			for (auto& role : json["roles"]) {
-				discpp::Role r(role.get<snowflake>(), guild);
-                if (r.position > highest_hiearchy) {
-                    highest_hiearchy = r.position;
-                }
+
+        int highest_hiearchy = 0;
+		if (ContainsNotNull(json, "roles")) {
+			for (auto& role : json["roles"].GetArray()) {
+				rapidjson::Document role_json;
+				role_json.CopyFrom(role, role_json.GetAllocator());
+				discpp::Role r(static_cast<snowflake>(role_json.GetString()), guild);
+				if (r.position > highest_hiearchy) {
+					highest_hiearchy = r.position;
+				}
 
 				// Save permissions
 				if (json["roles"][0] == role) {
@@ -70,6 +69,7 @@ namespace discpp {
 				roles.push_back(r);
 			}
 		}
+
 		if (guild.owner_id == this->id) {
             hierarchy = INT_MAX;
 		} else {
@@ -79,8 +79,7 @@ namespace discpp {
 		premium_since = GetDataSafely<std::string>(json, "premium_since");
 		deaf = GetDataSafely<bool>(json, "deaf");
 		mute = GetDataSafely<bool>(json, "mute");
-		std::string _id = this->id.c_str();
-		user.mention = "<@!" + _id + ">";
+		user.mention = "<@!" + id + ">";
 	}
 
 	void Member::ModifyMember(std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf, snowflake channel_id) {
@@ -171,8 +170,9 @@ namespace discpp {
 		 * @return bool
 		 */
 
-		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + guild_id + "/bans/" + id), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
-		return result.contains("reason");
+		rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + guild_id + "/bans/" + id), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
+		rapidjson::Value::ConstMemberIterator itr = result.FindMember("reason");
+		return itr != result.MemberEnd();
 	}
 
 	bool Member::HasRole(discpp::Role role) {

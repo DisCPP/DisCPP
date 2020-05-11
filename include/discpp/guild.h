@@ -1,6 +1,8 @@
 #ifndef DISCPP_GUILD_H
 #define DISCPP_GUILD_H
 
+#define RAPIDJSON_HAS_STDSTRING 1
+
 #include "discord_object.h"
 #include "emoji.h"
 #include "member.h"
@@ -44,7 +46,7 @@ namespace discpp {
 	    };
 
 		GuildInvite() = default;
-		GuildInvite(nlohmann::json json) {
+		GuildInvite(rapidjson::Document& json) {
             /**
              * @brief Constructs a discpp::GuildInvite object from json.
              *
@@ -56,14 +58,39 @@ namespace discpp {
              *
              * @return discpp::GuildInvite, this is a constructor.
              */
-            code = json["code"];
-            guild_id = (json.contains("guild")) ? json["guild"]["id"].get<snowflake>() : "";
-            channel = discpp::GuildChannel(json["channel"]);
-            inviter = (json.contains("inviter")) ? discpp::User(json["inviter"]) : discpp::User();
-            target_user = (json.contains("target_user")) ? discpp::User(json["target_user"]) : discpp::User();
-            target_user_type = static_cast<TargetUserType>(GetDataSafely<int>(json, "target_user_type"));
-            approximate_presence_count = GetDataSafely<int>(json, "approximate_presence_count");
-            approximate_member_count = GetDataSafely<int>(json, "approximate_member_count");
+
+            code = json["code"].GetString();
+            rapidjson::Value::ConstMemberIterator itr = json.FindMember("guild");
+            if (itr != json.MemberEnd()) {
+                guild_id = static_cast<snowflake>(json["guild"]["id"].GetString());
+            }
+            else {
+                guild_id = "";
+            }
+            itr = json.FindMember("channel");
+            if (itr != json.MemberEnd()) {
+                rapidjson::Document channel_json;
+                channel_json.CopyFrom(json["channel"], channel_json.GetAllocator());
+                channel = discpp::GuildChannel(channel_json);
+            }
+            itr = json.FindMember("inviter");
+            if (itr != json.MemberEnd()) {
+                rapidjson::Document inviter_json;
+                inviter_json.CopyFrom(json["inviter"], inviter_json.GetAllocator());
+                inviter = discpp::User(inviter_json);
+            }
+            else {
+                inviter = discpp::User();
+            }
+            itr = json.FindMember("target_user");
+            if (itr != json.MemberEnd()) {
+                rapidjson::Document target_json;
+                target_json.CopyFrom(json["target_user"], target_json.GetAllocator());
+                target_user = discpp::User(target_json);
+            }
+            target_user_type = static_cast<TargetUserType>(json["target_user_type"].GetInt());
+            approximate_presence_count = json["approximate_presence_count"].GetInt();
+            approximate_member_count = json["approximate_member_count"].GetInt();
         }
         std::string code; /**< The invite code (unique ID). */
         snowflake guild_id; /**< GThe guild this invite is for. */
@@ -75,72 +102,73 @@ namespace discpp {
         int approximate_member_count; /**< Approximate count of total members. */
 	};
 
-	class GuildIntegrationAccount : public DiscordObject {
+	class IntegrationAccount : public DiscordObject {
 	public:
-        GuildIntegrationAccount() = default;
-        GuildIntegrationAccount(nlohmann::json json) {
+        IntegrationAccount() = default;
+        IntegrationAccount(rapidjson::Document& json) {
             /**
-             * @brief Constructs a discpp::GuildIntegrationAccount object from json.
+             * @brief Constructs a discpp::IntegrationAccount object from json.
              *
              * ```cpp
-             *      discpp::GuildIntegrationAccount guild_integration_account(json);
+             *      discpp::IntegrationAccount integration_account(json);
              * ```
              *
              * @param[in] json The json data for the integration account.
              *
-             * @return discpp::GuildIntegrationAccount, this is a constructor.
+             * @return discpp::IntegrationAccount, this is a constructor.
              */
-			id = json["id"];
-			name = json["name"];
+			id = json["id"].GetString();
+			name = json["name"].GetString();
 		}
 
         std::string name; /**< Name of the account. */
     };
 
-	class GuildIntegration : public DiscordObject {
+	class Integration : public DiscordObject {
 	public:
 	    enum class IntegrationExpireBehavior : int {
 	        REMOVE_ROLE = 0,
 	        KICK = 1
 	    };
 
-		GuildIntegration() = default;
-        GuildIntegration(nlohmann::json json) {
+		Integration() = default;
+        Integration(rapidjson::Document& json) {
             /**
-             * @brief Constructs a discpp::GuildIntegration object from json.
+             * @brief Constructs a discpp::Integration object from json.
              *
              * ```cpp
-             *      discpp::GuildIntegration guild_integration(json);
+             *      discpp::Integration integration(json);
              * ```
              *
-             * @param[in] json The json data for the guild integration.
+             * @param[in] json The json data for the integration.
              *
-             * @return discpp::GuildIntegration, this is a constructor.
+             * @return discpp::dIntegration, this is a constructor.
              */
 
-            id = json["id"].get<snowflake>();
-            name = json["name"];
-            type = json["type"];
-            enabled = json["enabled"].get<bool>();
-            syncing = json["syncing"].get<bool>();
-            role = discpp::Role(json["role_id"].get<snowflake>());
-            expire_behavior = static_cast<IntegrationExpireBehavior>(json["expire_behavior"].get<int>());
-            expire_grace_period = json["expire_grace_period"].get<int>();
-            user = discpp::User(json["user"]);
-            account = discpp::GuildIntegrationAccount(json["account"]);
-            synced_at = json["synced_at"];
+            id = static_cast<snowflake>(json["id"].GetString());
+            name = json["name"].GetString();
+            type = json["type"].GetString();
+            enabled = json["enabled"].GetBool();
+            syncing = json["syncing"].GetBool();
+            role_id = json["role_id"].GetString();
+            enable_emoticons = GetDataSafely<bool>(json, "enable_emoticons");
+            expire_behavior = static_cast<IntegrationExpireBehavior>(json["expire_behavior"].GetInt());
+            expire_grace_period = json["expire_grace_period"].GetInt();
+            user = ConstructDiscppObjectFromJson(json, "user", discpp::User());
+            account = ConstructDiscppObjectFromJson(json, "account", discpp::IntegrationAccount());
+            synced_at = json["synced_at"].GetString();
         }
 
         std::string name; /**< Integration name. */
         std::string type; /**< Integration type (twitch, youtube, etc). */
         bool enabled; /**< Is this integration enabled? */
         bool syncing; /**< Is this integration syncing? */
-        discpp::Role role; /**< Role that this integration uses for "subscribers". */
+        discpp::snowflake role_id; /**< ID that this integration uses for "subscribers". */
         bool enable_emoticons; /**< Whether emoticons should be synced for this integration (twitch only currently). */
         IntegrationExpireBehavior expire_behavior; /**< The behavior of expiring subscribers. */
         int expire_grace_period; /**< The grace period (in days) before expiring subscribers. */
         discpp::User user; /**< User for this integration. */
-        discpp::GuildIntegrationAccount account; /**< Integration account information. */
+        discpp::IntegrationAccount account; /**< Integration account information. */
         // @TODO: Convert to iso8601Time
         std::string synced_at; /**< When this integration was last synced. */
 	};
@@ -148,7 +176,7 @@ namespace discpp {
 	class GuildEmbed : public DiscordObject {
 	public:
         GuildEmbed() = default;
-		GuildEmbed(nlohmann::json json) {
+		GuildEmbed(rapidjson::Document& json) {
             /**
              * @brief Constructs a discpp::GuildEmbed object from json.
              *
@@ -161,8 +189,9 @@ namespace discpp {
              * @return discpp::GuildEmbed, this is a constructor.
              */
 
-            enabled = json["enabled"].get<bool>();
-			channel_id = json["channel_id"].get<snowflake>();
+            enabled = json["enabled"].GetBool();
+			//channel_id = ContainsNotNull(json, "channel_id") ? json["channel_id"].GetString() : "";
+			channel_id = GetDataSafely<discpp::snowflake>(json, "channel_id");
 		}
 
         bool enabled; /**< Whether the embed is enabled. */
@@ -214,11 +243,11 @@ namespace discpp {
 	public:
 		Guild() = default;
 		Guild(snowflake id);
-		Guild(nlohmann::json json);
+		Guild(rapidjson::Document& json);
 
 		discpp::Guild Modify(GuildModifyRequests modify_requests);
 		void DeleteGuild();
-		std::vector<discpp::GuildChannel> GetChannels();
+		std::unordered_map<discpp::snowflake, discpp::GuildChannel> GetChannels();
         discpp::GuildChannel GetChannel(snowflake id);
 		discpp::GuildChannel CreateChannel(std::string name, std::string topic = "", ChannelType type = ChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discpp::Permissions> permission_overwrites = {}, discpp::Channel category = {}, bool nsfw = false);
 		void ModifyChannelPositions(std::vector<discpp::Channel>& new_channel_positions);
@@ -227,7 +256,7 @@ namespace discpp {
 		discpp::Member AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discpp::Role>& roles, bool mute, bool deaf);
 		void RemoveMember(discpp::Member& member);
 		std::vector<discpp::GuildBan> GetBans();
-		std::optional<std::string> GetMemberBanReason(discpp::Member& member);
+		std::string GetMemberBanReason(discpp::Member& member);
 		void BanMember(discpp::Member& member, std::string reason = "");
 		void UnbanMember(discpp::Member& member);
 		void KickMember(discpp::Member& member);
@@ -239,11 +268,11 @@ namespace discpp {
 		int GetPruneAmount(int days);
 		void BeginPrune(int days);
 		std::vector<discpp::GuildInvite> GetInvites();
-		std::vector<discpp::GuildIntegration> GetIntegrations();
+		std::vector<discpp::Integration> GetIntegrations();
 		void CreateIntegration(snowflake id, std::string type);
-		void ModifyIntegration(discpp::GuildIntegration& guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons);
-		void DeleteIntegration(discpp::GuildIntegration& guild_integration);
-		void SyncIntegration(discpp::GuildIntegration& guild_integration);
+		void ModifyIntegration(discpp::Integration& guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons);
+		void DeleteIntegration(discpp::Integration& guild_integration);
+		void SyncIntegration(discpp::Integration& guild_integration);
 		GuildEmbed GetGuildEmbed();
 		GuildEmbed ModifyGuildEmbed(snowflake channel_id, bool enabled);
 		discpp::GuildInvite GetVanityURL();
@@ -298,13 +327,16 @@ namespace discpp {
 		discpp::specials::NitroTier premium_tier; /**< Premium tier (Server Boost level). */
 		int premium_subscription_count; /**< The number of boosts this server currently has. */
 		std::string preferred_locale; /**< The preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults to "en-US". */
+		discpp::GuildChannel public_updates_channel; /**< The channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */
+		int approximate_member_count; /**< Approximate number of members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
+		int approximate_presence_count; /**< Approximate number of online members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
 		std::string created_at; /**< The id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */
 	};
 
     class VoiceState {
     public:
         VoiceState() = default;
-        VoiceState(nlohmann::json json) {
+        VoiceState(rapidjson::Document& json) {
             /**
              * @brief Constructs a discpp::VoiceState object from json.
              *
@@ -316,17 +348,22 @@ namespace discpp {
              *
              * @return discpp::VoiceState, this is a constructor.
              */
-            guild_id = GetDataSafely<snowflake>(json, "guild_id");
-            channel_id = GetDataSafely<snowflake>(json, "channel_id");
-            user_id = json["user_id"].get<snowflake>();
-            member = (json.contains("member") && !json["member"].is_null()) ? discpp::Member(json["member"], discpp::Guild(guild_id)) : discpp::Member();
-            session_id = json["session_id"];
-            deaf = json["deaf"].get<bool>();
-            mute = json["mute"].get<bool>();
-            self_deaf = json["self_deaf"].get<bool>();
-            self_mute = json["self_mute"].get<bool>();
-            self_stream = GetDataSafely<bool>(json, "self_stream");
-            suppress = json["suppress"].get<bool>();
+            guild_id = static_cast<snowflake>(json["guild_id"].GetString());
+            channel_id = static_cast<snowflake>(json["channel_id"].GetString());
+            user_id = static_cast<snowflake>(json["user_id"].GetString());
+            rapidjson::Value::ConstMemberIterator itr = json.FindMember("member");
+            if (itr != json.MemberEnd() && !json["member"].IsNull()) {
+                rapidjson::Document member_json; 
+                member_json.CopyFrom(json["member"], member_json.GetAllocator());
+                member = discpp::Member(member_json, discpp::Guild(guild_id));
+            }
+            session_id = json["session_id"].GetString();
+            deaf = json["deaf"].GetBool();
+            mute = json["mute"].GetBool();
+            self_deaf = json["self_deaf"].GetBool();
+            self_mute = json["self_mute"].GetBool();
+            self_stream = json["self_stream"].GetBool();
+            suppress = json["suppress"].GetBool();
         }
 
         snowflake guild_id; /**< The guild id this voice state is for. */

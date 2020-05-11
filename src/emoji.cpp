@@ -17,7 +17,7 @@ namespace discpp {
 		 */
 	}
 
-	Emoji::Emoji(discpp::Guild guild, snowflake id) : id(id) {
+	Emoji::Emoji(discpp::Guild& guild, snowflake id) : id(id) {
 		/**
 		 * @brief Constructs a discpp::Emoji object using a guild object and id.
 		 *
@@ -39,7 +39,7 @@ namespace discpp {
 		}
 	}
 
-	Emoji::Emoji(nlohmann::json json) {
+	Emoji::Emoji(rapidjson::Document& json) {
 		/**
 		 * @brief Constructs a discpp::Emoji object by parsing json.
 		 *
@@ -52,19 +52,28 @@ namespace discpp {
 		 * @return discpp::Emoji, this is a constructor.
 		 */
 
-		id = GetDataSafely<snowflake>(json, "id");
-		name = GetDataSafely<std::string>(json, "name");
-		if (json.contains("roles")) {
-			for (nlohmann::json role : json["roles"]) {
-				roles.push_back(role);
+		id = json["id"].GetString();
+		name = json["name"].GetString();
+		rapidjson::Value::ConstMemberIterator itr = json.FindMember("roles");
+		
+		if (itr != json.MemberEnd()) {
+			for (auto& role : json["roles"].GetArray()) {
+				rapidjson::Document role_json;
+				role_json.CopyFrom(role, role_json.GetAllocator());
+				roles.push_back(discpp::Role(role_json));
 			}
 		}
-		if (json.contains("user")) {
-			user = discpp::User(json["user"]);
+
+		itr = json.FindMember("user");
+		if (itr != json.MemberEnd()) {
+			rapidjson::Document user_json;
+			user_json.CopyFrom(json["user"], user_json.GetAllocator());
+			user = discpp::User(user_json);
 		}
-		require_colons = GetDataSafely<bool>(json, "require_colons");
-		managed = GetDataSafely<bool>(json, "managed");
-		animated = GetDataSafely<bool>(json, "animated");
+
+		require_colons = json["require_colons"].GetBool();
+		managed = json["managed"].GetBool();
+		animated = json["animated"].GetBool();
 	}
 
 	Emoji::Emoji(std::wstring w_unicode) : unicode(w_unicode) {

@@ -1,13 +1,16 @@
 #ifndef DISCPP_CHANNEL_H
 #define DISCPP_CHANNEL_H
 
+#define RAPIDJSON_HAS_STDSTRING 1
+
 #include "discord_object.h"
 #include "permission.h"
 #include "embed_builder.h"
 
-#include <nlohmann/json.hpp>
-
 #include <variant>
+#include <vector>
+
+#include <rapidjson/document.h>
 
 namespace discpp {
 	class Message;
@@ -69,7 +72,7 @@ namespace discpp {
 	public:
 		Channel() = default;
 		Channel(snowflake id);
-		Channel(nlohmann::json json);
+		Channel(rapidjson::Document& json);
 
 		discpp::Message Send(std::string text, bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
 		discpp::Channel Modify(ModifyRequests& modify_requests);
@@ -90,7 +93,7 @@ namespace discpp {
 	class GuildChannel : public Channel {
 	public:
 		GuildChannel() = default;
-		GuildChannel(nlohmann::json json);
+		GuildChannel(rapidjson::Document& json);
 		GuildChannel(snowflake id, snowflake guild_id);
 
 		void BulkDeleteMessage(std::vector<snowflake>& messages);
@@ -114,7 +117,7 @@ namespace discpp {
 	class DMChannel : public Channel {
 	public: 
 		DMChannel() = default;
-		DMChannel(nlohmann::json json);
+		DMChannel(rapidjson::Document& json);
 		DMChannel(snowflake id);
 
 		void GroupDMAddRecipient(discpp::User& user);

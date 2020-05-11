@@ -13,7 +13,7 @@ namespace discpp {
 	public:
 		Role() = default;
 		Role(snowflake role_id, discpp::Guild& guild);
-		Role(nlohmann::json json);
+		Role(rapidjson::Document& json);
 
 		//snowflake id;  /**< Id of the current role */
 		std::string name; /**< Name of the current role */

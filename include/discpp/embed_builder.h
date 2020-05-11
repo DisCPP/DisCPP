@@ -1,9 +1,11 @@
 #ifndef DISCPP_EMBED_BUILDER_H
 #define DISCPP_EMBED_BUILDER_H
 
+#define RAPIDJSON_HAS_STDSTRING 1
+
 #include "discord_object.h"
 
-#include <nlohmann/json.hpp>
+#include <rapidjson/document.h>
 
 namespace discpp {
 	class Color;
@@ -12,7 +14,7 @@ namespace discpp {
 	public:
 		EmbedBuilder();
 		EmbedBuilder(std::string title, std::string description, Color color);
-		EmbedBuilder(nlohmann::json json);
+		EmbedBuilder(rapidjson::Document& json);
 
 		EmbedBuilder& SetTitle(std::string title);
 		EmbedBuilder& SetType(std::string type);
@@ -36,11 +38,9 @@ namespace discpp {
 		std::pair<std::string, std::string> GetFooter();
         std::pair<std::string, std::string> GetProvider();
 
-		nlohmann::json ToJson();
-		operator nlohmann::json();
-		
+        rapidjson::Document ToJson();
 	private:
-		nlohmann::json embed_json;
+        std::shared_ptr<rapidjson::Document> embed_json;
 	};
 }
 

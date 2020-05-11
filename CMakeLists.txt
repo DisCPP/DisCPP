@@ -6,7 +6,8 @@ project(discpp)
 option(BUILD_EXAMPLES "Build example bots" OFF)
 option(BUILD_TESTS "Build unit tests" OFF)
 
-find_package(nlohmann_json CONFIG REQUIRED)
+find_package(RapidJSON CONFIG REQUIRED)
+#find_package(nlohmann_json CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(cpr REQUIRED)
 
@@ -21,7 +22,8 @@ add_library(discpp STATIC ${source_list} ${events_source_list})
 
 target_include_directories(discpp PUBLIC include PRIVATE include/discpp)
 
-target_link_libraries(discpp PUBLIC nlohmann_json::nlohmann_json)
+target_include_directories(discpp PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
+#target_link_libraries(discpp PUBLIC nlohmann_json::nlohmann_json)
 target_link_libraries(discpp PUBLIC OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(discpp PUBLIC cpr)
 
