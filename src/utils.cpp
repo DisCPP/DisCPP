@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "client.h"
+#include <ixwebsocket/IXHttpClient.h>
 
 std::string discpp::GetOsName() {
 	/**
@@ -30,31 +31,31 @@ std::string discpp::GetOsName() {
 }
 
 // @TODO: Test if the json document type returned is what its supposed to be, like an array or object.
-rapidjson::Document discpp::HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket) {
-	/**
-	 * @brief Handles a response from the discpp servers.
-	 *
-	 * ```cpp
-	 *      nlohmann::json response = discpp::HandleResponse(cpr_response, object, discpp::RateLimitBucketType::CHANNEL);
-	 * ```
-	 *
-	 * @param[in] reponse The cpr response from the servers.
-	 * @param[in] object The object id to handle the ratelimits for.
-	 * @param[in] ratelimit_bucket The rate limit bucket.
-	 *
-	 * @return nlohmann::json
-	 */
-	globals::client_instance->logger->Debug("Received requested payload: " + response.text);
+rapidjson::Document discpp::HandleResponse(ix::HttpResponsePtr response, snowflake object, RateLimitBucketType ratelimit_bucket) {
+    /**
+     * @brief Handles a response from the discpp servers.
+     *
+     * ```cpp
+     *      nlohmann::json response = discpp::HandleResponse(cpr_response, object, discpp::RateLimitBucketType::CHANNEL);
+     * ```
+     *
+     * @param[in] reponse The cpr response from the servers.
+     * @param[in] object The object id to handle the ratelimits for.
+     * @param[in] ratelimit_bucket The rate limit bucket.
+     *
+     * @return nlohmann::json
+     */
+    globals::client_instance->logger->Debug("Received requested payload: " + response->payload);
 
     rapidjson::Document tmp;
-    if (!response.text.empty() && response.text[0] == '[' && response.text[response.text.size() - 1] == ']') {
+    if (!response->payload.empty() && response->payload[0] == '[' && response->payload[response->payload.size() - 1] == ']') {
         tmp.SetArray();
     } else {
         tmp.SetObject();
     }
 
-	HandleRateLimits(response.header, object, ratelimit_bucket);
-	tmp.Parse((!response.text.empty() ? response.text.c_str() : "{}"));
+    HandleRateLimits(response->headers, object, ratelimit_bucket);
+    tmp.Parse((!response->payload.empty() ? response->payload.c_str() : "{}"));
 
     // This shows an error in inteliisense for some reason but compiles fine.
 #ifndef __INTELLISENSE__
@@ -62,36 +63,34 @@ rapidjson::Document discpp::HandleResponse(cpr::Response response, snowflake obj
 #endif
 }
 
-std::string CprBodyToString(cpr::Body body) {
-	if (body.empty()) {
-		return "Empty";
-	}
-	
-	return body;
-}
+rapidjson::Document discpp::SendGetRequest(std::string url, ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket, std::string body) {
+    /**
+     * @brief Sends a get request to a url.
+     *
+     * ```cpp
+     *      nlohmann::json response = discpp::SendGetRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+     * ```
+     *
+     * @param[in] url The url to create a request to.
+     * @param[in] headers The http header.
+     * @param[in] object The object id to handle the ratelimits for.
+     * @param[in] ratelimit_bucket The rate limit bucket.
+     * @param[in] The cpr response body.
+     *
+     * @return nlohmann::json
+     */
 
-rapidjson::Document discpp::SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
-	/**
-	 * @brief Sends a get request to a url.
-	 *
-	 * ```cpp
-	 *      nlohmann::json response = discpp::SendGetRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
-	 * ```
-	 *
-	 * @param[in] url The url to create a request to.
-	 * @param[in] headers The http header.
-	 * @param[in] object The object id to handle the ratelimits for.
-	 * @param[in] ratelimit_bucket The rate limit bucket.
-	 * @param[in] The cpr response body.
-	 *
-	 * @return nlohmann::json
-	 */
+    globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + body);
+    WaitForRateLimits(object, ratelimit_bucket);
 
-	globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
-	WaitForRateLimits(object, ratelimit_bucket);
-	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
+    ix::HttpClient httpClient;
+    ix::HttpRequestArgsPtr args = httpClient.createRequest();
+    args->extraHeaders = headers;
+    args->body = body;
+    ix::HttpResponsePtr result;
+    result = httpClient.get(url, args);
 
-	rapidjson::Document doc = HandleResponse(result, object, ratelimit_bucket);
+    rapidjson::Document doc = HandleResponse(result, object, ratelimit_bucket);
 
     // This shows an error in inteliisense for some reason but compiles fine.
 #ifndef __INTELLISENSE__
@@ -99,30 +98,36 @@ rapidjson::Document discpp::SendGetRequest(std::string url, cpr::Header headers,
 #endif
 }
 
-rapidjson::Document discpp::SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
-	/**
-	 * @brief Sends a post request to a url.
-	 *
-	 * ```cpp
-	 *      nlohmann::json response = discpp::SendPostRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
-	 * ```
-	 *
-	 * @param[in] url The url to create a request to.
-	 * @param[in] headers The http header.
-	 * @param[in] object The object id to handle the ratelimits for.
-	 * @param[in] ratelimit_bucket The rate limit bucket.
-	 * @param[in] The cpr response body.
-	 *
-	 * @return nlohmann::json
-	 */
+rapidjson::Document discpp::SendPostRequest(std::string url, ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket, std::string body) {
+    /**
+     * @brief Sends a post request to a url.
+     *
+     * ```cpp
+     *      nlohmann::json response = discpp::SendPostRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+     * ```
+     *
+     * @param[in] url The url to create a request to.
+     * @param[in] headers The http header.
+     * @param[in] object The object id to handle the ratelimits for.
+     * @param[in] ratelimit_bucket The rate limit bucket.
+     * @param[in] The cpr response body.
+     *
+     * @return nlohmann::json
+     */
 
-	globals::client_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + CprBodyToString(body));
-	WaitForRateLimits(object, ratelimit_bucket);
-	cpr::Response result = cpr::Post(cpr::Url{ url }, headers, body);
-	return HandleResponse(result, object, ratelimit_bucket);
+    globals::client_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + body);
+    WaitForRateLimits(object, ratelimit_bucket);
+
+    ix::HttpClient httpClient;
+    ix::HttpRequestArgsPtr args = httpClient.createRequest();
+    args->extraHeaders = headers;
+    ix::HttpResponsePtr result;
+    result = httpClient.post(url, body, args);
+
+    return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendPutRequest(std::string url, ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket, std::string body) {
 	/**
 	 * @brief Sends a put request to a url.
 	 *
@@ -139,78 +144,100 @@ rapidjson::Document discpp::SendPutRequest(std::string url, cpr::Header headers,
 	 * @return nlohmann::json
 	 */
 
-	globals::client_instance->logger->Debug("Sending put request, URL: " + url + ", body: " + CprBodyToString(body));
+	globals::client_instance->logger->Debug("Sending put request, URL: " + url + ", body: " + body);
 	WaitForRateLimits(object, ratelimit_bucket);
-	cpr::Response result = cpr::Put(cpr::Url{ url }, headers, body);
+
+    ix::HttpClient httpClient;
+    ix::HttpRequestArgsPtr args = httpClient.createRequest();
+    args->extraHeaders = headers;
+    ix::HttpResponsePtr result;
+    result = httpClient.put(url, body, args);
+
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
-	/**
-	 * @brief Sends a patch request to a url.
-	 *
-	 * ```cpp
-	 *      nlohmann::json response = discpp::SendPatchRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
-	 * ```
-	 *
-	 * @param[in] url The url to create a request to.
-	 * @param[in] headers The http header.
-	 * @param[in] object The object id to handle the ratelimits for.
-	 * @param[in] ratelimit_bucket The rate limit bucket.
-	 * @param[in] The cpr response body.
-	 *
-	 * @return nlohmann::json
-	 */
+rapidjson::Document discpp::SendPatchRequest(std::string url, ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket, std::string body) {
+    /**
+     * @brief Sends a patch request to a url.
+     *
+     * ```cpp
+     *      nlohmann::json response = discpp::SendPatchRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+     * ```
+     *
+     * @param[in] url The url to create a request to.
+     * @param[in] headers The http header.
+     * @param[in] object The object id to handle the ratelimits for.
+     * @param[in] ratelimit_bucket The rate limit bucket.
+     * @param[in] The cpr response body.
+     *
+     * @return nlohmann::json
+     */
 
-	globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + CprBodyToString(body));
-	WaitForRateLimits(object, ratelimit_bucket);
-	cpr::Response result = cpr::Patch(cpr::Url{ url }, headers, body);
-	return HandleResponse(result, object, ratelimit_bucket);
+    globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + body);
+    WaitForRateLimits(object, ratelimit_bucket);
+
+    ix::HttpClient httpClient;
+    ix::HttpRequestArgsPtr args = httpClient.createRequest();
+    args->extraHeaders = headers;
+    ix::HttpResponsePtr result;
+    result = httpClient.request(url, "PATCH", body, args);
+
+    return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket) {
-	/**
-	 * @brief Sends a delete request to a url.
-	 *
-	 * ```cpp
-	 *      nlohmann::json response = discpp::SendDeleteRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL);
-	 * ```
-	 *
-	 * @param[in] url The url to create a request to.
-	 * @param[in] headers The http header.
-	 * @param[in] object The object id to handle the ratelimits for.
-	 * @param[in] ratelimit_bucket The rate limit bucket.
-	 *
-	 * @return nlohmann::json
-	 */
+rapidjson::Document discpp::SendDeleteRequest(std::string url, ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket) {
+    /**
+     * @brief Sends a delete request to a url.
+     *
+     * ```cpp
+     *      nlohmann::json response = discpp::SendDeleteRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL);
+     * ```
+     *
+     * @param[in] url The url to create a request to.
+     * @param[in] headers The http header.
+     * @param[in] object The object id to handle the ratelimits for.
+     * @param[in] ratelimit_bucket The rate limit bucket.
+     *
+     * @return nlohmann::json
+     */
 
-	globals::client_instance->logger->Debug("Sending delete request, URL: " + url);
-	WaitForRateLimits(object, ratelimit_bucket);
-	cpr::Response result = cpr::Delete(cpr::Url{ url }, headers);
-	return HandleResponse(result, object, ratelimit_bucket);
+    globals::client_instance->logger->Debug("Sending delete request, URL: " + url);
+    WaitForRateLimits(object, ratelimit_bucket);
+
+    ix::HttpClient httpClient;
+    ix::HttpRequestArgsPtr args = httpClient.createRequest();
+    args->extraHeaders = headers;
+    ix::HttpResponsePtr result;
+    result = httpClient.del(url, args);
+
+    return HandleResponse(result, object, ratelimit_bucket);
 }
 
-cpr::Header discpp::DefaultHeaders(cpr::Header add) {
-	/**
-	 * @brief Gets the default headers to communicate with the discpp servers.
-	 *
-	 * ```cpp
-	 *      cpr::Header default_headers = discpp::DefaultHeaders({});
-	 * ```
-	 *
-	 * @param[in] add The headers to add to the default ones.
-	 *
-	 * @return nlohmann::json
-	 */
+ix::WebSocketHttpHeaders discpp::DefaultHeaders(ix::WebSocketHttpHeaders add) {
+    /**
+     * @brief Gets the default headers to communicate with the discord servers.
+     *
+     * ```cpp
+     *      ix::WebSocketHttpHeaders default_headers = discpp::DefaultHeaders({});
+     * ```
+     *
+     * @param[in] add The headers to add to the default ones.
+     *
+     * @return nlohmann::json
+     */
 
-	cpr::Header headers = { { "Authorization", "Bot " + discpp::globals::client_instance->token },
-							{ "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" },
-							{ "X-RateLimit-Precision", "millisecond"} };
-	for (auto head : add) {
-		headers.insert(headers.end(), head);
-	}
+    ix::WebSocketHttpHeaders headers =
+            {
+                { "Authorization", "Bot " + discpp::globals::client_instance->token },
+                { "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" },
+                { "X-RateLimit-Precision", "millisecond"}
+            };
 
-	return headers;
+    for (auto head : add) {
+        headers.insert(headers.end(), head);
+    }
+
+    return headers;
 }
 
 bool discpp::StartsWith(std::string string, std::string prefix) {
@@ -493,43 +520,63 @@ bool HeaderContains(cpr::Header header, std::string key) {
 	return false;
 }
 
-void discpp::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBucketType ratelimit_bucket) {
-	/**
-	 * @brief Handle rate limites
-	 *
-	 * ```cpp
-	 *      discpp::HandleRateLimits(header, id, bucket);
-	 * ```
-	 *
-	 * @param[in] header The headers to get the wait rate limit from.
-	 * @param[in] object The object id.
-	 * @param[in] ratelimit_bucket The rate limit bucket.
-	 *
-	 * @return int
-	 */
+bool HeaderContains(ix::WebSocketHttpHeaders header, std::string key) {
+    /**
+     * @brief Check if a cpr::Header contains a specific key.
+     *
+     * ```cpp
+     *      bool contains = discpp::HeaderContains(headers, "auth");
+     * ```
+     *
+     * @param[in] header The headers to see if the key is contained in.
+     * @param[in] key The key to check if the headers contain.
+     *
+     * @return bool
+     */
 
-	RateLimit* obj = nullptr;
-	if (HeaderContains(header, "x-ratelimit-global")) {
-		obj = &global_ratelimit;
-	} else if (HeaderContains(header, "x-ratelimit-limit")) {
-		if (ratelimit_bucket == RateLimitBucketType::CHANNEL) {
-			obj = &channel_ratelimit[object];
-		} else if (ratelimit_bucket == RateLimitBucketType::GUILD) {
-			obj = &guild_ratelimit[object];
-		} else if (ratelimit_bucket == RateLimitBucketType::WEBHOOK) {
-			obj = &webhook_ratelimit[object];
-		} else if (ratelimit_bucket == RateLimitBucketType::GLOBAL) {
-			obj = &global_ratelimit;
-		} else {
-			throw std::runtime_error("RateLimitBucketType is invalid!");
-		}
-	} else {
-		return;
-	}
+    for (auto head : header) {
+        if (head.first == key) return true;
+    }
+    return false;
+}
 
-	obj->limit = std::stoi(header["x-ratelimit-limit"]);
-	obj->remaining_limit = std::stoi(header["x-ratelimit-remaining"]);
-	obj->ratelimit_reset = std::stod(header["x-ratelimit-reset"]);
+void discpp::HandleRateLimits(ix::WebSocketHttpHeaders header, snowflake object, RateLimitBucketType ratelimit_bucket) {
+    /**
+     * @brief Handle rate limites
+     *
+     * ```cpp
+     *      discpp::HandleRateLimits(header, id, bucket);
+     * ```
+     *
+     * @param[in] header The headers to get the wait rate limit from.
+     * @param[in] object The object id.
+     * @param[in] ratelimit_bucket The rate limit bucket.
+     *
+     * @return int
+     */
+
+    RateLimit* obj = nullptr;
+    if (HeaderContains(header, "x-ratelimit-global")) {
+        obj = &global_ratelimit;
+    } else if (HeaderContains(header, "x-ratelimit-limit")) {
+        if (ratelimit_bucket == RateLimitBucketType::CHANNEL) {
+            obj = &channel_ratelimit[object];
+        } else if (ratelimit_bucket == RateLimitBucketType::GUILD) {
+            obj = &guild_ratelimit[object];
+        } else if (ratelimit_bucket == RateLimitBucketType::WEBHOOK) {
+            obj = &webhook_ratelimit[object];
+        } else if (ratelimit_bucket == RateLimitBucketType::GLOBAL) {
+            obj = &global_ratelimit;
+        } else {
+            throw std::runtime_error("RateLimitBucketType is invalid!");
+        }
+    } else {
+        return;
+    }
+
+    obj->limit = std::stoi(header["x-ratelimit-limit"]);
+    obj->remaining_limit = std::stoi(header["x-ratelimit-remaining"]);
+    obj->ratelimit_reset = std::stod(header["x-ratelimit-reset"]);
 }
 
 time_t discpp::TimeFromSnowflake(snowflake snow) {

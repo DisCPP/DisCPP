@@ -1,6 +1,7 @@
 # CMakeLists.txt
 cmake_minimum_required (VERSION 3.6)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
+set(USE_MBED_TLS ON)
 project(discpp)
 
 option(BUILD_EXAMPLES "Build example bots" OFF)
@@ -33,6 +34,7 @@ endif()
 if (CURL_FOUND)
 	include_directories(${CURL_INCLUDE_DIR})
 	target_link_libraries(discpp PUBLIC ${CURL_LIBRARIES})
+	target_link_libraries(discpp PUBLIC CURL::libcurl)
 endif()
 
 target_link_libraries(discpp PUBLIC ${MBEDTLS_LIBRARY})
@@ -40,6 +42,7 @@ target_link_libraries(discpp PUBLIC ${MBEDTLS_LIBRARY})
 if (OPENSSL_FOUND)
 	include_directories(${OPENSSL_INCLUDE_DIR})
 	target_link_libraries(discpp PUBLIC ${OPENSSL_LIBRARIES})
+	target_link_libraries(discpp PUBLIC OpenSSL::Crypto)
 endif()
 
 target_link_libraries(discpp PUBLIC cpr)
@@ -55,6 +58,8 @@ endif()
 if (UNIX)
 	find_package(Threads)
 	target_link_libraries(discpp PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+	link_libraries(pthread)
+	link_libraries(dl)
 endif()
 
 target_link_libraries(discpp PUBLIC ${IXWEBSOCKET_LIBRARY})

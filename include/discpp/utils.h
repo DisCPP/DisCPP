@@ -11,6 +11,7 @@
 
 #include <unordered_map>
 #include <climits>
+#include <ixwebsocket/IXHttp.h>
 
 namespace discpp {
 	class Client;
@@ -145,17 +146,17 @@ namespace discpp {
 	inline RateLimit global_ratelimit;
 
 	inline int WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bucket);
-	inline void HandleRateLimits(cpr::Header header, snowflake object, RateLimitBucketType ratelimit_bucket);
+    inline void HandleRateLimits(ix::WebSocketHttpHeaders header, snowflake object, RateLimitBucketType ratelimit_bucket);
 	// End of rate limits
 
-	extern rapidjson::Document HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket);
-	extern rapidjson::Document SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern rapidjson::Document SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern rapidjson::Document SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern rapidjson::Document SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern rapidjson::Document SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket);
+    extern rapidjson::Document HandleResponse(ix::HttpResponsePtr response, snowflake object, RateLimitBucketType ratelimit_bucket);
+	extern rapidjson::Document SendGetRequest(std::string url, ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
+    extern rapidjson::Document SendPostRequest(std::string url, ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
+    extern rapidjson::Document SendPutRequest(std::string url, ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
+    extern rapidjson::Document SendPatchRequest(std::string url, ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
+    extern rapidjson::Document SendDeleteRequest(std::string url, ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket);
 
-	cpr::Header DefaultHeaders(cpr::Header add = {});
+	ix::WebSocketHttpHeaders DefaultHeaders(ix::WebSocketHttpHeaders add = {});
 	bool StartsWith(std::string string, std::string prefix);
 	std::vector<std::string> SplitString(std::string str, std::string delimter);
 	std::string CombineStringVector(std::vector<std::string> v, std::string delimiter = " ", int offset = 0);
