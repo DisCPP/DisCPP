@@ -9,17 +9,20 @@ option(BUILD_TESTS "Build unit tests" OFF)
 find_package(RapidJSON CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(cpr REQUIRED)
+find_package(CURL QUIET COMPONENTS libcurl CONFIG)
 find_package(ZLIB REQUIRED)
-find_package(Threads REQUIRED)
 find_package(MbedTLS REQUIRED)
 find_package(ixwebsocket REQUIRED)
+
+link_libraries(z)
+link_libraries(ssl)
+link_libraries(crypto)
 
 # Add source files
 file(GLOB_RECURSE source_list src/*.cpp)
 add_library(discpp STATIC ${source_list} ${events_source_list})
 
 target_include_directories(discpp PUBLIC include PRIVATE include/discpp)
-
 target_include_directories(discpp PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
 
 if (ZLIB_FOUND)
@@ -27,9 +30,18 @@ if (ZLIB_FOUND)
 	target_link_libraries(discpp PUBLIC ${ZLIB_LIBRARIES})
 endif()
 
-target_link_libraries(discpp PUBLIC Threads::Threads)
+if (CURL_FOUND)
+	include_directories(${CURL_INCLUDE_DIR})
+	target_link_libraries(discpp PUBLIC ${CURL_LIBRARIES})
+endif()
+
 target_link_libraries(discpp PUBLIC ${MBEDTLS_LIBRARY})
-target_link_libraries(discpp PUBLIC OpenSSL::SSL OpenSSL::Crypto)
+
+if (OPENSSL_FOUND)
+	include_directories(${OPENSSL_INCLUDE_DIR})
+	target_link_libraries(discpp PUBLIC ${OPENSSL_LIBRARIES})
+endif()
+
 target_link_libraries(discpp PUBLIC cpr)
 
 if (WIN32)
@@ -38,6 +50,11 @@ if (WIN32)
 	if (USE_TLS)
 		target_link_libraries(discpp PUBLIC Crypt32)
 	endif()
+endif()
+
+if (UNIX)
+	find_package(Threads)
+	target_link_libraries(discpp PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 target_link_libraries(discpp PUBLIC ${IXWEBSOCKET_LIBRARY})
