@@ -247,23 +247,23 @@ namespace discpp {
 
 		discpp::Guild Modify(GuildModifyRequests modify_requests);
 		void DeleteGuild();
-		std::unordered_map<discpp::snowflake, discpp::GuildChannel> GetChannels();
-        discpp::GuildChannel GetChannel(snowflake id);
-		discpp::GuildChannel CreateChannel(std::string name, std::string topic = "", ChannelType type = ChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discpp::Permissions> permission_overwrites = {}, discpp::Channel category = {}, bool nsfw = false);
+		std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::GuildChannel>> GetChannels();
+        std::shared_ptr<discpp::GuildChannel> GetChannel(snowflake id);
+        std::shared_ptr<discpp::GuildChannel> CreateChannel(std::string name, std::string topic = "", ChannelType type = ChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discpp::Permissions> permission_overwrites = {}, discpp::Channel category = {}, bool nsfw = false);
 		void ModifyChannelPositions(std::vector<discpp::Channel>& new_channel_positions);
-		discpp::Member GetMember(snowflake id);
+        std::shared_ptr<discpp::Member> GetMember(snowflake id);
 		void EnsureBotPermission(Permission req_perm);
-		discpp::Member AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discpp::Role>& roles, bool mute, bool deaf);
+        std::shared_ptr<discpp::Member> AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discpp::Role>& roles, bool mute, bool deaf);
 		void RemoveMember(discpp::Member& member);
 		std::vector<discpp::GuildBan> GetBans();
 		std::string GetMemberBanReason(discpp::Member& member);
 		void BanMember(discpp::Member& member, std::string reason = "");
 		void UnbanMember(discpp::Member& member);
 		void KickMember(discpp::Member& member);
-		discpp::Role GetRole(snowflake id);
-		discpp::Role CreateRole(std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
+        std::shared_ptr<discpp::Role> GetRole(snowflake id);
+        std::shared_ptr<discpp::Role> CreateRole(std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
 		void ModifyRolePositions(std::vector<discpp::Role>& new_role_positions);
-		discpp::Role ModifyRole(discpp::Role role, std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
+        std::shared_ptr<discpp::Role> ModifyRole(discpp::Role role, std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
 		void DeleteRole(discpp::Role& role);
 		int GetPruneAmount(int days);
 		void BeginPrune(int days);
@@ -278,13 +278,13 @@ namespace discpp {
 		discpp::GuildInvite GetVanityURL();
 		std::string GetWidgetImageURL(WidgetStyle widget_style = WidgetStyle::SHIELD);
 
-		std::unordered_map<snowflake, Emoji> GetEmojis();
-		discpp::Emoji GetEmoji(snowflake id);
-		discpp::Emoji CreateEmoji(std::string name, discpp::Image image, std::vector<discpp::Role>& roles);
-		discpp::Emoji ModifyEmoji(discpp::Emoji& emoji, std::string name, std::vector<discpp::Role>& roles);
+		std::unordered_map<snowflake, std::shared_ptr<discpp::Emoji>> GetEmojis();
+        std::shared_ptr<discpp::Emoji> GetEmoji(snowflake id);
+        std::shared_ptr<discpp::Emoji> CreateEmoji(std::string name, discpp::Image image, std::vector<discpp::Role>& roles);
+		std::shared_ptr<discpp::Emoji> ModifyEmoji(discpp::Emoji& emoji, std::string name, std::vector<discpp::Role>& roles);
 		void DeleteEmoji(discpp::Emoji& emoji);
 		std::string GetIconURL(discpp::ImageType imgType = discpp::ImageType::AUTO);
-		discpp::Member GetOwnerObject();
+        std::shared_ptr<discpp::Member> GetOwnerMember();
 
 		std::string name; /**< Guild name. */
 		std::string icon; /**< Hashed guild icon. */
@@ -301,8 +301,8 @@ namespace discpp {
 		discpp::specials::VerificationLevel verification_level; /**< Verification level required for the guild. */
 		discpp::specials::DefaultMessageNotificationLevel default_message_notifications; /**< Default message notifications level. */
 		discpp::specials::ExplicitContentFilterLevel explicit_content_filter; /**< Explicit content filter level. */
-		std::unordered_map<snowflake, Role> roles; /**< Roles in the guild. */
-		std::unordered_map<snowflake, Emoji> emojis; /**< Custom guild emojis. */
+		std::unordered_map<snowflake, std::shared_ptr<Role>> roles; /**< Roles in the guild. */
+		std::unordered_map<snowflake, std::shared_ptr<Emoji>> emojis; /**< Custom guild emojis. */
 		std::vector<std::string> features; /**< Enabled guild features. */
 		discpp::specials::MFALevel mfa_level; /**< Required MFA level for the guild. */
 		snowflake application_id; /**< Application id of the guild creator if it is bot-created. */
@@ -317,8 +317,8 @@ namespace discpp {
 		bool unavailable; /**< Whether this guild is unavailable. */
 		int member_count; /**< Total number of members in this guild. */
 		std::vector<discpp::VoiceState> voice_states; /**< Array of partial voice state objects. */
-		std::unordered_map<snowflake, Member> members; /**< Users in the guild. */
-		std::unordered_map<snowflake, GuildChannel> channels; /**< Channels in the guild. */
+		std::unordered_map<snowflake, std::shared_ptr<Member>> members; /**< Users in the guild. */
+		std::unordered_map<snowflake, std::shared_ptr<GuildChannel>> channels; /**< Channels in the guild. */
 		int max_presences; /**< The maximum amount of presences for the guild (the default value, currently 25000, is in effect when null is returned). */
 		int max_members; /**< The maximum amount of members for the guild. */
 		std::string vanity_url_code; /**< The vanity url code for the guild. */
@@ -327,7 +327,7 @@ namespace discpp {
 		discpp::specials::NitroTier premium_tier; /**< Premium tier (Server Boost level). */
 		int premium_subscription_count; /**< The number of boosts this server currently has. */
 		std::string preferred_locale; /**< The preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults to "en-US". */
-		discpp::GuildChannel public_updates_channel; /**< The channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */
+        std::shared_ptr<discpp::GuildChannel> public_updates_channel; /**< The channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */
 		int approximate_member_count; /**< Approximate number of members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
 		int approximate_presence_count; /**< Approximate number of online members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
 		std::string created_at; /**< The id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */

@@ -3,7 +3,7 @@
 #include <climits>
 
 namespace discpp {
-	Member::Member(snowflake id, discpp::Guild guild) : discpp::DiscordObject(id) {
+	Member::Member(snowflake id, discpp::Guild& guild) : discpp::DiscordObject(id) {
 		/**
 		 * @brief Constructs a discpp::Member object using its id and the guild that it is in.
 		 *
@@ -19,17 +19,10 @@ namespace discpp {
 		 * @return discpp::Member, this is a constructor.
 		 */
 
-		*this = guild.GetMember(id);
-
-		/*auto it = std::find_if(discpp::globals::bot_instance->members.begin(), discpp::globals::bot_instance->members.end(),
-		        [](std::unordered_map<snowflake, Member>::) {});
-
-		if (it != discpp::globals::bot_instance->members.end()) {
-			*this = it->second;
-		}*/
+		*this = *guild.GetMember(id);
 	}
 
-	Member::Member(rapidjson::Document& json, discpp::Guild guild) : guild_id(guild.id) {
+	Member::Member(rapidjson::Document& json, discpp::Guild& guild) : guild_id(guild.id) {
 		/**
 		 * @brief Constructs a discpp::Member object by parsing json and stores the guild_id.
 		 *
@@ -52,21 +45,23 @@ namespace discpp {
 			for (auto& role : json["roles"].GetArray()) {
 				rapidjson::Document role_json;
 				role_json.CopyFrom(role, role_json.GetAllocator());
-				discpp::Role r(static_cast<snowflake>(role_json.GetString()), guild);
-				if (r.position > highest_hiearchy) {
-					highest_hiearchy = r.position;
+
+				std::shared_ptr<discpp::Role> r = guild.GetRole(role_json.GetString());
+
+				if (r->position > highest_hiearchy) {
+					highest_hiearchy = r->position;
 				}
 
 				// Save permissions
 				if (json["roles"][0] == role) {
-					permissions.allow_perms.value = r.permissions.allow_perms.value;
-					permissions.deny_perms.value = r.permissions.deny_perms.value;
+					permissions.allow_perms.value = r->permissions.allow_perms.value;
+					permissions.deny_perms.value = r->permissions.deny_perms.value;
 				} else {
-					permissions.allow_perms.value |= r.permissions.allow_perms.value;
-					permissions.deny_perms.value |= r.permissions.deny_perms.value;
+					permissions.allow_perms.value |= r->permissions.allow_perms.value;
+					permissions.deny_perms.value |= r->permissions.deny_perms.value;
 				}
 
-				roles.push_back(r);
+				roles.insert({ r->id, r });
 			}
 		}
 
@@ -188,7 +183,7 @@ namespace discpp {
 		 * @return bool
 		 */
 
-		return count_if(roles.begin(), roles.end(), [role](discpp::Role r) { return role.id == r.id; }) != 0;
+		return count_if(roles.begin(), roles.end(), [role](std::pair<discpp::snowflake, std::shared_ptr<discpp::Role>> pair) { return role.id == pair.second->id; }) != 0;
 	}
 
 	bool Member::HasPermission(discpp::Permission perm) {

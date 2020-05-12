@@ -33,9 +33,9 @@ namespace discpp {
 		 * @return discpp::Emoji, this is a constructor.
 		 */
 
-		std::unordered_map<snowflake, Emoji>::iterator it = guild.emojis.find(id);
+		auto it = guild.emojis.find(id);
 		if (it != guild.emojis.end()) {
-			*this = it->second;
+			*this = *it->second;
 		}
 	}
 

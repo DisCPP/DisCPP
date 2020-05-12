@@ -15,9 +15,9 @@ namespace discpp {
 		 *
 		 * @return discpp::Channel, this is a constructor.
 		 */
-		std::unordered_map<snowflake, Channel>::iterator it = discpp::globals::client_instance->channels.find(id);
+		auto it = discpp::globals::client_instance->channels.find(id);
 		if (it != discpp::globals::client_instance->channels.end()) {
-			*this = it->second;
+			*this = *it->second;
 		}
 	}
 
@@ -92,8 +92,8 @@ namespace discpp {
 
 		cpr::Body body;
 		if (embed != nullptr) {
-		    rapidjson::Document json = embed->ToJson();
-			body = cpr::Body("{\"embed\": " + DumpJson(json) + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
+		    rapidjson::Document embed_json = embed->ToJson();
+			body = cpr::Body("{\"embed\": " + DumpJson(embed_json) + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
 		} else if (!files.empty()) {
 			cpr::Multipart multipart_data{};
 
@@ -325,9 +325,10 @@ namespace discpp {
 		 */
 
 		discpp::Guild guild(guild_id);
-		std::unordered_map<snowflake, GuildChannel>::iterator channels = guild.channels.find(id);
+
+		auto channels = guild.channels.find(id);
 		if (channels != guild.channels.end()) {
-			*this = channels->second;
+			*this = *channels->second;
 		}
 	}
 

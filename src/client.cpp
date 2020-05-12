@@ -68,25 +68,26 @@ namespace discpp {
         return 0;
     }
 
-    discpp::Guild Client::GetGuild(snowflake guild_id) {
+    std::shared_ptr<discpp::Guild> Client::GetGuild(snowflake guild_id) {
         /**
          * @brief Gets a discpp::Guild from a guild id.
          *
          * This will throw a runtime exception if the guild is not found.
          *
          * ```cpp
-         *      discpp::Guild guild = bot.GetGuild(583251190591258624);
+         *      std::shared_ptr<discpp::Guild> guild = bot.GetGuild(583251190591258624);
          * ```
          *
          * @param[in] guild_id The guild id of the guild you want to get.
          *
-         * @return discpp::Guild
+         * @return std::shared_ptr<discpp::Guild>
          */
 
-        std::unordered_map<snowflake, Guild>::iterator it = discpp::globals::client_instance->guilds.find(guild_id);
+        auto it = discpp::globals::client_instance->guilds.find(guild_id);
         if (it != discpp::globals::client_instance->guilds.end()) {
             return it->second;
         }
+
         throw new InvalidGuildException();
     }
 
