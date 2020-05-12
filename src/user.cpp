@@ -147,10 +147,10 @@ namespace discpp {
 
 		std::string idString = this->id.c_str();
 		if (this->avatar == "") {
-			return cpr::Url("https://cdn.discppapp.com/embed/avatars/" + std::to_string(std::stoi(this->discriminator) % 5) + ".png");
+			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(std::stoi(this->discriminator) % 5) + ".png");
 		}
 		else {
-			std::string url = "https://cdn.discppapp.com/avatars/" + idString + "/" + this->avatar;
+			std::string url = "https://cdn.discordapp.com/avatars/" + idString + "/" + this->avatar;
 			if (imgType == ImageType::AUTO) imgType = StartsWith(this->avatar, "a_") ? ImageType::GIF : ImageType::PNG;
 			switch (imgType) {
 			case ImageType::GIF:
