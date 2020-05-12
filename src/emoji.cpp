@@ -52,28 +52,23 @@ namespace discpp {
 		 * @return discpp::Emoji, this is a constructor.
 		 */
 
-		id = json["id"].GetString();
-		name = json["name"].GetString();
-		rapidjson::Value::ConstMemberIterator itr = json.FindMember("roles");
-		
-		if (itr != json.MemberEnd()) {
+		id = GetDataSafely<std::string>(json, "id");
+		name = GetDataSafely<std::string>(json, "name");
+		if (ContainsNotNull(json, "roles")) {
 			for (auto& role : json["roles"].GetArray()) {
 				rapidjson::Document role_json;
 				role_json.CopyFrom(role, role_json.GetAllocator());
 				roles.push_back(discpp::Role(role_json));
 			}
 		}
-
-		itr = json.FindMember("user");
-		if (itr != json.MemberEnd()) {
+		if (ContainsNotNull(json, "user")) {
 			rapidjson::Document user_json;
 			user_json.CopyFrom(json["user"], user_json.GetAllocator());
 			user = discpp::User(user_json);
 		}
-
-		require_colons = json["require_colons"].GetBool();
-		managed = json["managed"].GetBool();
-		animated = json["animated"].GetBool();
+		require_colons = GetDataSafely<bool>(json, "require_colons");
+        managed = GetDataSafely<bool>(json, "managed");
+        animated = GetDataSafely<bool>(json, "animated");
 	}
 
 	Emoji::Emoji(std::wstring w_unicode) : unicode(w_unicode) {
