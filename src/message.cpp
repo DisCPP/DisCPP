@@ -298,7 +298,7 @@ namespace discpp {
 		 * @return discpp::Message
 		 */
 
-		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id);
+		std::string endpoint = Endpoint("/channels/" + channel->id + "/messages/" + id);
 		rapidjson::Document json = embed.ToJson();
 		cpr::Body body("{\"embed\": " + DumpJson(json) + "}");
 		rapidjson::Document result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
