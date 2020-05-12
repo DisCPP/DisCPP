@@ -355,7 +355,9 @@ namespace discpp {
             if (itr != json.MemberEnd() && !json["member"].IsNull()) {
                 rapidjson::Document member_json; 
                 member_json.CopyFrom(json["member"], member_json.GetAllocator());
-                member = discpp::Member(member_json, discpp::Guild(guild_id));
+
+                discpp::Guild guild(guild_id);
+                member = discpp::Member(member_json, guild);
             }
             session_id = json["session_id"].GetString();
             deaf = json["deaf"].GetBool();
