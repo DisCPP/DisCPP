@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include "bot.h"
+#include "client.h"
 #include "guild.h"
 #include "channel.h"
 #include "user.h"
@@ -17,16 +17,16 @@ namespace discpp {
 	private:
 
 	public:
-		discpp::Bot* bot;
-		discpp::Guild guild;
-		discpp::Channel channel;
-		discpp::User user;
-		discpp::Member author;
+		discpp::Client* client;
+		std::shared_ptr<discpp::Guild> guild;
+		std::shared_ptr<discpp::Channel> channel;
+        std::shared_ptr<discpp::User> user;
+        std::shared_ptr<discpp::Member> author;
 		discpp::Message message;
 		std::string remainder;
 		std::vector<std::string> arguments;
 
-		Context(discpp::Bot* bot, discpp::Channel channel, discpp::Member author, discpp::Message message, std::string remainder, std::vector<std::string> arguments);
+		Context(discpp::Client* client, std::shared_ptr<discpp::Channel> channel, std::shared_ptr<discpp::Member> author, discpp::Message message, std::string remainder, std::vector<std::string> arguments);
 
 		discpp::Message Send(std::string text, bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
 	};

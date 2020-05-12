@@ -1,6 +1,8 @@
 #ifndef DISCPP_BOT_H
 #define DISCPP_BOT_H
 
+#define RAPIDJSON_HAS_STDSTRING 1
+
 #include <string>
 #include <future>
 #include <string_view>
@@ -9,6 +11,10 @@
 
 #include <nlohmann/json.hpp>
 
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
+
 #include <ixwebsocket/IXWebSocket.h>
 
 #include "channel.h"
@@ -16,28 +22,43 @@
 #include "member.h"
 #include "guild.h"
 #include "log.h"
-#include "bot_config.h"
 
 namespace discpp {
 	class Role;
 	class User;
 	class Activity;
-	class BotConfig;
+	class ClientConfig;
 
-	class Bot {
+	class InvalidGuildException : public std::runtime_error {
+	public: 
+		InvalidGuildException() : std::runtime_error("Guild not found") {}
+	};
+
+	class StartLimitException : public std::runtime_error {
 	public:
-		std::string token; /**< Token for the current bot */
-		BotConfig config; /**< Configuration for the current bot */
+		StartLimitException() : std::runtime_error("Maximum start limit reached") {}
+	};
 
-		discpp::User bot_user; /**< discpp::User object representing current bot */
-		discpp::Logger* logger; /**< discpp::Logger object representing current logger */
+	class AuthenticationException : public std::runtime_error {
+	public:
+        AuthenticationException() : std::runtime_error("Invalid token, failed to connect to gateway") {}
+	};
 
-		std::unordered_map<snowflake, Channel> channels; /**< List of channels the current bot can access */
-		std::unordered_map<snowflake, Member> members; /**< List of members the current bot can access */
-		std::unordered_map<snowflake, Guild> guilds; /**< List of guilds the current bot can access */ 
-		std::unordered_map<snowflake, Message> messages; /**< List of messages the current bot can access */
+	class Client {
+	public:
+		std::string token; /**< Token for the current client. */
+		ClientConfig* config; /**< Configuration for the current bot. */
 
-		std::vector<std::future<void>> futures; /**< List of events */
+		discpp::User client_user; /**< discpp::User object representing current user. */
+		discpp::Logger* logger; /**< discpp::Logger object representing current logger. */
+
+		std::unordered_map<snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
+		std::unordered_map<snowflake, std::shared_ptr<Member>> members; /**< List of members the current bot can access. */
+		std::unordered_map<snowflake, std::shared_ptr<Guild>> guilds; /**< List of guilds the current bot can access. */
+		std::unordered_map<snowflake, std::shared_ptr<Message>> messages; /**< List of messages the current bot can access. */
+        std::unordered_map<discpp::snowflake, discpp::DMChannel> private_channels; /**< List of dm channels the current client can access. */
+
+		std::vector<std::future<void>> futures; /**< List of events. */
 
 		enum packet_opcode : int {
 			dispatch = 0,				// Receive
@@ -53,18 +74,18 @@ namespace discpp {
 			heartbeat_ack = 11			// Receive
 		};
 
-		Bot(std::string token, BotConfig config);
+		Client(std::string token, ClientConfig* config);
 		int Run();
-		void CreateWebsocketRequest(nlohmann::json json, std::string message = "");
-		void SetCommandHandler(std::function<void(discpp::Bot*, discpp::Message)> command_handler);
+		void CreateWebsocketRequest(rapidjson::Document& json, std::string message = "");
+		void SetCommandHandler(std::function<void(discpp::Client*, discpp::Message)> command_handler);
 		void DisconnectWebsocket();
 		void ReconnectToWebsocket();
 
 		// Discord based methods.
-        discpp::Guild GetGuild(snowflake guild_id);
+        std::shared_ptr<discpp::Guild> GetGuild(snowflake guild_id);
         discpp::User ModifyCurrentUser(std::string username, discpp::Image avatar);
-        void LeaveGuild(discpp::Guild guild);
-        void UpdatePresence(discpp::Activity activity);
+        void LeaveGuild(discpp::Guild& guild);
+        void UpdatePresence(discpp::Activity& activity);
 		discpp::User GetUser(discpp::snowflake id);
         std::vector<discpp::Connection> GetBotUserConnections();
         // std::vector<discpp::Channel> GetUserDMs(); // Not supported by bots.
@@ -96,12 +117,11 @@ namespace discpp {
 		std::string session_id;
 		std::string gateway_endpoint;
 
-		nlohmann::json hello_packet;
+		rapidjson::Document hello_packet;
 
 		std::thread heartbeat_thread;
 
 		std::mutex websocket_client_mutex;
-		//websocket_callback_client websocket_client;
 
 		ix::WebSocket websocket;
 
@@ -109,19 +129,19 @@ namespace discpp {
 		int last_sequence_number;
 		long long packet_counter;
 
-		int message_cache_count = config.messageCacheSize;
+		int message_cache_count;
 
 		// Websocket Methods
 		void WebSocketStart();
 		void OnWebSocketListen(const ix::WebSocketMessagePtr& msg);
-		void OnWebSocketPacket(const nlohmann::json& result);
+		void OnWebSocketPacket(rapidjson::Document& result);
 		void HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg);
 		void HandleHeartbeat();
-		nlohmann::json GetIdentifyPacket();
+		rapidjson::Document GetIdentifyPacket();
 
 		// Commands
-		std::function<void(discpp::Bot*, discpp::Message)> fire_command_method;
-	};
+		std::function<void(discpp::Client*, discpp::Message)> fire_command_method;
+    };
 }
 
 #endif

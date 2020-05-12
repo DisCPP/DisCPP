@@ -1,19 +1,23 @@
 #ifndef DISCPP_UTILS_H
 #define DISCPP_UTILS_H
 
+#define RAPIDJSON_HAS_STDSTRING 1
+
 #include "discord_object.h"
 
-#include <nlohmann/json.hpp>
+#include <rapidjson/document.h>
 
 #include <cpr/cpr.h>
 
 #include <unordered_map>
+#include <climits>
 
 namespace discpp {
-	class Bot;
+	class Client;
+	class Role;
 
 	namespace globals {
-		inline discpp::Bot* bot_instance;
+		inline discpp::Client* client_instance;
 	}
 
 	namespace specials {
@@ -70,20 +74,56 @@ namespace discpp {
 		return nullptr;
 	}
 
-	template<typename T>
-	inline T GetDataSafely(nlohmann::json json, std::string value_name) {
-		return (json.contains(value_name) && json[value_name] != nullptr) ? json[value_name].get<T>() : T();
+    template<typename T>
+    inline T GetDataSafely(rapidjson::Document & json, const char* value_name) {
+        rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
+        if (itr != json.MemberEnd()) {
+            if (!json[value_name].IsNull()) {
+                rapidjson::Document t_doc;
+                t_doc.CopyFrom(json[value_name], t_doc.GetAllocator());
+
+                return t_doc.Get<T>();
+            }
+        }
+
+        return T();
+    }
+
+    template<class T>
+    inline T ConstructDiscppObjectFromID(rapidjson::Document& doc, const char* value_name, T default_val) {
+        rapidjson::Value::ConstMemberIterator itr = doc.FindMember(value_name);
+        if (itr != doc.MemberEnd()) {
+            if (!doc[value_name].IsNull()) {
+                rapidjson::Document t_doc;
+                t_doc.CopyFrom(doc[value_name], t_doc.GetAllocator());
+
+                return T(t_doc.GetString());
+            }
+        }
+
+        return default_val;
+    }
+
+	template<class T>
+	inline T ConstructDiscppObjectFromJson(rapidjson::Document& doc, const char* value_name, T default_val) {
+        rapidjson::Value::ConstMemberIterator itr = doc.FindMember(value_name);
+        if (itr != doc.MemberEnd()) {
+            if (!doc[value_name].IsNull()) {
+                rapidjson::Document t_doc;
+                t_doc.CopyFrom(doc[value_name], t_doc.GetAllocator());
+
+                return T(t_doc);
+            }
+        }
+
+        return default_val;
 	}
 
-	template<typename type, typename func>
-	inline type GetIf(std::vector<type>& items, func const& predicate) {
-		auto item = std::find_if(items.begin(), items.end(), predicate);
-
-		if (item != items.end()) {
-			return *item;
-		}
-		return type();
-	}
+	void IterateThroughNotNullJson(rapidjson::Document& json, std::function<void(rapidjson::Document&)> func);
+    bool ContainsNotNull(rapidjson::Document& json, char * value_name);
+    std::string DumpJson(rapidjson::Document& json);
+    std::string DumpJson(rapidjson::Value& json);
+    rapidjson::Document GetDocumentInsideJson(rapidjson::Document &json, const char* value_name);
 
 	// Rate limits
 	struct RateLimit {
@@ -108,12 +148,13 @@ namespace discpp {
 	inline void HandleRateLimits(cpr::Header header, snowflake object, RateLimitBucketType ratelimit_bucket);
 	// End of rate limits
 
-	extern nlohmann::json HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket);
-	extern nlohmann::json SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern nlohmann::json SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern nlohmann::json SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern nlohmann::json SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern nlohmann::json SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket);
+	extern rapidjson::Document HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket);
+	extern rapidjson::Document SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
+	extern rapidjson::Document SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
+	extern rapidjson::Document SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
+	extern rapidjson::Document SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
+	extern rapidjson::Document SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket);
+
 	cpr::Header DefaultHeaders(cpr::Header add = {});
 	bool StartsWith(std::string string, std::string prefix);
 	std::vector<std::string> SplitString(std::string str, std::string delimter);

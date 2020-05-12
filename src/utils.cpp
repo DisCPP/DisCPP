@@ -1,5 +1,5 @@
 #include "utils.h"
-#include "bot.h"
+#include "client.h"
 
 std::string discpp::GetOsName() {
 	/**
@@ -29,7 +29,8 @@ std::string discpp::GetOsName() {
 	#endif
 }
 
-nlohmann::json discpp::HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket) {
+// @TODO: Test if the json document type returned is what its supposed to be, like an array or object.
+rapidjson::Document discpp::HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket) {
 	/**
 	 * @brief Handles a response from the discpp servers.
 	 *
@@ -43,10 +44,22 @@ nlohmann::json discpp::HandleResponse(cpr::Response response, snowflake object, 
 	 *
 	 * @return nlohmann::json
 	 */
+	globals::client_instance->logger->Debug("Received requested payload: " + response.text);
 
-	globals::bot_instance->logger->Debug("Received requested payload: " + response.text);
+    rapidjson::Document tmp;
+    if (!response.text.empty() && response.text[0] == '[' && response.text[response.text.size() - 1] == ']') {
+        tmp.SetArray();
+    } else {
+        tmp.SetObject();
+    }
+
 	HandleRateLimits(response.header, object, ratelimit_bucket);
-	return nlohmann::json::parse((!response.text.empty()) ? response.text : "{}");
+	tmp.Parse((!response.text.empty() ? response.text.c_str() : "{}"));
+
+    // This shows an error in inteliisense for some reason but compiles fine.
+#ifndef __INTELLISENSE__
+    return std::move(tmp);
+#endif
 }
 
 std::string CprBodyToString(cpr::Body body) {
@@ -57,7 +70,7 @@ std::string CprBodyToString(cpr::Body body) {
 	return body;
 }
 
-nlohmann::json discpp::SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
 	/**
 	 * @brief Sends a get request to a url.
 	 *
@@ -74,13 +87,19 @@ nlohmann::json discpp::SendGetRequest(std::string url, cpr::Header headers, snow
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
+	globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
-	return HandleResponse(result, object, ratelimit_bucket);
+
+	rapidjson::Document doc = HandleResponse(result, object, ratelimit_bucket);
+
+    // This shows an error in inteliisense for some reason but compiles fine.
+#ifndef __INTELLISENSE__
+    return std::move(doc);
+#endif
 }
 
-nlohmann::json discpp::SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
 	/**
 	 * @brief Sends a post request to a url.
 	 *
@@ -97,13 +116,13 @@ nlohmann::json discpp::SendPostRequest(std::string url, cpr::Header headers, sno
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + CprBodyToString(body));
+	globals::client_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Post(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-nlohmann::json discpp::SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
 	/**
 	 * @brief Sends a put request to a url.
 	 *
@@ -120,13 +139,13 @@ nlohmann::json discpp::SendPutRequest(std::string url, cpr::Header headers, snow
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger->Debug("Sending put request, URL: " + url + ", body: " + CprBodyToString(body));
+	globals::client_instance->logger->Debug("Sending put request, URL: " + url + ", body: " + CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Put(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-nlohmann::json discpp::SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
 	/**
 	 * @brief Sends a patch request to a url.
 	 *
@@ -143,13 +162,13 @@ nlohmann::json discpp::SendPatchRequest(std::string url, cpr::Header headers, sn
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + CprBodyToString(body));
+	globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + CprBodyToString(body));
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Patch(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-nlohmann::json discpp::SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket) {
+rapidjson::Document discpp::SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket) {
 	/**
 	 * @brief Sends a delete request to a url.
 	 *
@@ -165,7 +184,7 @@ nlohmann::json discpp::SendDeleteRequest(std::string url, cpr::Header headers, s
 	 * @return nlohmann::json
 	 */
 
-	globals::bot_instance->logger->Debug("Sending delete request, URL: " + url);
+	globals::client_instance->logger->Debug("Sending delete request, URL: " + url);
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Delete(cpr::Url{ url }, headers);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -184,7 +203,7 @@ cpr::Header discpp::DefaultHeaders(cpr::Header add) {
 	 * @return nlohmann::json
 	 */
 
-	cpr::Header headers = { { "Authorization", "Bot " + discpp::globals::bot_instance->token },
+	cpr::Header headers = { { "Authorization", "Bot " + discpp::globals::client_instance->token },
 							{ "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" },
 							{ "X-RateLimit-Precision", "millisecond"} };
 	for (auto head : add) {
@@ -437,7 +456,7 @@ int discpp::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bu
 			rlmt = &global_ratelimit;
 			break;
 		default:
-			globals::bot_instance->logger->Error(LogTextColor::RED + "RateLimitBucketType is invalid!");
+			globals::client_instance->logger->Error(LogTextColor::RED + "RateLimitBucketType is invalid!");
 			throw std::runtime_error("RateLimitBucketType is invalid!");
 			break;
 		}
@@ -447,7 +466,7 @@ int discpp::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bu
 		double milisecond_time = rlmt->ratelimit_reset * 1000 - time(NULL) * 1000;
 
 		if (milisecond_time > 0) {
-			globals::bot_instance->logger->Debug("Rate limit wait time: " + std::to_string(milisecond_time) + " miliseconds");
+			globals::client_instance->logger->Debug("Rate limit wait time: " + std::to_string(milisecond_time) + " miliseconds");
 			std::this_thread::sleep_for(std::chrono::milliseconds((int)milisecond_time));
 		}
 	}
@@ -529,4 +548,52 @@ std::string discpp::FormatTimeFromSnowflake(snowflake snow) {
 	strftime(buffer, sizeof(buffer), "%Y-%m-%d @ %H:%M:%S GMT", &now);
 
 	return buffer;
+}
+
+bool discpp::ContainsNotNull(rapidjson::Document &json, char *value_name) {
+    rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
+    if (itr != json.MemberEnd()) {
+        return !json[value_name].IsNull();
+    }
+
+    return false;
+}
+
+void discpp::IterateThroughNotNullJson(rapidjson::Document &json, std::function<void(rapidjson::Document&)> func) {
+    for (auto const& object : json.GetArray()) {
+        if (!object.IsNull()) {
+            rapidjson::Document object_json;
+            object_json.CopyFrom(object, object_json.GetAllocator());
+
+            func(object_json);
+        }
+    }
+}
+
+rapidjson::Document discpp::GetDocumentInsideJson(rapidjson::Document &json, const char* value_name) {
+    rapidjson::Document inside_json;
+    inside_json.CopyFrom(json[value_name], inside_json.GetAllocator());
+
+    // This shows an error in inteliisense for some reason but compiles fine.
+#ifndef __INTELLISENSE__
+    return std::move(inside_json);
+#endif
+}
+
+std::string discpp::DumpJson(rapidjson::Document &json) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    json.Accept(writer);
+	std::string tmp = buffer.GetString();
+
+    return tmp;
+}
+
+std::string discpp::DumpJson(rapidjson::Value &json) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    json.Accept(writer);
+    std::string tmp = buffer.GetString();
+
+    return tmp;
 }

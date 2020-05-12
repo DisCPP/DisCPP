@@ -1,61 +1,64 @@
 #ifndef DISCPP_EVENT_DISPATCHER_H
 #define DISCPP_EVENT_DISPATCHER_H
 
+#define RAPIDJSON_HAS_STDSTRING 1
+#include <rapidjson/document.h>
+
 #include "event.h"
 #include "utils.h"
-#include "bot.h"
+#include "client.h"
 #include <string>
 #include <future>
 #include <string_view>
 #include <optional>
 #include <vector>
-#include <nlohmann/json.hpp>
 
 namespace discpp {
 	class EventDispatcher {
 	private:
-        inline static std::unordered_map<std::string, std::function<void(nlohmann::json &)>> internal_event_map = {};
+	    inline static std::unordered_map<std::string, std::function<void(rapidjson::Document &)>> internal_event_map = {};
+        static std::unordered_map<int, rapidjson::Document> json_docs;
 
-        static void RunEvent(const std::function<void(const nlohmann::json &)>& func, nlohmann::json& json);
+        static void RunEvent(const std::function<void(rapidjson::Document &)>& func, rapidjson::Document& json);
 
-		void ReadyEvent(const nlohmann::json& result);
-		void ResumedEvent(const nlohmann::json& result);
-		void ReconnectEvent(const nlohmann::json& result);
-		void InvalidSessionEvent(const nlohmann::json& result);
-		void ChannelCreateEvent(const nlohmann::json& result);
-		void ChannelUpdateEvent(const nlohmann::json& result);
-		void ChannelDeleteEvent(const nlohmann::json& result);
-		void ChannelPinsUpdateEvent(const nlohmann::json& result);
-		void GuildCreateEvent(const nlohmann::json& result);
-		void GuildUpdateEvent(const nlohmann::json& result);
-		void GuildDeleteEvent(const nlohmann::json& result);
-		void GuildBanAddEvent(const nlohmann::json& result);
-		void GuildBanRemoveEvent(const nlohmann::json& result);
-		void GuildEmojisUpdateEvent(const nlohmann::json& result);
-		void GuildIntegrationsUpdateEvent(const nlohmann::json& result);
-		void GuildMemberAddEvent(const nlohmann::json& result);
-		void GuildMemberRemoveEvent(const nlohmann::json& result);
-		void GuildMemberUpdateEvent(const nlohmann::json& result);
-		void GuildMembersChunkEvent(const nlohmann::json& result);
-		void GuildRoleCreateEvent(const nlohmann::json& result);
-		void GuildRoleUpdateEvent(const nlohmann::json& result);
-		void GuildRoleDeleteEvent(const nlohmann::json& result);
-		void MessageCreateEvent(const nlohmann::json& result);
-		void MessageUpdateEvent(const nlohmann::json& result);
-		void MessageDeleteEvent(const nlohmann::json& result);
-		void MessageDeleteBulkEvent(const nlohmann::json& result);
-		void MessageReactionAddEvent(const nlohmann::json& result);
-		void MessageReactionRemoveEvent(const nlohmann::json& result);
-		void MessageReactionRemoveAllEvent(const nlohmann::json& result);
-		void PresenceUpdateEvent(const nlohmann::json& result);
-		void TypingStartEvent(const nlohmann::json& result);
-		void UserUpdateEvent(const nlohmann::json& result);
-		void VoiceStateUpdateEvent(const nlohmann::json& result);
-		void VoiceServerUpdateEvent(const nlohmann::json& result);
-		void WebhooksUpdateEvent(const nlohmann::json& result);
+		static void ReadyEvent(rapidjson::Document& result);
+        static void ResumedEvent(rapidjson::Document& result);
+        static void ReconnectEvent(rapidjson::Document& result);
+        static void InvalidSessionEvent(rapidjson::Document& result);
+        static void ChannelCreateEvent(rapidjson::Document& result);
+        static void ChannelUpdateEvent(rapidjson::Document& result);
+        static void ChannelDeleteEvent(rapidjson::Document& result);
+        static void ChannelPinsUpdateEvent(rapidjson::Document& result);
+        static void GuildCreateEvent(rapidjson::Document& result);
+        static void GuildUpdateEvent(rapidjson::Document& result);
+        static void GuildDeleteEvent(rapidjson::Document& result);
+        static void GuildBanAddEvent(rapidjson::Document& result);
+        static void GuildBanRemoveEvent(rapidjson::Document& result);
+        static void GuildEmojisUpdateEvent(rapidjson::Document& result);
+        static void GuildIntegrationsUpdateEvent(rapidjson::Document& result);
+        static void GuildMemberAddEvent(rapidjson::Document& result);
+        static void GuildMemberRemoveEvent(rapidjson::Document& result);
+        static void GuildMemberUpdateEvent(rapidjson::Document& result);
+        static void GuildMembersChunkEvent(rapidjson::Document& result);
+        static void GuildRoleCreateEvent(rapidjson::Document& result);
+        static void GuildRoleUpdateEvent(rapidjson::Document& result);
+        static void GuildRoleDeleteEvent(rapidjson::Document& result);
+        static void MessageCreateEvent(rapidjson::Document& result);
+        static void MessageUpdateEvent(rapidjson::Document& result);
+        static void MessageDeleteEvent(rapidjson::Document& result);
+        static void MessageDeleteBulkEvent(rapidjson::Document& result);
+        static void MessageReactionAddEvent(rapidjson::Document& result);
+        static void MessageReactionRemoveEvent(rapidjson::Document& result);
+        static void MessageReactionRemoveAllEvent(rapidjson::Document& result);
+        static void PresenceUpdateEvent(rapidjson::Document& result);
+        static void TypingStartEvent(rapidjson::Document& result);
+        static void UserUpdateEvent(rapidjson::Document& result);
+        static void VoiceStateUpdateEvent(rapidjson::Document& result);
+        static void VoiceServerUpdateEvent(rapidjson::Document& result);
+        static void WebhooksUpdateEvent(rapidjson::Document& result);
 	public:
-		void BindEvents();
-		static void HandleDiscordEvent(const nlohmann::json& j, std::string event_name);
+        static void BindEvents();
+		static void HandleDiscordEvent(rapidjson::Document& j, std::string event_name);
 	};
 }
 

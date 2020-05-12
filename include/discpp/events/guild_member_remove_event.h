@@ -10,10 +10,10 @@
 namespace discpp {
 	class GuildMemberRemoveEvent : public Event {
 	public:
-		inline GuildMemberRemoveEvent(discpp::Guild guild, discpp::Member member) : guild(guild), member(member) {}
+		inline GuildMemberRemoveEvent(std::shared_ptr<discpp::Guild> guild, std::shared_ptr<discpp::Member> member) : guild(guild), member(member) {}
 
-		discpp::Guild guild;
-		discpp::Member member;
+		std::shared_ptr<discpp::Guild> guild;
+		std::shared_ptr<discpp::Member> member;
 	};
 }
 

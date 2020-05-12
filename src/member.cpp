@@ -1,9 +1,9 @@
 #include "guild.h"
-#include "bot.h"
+#include "client.h"
 #include <climits>
 
 namespace discpp {
-	Member::Member(snowflake id, discpp::Guild guild) : discpp::DiscordObject(id) {
+	Member::Member(snowflake id, discpp::Guild& guild) : discpp::DiscordObject(id) {
 		/**
 		 * @brief Constructs a discpp::Member object using its id and the guild that it is in.
 		 *
@@ -19,17 +19,10 @@ namespace discpp {
 		 * @return discpp::Member, this is a constructor.
 		 */
 
-		*this = guild.GetMember(id);
-
-		/*auto it = std::find_if(discpp::globals::bot_instance->members.begin(), discpp::globals::bot_instance->members.end(),
-		        [](std::unordered_map<snowflake, Member>::) {});
-
-		if (it != discpp::globals::bot_instance->members.end()) {
-			*this = it->second;
-		}*/
+		*this = *guild.GetMember(id);
 	}
 
-	Member::Member(nlohmann::json json, discpp::Guild guild) : guild_id(guild.id) {
+	Member::Member(rapidjson::Document& json, discpp::Guild& guild) : guild_id(guild.id) {
 		/**
 		 * @brief Constructs a discpp::Member object by parsing json and stores the guild_id.
 		 *
@@ -43,33 +36,35 @@ namespace discpp {
 		 * @return discpp::Member, this is a constructor.
 		 */
 
-		if (json.contains("user")) {
-			user = discpp::User(json["user"]);
-			id = user.id;
-		} else {
-			user = discpp::User();
-		}
-        int highest_hiearchy = 0;
+		user = ConstructDiscppObjectFromJson(json, "user", discpp::User());
+		if (!user.id.empty()) id = user.id;
 		nick = GetDataSafely<std::string>(json, "nick");
-		if (json.contains("roles")) {
-			for (auto& role : json["roles"]) {
-				discpp::Role r(role.get<snowflake>(), guild);
-                if (r.position > highest_hiearchy) {
-                    highest_hiearchy = r.position;
-                }
+
+        int highest_hiearchy = 0;
+		if (ContainsNotNull(json, "roles")) {
+			for (auto& role : json["roles"].GetArray()) {
+				rapidjson::Document role_json;
+				role_json.CopyFrom(role, role_json.GetAllocator());
+
+				std::shared_ptr<discpp::Role> r = guild.GetRole(role_json.GetString());
+
+				if (r->position > highest_hiearchy) {
+					highest_hiearchy = r->position;
+				}
 
 				// Save permissions
 				if (json["roles"][0] == role) {
-					permissions.allow_perms.value = r.permissions.allow_perms.value;
-					permissions.deny_perms.value = r.permissions.deny_perms.value;
+					permissions.allow_perms.value = r->permissions.allow_perms.value;
+					permissions.deny_perms.value = r->permissions.deny_perms.value;
 				} else {
-					permissions.allow_perms.value |= r.permissions.allow_perms.value;
-					permissions.deny_perms.value |= r.permissions.deny_perms.value;
+					permissions.allow_perms.value |= r->permissions.allow_perms.value;
+					permissions.deny_perms.value |= r->permissions.deny_perms.value;
 				}
 
-				roles.push_back(r);
+				roles.insert({ r->id, r });
 			}
 		}
+
 		if (guild.owner_id == this->id) {
             hierarchy = INT_MAX;
 		} else {
@@ -79,8 +74,7 @@ namespace discpp {
 		premium_since = GetDataSafely<std::string>(json, "premium_since");
 		deaf = GetDataSafely<bool>(json, "deaf");
 		mute = GetDataSafely<bool>(json, "mute");
-		std::string _id = this->id.c_str();
-		user.mention = "<@!" + _id + ">";
+		user.mention = "<@!" + id + ">";
 	}
 
 	void Member::ModifyMember(std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf, snowflake channel_id) {
@@ -171,8 +165,9 @@ namespace discpp {
 		 * @return bool
 		 */
 
-		nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + guild_id + "/bans/" + id), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
-		return result.contains("reason");
+		rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + guild_id + "/bans/" + id), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
+		rapidjson::Value::ConstMemberIterator itr = result.FindMember("reason");
+		return itr != result.MemberEnd();
 	}
 
 	bool Member::HasRole(discpp::Role role) {
@@ -188,7 +183,7 @@ namespace discpp {
 		 * @return bool
 		 */
 
-		return count_if(roles.begin(), roles.end(), [role](discpp::Role r) { return role.id == r.id; }) != 0;
+		return count_if(roles.begin(), roles.end(), [role](std::pair<discpp::snowflake, std::shared_ptr<discpp::Role>> pair) { return role.id == pair.second->id; }) != 0;
 	}
 
 	bool Member::HasPermission(discpp::Permission perm) {

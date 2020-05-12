@@ -3,7 +3,7 @@
 
 #include "../event.h"
 #include "../message.h"
-#include "../bot.h"
+#include "../client.h"
 
 #include <vector>
 

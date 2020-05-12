@@ -2,7 +2,8 @@
 	Basic bot showing off preconditions
 */
 
-#include <discpp/bot.h>
+#include <discpp/client.h>
+#include <discpp/client_config.h>
 #include <discpp/context.h>
 #include <discpp/command_handler.h>
 
@@ -16,8 +17,8 @@ int main(int argc, const char* argv[]) {
 	std::string token;
 	std::getline(token_file, token);
 
-	discpp::BotConfig config{ {"!"} };
-	discpp::Bot bot { token, config }; // Token, config
+	discpp::ClientConfig* config = new discpp::ClientConfig({"!"});
+	discpp::Client bot { token, config }; // Token, config
 
 	ServerinfoCommand();
 	

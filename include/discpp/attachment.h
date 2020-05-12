@@ -3,13 +3,13 @@
 
 #include "discord_object.h"
 
-#include <nlohmann/json.hpp>
+#include <rapidjson/document.h>
 
 namespace discpp {
 	class Attachment : DiscordObject {
 	public:
 		Attachment() = default;
-		Attachment(nlohmann::json json);
+		Attachment(rapidjson::Document& json);
 
 		snowflake id;
 		std::string filename;
