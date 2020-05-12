@@ -23,7 +23,7 @@ DisC++ is a simplified, but feature rich Discord API wrapper written in modern C
 </table>
 
 ## Dependencies
-- [Nlohmann JSON](https://github.com/nlohmann/json)
+- [RapidJSON](https://github.com/Tencent/rapidjson)
 - [cpr](https://github.com/whoshuu/cpr)
 - [IXWebSocket](https://github.com/machinezone/IXWebSocket)
 
@@ -32,7 +32,7 @@ Please follow [Google's styling guide](https://google.github.io/styleguide/cppgu
 
 ## Building
 1. Install vcpkg onto the root of your C drive.
-2. Install dependencies by running command: `vcpkg install nlohmann-json cpr ixwebsocket openssl --triplet x64-[windows/linux]`.
+2. Install dependencies by running command: `vcpkg install rapidjson cpr ixwebsocket openssl --triplet x64-[windows/linux]`.
     * Replace [windows/linux] with your operating system.
 3. Then run `vcpkg integrate install`.
     * Should get an output similar to: `"-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"`.
