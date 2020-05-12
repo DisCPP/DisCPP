@@ -259,6 +259,7 @@ namespace discpp {
 		std::vector<discpp::GuildBan> GetBans();
 		std::string GetMemberBanReason(discpp::Member& member);
 		void BanMember(discpp::Member& member, std::string reason = "");
+		void BanMemberById(snowflake& id, std::string reason = "");
 		void UnbanMember(discpp::Member& member);
 		void KickMember(discpp::Member& member);
         std::shared_ptr<discpp::Role> GetRole(snowflake id);
