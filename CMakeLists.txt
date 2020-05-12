@@ -13,6 +13,12 @@ find_package(CURL CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(ixwebsocket REQUIRED)
 
+if (UNIX)
+	link_libraries(z)
+	link_libraries(ssl)
+	link_libraries(crypto)
+endif()
+
 # Add source files
 file(GLOB_RECURSE source_list src/*.cpp)
 add_library(discpp STATIC ${source_list} ${events_source_list})
@@ -28,13 +34,6 @@ if (WIN32)
 else()
 	find_package(Threads)
 	target_link_libraries(discpp PUBLIC ${CMAKE_THREAD_LIBS_INIT})
-endif()
-
-# Required on some linux systems.
-if(UNIX)
-	#target_link_libraries(discpp PUBLIC z)
-	target_link_libraries(discpp PUBLIC ssl)
-	target_link_libraries(discpp PUBLIC crypto)
 endif()
 
 target_include_directories(discpp PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
