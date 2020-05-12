@@ -40,11 +40,11 @@ namespace discpp {
 
 		id = json["id"].GetString();
         name = json["name"].GetString();
-		icon = GetDataSafely<std::string>(json, "name");
+		icon = GetDataSafely<std::string>(json, "icon");
 		splash = GetDataSafely<std::string>(json, "splash");
 		discovery_splash = GetDataSafely<std::string>(json, "discovery_splash");
 		owner = GetDataSafely<bool>(json, "owner");
-		owner_id = GetDataSafely<std::string>(json, "owner");
+		owner_id = GetDataSafely<std::string>(json, "owner_id");
 		permissions = GetDataSafely<int>(json, "permissions");
 		region = json["region"].GetString();
 		afk_channel_id = GetDataSafely<snowflake>(json, "afk_channel_id");
@@ -1029,7 +1029,7 @@ namespace discpp {
 		 */
 
 		std::string idString = this->id.c_str();
-		std::string url = "https://cdn.discppapp.com/icons/" + idString +  "/" + this->icon;
+		std::string url = "https://cdn.discordapp.com/icons/" + idString +  "/" + this->icon;
 		if (imgType == ImageType::AUTO) imgType = StartsWith(this->icon, "a_") ? ImageType::GIF : ImageType::PNG;
 		switch (imgType) {
 		case ImageType::GIF:
