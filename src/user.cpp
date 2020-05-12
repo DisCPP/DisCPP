@@ -36,7 +36,7 @@ namespace discpp {
 		 * @return discpp::User, this is a constructor.
 		 */
 
-		id = json["id"].GetString();
+		id = GetDataSafely<std::string>(json, "id");
 		username = GetDataSafely<std::string>(json, "username");
 		discriminator = GetDataSafely<std::string>(json, "discriminator");
 		avatar = GetDataSafely<std::string>(json, "avatar");
