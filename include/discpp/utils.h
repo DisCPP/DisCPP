@@ -165,6 +165,7 @@ namespace discpp {
 	std::string EscapeString(std::string string);
 	time_t TimeFromSnowflake(snowflake snow);
 	std::string FormatTimeFromSnowflake(snowflake snow);
+	std::string URIEncode(std::string str);
 }
 
 #endif

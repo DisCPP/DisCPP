@@ -68,7 +68,13 @@ namespace discpp {
 		}
 		auto& allocator = embed_json->GetAllocator();
 
-		embed_json->AddMember("title", EscapeString(title), allocator);
+		if (ContainsNotNull(*embed_json, "title")) {
+            (*embed_json)["title"].SetNull();
+            (*embed_json)["title"].SetString(EscapeString(title).c_str(), embed_json->GetAllocator());
+		} else {
+		    embed_json->AddMember("title", EscapeString(title), embed_json->GetAllocator());
+		}
+
 
 		return *this;
 	}
@@ -86,7 +92,12 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-        embed_json->AddMember("type", EscapeString(type), embed_json->GetAllocator());
+        if (ContainsNotNull(*embed_json, "type")) {
+            (*embed_json)["type"].SetNull();
+            (*embed_json)["type"].SetString(EscapeString(type).c_str(), embed_json->GetAllocator());
+        } else {
+            embed_json->AddMember("type", EscapeString(type), embed_json->GetAllocator());
+        }
 
 		return *this;
 	}
@@ -108,7 +119,12 @@ namespace discpp {
 			throw std::runtime_error("Embed descriptions can only be 0-2048 characters!");
 		}
 
-        embed_json->AddMember("description", EscapeString(description), embed_json->GetAllocator());
+		if (ContainsNotNull(*embed_json, "description")) {
+            (*embed_json)["description"].SetNull();
+            (*embed_json)["description"].SetString(EscapeString(description).c_str(), embed_json->GetAllocator());
+        } else {
+            embed_json->AddMember("description", rapidjson::StringRef(EscapeString(description)), embed_json->GetAllocator());
+        }
 
 		return *this;
 	}
@@ -126,7 +142,12 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-        embed_json->AddMember("url", EscapeString(url), embed_json->GetAllocator());
+        if (ContainsNotNull(*embed_json, "url")) {
+            (*embed_json)["url"].SetNull();
+            (*embed_json)["url"].SetString(URIEncode(url).c_str(), embed_json->GetAllocator());
+        } else {
+            embed_json->AddMember("url", URIEncode(url), embed_json->GetAllocator());
+        }
 
 		return *this;
 	}
@@ -144,7 +165,12 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-        embed_json->AddMember("timestamp", EscapeString(timestamp), embed_json->GetAllocator());
+        if (ContainsNotNull(*embed_json, "timestamp")) {
+            (*embed_json)["timestamp"].SetNull();
+            (*embed_json)["timestamp"].SetString(EscapeString(timestamp).c_str(), embed_json->GetAllocator());
+        } else {
+            embed_json->AddMember("timestamp", EscapeString(timestamp), embed_json->GetAllocator());
+        }
 
 		return *this;
 	}
@@ -162,7 +188,12 @@ namespace discpp {
 		 * @return discpp::EmbedBuilder, just returns an object of this.
 		 */
 
-        embed_json->AddMember("color", color.color_hex, embed_json->GetAllocator());
+        if (ContainsNotNull(*embed_json, "timestamp")) {
+            (*embed_json)["color"].SetNull();
+            (*embed_json)["color"].SetInt(color.color_hex);
+        } else {
+            embed_json->AddMember("color", color.color_hex, embed_json->GetAllocator());
+        }
 
 		return *this;
 	}
@@ -186,13 +217,18 @@ namespace discpp {
 			throw std::runtime_error("Embed footer text can only be up to 0-2048 characters!");
 		}
 
-		rapidjson::Value footer(rapidjson::kObjectType);
+		rapidjson::Document footer(rapidjson::kObjectType);
 		footer.AddMember("text", text, embed_json->GetAllocator());
 		if (!icon_url.empty()) {
             footer.AddMember("icon_url", icon_url, embed_json->GetAllocator());
 		}
 
-		embed_json->AddMember("footer", footer, embed_json->GetAllocator());
+        if (ContainsNotNull(*embed_json, "timestamp")) {
+            (*embed_json)["footer"].SetNull();
+            (*embed_json)["footer"].CopyFrom(footer, embed_json->GetAllocator());
+        } else {
+            embed_json->AddMember("footer", footer, embed_json->GetAllocator());
+        }
 
 		return *this;
 	}
@@ -213,14 +249,20 @@ namespace discpp {
 		 */
 
         rapidjson::Value image(rapidjson::kObjectType);
-        image.AddMember("url", url, embed_json->GetAllocator());
+        image.AddMember("url", URIEncode(url), embed_json->GetAllocator());
 		if (height != -1) {
             image.AddMember("height", height, embed_json->GetAllocator());
 		}
 		if (width != -1) {
             image.AddMember("width", width, embed_json->GetAllocator());
 		}
-		embed_json->AddMember("image", image, embed_json->GetAllocator());
+
+        if (ContainsNotNull(*embed_json, "image")) {
+            (*embed_json)["image"].SetNull();
+            (*embed_json)["image"].CopyFrom(image, embed_json->GetAllocator());
+        } else {
+            embed_json->AddMember("image", image, embed_json->GetAllocator());
+        }
 
 		return *this;
 	}
@@ -241,14 +283,20 @@ namespace discpp {
 		 */
 
 		rapidjson::Value thumbnail(rapidjson::kObjectType);
-        thumbnail.AddMember("url", url, embed_json->GetAllocator());
+        thumbnail.AddMember("url", URIEncode(url), embed_json->GetAllocator());
         if (height != -1) {
             thumbnail.AddMember("height", height, embed_json->GetAllocator());
         }
         if (width != -1) {
             thumbnail.AddMember("width", width, embed_json->GetAllocator());
         }
-        embed_json->AddMember("thumbnail", thumbnail, embed_json->GetAllocator());
+
+        if (ContainsNotNull(*embed_json, "thumbnail")) {
+            (*embed_json)["thumbnail"].SetNull();
+            (*embed_json)["thumbnail"].CopyFrom(thumbnail, embed_json->GetAllocator());
+        } else {
+            embed_json->AddMember("thumbnail", thumbnail, embed_json->GetAllocator());
+        }
 
 		return *this;
 	}
@@ -269,14 +317,20 @@ namespace discpp {
 		 */
 
         rapidjson::Value video(rapidjson::kObjectType);
-        video.AddMember("url", url, embed_json->GetAllocator());
+        video.AddMember("url", URIEncode(url), embed_json->GetAllocator());
         if (height != -1) {
             video.AddMember("height", height, embed_json->GetAllocator());
         }
         if (width != -1) {
             video.AddMember("width", width, embed_json->GetAllocator());
         }
-        embed_json->AddMember("video", video, embed_json->GetAllocator());
+
+        if (ContainsNotNull(*embed_json, "video")) {
+            (*embed_json)["video"].SetNull();
+            (*embed_json)["video"].CopyFrom(video, embed_json->GetAllocator());
+        } else {
+            embed_json->AddMember("video", video, embed_json->GetAllocator());
+        }
 
 		return *this;
 	}
@@ -297,9 +351,14 @@ namespace discpp {
 
         rapidjson::Value provider(rapidjson::kObjectType);
         provider.AddMember("name", name, embed_json->GetAllocator());
-        provider.AddMember("url", url, embed_json->GetAllocator());
+        provider.AddMember("url", URIEncode(url), embed_json->GetAllocator());
 
-        embed_json->AddMember("provider", provider, embed_json->GetAllocator());
+        if (ContainsNotNull(*embed_json, "provider")) {
+            (*embed_json)["provider"].SetNull();
+            (*embed_json)["provider"].CopyFrom(provider, embed_json->GetAllocator());
+        } else {
+            embed_json->AddMember("provider", provider, embed_json->GetAllocator());
+        }
 
 		return *this;
 	}
@@ -328,12 +387,18 @@ namespace discpp {
         author.AddMember("name", EscapeString(name), embed_json->GetAllocator());
 
 		if (!url.empty()) {
-            author.AddMember("url", url, embed_json->GetAllocator());
+            author.AddMember("url", URIEncode(url), embed_json->GetAllocator());
 		}
 		if (!icon_url.empty()) {
-            author.AddMember("icon_url", icon_url, embed_json->GetAllocator());
+            author.AddMember("icon_url", URIEncode(icon_url), embed_json->GetAllocator());
 		}
-        embed_json->AddMember("author", author, embed_json->GetAllocator());
+
+        if (ContainsNotNull(*embed_json, "author")) {
+            (*embed_json)["author"].SetNull();
+            (*embed_json)["author"].CopyFrom(author, embed_json->GetAllocator());
+        } else {
+            embed_json->AddMember("author", author, embed_json->GetAllocator());
+        }
 
 		return *this;
 	}
