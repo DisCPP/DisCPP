@@ -16,7 +16,7 @@ void discpp::FireCommand(discpp::Client* bot, discpp::Message message) {
     bool trigger = false;
     for (std::string const& prefix : bot->config->prefixes) {
         prefixSize = prefix.size();
-        if (message.author.bot) {
+        if (message.author->bot) {
             return;
         }
         if (StartsWith(message.content, prefix)) {
@@ -39,9 +39,9 @@ void discpp::FireCommand(discpp::Client* bot, discpp::Message message) {
 
     argument_vec.erase(argument_vec.begin()); // Erase the command from the arguments
 
-    discpp::Member member;
-    if (message.channel.type != discpp::ChannelType::DM) {
-        member = discpp::Member(message.author.id, message.guild);
+    std::shared_ptr<discpp::Member> member = nullptr;
+    if (message.channel->type != discpp::ChannelType::DM) {
+        member = message.guild->GetMember(message.author->id);
     }
 
     std::string remainder = "d";

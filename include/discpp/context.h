@@ -18,15 +18,15 @@ namespace discpp {
 
 	public:
 		discpp::Client* client;
-		discpp::Guild guild;
-		discpp::Channel channel;
-		discpp::User user;
-		discpp::Member author;
+		std::shared_ptr<discpp::Guild> guild;
+		std::shared_ptr<discpp::Channel> channel;
+        std::shared_ptr<discpp::User> user;
+        std::shared_ptr<discpp::Member> author;
 		discpp::Message message;
 		std::string remainder;
 		std::vector<std::string> arguments;
 
-		Context(discpp::Client* client, discpp::Channel channel, discpp::Member author, discpp::Message message, std::string remainder, std::vector<std::string> arguments);
+		Context(discpp::Client* client, std::shared_ptr<discpp::Channel> channel, std::shared_ptr<discpp::Member> author, discpp::Message message, std::string remainder, std::vector<std::string> arguments);
 
 		discpp::Message Send(std::string text, bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
 	};

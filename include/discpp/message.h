@@ -85,17 +85,17 @@ namespace discpp {
 		void PinMessage();
 		void UnpinMessage();
 
-		discpp::Channel channel;
-		discpp::Guild guild;
-		discpp::User author;
+        std::shared_ptr<discpp::Channel> channel;
+        std::shared_ptr<discpp::Guild> guild;
+        std::shared_ptr<discpp::User> author;
 		std::string content;
 		std::string timestamp; // TODO: Convert to iso8601Time
 		std::string edited_timestamp; // TODO: Convert to iso8601Time
 		bool tts;
 		bool mention_everyone;
-		std::unordered_map<discpp::snowflake, discpp::Member> mentions;
-		std::unordered_map<discpp::snowflake, discpp::Role> mentioned_roles;
-		std::unordered_map<discpp::snowflake, discpp::GuildChannel> mention_channels;
+		std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::Member>> mentions;
+		std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::Role>> mentioned_roles;
+		std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::GuildChannel>> mention_channels;
 		std::vector<discpp::Attachment> attachments;
 		std::vector<discpp::EmbedBuilder> embeds;
 		std::vector<discpp::Reaction> reactions;

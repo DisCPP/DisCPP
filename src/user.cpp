@@ -17,9 +17,9 @@ namespace discpp {
 		 * @return discpp::User, this is a constructor.
 		 */
 
-		std::unordered_map<snowflake, Member>::iterator it = discpp::globals::client_instance->members.find(id);
+		auto it = discpp::globals::client_instance->members.find(id);
 		if (it != discpp::globals::client_instance->members.end()) {
-			*this = it->second.user;
+			*this = it->second->user;
 		}
 	}
 

@@ -16,9 +16,8 @@ namespace discpp {
 		 */
 
 		auto message = discpp::globals::client_instance->messages.find(id);
-
 		if (message != discpp::globals::client_instance->messages.end()) {
-			*this = message->second;
+			*this = *message->second;
 		}
 	}
 
@@ -36,9 +35,9 @@ namespace discpp {
 		 */
 
 		id = GetDataSafely<snowflake>(json, "id");
-		channel = ConstructDiscppObjectFromID(json, "channel_id", discpp::Channel());
-        guild = ConstructDiscppObjectFromID(json, "guild_id", discpp::Guild());
-		author = ConstructDiscppObjectFromJson(json, "author", discpp::User());
+		channel = std::make_shared<discpp::Channel>(ConstructDiscppObjectFromID(json, "channel_id", discpp::Channel()));
+        guild = std::make_shared<discpp::Guild>(ConstructDiscppObjectFromID(json, "guild_id", discpp::Guild()));
+		author = std::make_shared<discpp::User>(ConstructDiscppObjectFromJson(json, "author", discpp::User()));
 		content = GetDataSafely<std::string>(json, "content");
 		timestamp = GetDataSafely<std::string>(json, "timestamp");
 		edited_timestamp = GetDataSafely<std::string>(json, "edited_timestamp");
@@ -70,8 +69,8 @@ namespace discpp {
 
                 new_member_json.AddMember("user", user, allocator);
 
-                discpp::Member tmp(new_member_json, guild.id);
-                mentions.insert({ tmp.id, tmp });
+                std::shared_ptr<discpp::Member> tmp = guild->GetMember(new_member_json["user"]["id"].GetString());
+                mentions.insert({ tmp->id, tmp });
             }
         }
 
@@ -80,8 +79,8 @@ namespace discpp {
                 rapidjson::Document mentioned_role_json;
                 mentioned_role_json.CopyFrom(mentioned_role, mentioned_role_json.GetAllocator());
 
-                discpp::Role tmp = discpp::Role(mentioned_role_json.GetString(), guild);
-                mentioned_roles.insert({ tmp.id, tmp });
+                std::shared_ptr<discpp::Role> tmp = guild->GetRole(mentioned_role_json.GetString());
+                mentioned_roles.insert({ tmp->id, tmp });
             }
         }
 
@@ -90,12 +89,15 @@ namespace discpp {
                 rapidjson::Document mention_channel_json;
                 mention_channel_json.CopyFrom(mention_channel, mention_channel_json.GetAllocator());
 
-                discpp::GuildChannel channel(mention_channel["id"].GetString(), guild.id);
+                /*discpp::GuildChannel channel(mention_channel["id"].GetString(), guild.id);
                 channel.type = static_cast<ChannelType>(mention_channel["type"].GetInt());
                 channel.guild_id = mention_channel["guild_id"].GetString();
-                channel.name = mention_channel["name"].GetString();
+                channel.name = mention_channel["name"].GetString();*/
 
-                mention_channels.insert({ channel.id, channel });
+                std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(mention_channel["guild_id"].GetString());
+                std::shared_ptr<discpp::GuildChannel> channel = guild->GetChannel(mention_channel["id"].GetString());
+
+                mention_channels.insert({ channel->id, channel });
             }
         }
 
@@ -148,8 +150,8 @@ namespace discpp {
 		 * @return void
 		 */
 
-		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions/" + emoji.ToURL() + "/@me");
-		SendPutRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
+		std::string endpoint = Endpoint("/channels/" + channel->id + "/messages/" + id + "/reactions/" + emoji.ToURL() + "/@me");
+		SendPutRequest(endpoint, DefaultHeaders(), channel->id, RateLimitBucketType::CHANNEL);
 	}
 
 	void Message::RemoveBotReaction(discpp::Emoji emoji) {
@@ -165,8 +167,8 @@ namespace discpp {
 		 * @return void
 		 */
 
-		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions/" + emoji.ToURL() + "/@me");
-		SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
+		std::string endpoint = Endpoint("/channels/" + channel->id + "/messages/" + id + "/reactions/" + emoji.ToURL() + "/@me");
+		SendDeleteRequest(endpoint, DefaultHeaders(), channel->id, RateLimitBucketType::CHANNEL);
 	}
 
 	void Message::RemoveReaction(discpp::User user, discpp::Emoji emoji) {
@@ -183,8 +185,8 @@ namespace discpp {
 		 * @return void
 		 */
 
-		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions/" + emoji.ToURL() + "/" + user.id);
-		SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
+		std::string endpoint = Endpoint("/channels/" + channel->id + "/messages/" + id + "/reactions/" + emoji.ToURL() + "/" + user.id);
+		SendDeleteRequest(endpoint, DefaultHeaders(), channel->id, RateLimitBucketType::CHANNEL);
 	}
 
 	std::unordered_map<discpp::snowflake, discpp::User> Message::GetReactorsOfEmoji(discpp::Emoji emoji, int amount) {
@@ -203,9 +205,9 @@ namespace discpp {
 		 * @return std::vector<discpp::User>
 		 */
 
-		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions/" + emoji.ToURL());
+		std::string endpoint = Endpoint("/channels/" + channel->id + "/messages/" + id + "/reactions/" + emoji.ToURL());
 		cpr::Body body("{\"limit\": " + std::to_string(amount) + "}");
-		rapidjson::Document result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
+		rapidjson::Document result = SendGetRequest(endpoint, DefaultHeaders(), channel->id, RateLimitBucketType::CHANNEL, body);
 		
 		std::unordered_map<discpp::snowflake, discpp::User> users;
 		IterateThroughNotNullJson(result, [&](rapidjson::Document& user_json) {
@@ -233,10 +235,10 @@ namespace discpp {
 		 * @return std::vector<discpp::User>
 		 */
 
-		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions/" + emoji.ToURL());
+		std::string endpoint = Endpoint("/channels/" + channel->id + "/messages/" + id + "/reactions/" + emoji.ToURL());
 		std::string method_str = (method == GetReactionsMethod::BEFORE_USER) ? "before" : "after";
 		cpr::Body body("{\"" + method_str + "\": " + user.id + "}");
-		rapidjson::Document result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
+		rapidjson::Document result = SendGetRequest(endpoint, DefaultHeaders(), channel->id, RateLimitBucketType::CHANNEL, body);
 
         std::unordered_map<discpp::snowflake, discpp::User> users;
         IterateThroughNotNullJson(result, [&](rapidjson::Document& user_json) {
@@ -258,8 +260,8 @@ namespace discpp {
 		 * @return void
 		 */
 
-		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id + "/reactions");
-		SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
+		std::string endpoint = Endpoint("/channels/" + channel->id + "/messages/" + id + "/reactions");
+		SendDeleteRequest(endpoint, DefaultHeaders(), channel->id, RateLimitBucketType::CHANNEL);
 	}
 
 	discpp::Message Message::EditMessage(std::string text) {
@@ -275,7 +277,7 @@ namespace discpp {
 		 * @return discpp::Message
 		 */
 
-		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id);
+		std::string endpoint = Endpoint("/channels/" + channel->id + "/messages/" + id);
 		cpr::Body body("{\"content\": \"" + EscapeString(text) + "\"}");
 		rapidjson::Document result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL);
 
@@ -296,7 +298,7 @@ namespace discpp {
 		 * @return discpp::Message
 		 */
 
-		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id);
+		std::string endpoint = Endpoint("/channels/" + channel->id + "/messages/" + id);
 		cpr::Body body("{\"embed\": " + DumpJson(embed.ToJson()) + "}");
 		rapidjson::Document result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
@@ -317,7 +319,7 @@ namespace discpp {
 		 * @return discpp::Message
 		 */
 
-		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id);
+		std::string endpoint = Endpoint("/channels/" + channel->id + "/messages/" + id);
 		cpr::Body body("{\"flags\": " + std::to_string(flags) + "}");
         rapidjson::Document result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
@@ -336,7 +338,7 @@ namespace discpp {
 		 * @return void
 		 */
 
-		std::string endpoint = Endpoint("/channels/" + channel.id + "/messages/" + id);
+		std::string endpoint = Endpoint("/channels/" + channel->id + "/messages/" + id);
 		SendDeleteRequest(endpoint, DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 		
 		*this = discpp::Message();
@@ -353,7 +355,7 @@ namespace discpp {
 		 * @return void
 		 */
 
-		SendPutRequest(Endpoint("/channels/" + channel.id + "/pins/" + id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		SendPutRequest(Endpoint("/channels/" + channel->id + "/pins/" + id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 
 	void Message::UnpinMessage() {
@@ -367,6 +369,6 @@ namespace discpp {
 		 * @return void
 		 */
 
-		SendDeleteRequest(Endpoint("/channels/" + channel.id + "/pins/" + id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+		SendDeleteRequest(Endpoint("/channels/" + channel->id + "/pins/" + id), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 }

@@ -137,7 +137,7 @@ namespace discpp {
                 rapidjson::Document member_json;
                 member_json.CopyFrom(member, member_json.GetAllocator());
 
-                discpp::Member tmp = discpp::Member(member_json, this->id);
+                discpp::Member tmp = discpp::Member(member_json, *this);
                 members.insert({ tmp.id, std::make_shared<discpp::Member>(tmp)});
             }
         }
@@ -400,7 +400,7 @@ namespace discpp {
 		cpr::Body body("{\"access_token\": \"" + access_token + "\", \"nick\": \"" + nick + "\", \"roles\": " + json_roles + ", \"mute\": " + std::to_string(mute) + ", \"deaf\": " + std::to_string(deaf) + "}");
 		rapidjson::Document result = SendPutRequest(Endpoint("/guilds/" + this->id + "/members/" + id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 
-		return std::make_shared<discpp::Member>((result.Empty()) ? discpp::Member(id, *this) : discpp::Member(result, id)); // If the member is already added, return it.
+		return std::make_shared<discpp::Member>((result.Empty()) ? discpp::Member(id, *this) : discpp::Member(result, *this)); // If the member is already added, return it.
 	}
 
 	void Guild::RemoveMember(discpp::Member& member) {
@@ -929,7 +929,7 @@ namespace discpp {
 		 * @brief Create a guild emoji.
 		 *
 		 * ```cpp
-		 *      ctx.guild.CreateEmoji("test", { &std::ifstream("C:\\emoji.png", std::ios::in | std::ios::binary), "C:\\emoji.png" }, {});
+		 *      ctx.guild->CreateEmoji("test", { &std::ifstream("C:\\emoji.png", std::ios::in | std::ios::binary), "C:\\emoji.png" }, {});
 		 * ```
 		 *
 		 * @param[in] name The emoji name.
@@ -1140,7 +1140,7 @@ namespace discpp {
          * Requires the MANAGE_GUILD permission. code will be null if a vanity url for the guild is not set. Only `code` and `uses` are valid
          *
          * ```cpp
-         *      discpp::GuildInvite vanity_url = ctx.guild.GetVanityURL();
+         *      discpp::GuildInvite vanity_url = ctx.guild->GetVanityURL();
          * ```
          *
          * @return discpp::GuildInvite

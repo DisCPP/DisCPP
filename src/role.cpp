@@ -17,9 +17,9 @@ namespace discpp {
 		 * @return discpp::Role, this is a constructor.
 		 */
 
-		std::unordered_map<snowflake, Role>::iterator it = guild.roles.find(role_id); 
+		auto it = guild.roles.find(role_id);
 		if (it != guild.roles.end()) {
-			*this = it->second;
+			*this = *it->second;
 		}
 	}
 
