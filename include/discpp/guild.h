@@ -292,7 +292,7 @@ namespace discpp {
 		std::string icon; /**< Hashed guild icon. */
 		std::string splash; /**< Optional hashed guild splash. */
 		std::string discovery_splash; /**< Optional hashed discovery splash. */
-		std::string owner; /**< Whether or not the bot is the owner of the guild. */
+		bool owner; /**< Whether or not the bot is the owner of the guild. */
 		snowflake owner_id; /**< ID of the guild owner. */
 		int permissions; /**< Total permissions for the bot in the guild (does not include channel overrides). */
 		std::string region; /**< Voice region id for the guild. */
