@@ -438,8 +438,9 @@ namespace discpp {
                 rapidjson::Document guild_ban_json;
                 guild_ban_json.CopyFrom(guild_ban, guild_ban_json.GetAllocator());
 
-                std::string reason = GetDataSafely<std::string>(result, "reason");
-                guild_bans.push_back(discpp::GuildBan(reason, guild_ban_json));
+                std::string reason = GetDataSafely<std::string>(guild_ban_json, "reason");
+                discpp::User user = ConstructDiscppObjectFromJson(guild_ban_json, "user", discpp::User());
+                guild_bans.push_back(discpp::GuildBan(reason, user));
             }
         }
 
