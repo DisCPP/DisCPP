@@ -6,14 +6,33 @@
 #include <discpp/embed_builder.h>
 
 namespace discpp {
-	class WebhookClient : DiscordObject {
+	class Guild;
+	class Channel;
+	class User;
+
+    enum WebhookType : int {
+        INCOMING = 1,
+        CHANNEL_FOLLOWER = 2
+    };
+
+    // @TODO: Add more endpoints: https://discordapp.com/developers/docs/resources/webhook
+	class Webhook : public DiscordObject {
 	public:
-		WebhookClient(snowflake id, std::string token);
-		std::string token;
+	    Webhook() = default;
+	    Webhook(nlohmann::json json);
+		Webhook(snowflake id, std::string token);
 
 		discpp::Message Send(std::string text, bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
 		void EditName(std::string& name);
 		void Remove();
+
+        WebhookType type;
+        discpp::Guild* guild;
+        discpp::Channel* channel;
+        discpp::User* user;
+        std::string name;
+        std::string avatar;
+        std::string token;
 	};
 }
 

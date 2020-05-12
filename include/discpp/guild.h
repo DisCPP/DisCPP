@@ -5,11 +5,12 @@
 
 #include "discord_object.h"
 #include "emoji.h"
-#include "member.h"
 #include "channel.h"
+#include "member.h"
 #include "utils.h"
 #include "role.h"
 #include "image.h"
+#include "audit_log.h"
 
 #include <nlohmann/json.hpp>
 
@@ -106,11 +107,12 @@ namespace discpp {
 	public:
         IntegrationAccount() = default;
         IntegrationAccount(rapidjson::Document& json) {
+
             /**
              * @brief Constructs a discpp::IntegrationAccount object from json.
              *
              * ```cpp
-             *      discpp::IntegrationAccount integration_account(json);
+             *      discpp::IntegrationAccount guild_integration_account(json);
              * ```
              *
              * @param[in] json The json data for the integration account.
@@ -130,8 +132,7 @@ namespace discpp {
 	        REMOVE_ROLE = 0,
 	        KICK = 1
 	    };
-
-		Integration() = default;
+		    Integration() = default;
         Integration(rapidjson::Document& json) {
             /**
              * @brief Constructs a discpp::Integration object from json.
@@ -142,7 +143,7 @@ namespace discpp {
              *
              * @param[in] json The json data for the integration.
              *
-             * @return discpp::dIntegration, this is a constructor.
+             * @return discpp::Integration, this is a constructor.
              */
 
             id = static_cast<snowflake>(json["id"].GetString());
@@ -284,7 +285,8 @@ namespace discpp {
 		std::shared_ptr<discpp::Emoji> ModifyEmoji(discpp::Emoji& emoji, std::string name, std::vector<discpp::Role>& roles);
 		void DeleteEmoji(discpp::Emoji& emoji);
 		std::string GetIconURL(discpp::ImageType imgType = discpp::ImageType::AUTO);
-        std::shared_ptr<discpp::Member> GetOwnerMember();
+    std::shared_ptr<discpp::Member> GetOwnerMember();
+		discpp::AuditLog GetAuditLog();
 
 		std::string name; /**< Guild name. */
 		std::string icon; /**< Hashed guild icon. */
