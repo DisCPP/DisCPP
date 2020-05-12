@@ -1153,7 +1153,7 @@ namespace discpp {
     }
 
     discpp::AuditLog Guild::GetAuditLog() {
-        nlohmann::json result = SendGetRequest(Endpoint("/guilds/" + id + "/audit-logs"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
+        rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + id + "/audit-logs"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 
         return discpp::AuditLog(result);
     }

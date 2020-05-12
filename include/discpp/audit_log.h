@@ -8,8 +8,6 @@
 #include "webhook.h"
 #include "user.h"
 
-#include <nlohmann/json.hpp>
-
 namespace discpp {
     class Integration;
 	class Message;
@@ -78,7 +76,7 @@ namespace discpp {
 	private:
     public:
         AuditLogChange() = default;
-        AuditLogChange(nlohmann::json json);
+        AuditLogChange(rapidjson::Document& json);
 
         std::string key;
 		AuditLogChangeKey new_value;
@@ -126,12 +124,12 @@ namespace discpp {
     class AuditEntryOptions {
     public:
 		AuditEntryOptions() = default;
-		AuditEntryOptions(nlohmann::json json);
+		AuditEntryOptions(rapidjson::Document& json);
 
         std::string delete_member_days;
         std::string members_removed;
-        discpp::Channel channel;
-        discpp::Message* message;
+        std::shared_ptr<discpp::Channel> channel;
+		std::shared_ptr<discpp::Message> message;
         std::string count;
         discpp::snowflake id;
         std::string type;
@@ -141,7 +139,7 @@ namespace discpp {
     class AuditLogEntry : public DiscordObject {
     public:
         AuditLogEntry() = default;
-        AuditLogEntry(nlohmann::json json);
+        AuditLogEntry(rapidjson::Document& json);
 
         std::string target_id;
         std::vector<AuditLogChange> changes;
@@ -154,7 +152,7 @@ namespace discpp {
     class AuditLog {
     public:
         AuditLog() = default;
-        AuditLog(nlohmann::json json);
+        AuditLog(rapidjson::Document& json);
 
         std::vector<discpp::Webhook> webhooks;
         std::vector<discpp::User> users;

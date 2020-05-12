@@ -5,12 +5,12 @@
 #include <fstream>
 
 namespace discpp {
-    Webhook::Webhook(nlohmann::json json) {
-        id = json["id"];
-        type = static_cast<WebhookType>(json["type"].get<int>());
-        guild = (json.contains("guild_id")) ? &discpp::Guild(json["guild_id"].get<snowflake>()) : &discpp::Guild();
-        channel = (json.contains("channel_id")) ? &discpp::Channel(json["channel_id"].get<snowflake>()) : &discpp::Channel();
-        user = (json.contains("user")) ? &discpp::User(json["user"]) : &discpp::User();
+    Webhook::Webhook(rapidjson::Document& json) {
+        id = json["id"].GetString();
+        type = static_cast<WebhookType>(json["type"].GetInt());
+        guild = std::make_shared<discpp::Guild>(ConstructDiscppObjectFromID(json, "guild_id", discpp::Guild()));
+		channel = std::make_shared<discpp::Channel>(ConstructDiscppObjectFromID(json, "guild_id", discpp::Channel()));
+		user = std::make_shared<discpp::User>(ConstructDiscppObjectFromJson(json, "user", discpp::User()));
         name = GetDataSafely<std::string>(json, "name");
         avatar = GetDataSafely<std::string>(json, "avatar");
         token = GetDataSafely<std::string>(json, "token");

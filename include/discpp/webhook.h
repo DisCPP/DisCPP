@@ -19,7 +19,7 @@ namespace discpp {
 	class Webhook : public DiscordObject {
 	public:
 	    Webhook() = default;
-	    Webhook(nlohmann::json json);
+	    Webhook(rapidjson::Document& json);
 		Webhook(snowflake id, std::string token);
 
 		discpp::Message Send(std::string text, bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
@@ -27,9 +27,9 @@ namespace discpp {
 		void Remove();
 
         WebhookType type;
-        discpp::Guild* guild;
-        discpp::Channel* channel;
-        discpp::User* user;
+        std::shared_ptr<discpp::Guild> guild;
+        std::shared_ptr<discpp::Channel> channel;
+        std::shared_ptr<discpp::User> user;
         std::string name;
         std::string avatar;
         std::string token;
