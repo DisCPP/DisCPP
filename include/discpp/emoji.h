@@ -8,8 +8,7 @@
 #include "role.h"
 #include "utils.h"
 
-#include <nlohmann/json.hpp>
-
+#include <rapidjson/document.h>
 //#include <cpprest/uri.h>
 
 #include <locale>

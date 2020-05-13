@@ -135,7 +135,7 @@ namespace discpp {
         cpr::Body body("{\"username\": \"" + username + "\", \"avatar\": " + avatar.ToDataURI() + "}");
         rapidjson::Document result = SendPatchRequest(Endpoint("/users/@me"), DefaultHeaders(), 0, discpp::RateLimitBucketType::GLOBAL, body);
 
-        client_user = discpp::User(result);
+        client_user = discpp::ClientUser(result);
 
         return client_user;
     }

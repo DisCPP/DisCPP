@@ -42,9 +42,6 @@ namespace discpp {
 		avatar = GetDataSafely<std::string>(json, "avatar");
 		bot = GetDataSafely<bool>(json, "bot");
 		system = GetDataSafely<bool>(json, "system");
-		mfa_enabled = GetDataSafely<bool>(json, "mfa_enabled");
-		locale = GetDataSafely<std::string>(json, "locale");
-		verified = GetDataSafely<bool>(json, "verified");
 		flags = GetDataSafely<int>(json, "flags");
 		premium_type = static_cast<discpp::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type"));
 		public_flags = GetDataSafely<int>(json, "public_flags");
@@ -108,29 +105,6 @@ namespace discpp {
 
 		return discpp::Channel(result);
 	}
-
-	std::vector<Connection> User::GetUserConnections() {
-		/**
-		 * @brief Create all connections of this user.
-		 *
-		 * ```cpp
-		 *      std::vector<discpp::Connection> conntections = user.GetUserConnections();
-		 * ```
-		 *
-		 * @return std::vector<discpp::Connection>
-		 */
-
-		rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
-
-		std::vector<Connection> connections;
-		for (auto const& connection : result.GetArray()) {
-			rapidjson::Document connection_json;
-			connection_json.CopyFrom(connection, connection_json.GetAllocator());
-			connections.push_back(discpp::Connection(connection_json));
-		}
-
-		return connections;
-	}
 	
 	std::string User::GetAvatarURL(ImageType imgType) {
 		/**
@@ -165,5 +139,34 @@ namespace discpp {
 				return cpr::Url(url);
 			}
 		}
+	}
+
+    std::vector<Connection> ClientUser::GetUserConnections() {
+        /**
+         * @brief Create all connections of this user.
+         *
+         * ```cpp
+         *      std::vector<discpp::Connection> conntections = user.GetUserConnections();
+         * ```
+         *
+         * @return std::vector<discpp::Connection>
+         */
+
+        rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
+
+        std::vector<Connection> connections;
+        for (auto const& connection : result.GetArray()) {
+            rapidjson::Document connection_json;
+            connection_json.CopyFrom(connection, connection_json.GetAllocator());
+            connections.push_back(discpp::Connection(connection_json));
+        }
+
+        return connections;
+    }
+
+    ClientUser::ClientUser(rapidjson::Document& json) : User(json) {
+        mfa_enabled = GetDataSafely<bool>(json, "mfa_enabled");
+        locale = GetDataSafely<std::string>(json, "locale");
+        verified = GetDataSafely<bool>(json, "verified");
 	}
 }

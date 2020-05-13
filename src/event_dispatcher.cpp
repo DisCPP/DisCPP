@@ -18,7 +18,7 @@ namespace discpp {
             rapidjson::Document user_json;
             user_json.CopyFrom(result["user"], user_json.GetAllocator());
 
-            discpp::User client_user(user_json);
+            discpp::ClientUser client_user(user_json);
             discpp::globals::client_instance->client_user = client_user;
 
             for (const auto& guild : result["guilds"].GetArray()) {
@@ -39,7 +39,7 @@ namespace discpp {
         } else {
             // Get the bot user
             rapidjson::Document user_json = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
-            discpp::globals::client_instance->client_user = discpp::User(user_json);
+            discpp::globals::client_instance->client_user = discpp::ClientUser(user_json);
         }
 
         discpp::DispatchEvent(discpp::ReadyEvent());
