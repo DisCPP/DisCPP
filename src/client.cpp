@@ -70,6 +70,31 @@ namespace discpp {
         return 0;
     }
 
+    void Client::AddFriend(discpp::User user) {
+        if (!discpp::globals::client_instance->client_user.bot) {
+            throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+        } else {
+            rapidjson::Document result = SendPostRequest(Endpoint("users/@me/relationships"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL, cpr::Body("{\"discriminator\":\"" + user.discriminator + "\", \"username\":" + user.username + "\"}"));
+        }
+    }
+
+    void Client::RemoveFriend(discpp::User user) {
+        if(discpp::globals::client_instance->client_user.bot) {
+            throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+        } else {
+            rapidjson::Document result = SendDeleteRequest(Endpoint("users/@me/relationships/" + user.id), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+        }
+    }
+
+    void Client::GetFriends() {
+        //todo implement this endpoint
+        if(discpp::globals::client_instance->client_user.bot) {
+            throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+        } else {
+            rapidjson::Document result = SendGetRequest(Endpoint("users/@me/relationships/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+        }
+    }
+
     std::shared_ptr<discpp::Guild> Client::GetGuild(snowflake guild_id) {
         /**
          * @brief Gets a discpp::Guild from a guild id.

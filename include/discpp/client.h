@@ -39,6 +39,11 @@ namespace discpp {
 		StartLimitException() : std::runtime_error("Maximum start limit reached") {}
 	};
 
+    class ProhibitedEndpointException : public std::runtime_error {
+    public:
+        ProhibitedEndpointException(std::string msg) : std::runtime_error(msg) {}
+    };
+
 	class AuthenticationException : public std::runtime_error {
 	public:
         AuthenticationException() : std::runtime_error("Invalid token, failed to connect to gateway") {}
@@ -83,6 +88,9 @@ namespace discpp {
 		void ReconnectToWebsocket();
 
 		// Discord based methods.
+		void AddFriend(discpp::User user);
+		void RemoveFriend(discpp::User user);
+		void GetFriends();
         std::shared_ptr<discpp::Guild> GetGuild(snowflake guild_id);
         discpp::User ModifyCurrentUser(std::string username, discpp::Image avatar);
         void LeaveGuild(discpp::Guild& guild);
