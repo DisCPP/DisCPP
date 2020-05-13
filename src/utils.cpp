@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "client.h"
+#include "client_config.h"
 
 std::string discpp::GetOsName() {
 	/**
@@ -216,9 +217,16 @@ cpr::Header discpp::DefaultHeaders(cpr::Header add) {
 	 * @return nlohmann::json
 	 */
 
-	cpr::Header headers = { { "Authorization", "Bot " + discpp::globals::client_instance->token },
-							{ "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" },
-							{ "X-RateLimit-Precision", "millisecond"} };
+
+    cpr::Header headers = { { "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" },
+                            { "X-RateLimit-Precision", "millisecond"} };
+    // Add the correct authorization header depending on the token type.
+	if (globals::client_instance->config->type == TokenType::USER) {
+	    headers.insert({ "Authorization", discpp::globals::client_instance->token });
+	} else {
+        headers.insert({ "Authorization", "Bot " + discpp::globals::client_instance->token });
+	}
+
 	for (auto head : add) {
 		headers.insert(headers.end(), head);
 	}
