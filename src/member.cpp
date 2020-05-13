@@ -72,9 +72,21 @@ namespace discpp {
         }
 		joined_at = GetDataSafely<std::string>(json, "joined_at");
 		premium_since = GetDataSafely<std::string>(json, "premium_since");
-		deaf = GetDataSafely<bool>(json, "deaf");
-		mute = GetDataSafely<bool>(json, "mute");
+		if (GetDataSafely<bool>(json, "deaf")) {
+		    flags |= 0b1;
+		}
+		if (GetDataSafely<bool>(json, "mute")) {
+		    flags |= 0b10;
+		}
 		user.mention = "<@!" + std::to_string(id) + ">";
+	}
+
+	inline bool Member::IsDeafened() {
+	    return (flags & 0b1) == 0b1;
+	}
+
+	inline bool Member::IsMuted() {
+        return (flags & 0b10) == 0b10;
 	}
 
 	void Member::ModifyMember(std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf, snowflake channel_id) {
