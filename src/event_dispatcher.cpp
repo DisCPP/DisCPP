@@ -12,11 +12,11 @@ namespace discpp {
 
         discpp::globals::client_instance->ready = true;
         // @TODO: This for some reason causes an exception.
-        result.SetObject();
-        discpp::globals::client_instance->session_id = GetDataSafely<std::string>(result, "session_id");
+        discpp::globals::client_instance->session_id = result["session_id"].GetString();
 
         if (discpp::globals::client_instance->config->type == discpp::TokenType::USER) {
-            rapidjson::Document user_json = GetDocumentInsideJson(result, "user");
+            rapidjson::Document user_json;
+            user_json.CopyFrom(result["user"], user_json.GetAllocator());
 
             discpp::User client_user(user_json);
             discpp::globals::client_instance->client_user = client_user;

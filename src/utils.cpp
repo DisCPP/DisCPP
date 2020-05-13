@@ -44,7 +44,10 @@ rapidjson::Document discpp::HandleResponse(cpr::Response response, snowflake obj
 	 *
 	 * @return nlohmann::json
 	 */
-	globals::client_instance->logger->Debug("Received requested payload: " + response.text);
+
+    if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("Received requested payload: " + response.text);
+    }
 
     rapidjson::Document tmp;
     if (!response.text.empty() && response.text[0] == '[' && response.text[response.text.size() - 1] == ']') {
@@ -87,7 +90,9 @@ rapidjson::Document discpp::SendGetRequest(std::string url, cpr::Header headers,
 	 * @return nlohmann::json
 	 */
 
-	globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
+    if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
+    }
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
 
@@ -116,7 +121,9 @@ rapidjson::Document discpp::SendPostRequest(std::string url, cpr::Header headers
 	 * @return nlohmann::json
 	 */
 
-	globals::client_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + CprBodyToString(body));
+    if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + CprBodyToString(body));
+    }
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Post(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -139,7 +146,9 @@ rapidjson::Document discpp::SendPutRequest(std::string url, cpr::Header headers,
 	 * @return nlohmann::json
 	 */
 
-	globals::client_instance->logger->Debug("Sending put request, URL: " + url + ", body: " + CprBodyToString(body));
+    if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("put patch request, URL: " + url + ", body: " + CprBodyToString(body));
+    }
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Put(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -162,7 +171,9 @@ rapidjson::Document discpp::SendPatchRequest(std::string url, cpr::Header header
 	 * @return nlohmann::json
 	 */
 
-	globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + CprBodyToString(body));
+	if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + CprBodyToString(body));
+    }
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Patch(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
@@ -184,7 +195,9 @@ rapidjson::Document discpp::SendDeleteRequest(std::string url, cpr::Header heade
 	 * @return nlohmann::json
 	 */
 
-	globals::client_instance->logger->Debug("Sending delete request, URL: " + url);
+    if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("Sending delete request, URL: " + url);
+    }
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Delete(cpr::Url{ url }, headers);
 	return HandleResponse(result, object, ratelimit_bucket);

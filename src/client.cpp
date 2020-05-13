@@ -55,7 +55,8 @@ namespace discpp {
          */
 
         WebSocketStart();
-        while (true) {
+
+        while (run) {
             for (size_t i = 0; i < futures.size(); i++) {
                 if (!futures[i].valid() ||
                     !(futures[i].wait_for(std::chrono::seconds(0)) == std::future_status::ready)) {
@@ -65,6 +66,7 @@ namespace discpp {
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
+
         return 0;
     }
 
@@ -310,8 +312,7 @@ namespace discpp {
             disconnected = false;
 
             bindthread.join();
-        }
-        else {
+        } else {
             logger->Error(LogTextColor::RED + "Improper token, failed to connect to discord gateway!");
             throw AuthenticationException();
         }
@@ -321,6 +322,8 @@ namespace discpp {
         // if we're reconnecting this just stop here.
         if (reconnecting) {
             logger->Debug("Websocket was closed for reconnecting...");
+        } else if (stay_disconnected) {
+            logger->Warn(LogTextColor::YELLOW + "Websocket was closed.");
         } else {
             logger->Error(LogTextColor::RED + "Websocket was closed with error: " + std::to_string(msg->closeInfo.code) + ", " + msg->closeInfo.reason + "! Attempting reconnect in 10 seconds...");
         }
@@ -349,14 +352,14 @@ namespace discpp {
             rapidjson::Document result;
             result.Parse(msg->str);
             if (result.HasParseError()) {
-                logger->Debug(LogTextColor::YELLOW + "A non json payload was received and ignored: \"" + msg->str);
+                logger->Debug(LogTextColor::YELLOW + "A non-json payload was received and ignored: \"" + msg->str);
             }
 
             if (!result.IsNull()) {
                 OnWebSocketPacket(result);
             }
         } else {
-            logger->Info(LogTextColor::RED + "Known message sent");
+            logger->Warn(LogTextColor::YELLOW + "Unknown message sent");
         }
     }
 
@@ -441,9 +444,9 @@ namespace discpp {
 
     void Client::HandleHeartbeat() {
         try {
-            while (true) {
+            while (run) {
                 // Make sure that it doesn't try to do anything while its trying to reconnect.
-                while (reconnecting) {}
+                while (reconnecting && !run) {}
 
                 rapidjson::Document data(rapidjson::kObjectType);
                 rapidjson::Document::AllocatorType& data_allocator = data.GetAllocator();
@@ -465,7 +468,20 @@ namespace discpp {
                 logger->Debug("Waiting for next heartbeat (" + std::to_string(heartbeat_interval / 1000.0 - 10) + " seconds)...");
 
                 // Wait for the required heartbeat interval, while waiting it should be acked from another thread.
-                std::this_thread::sleep_for(std::chrono::milliseconds(heartbeat_interval - 10));
+                // This also checks it should stop this thread.
+                int timer = time(NULL);
+                int ending_time = timer + heartbeat_interval / 1000.0 - 10;
+
+                while (timer <= ending_time) {
+                    if (!run) {
+                        return;
+                    }
+
+                    // Increment the timer
+                    timer += (time(NULL) - timer);
+                }
+
+                // std::this_thread::sleep_for(std::chrono::milliseconds(heartbeat_interval - 10));
 
                 if (!heartbeat_acked) {
                     logger->Warn(LogTextColor::YELLOW + "Heartbeat wasn't acked, trying to reconnect...");
@@ -514,5 +530,14 @@ namespace discpp {
             websocket.connect(20);
             //WebSocketStart();
         }
+    }
+
+    void Client::StopClient() {
+        stay_disconnected = true;
+        DisconnectWebsocket();
+
+        run = false;
+
+        if (heartbeat_thread.joinable()) heartbeat_thread.join();
     }
 }

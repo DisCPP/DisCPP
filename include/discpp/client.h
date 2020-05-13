@@ -79,6 +79,7 @@ namespace discpp {
 		void CreateWebsocketRequest(rapidjson::Document& json, std::string message = "");
 		void SetCommandHandler(std::function<void(discpp::Client*, discpp::Message)> command_handler);
 		void DisconnectWebsocket();
+		void StopClient();
 		void ReconnectToWebsocket();
 
 		// Discord based methods.
@@ -113,6 +114,8 @@ namespace discpp {
 		bool ready = false;
 		bool disconnected = true;
 		bool reconnecting = false;
+		bool stay_disconnected = false;
+		bool run = true;
 
 		std::string session_id;
 		std::string gateway_endpoint;
@@ -120,6 +123,7 @@ namespace discpp {
 		rapidjson::Document hello_packet;
 
 		std::thread heartbeat_thread;
+		std::thread future_loop_thread;
 
 		std::mutex websocket_client_mutex;
 
