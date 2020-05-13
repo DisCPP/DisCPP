@@ -484,12 +484,30 @@ namespace discpp {
 		SendPutRequest(Endpoint("/guilds/" + id + "/bans/" + member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 	}
 
+    void Guild::BanMemberById(discpp::snowflake& user_id, std::string reason) {
+        /**
+         * @brief Ban a guild member.
+         *
+         * ```cpp
+         *      guild.BanMemberById(150312037426135041, "Reason");
+         * ```
+         *
+         * @param[in] user_id The id to ban.
+         * @param[in] reason The reason to ban them.
+         *
+         * @return void
+         */
+        Guild::EnsureBotPermission(Permission::BAN_MEMBERS);
+        cpr::Body body("{\"reason\": \"" + EscapeString(reason) + "\"}");
+        SendPutRequest(Endpoint("/guilds/" + id + "/bans/" + user_id), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
+    }
+
 	void Guild::UnbanMember(discpp::Member& member) {
 		/**
 		 * @brief Unban a guild member.
 		 *
 		 * ```cpp
-		 *      std::optional<std::string> reason = guild.GetMemberBanReason(member);
+		 *      guild.UnbanMember(member);
 		 * ```
 		 *
 		 * @param[in] member The member to unban.
@@ -499,6 +517,22 @@ namespace discpp {
 		Guild::EnsureBotPermission(Permission::BAN_MEMBERS);
 		SendDeleteRequest(Endpoint("/guilds/" + id + "/bans/" + member.user.id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
+
+    void Guild::UnbanMemberById(discpp::snowflake& user_id) {
+        /**
+         * @brief Unban a guild member.
+         *
+         * ```cpp
+         *      guild.UnbanMemberById(150312037426135041);
+         * ```
+         *
+         * @param[in] user_id The id to unban.
+         *
+         * @return void
+         */
+        Guild::EnsureBotPermission(Permission::BAN_MEMBERS);
+        SendDeleteRequest(Endpoint("/guilds/" + id + "/bans/" + user_id), DefaultHeaders(), id, RateLimitBucketType::GUILD);
+    }
 
 	void Guild::KickMember(discpp::Member& member) {
 		/**
