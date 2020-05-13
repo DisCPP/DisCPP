@@ -52,7 +52,7 @@ namespace discpp {
 		 * @return discpp::Emoji, this is a constructor.
 		 */
 
-		id = GetDataSafely<std::string>(json, "id");
+		id = GetIDSafely(json, "id");
 		name = GetDataSafely<std::string>(json, "name");
 		if (ContainsNotNull(json, "roles")) {
 			for (auto& role : json["roles"].GetArray()) {

@@ -32,7 +32,7 @@ namespace discpp {
 		MessageActivity() = default;
 		MessageActivity(rapidjson::Document& json) {
 			type = static_cast<ActivityType>(json["type"].GetInt());
-			party_id = GetDataSafely<std::string>(json, "pary_id");
+			party_id = GetDataSafely<std::string>(json, "party_id");
 		}
 	};
 
@@ -45,7 +45,7 @@ namespace discpp {
 
 		MessageApplication() = default;
 		MessageApplication(rapidjson::Document& json) {
-			id = json["id"].GetString();
+			id = SnowflakeFromString(json["id"].GetString());
 			cover_image = GetDataSafely<std::string>(json, "cover_image");
 			description = json["description"].GetString();
 			icon = json["icon"].GetString();
@@ -60,9 +60,9 @@ namespace discpp {
 
 		MessageReference() = default;
 		MessageReference(rapidjson::Document& json) {
-			message_id = GetDataSafely<snowflake>(json, "message_id");
-			channel_id = json["channel_id"].GetString();
-			guild_id = GetDataSafely<snowflake>(json, "guild_id");
+			message_id = GetIDSafely(json, "message_id");
+			channel_id = SnowflakeFromString(json["channel_id"].GetString());
+			guild_id = GetIDSafely(json, "guild_id");
 		}
 	};
 

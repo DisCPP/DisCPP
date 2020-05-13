@@ -19,11 +19,11 @@ discpp::AuditLogChangeKey GetKey(std::string key, rapidjson::Document& j) {
 	} else if (key == "splash_hash") {
 		a_key.splash_hash = j.GetString();
 	} else if (key == "owner_id") {
-		a_key.owner_id = j.GetString();
+		a_key.owner_id = discpp::SnowflakeFromString(j.GetString());
 	} else if (key == "region") {
 		a_key.region = j.GetString();
 	} else if (key == "afk_channel_id") {
-		a_key.afk_channel_id = j.GetString();
+		a_key.afk_channel_id = discpp::SnowflakeFromString(j.GetString());
 	} else if (key == "afk_timeout") {
 		a_key.afk_timeout = j.GetInt();
 	} else if (key == "mfa_level") {
@@ -55,9 +55,9 @@ discpp::AuditLogChangeKey GetKey(std::string key, rapidjson::Document& j) {
 	} else if (key == "widget_enabled") {
 		a_key.widget_enabled = j.GetBool();
 	} else if (key == "widget_channel_id") {
-		a_key.widget_channel_id = j.GetString();
+		a_key.widget_channel_id = discpp::SnowflakeFromString(j.GetString());
 	} else if (key == "system_channel_id") {
-		a_key.system_channel_id = j.GetString();
+		a_key.system_channel_id = discpp::SnowflakeFromString(j.GetString());
 	} else if (key == "position") {
 		a_key.position = j.GetInt();
 	} else if (key == "topic") {
@@ -74,7 +74,7 @@ discpp::AuditLogChangeKey GetKey(std::string key, rapidjson::Document& j) {
 	} else if (key == "nsfw") {
 		a_key.nsfw = j.GetBool();
 	} else if (key == "application_id") {
-		a_key.application_id = j.GetString();
+		a_key.application_id = discpp::SnowflakeFromString(j.GetString());
 	} else if (key == "rate_limit_per_user") {
 		a_key.rate_limit_per_user = j.GetInt();
 	} else if (key == "permissions") {
@@ -92,9 +92,9 @@ discpp::AuditLogChangeKey GetKey(std::string key, rapidjson::Document& j) {
 	} else if (key == "code") {
 		a_key.code = j.GetString();
 	} else if (key == "channel_id") {
-		a_key.channel_id = j.GetString();
+		a_key.channel_id = discpp::SnowflakeFromString(j.GetString());
 	} else if (key == "inviter_id") {
-		a_key.inviter_id = j.GetString();
+		a_key.inviter_id = discpp::SnowflakeFromString(j.GetString());
 	} else if (key == "max_uses") {
 		a_key.max_uses = j.GetInt();
 	} else if (key == "uses") {
@@ -112,7 +112,7 @@ discpp::AuditLogChangeKey GetKey(std::string key, rapidjson::Document& j) {
 	} else if (key == "avatar_hash") {
 		a_key.avatar_hash = j.GetString();
 	} else if (key == "id") {
-		a_key.id = j.GetString();
+		a_key.id = discpp::SnowflakeFromString(j.GetString());
 	} else if (key == "type") {
 		a_key.type = j.GetString();
 	} else if (key == "enable_emoticons") {
@@ -146,7 +146,7 @@ discpp::AuditEntryOptions::AuditEntryOptions(rapidjson::Document& json) {
 	channel = std::make_shared<discpp::Channel>(ConstructDiscppObjectFromID(json, "channel_id", discpp::Channel()));
     message = std::make_shared<discpp::Message>(ConstructDiscppObjectFromID(json, "message_id", discpp::Message()));
 	count = GetDataSafely<std::string>(json, "count");
-	id = GetDataSafely<discpp::snowflake>(json, "id");
+	id = GetIDSafely(json, "id");
 	type = GetDataSafely<std::string>(json, "type");
 	role_name = GetDataSafely<std::string>(json, "role_name");
 }
@@ -161,8 +161,8 @@ discpp::AuditLogEntry::AuditLogEntry(rapidjson::Document& json) {
             changes.push_back(discpp::AuditLogChange(change_json));
         }
     }
-    user = discpp::User(json["user_id"].GetString());
-    id = json["id"].GetString();
+    user = discpp::User(SnowflakeFromString(json["user_id"].GetString()));
+    id = SnowflakeFromString(json["id"].GetString());
     action_type = static_cast<discpp::AuditLogEvent>(json["action_type"].GetInt());
     options = ConstructDiscppObjectFromJson(json, "options", discpp::AuditEntryOptions());
     reason = GetDataSafely<std::string>(json, "reason");

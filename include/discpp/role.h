@@ -4,7 +4,7 @@
 #include "discord_object.h"
 #include "permission.h"
 
-#include <nlohmann/json.hpp>
+
 
 namespace discpp {
 	class Guild;

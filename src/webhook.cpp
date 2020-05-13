@@ -6,7 +6,7 @@
 
 namespace discpp {
     Webhook::Webhook(rapidjson::Document& json) {
-        id = json["id"].GetString();
+        id = SnowflakeFromString(json["id"].GetString());
         type = static_cast<WebhookType>(json["type"].GetInt());
         guild = std::make_shared<discpp::Guild>(ConstructDiscppObjectFromID(json, "guild_id", discpp::Guild()));
 		channel = std::make_shared<discpp::Channel>(ConstructDiscppObjectFromID(json, "guild_id", discpp::Channel()));
@@ -24,12 +24,13 @@ namespace discpp {
 	discpp::Message Webhook::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<discpp::File> files) {
 
 		std::string escaped_text = EscapeString(text);
-		nlohmann::json message_json = nlohmann::json::parse("{\"content\":\"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}");
+        rapidjson::Document message_json = rapidjson::Document(rapidjson::kObjectType);
+        message_json.Parse("{\"content\":\"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}");
 
 		if (escaped_text.size() >= 2000) {
 			// Write message to file
 			std::ofstream message("message.txt", std::ios::out | std::ios::binary);
-			message << message_json["content"];
+			message << message_json["content"].GetString();
 			message.close();
 
 			// Ensure the file will be deleted even if it runs into an exception sending the file.
@@ -68,25 +69,27 @@ namespace discpp {
 			multipart_data.parts.emplace_back("payload_json", "{\"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "\"}");
 
 			WaitForRateLimits(id, RateLimitBucketType::WEBHOOK);
-			cpr::Response response = cpr::Post(cpr::Url{ Endpoint("/webhooks/" + id + "/" + token) }, DefaultHeaders({ {"Content-Type", "multipart/form-data"} }), multipart_data);
+			cpr::Response response = cpr::Post(cpr::Url{ Endpoint("/webhooks/" + std::to_string(id) + "/" + token) }, DefaultHeaders({ {"Content-Type", "multipart/form-data"} }), multipart_data);
 			HandleRateLimits(response.header, id, RateLimitBucketType::WEBHOOK);
 
-			return discpp::Message(nlohmann::json::parse(response.text));
+            rapidjson::Document result_json(rapidjson::kObjectType);
+            result_json.Parse(response.text);
+			return discpp::Message(result_json);
+		} else {
+			body = cpr::Body(DumpJson(message_json));
 		}
-		else {
-			body = cpr::Body(message_json.dump());
-		}
-		rapidjson::Document result = SendPostRequest(Endpoint("/webhooks/" + id + "/" + token), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::WEBHOOK, body);
+		rapidjson::Document result = SendPostRequest(Endpoint("/webhooks/" + std::to_string(id) + "/" + token), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::WEBHOOK, body);
 
 		return discpp::Message(result);
 	}
 
 	void Webhook::EditName(std::string& name) {
-		nlohmann::json j = { "name", name };
-		discpp::SendPatchRequest(discpp::Endpoint("/webhooks/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK, cpr::Body(j.dump()));
+        rapidjson::Document result_json(rapidjson::kObjectType);
+        result_json.Parse("{\"name\": \"" + name + "\"}");
+		discpp::SendPatchRequest(discpp::Endpoint("/webhooks/" + std::to_string(id)), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK, cpr::Body(DumpJson(result_json)));
 	}
 
 	void Webhook::Remove() {
-		discpp::SendDeleteRequest(discpp::Endpoint("/webhooks/" + id + "/" + token), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK);
+		discpp::SendDeleteRequest(discpp::Endpoint("/webhooks/" + std::to_string(id) + "/" + token), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK);
 	}
 }

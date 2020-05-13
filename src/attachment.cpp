@@ -16,7 +16,7 @@ namespace discpp {
 		 *
 		*/
 
-		id = static_cast<snowflake>(json["id"].GetString());
+		id = SnowflakeFromString(json["id"].GetString());
 		filename = json["filename"].GetString();
 		size = json["size"].GetInt();
 		url = json["url"].GetString();

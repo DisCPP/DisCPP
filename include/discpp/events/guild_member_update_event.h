@@ -5,7 +5,7 @@
 #include "../guild.h"
 #include "../member.h"
 
-#include <nlohmann/json.hpp>
+
 
 namespace discpp {
 	class GuildMemberUpdateEvent : public Event {

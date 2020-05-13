@@ -11,7 +11,7 @@
 #include "utils.h"
 
 namespace discpp {
-	typedef std::string snowflake;
+	typedef uint64_t snowflake;
 
 	namespace presence {
 		struct Status {

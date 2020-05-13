@@ -8,7 +8,7 @@
 #include <rapidjson/document.h>
 
 namespace discpp {
-	typedef std::string snowflake;
+	typedef uint64_t snowflake;
 
 	enum class PermissionType : int {
 		ROLE,
@@ -111,7 +111,7 @@ namespace discpp {
 		Permissions() = default;
 		Permissions(PermissionType permission_type, int byte_set);
 		Permissions(rapidjson::Document& json);
-        rapidjson::Document& ToJson();
+        rapidjson::Document ToJson();
 
 		snowflake role_user_id;
 		PermissionOverwrite allow_perms;

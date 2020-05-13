@@ -5,7 +5,7 @@
 #include "../guild.h"
 #include "../user.h"
 
-#include <nlohmann/json.hpp>
+
 
 namespace discpp {
 	class GuildBanAddEvent : public Event {

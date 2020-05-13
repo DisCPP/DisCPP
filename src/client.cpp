@@ -169,7 +169,7 @@ namespace discpp {
          * @return discpp::User
          */
 
-        rapidjson::Document result = SendGetRequest(Endpoint("/users/" + id), DefaultHeaders(), "", RateLimitBucketType::GLOBAL);
+        rapidjson::Document result = SendGetRequest(Endpoint("/users/" + std::to_string(id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
 
         return discpp::User(result);
     }
@@ -185,7 +185,7 @@ namespace discpp {
          * @return std::vector<discpp::Connection>
          */
 
-        rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), "", RateLimitBucketType::GLOBAL);
+        rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
 
         std::vector<discpp::Connection> connections;
         for (auto const& connection : result.GetArray()) {

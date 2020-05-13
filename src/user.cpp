@@ -36,7 +36,7 @@ namespace discpp {
 		 * @return discpp::User, this is a constructor.
 		 */
 
-		id = GetDataSafely<std::string>(json, "id");
+		id = GetIDSafely(json, "id");
 		username = GetDataSafely<std::string>(json, "username");
 		discriminator = GetDataSafely<std::string>(json, "discriminator");
 		avatar = GetDataSafely<std::string>(json, "avatar");
@@ -49,7 +49,7 @@ namespace discpp {
 		premium_type = static_cast<discpp::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type"));
 		public_flags = GetDataSafely<int>(json, "public_flags");
 		created_at = FormatTimeFromSnowflake(id);
-		mention = "<@" + id + ">";
+		mention = "<@" + std::to_string(id) + ">";
 	}
 
 	Connection::Connection(rapidjson::Document& json) {
@@ -65,7 +65,7 @@ namespace discpp {
 		 * @return discpp::Connection, this is a constructor.
 		 */
 
-		id = static_cast<snowflake>(json["id"].GetString());
+		id = SnowflakeFromString(json["id"].GetString());
 		name = json["name"].GetString();
 		type = json["type"].GetString();
 		revoked = json["revoked"].GetBool();
@@ -103,7 +103,7 @@ namespace discpp {
 		 * @return discpp::Channel
 		 */
 
-		cpr::Body body("{\"recipient_id\": \"" + id + "\"}");
+		cpr::Body body("{\"recipient_id\": \"" + std::to_string(id) + "\"}");
 		rapidjson::Document result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders({ {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
 
 		return discpp::Channel(result);
@@ -145,12 +145,10 @@ namespace discpp {
 		 * @return std::string
 		 */
 
-		std::string idString = this->id.c_str();
 		if (this->avatar == "") {
 			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(std::stoi(this->discriminator) % 5) + ".png");
-		}
-		else {
-			std::string url = "https://cdn.discordapp.com/avatars/" + idString + "/" + this->avatar;
+		} else {
+			std::string url = "https://cdn.discordapp.com/avatars/" + std::to_string(id) + "/" + this->avatar;
 			if (imgType == ImageType::AUTO) imgType = StartsWith(this->avatar, "a_") ? ImageType::GIF : ImageType::PNG;
 			switch (imgType) {
 			case ImageType::GIF:
