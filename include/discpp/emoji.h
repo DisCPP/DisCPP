@@ -8,7 +8,8 @@
 #include "role.h"
 #include "utils.h"
 
-#include <rapidjson/document.h>
+
+
 //#include <cpprest/uri.h>
 
 #include <locale>
@@ -36,7 +37,7 @@ namespace discpp {
                 return wstr_converter.to_bytes(other.unicode) == name;
             } else if (!other.name.empty() && name.empty() && !unicode.empty()) {
                 return wstr_converter.to_bytes(unicode) == other.name;
-            } else if (!other.id.empty() && !id.empty() && !other.name.empty() && !name.empty()) {
+            } else if (other.id != 0 && id != 0 && !other.name.empty() && !name.empty()) {
                 return other.id == id && other.name == name;
             }
 
@@ -56,7 +57,7 @@ namespace discpp {
 
             auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
 
-            if (name.empty() && id.empty()) {
+            if (name.empty() && id == 0) {
                 return wstr_converter.to_bytes(unicode);
             } else {
                 return name;

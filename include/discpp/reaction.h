@@ -4,7 +4,7 @@
 #include "discord_object.h"
 #include "emoji.h"
 
-#include <nlohmann/json.hpp>
+
 
 namespace discpp {
 

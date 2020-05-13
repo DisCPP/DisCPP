@@ -1,5 +1,9 @@
 #include "utils.h"
 #include "client.h"
+#include "client_config.h"
+
+#include <stdlib.h>
+#include <numeric>
 
 std::string discpp::GetOsName() {
 	/**
@@ -35,14 +39,14 @@ rapidjson::Document discpp::HandleResponse(cpr::Response response, snowflake obj
 	 * @brief Handles a response from the discpp servers.
 	 *
 	 * ```cpp
-	 *      nlohmann::json response = discpp::HandleResponse(cpr_response, object, discpp::RateLimitBucketType::CHANNEL);
+	 *      rapidjson::Document response = discpp::HandleResponse(cpr_response, object, discpp::RateLimitBucketType::CHANNEL);
 	 * ```
 	 *
 	 * @param[in] reponse The cpr response from the servers.
 	 * @param[in] object The object id to handle the ratelimits for.
 	 * @param[in] ratelimit_bucket The rate limit bucket.
 	 *
-	 * @return nlohmann::json
+	 * @return rapidjson::Document
 	 */
 
     if (globals::client_instance != nullptr) {
@@ -78,7 +82,7 @@ rapidjson::Document discpp::SendGetRequest(std::string url, cpr::Header headers,
 	 * @brief Sends a get request to a url.
 	 *
 	 * ```cpp
-	 *      nlohmann::json response = discpp::SendGetRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+	 *      rapidjson::Document response = discpp::SendGetRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
 	 * ```
 	 *
 	 * @param[in] url The url to create a request to.
@@ -87,7 +91,7 @@ rapidjson::Document discpp::SendGetRequest(std::string url, cpr::Header headers,
 	 * @param[in] ratelimit_bucket The rate limit bucket.
 	 * @param[in] The cpr response body.
 	 *
-	 * @return nlohmann::json
+	 * @return rapidjson::Document
 	 */
 
     if (globals::client_instance != nullptr) {
@@ -109,7 +113,7 @@ rapidjson::Document discpp::SendPostRequest(std::string url, cpr::Header headers
 	 * @brief Sends a post request to a url.
 	 *
 	 * ```cpp
-	 *      nlohmann::json response = discpp::SendPostRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+	 *      rapidjson::Document response = discpp::SendPostRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
 	 * ```
 	 *
 	 * @param[in] url The url to create a request to.
@@ -118,7 +122,7 @@ rapidjson::Document discpp::SendPostRequest(std::string url, cpr::Header headers
 	 * @param[in] ratelimit_bucket The rate limit bucket.
 	 * @param[in] The cpr response body.
 	 *
-	 * @return nlohmann::json
+	 * @return rapidjson::Document
 	 */
 
     if (globals::client_instance != nullptr) {
@@ -134,7 +138,7 @@ rapidjson::Document discpp::SendPutRequest(std::string url, cpr::Header headers,
 	 * @brief Sends a put request to a url.
 	 *
 	 * ```cpp
-	 *      nlohmann::Json response = discpp::SendPutRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+	 *      rapidjson::Document response = discpp::SendPutRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
 	 * ```
 	 *
 	 * @param[in] url The url to create a request to.
@@ -143,7 +147,7 @@ rapidjson::Document discpp::SendPutRequest(std::string url, cpr::Header headers,
 	 * @param[in] ratelimit_bucket The rate limit bucket.
 	 * @param[in] The cpr response body.
 	 *
-	 * @return nlohmann::json
+	 * @return rapidjson::Document
 	 */
 
     if (globals::client_instance != nullptr) {
@@ -159,7 +163,7 @@ rapidjson::Document discpp::SendPatchRequest(std::string url, cpr::Header header
 	 * @brief Sends a patch request to a url.
 	 *
 	 * ```cpp
-	 *      nlohmann::json response = discpp::SendPatchRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+	 *      rapidjson::Document response = discpp::SendPatchRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
 	 * ```
 	 *
 	 * @param[in] url The url to create a request to.
@@ -168,7 +172,7 @@ rapidjson::Document discpp::SendPatchRequest(std::string url, cpr::Header header
 	 * @param[in] ratelimit_bucket The rate limit bucket.
 	 * @param[in] The cpr response body.
 	 *
-	 * @return nlohmann::json
+	 * @return rapidjson::Document
 	 */
 
 	if (globals::client_instance != nullptr) {
@@ -184,7 +188,7 @@ rapidjson::Document discpp::SendDeleteRequest(std::string url, cpr::Header heade
 	 * @brief Sends a delete request to a url.
 	 *
 	 * ```cpp
-	 *      nlohmann::json response = discpp::SendDeleteRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL);
+	 *      rapidjson::Document response = discpp::SendDeleteRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL);
 	 * ```
 	 *
 	 * @param[in] url The url to create a request to.
@@ -192,7 +196,7 @@ rapidjson::Document discpp::SendDeleteRequest(std::string url, cpr::Header heade
 	 * @param[in] object The object id to handle the ratelimits for.
 	 * @param[in] ratelimit_bucket The rate limit bucket.
 	 *
-	 * @return nlohmann::json
+	 * @return rapidjson::Document
 	 */
 
     if (globals::client_instance != nullptr) {
@@ -213,12 +217,19 @@ cpr::Header discpp::DefaultHeaders(cpr::Header add) {
 	 *
 	 * @param[in] add The headers to add to the default ones.
 	 *
-	 * @return nlohmann::json
+	 * @return rapidjson::Document
 	 */
 
-	cpr::Header headers = { { "Authorization", "Bot " + discpp::globals::client_instance->token },
-							{ "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" },
-							{ "X-RateLimit-Precision", "millisecond"} };
+
+    cpr::Header headers = { { "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" },
+                            { "X-RateLimit-Precision", "millisecond"} };
+    // Add the correct authorization header depending on the token type.
+	if (globals::client_instance->config->type == TokenType::USER) {
+	    headers.insert({ "Authorization", discpp::globals::client_instance->token });
+	} else {
+        headers.insert({ "Authorization", "Bot " + discpp::globals::client_instance->token });
+	}
+
 	for (auto head : add) {
 		headers.insert(headers.end(), head);
 	}
@@ -415,7 +426,7 @@ std::string discpp::EscapeString(std::string string) {
 	 * ```cpp
 	 *      std::string raw_text = "{\"content\":\"" + EscapeString(text) + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
 	 *		cpr::Body body = cpr::Body(raw_text);
-	 *		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+	 *		rapidjson::Document result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 	 * ```
 	 *
 	 * @param[in] string The string to escape.
@@ -546,7 +557,7 @@ void discpp::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBuc
 }
 
 time_t discpp::TimeFromSnowflake(snowflake snow) {
-	int64_t unix = ((std::strtoll(snow.c_str(), NULL, 10) >> 22) + 1420070400000) / 1000;
+	int64_t unix = ((snow >> 22) + 1420070400000) / 1000;
 	time_t unix_time = unix;
 
 	return unix_time;
@@ -657,4 +668,8 @@ std::string discpp::URIEncode(std::string str) {
     std::string sResult((char *)pStart, (char *)pEnd);
     delete [] pStart;
     return sResult;
+}
+
+discpp::snowflake discpp::SnowflakeFromString(std::string str) {
+    return strtoll(str.c_str(), NULL, 10);
 }

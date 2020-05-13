@@ -36,7 +36,7 @@ namespace discpp {
 		 * @return discpp::Role, this is a constructor.
 		 */
 
-		id = static_cast<snowflake>(json["id"].GetString());
+		id = SnowflakeFromString(json["id"].GetString());
 		name = json["name"].GetString();
 		color = json["color"].GetInt();
 		hoist = json["hoist"].GetBool();

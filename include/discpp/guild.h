@@ -12,7 +12,7 @@
 #include "image.h"
 #include "audit_log.h"
 
-#include <nlohmann/json.hpp>
+
 
 #include <optional>
 #include <utility>
@@ -63,10 +63,7 @@ namespace discpp {
             code = json["code"].GetString();
             rapidjson::Value::ConstMemberIterator itr = json.FindMember("guild");
             if (itr != json.MemberEnd()) {
-                guild_id = static_cast<snowflake>(json["guild"]["id"].GetString());
-            }
-            else {
-                guild_id = "";
+                guild_id = SnowflakeFromString(json["guild"]["id"].GetString());
             }
             itr = json.FindMember("channel");
             if (itr != json.MemberEnd()) {
@@ -119,7 +116,7 @@ namespace discpp {
              *
              * @return discpp::IntegrationAccount, this is a constructor.
              */
-			id = json["id"].GetString();
+			id = SnowflakeFromString(json["id"].GetString());
 			name = json["name"].GetString();
 		}
 
@@ -146,12 +143,12 @@ namespace discpp {
              * @return discpp::Integration, this is a constructor.
              */
 
-            id = static_cast<snowflake>(json["id"].GetString());
+            id = SnowflakeFromString(json["id"].GetString());
             name = json["name"].GetString();
             type = json["type"].GetString();
             enabled = json["enabled"].GetBool();
             syncing = json["syncing"].GetBool();
-            role_id = json["role_id"].GetString();
+            role_id = SnowflakeFromString(json["role_id"].GetString());
             enable_emoticons = GetDataSafely<bool>(json, "enable_emoticons");
             expire_behavior = static_cast<IntegrationExpireBehavior>(json["expire_behavior"].GetInt());
             expire_grace_period = json["expire_grace_period"].GetInt();
@@ -192,7 +189,7 @@ namespace discpp {
 
             enabled = json["enabled"].GetBool();
 			//channel_id = ContainsNotNull(json, "channel_id") ? json["channel_id"].GetString() : "";
-			channel_id = GetDataSafely<discpp::snowflake>(json, "channel_id");
+			channel_id = GetIDSafely(json, "channel_id");
 		}
 
         bool enabled; /**< Whether the embed is enabled. */
@@ -352,9 +349,9 @@ namespace discpp {
              *
              * @return discpp::VoiceState, this is a constructor.
              */
-            guild_id = static_cast<snowflake>(json["guild_id"].GetString());
-            channel_id = static_cast<snowflake>(json["channel_id"].GetString());
-            user_id = static_cast<snowflake>(json["user_id"].GetString());
+            guild_id = SnowflakeFromString(json["guild_id"].GetString());
+            channel_id = SnowflakeFromString(json["channel_id"].GetString());
+            user_id = SnowflakeFromString(json["user_id"].GetString());
             rapidjson::Value::ConstMemberIterator itr = json.FindMember("member");
             if (itr != json.MemberEnd() && !json["member"].IsNull()) {
                 rapidjson::Document member_json; 

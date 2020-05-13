@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include <nlohmann/json.hpp>
+
 
 namespace discpp {
 	class MessageBulkDeleteEvent : public Event {

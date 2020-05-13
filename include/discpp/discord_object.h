@@ -5,7 +5,7 @@
 #include <iostream>
 
 namespace discpp {
-	typedef std::string snowflake;
+	typedef uint64_t snowflake;
 
 	class DiscordObject {
 	public:

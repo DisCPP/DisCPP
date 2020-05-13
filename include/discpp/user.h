@@ -4,7 +4,7 @@
 #include "discord_object.h"
 #include "utils.h"
 #include "activity.h"
-#include <nlohmann/json.hpp>
+
 
 namespace discpp {
 	enum ImageType : int { AUTO, WEBP, PNG, JPEG, GIF };

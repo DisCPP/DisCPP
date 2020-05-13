@@ -4,7 +4,7 @@
 #include "../event.h"
 #include "../guild.h"
 
-#include <nlohmann/json.hpp>
+
 
 namespace discpp {
 	class GuildEmojisUpdateEvent : public Event {
