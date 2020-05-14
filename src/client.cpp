@@ -71,15 +71,15 @@ namespace discpp {
     }
 
     void Client::AddFriend(discpp::User user) {
-        if (!discpp::globals::client_instance->client_user.bot) {
+        if (!discpp::globals::client_instance->client_user.IsBot()) {
             throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            rapidjson::Document result = SendPostRequest(Endpoint("users/@me/relationships"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL, cpr::Body("{\"discriminator\":\"" + user.discriminator + "\", \"username\":" + user.username + "\"}"));
+            rapidjson::Document result = SendPostRequest(Endpoint("users/@me/relationships"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL, cpr::Body("{\"discriminator\":\"" + std::to_string(user.discriminator) + "\", \"username\":" + user.username + "\"}"));
         }
     }
 
     void Client::RemoveFriend(discpp::User user) {
-        if(discpp::globals::client_instance->client_user.bot) {
+        if(discpp::globals::client_instance->client_user.IsBot()) {
             throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
             rapidjson::Document result = SendDeleteRequest(Endpoint("users/@me/relationships/" + user.id), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
@@ -88,7 +88,7 @@ namespace discpp {
 
     void Client::GetFriends() {
         //todo implement this endpoint
-        if(discpp::globals::client_instance->client_user.bot) {
+        if(discpp::globals::client_instance->client_user.IsBot()) {
             throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
             rapidjson::Document result = SendGetRequest(Endpoint("users/@me/relationships/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
@@ -564,5 +564,28 @@ namespace discpp {
         run = false;
 
         if (heartbeat_thread.joinable()) heartbeat_thread.join();
+    }
+
+    discpp::Channel Client::GetChannel(discpp::snowflake id) {
+        discpp::Channel channel = GetDMChannel(id);
+
+        if (channel.id == 0) {
+            for (const auto &guild : guilds) {
+                channel = guild.second->GetChannel(id);
+
+                if (channel.id != 0) return channel;
+            }
+        }
+
+        return channel;
+    }
+
+    discpp::DMChannel Client::GetDMChannel(discpp::snowflake id) {
+        auto it = private_channels.find(id);
+        if (it != private_channels.end()) {
+            return it->second;
+        }
+
+        return discpp::DMChannel();
     }
 }

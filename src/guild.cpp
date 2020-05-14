@@ -43,13 +43,13 @@ namespace discpp {
 		icon = GetDataSafely<std::string>(json, "icon");
 		splash = GetDataSafely<std::string>(json, "splash");
 		discovery_splash = GetDataSafely<std::string>(json, "discovery_splash");
-		owner = GetDataSafely<bool>(json, "owner");
+		if (GetDataSafely<bool>(json, "owner")) flags |= 0b1;
 		owner_id = GetIDSafely(json, "owner_id");
 		permissions = GetDataSafely<int>(json, "permissions");
 		region = json["region"].GetString();
 		afk_channel_id = GetIDSafely(json, "afk_channel_id");
 		afk_timeout = json["afk_timeout"].GetInt();
-		embed_enabled = GetDataSafely<bool>(json, "embed_enabled");
+        if (GetDataSafely<bool>(json, "embed_enabled")) flags |= 0b10;
 		embed_channel_id = GetIDSafely(json, "embed_channel_id");
 		verification_level = static_cast<discpp::specials::VerificationLevel>(json["verification_level"].GetInt());
 		default_message_notifications = static_cast<discpp::specials::DefaultMessageNotificationLevel>(json["default_message_notifications"].GetInt());
@@ -71,7 +71,7 @@ namespace discpp {
                 emoji_json.CopyFrom(emoji, emoji_json.GetAllocator());
 
                 discpp::Emoji tmp = discpp::Emoji(emoji_json);
-                emojis.insert({ tmp.id, std::make_shared<discpp::Emoji>(tmp) });
+                emojis.insert({ tmp.id, tmp });
             }
         }
 
@@ -86,14 +86,14 @@ namespace discpp {
 
 		mfa_level = static_cast<discpp::specials::MFALevel>(json["mfa_level"].GetInt());
 		application_id = GetIDSafely(json, "application_id");
-		widget_enabled = GetDataSafely<bool>(json, "widget_enabled");
+        if (GetDataSafely<bool>(json, "widget_enabled")) flags |= 0b100;
 		widget_channel_id = GetIDSafely(json, "widget_channel_id");
 		system_channel_id = GetIDSafely(json, "system_channel_id");
 		system_channel_flags = json["system_channel_flags"].GetInt();
         rules_channel_id = GetIDSafely(json, "rules_channel_id");
 		joined_at = GetDataSafely<std::string>(json, "joined_at");
-		large = GetDataSafely<bool>(json, "large");
-		unavailable = GetDataSafely<bool>(json, "unavailable");
+        if (GetDataSafely<bool>(json, "large")) flags |= 0b1000;
+        if (GetDataSafely<bool>(json, "unavailable")) flags |= 0b10000;
 		member_count = GetDataSafely<int>(json, "member_count");
 
         if (ContainsNotNull(json, "voice_states")) {
@@ -112,7 +112,7 @@ namespace discpp {
                 channel_json.CopyFrom(channel, channel_json.GetAllocator());
 
                 discpp::GuildChannel tmp = discpp::GuildChannel(channel_json);
-                channels.insert({ tmp.id, std::make_shared<discpp::GuildChannel>(tmp)});
+                channels.insert({ tmp.id, tmp });
             }
         }
 
@@ -126,8 +126,7 @@ namespace discpp {
 		preferred_locale = json["preferred_locale"].GetString();
 
 		if (ContainsNotNull(json, "public_updates_channel_id")) {
-            discpp::Channel channel = ConstructDiscppObjectFromID(json, "public_updates_channel_id", discpp::Channel());
-            public_updates_channel = std::make_shared<discpp::GuildChannel>(discpp::GuildChannel(channel.id, this->id));
+            public_updates_channel = std::make_shared<discpp::GuildChannel>(discpp::GuildChannel(SnowflakeFromString(json["public_updates_channel_id"].GetString()), this->id));
         }
 
 		created_at = FormatTimeFromSnowflake(id);
@@ -195,7 +194,7 @@ namespace discpp {
 		SendDeleteRequest(Endpoint("/guilds/" + std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-    std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::GuildChannel>> Guild::GetChannels() {
+    std::unordered_map<discpp::snowflake, discpp::GuildChannel> Guild::GetChannels() {
 		/**
 		 * @brief Gets a list of channels in this guild.
 		 *
@@ -210,14 +209,14 @@ namespace discpp {
 		 */
 
 		rapidjson::Document json = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/channels"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
-        std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::GuildChannel>> channels;
+        std::unordered_map<discpp::snowflake, discpp::GuildChannel> channels;
         for (auto const& channel : json.GetArray()) {
             if (!channel.IsNull()) {
                 rapidjson::Document channel_json;
                 channel_json.CopyFrom(channel, channel_json.GetAllocator());
 
-                std::shared_ptr<discpp::GuildChannel> guild_channel = std::make_shared<discpp::GuildChannel>(discpp::GuildChannel(channel_json));
-                channels.insert({ guild_channel->id, guild_channel });
+                discpp::GuildChannel guild_channel = discpp::GuildChannel(channel_json);
+                channels.insert({ guild_channel.id, guild_channel });
             }
         }
 
@@ -225,16 +224,16 @@ namespace discpp {
 		return channels;
 	}
 
-    std::shared_ptr<discpp::GuildChannel> Guild::GetChannel(snowflake id) {
+    discpp::GuildChannel Guild::GetChannel(snowflake id) {
 	    auto it = channels.find(id);
 	    if (it != channels.end()) {
 	        return it->second;
 	    }
 
-		return nullptr;
+		return discpp::GuildChannel();
 	}
 
-    std::shared_ptr<discpp::GuildChannel> Guild::CreateChannel(std::string name, std::string topic, ChannelType type, int bitrate, int user_limit, int rate_limit_per_user, int position, std::vector<discpp::Permissions> permission_overwrites, discpp::Channel category, bool nsfw) {
+    discpp::GuildChannel Guild::CreateChannel(std::string name, std::string topic, ChannelType type, int bitrate, int user_limit, int rate_limit_per_user, int position, std::vector<discpp::Permissions> permission_overwrites, discpp::Channel category, bool nsfw) {
 		/**
 		 * @brief Creates a channel for this Guild.
 		 *
@@ -266,7 +265,7 @@ namespace discpp {
 		rapidjson::Value permission_json_array(rapidjson::kArrayType);
 
 		for (auto permission : permission_overwrites) {
-			permission_json_array.PushBack(permission.ToJson(), allocator);
+			permission_json_array.PushBack(std::move(permission.ToJson()), allocator);
 		}
 
 		channel_json.AddMember("name", name, allocator);
@@ -294,9 +293,9 @@ namespace discpp {
 		rapidjson::Document result = SendPostRequest(Endpoint("/guilds/" + std::to_string(id) + "/channels"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::CHANNEL, body);
 
 		discpp::GuildChannel channel(result);
-        channels.insert({ channel.id, std::make_shared<discpp::GuildChannel>(channel)});
+        channels.insert({ channel.id, channel });
 
-		return std::make_shared<discpp::GuildChannel>(channel);
+		return channel;
 	}
 
 	void Guild::ModifyChannelPositions(std::vector<discpp::Channel>& new_channel_positions) {
@@ -922,7 +921,7 @@ namespace discpp {
 		return result.GetString();
 	}
 
-	std::unordered_map<snowflake, std::shared_ptr<Emoji>> Guild::GetEmojis() {
+	std::unordered_map<snowflake, Emoji> Guild::GetEmojis() {
 		/**
 		 * @brief Get all guild emojis.
 		 *
@@ -935,14 +934,14 @@ namespace discpp {
 
 		rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/emojis"), DefaultHeaders(), {}, {});
 
-		std::unordered_map<snowflake, std::shared_ptr<Emoji>> emojis;
+		std::unordered_map<snowflake, Emoji> emojis;
         for (auto const& emoji : result.GetArray()) {
             if (!emoji.IsNull()) {
                 rapidjson::Document emoji_json;
                 emoji_json.CopyFrom(emoji, emoji_json.GetAllocator());
 
-                std::shared_ptr<discpp::Emoji> tmp = std::make_shared<discpp::Emoji>(discpp::Emoji(emoji_json));
-                emojis.insert({ tmp->id, tmp });
+                discpp::Emoji tmp = discpp::Emoji(emoji_json);
+                emojis.insert({ tmp.id, tmp });
             }
         }
 
@@ -950,7 +949,7 @@ namespace discpp {
 		return emojis;
 	}
 
-    std::shared_ptr<Emoji> Guild::GetEmoji(snowflake id) {
+    Emoji Guild::GetEmoji(snowflake id) {
 		/**
 		 * @brief Get a guild emoji.
 		 *
@@ -960,15 +959,15 @@ namespace discpp {
 		 *
 		 * @param[in] id The emoji's id.
 		 *
-		 * @return std::shared_ptr<Emoji>
+		 * @return Emoji
 		 */
 
 		rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/emojis/" + std::to_string(id)), DefaultHeaders(), {}, {});
 
-		return std::make_shared<discpp::Emoji>(discpp::Emoji(result));
+		return discpp::Emoji(result);
 	}
 
-    std::shared_ptr<Emoji> Guild::CreateEmoji(std::string name, discpp::Image image, std::vector<discpp::Role>& roles) {
+    Emoji Guild::CreateEmoji(std::string name, discpp::Image image, std::vector<discpp::Role>& roles) {
 		/**
 		 * @brief Create a guild emoji.
 		 *
@@ -980,7 +979,7 @@ namespace discpp {
 		 * @param[in] image The image for the emoji.
 		 * @param[in] roles The roles for the emoji.
 		 *
-		 * @return std::shared_ptr<Emoji>
+		 * @return Emoji
 		 */
 		Guild::EnsureBotPermission(Permission::MANAGE_EMOJIS);
 
@@ -997,13 +996,13 @@ namespace discpp {
 		cpr::Body body(DumpJson(body_raw));
 		rapidjson::Document result = SendPostRequest(Endpoint("/guilds/" + std::to_string(id) + "/emojis"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::GUILD, body);
 
-        std::shared_ptr<Emoji> emoji = std::make_shared<Emoji>(discpp::Emoji(result));
-        emojis.insert({ emoji->id, emoji });
+        Emoji emoji = discpp::Emoji(result);
+        emojis.insert({ emoji.id, emoji });
 
 		return emoji;
 	}
 
-    std::shared_ptr<Emoji> Guild::ModifyEmoji(discpp::Emoji& emoji, std::string name, std::vector<discpp::Role>& roles) {
+    Emoji Guild::ModifyEmoji(discpp::Emoji& emoji, std::string name, std::vector<discpp::Role>& roles) {
 		/**
 		 * @brief Modify a guild emoji.
 		 *
@@ -1015,7 +1014,7 @@ namespace discpp {
 		 * @param[in] name The emoji's name.
 		 * @param[in] role The emoji's roles.
 		 *
-		 * @return std::shared_ptr<Emoji>
+		 * @return Emoji
 		 */
 		Guild::EnsureBotPermission(Permission::MANAGE_EMOJIS);
 		std::string json_roles = "[";
@@ -1032,9 +1031,9 @@ namespace discpp {
 		cpr::Body body("{\"name\": \"" + name + "\", \"roles\": " + json_roles + "}");
 		rapidjson::Document result = SendPatchRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/emojis/" + std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 
-		std::shared_ptr<discpp::Emoji> resulted_emoji = std::make_shared<discpp::Emoji>(discpp::Emoji(result));
+		discpp::Emoji resulted_emoji = discpp::Emoji(result);
 
-		auto it = emojis.find(resulted_emoji->id);
+		auto it = emojis.find(resulted_emoji.id);
 		if (it != emojis.end()) {
 			it->second = resulted_emoji;
 		}
@@ -1199,5 +1198,25 @@ namespace discpp {
         rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/audit-logs"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 
         return discpp::AuditLog(result);
+    }
+
+    bool Guild::IsBotOwner() {
+        return (flags & 0b1) == 0b1;
+    }
+
+    bool Guild::IsEmbedEnabled() {
+        return (flags & 0b10) == 0b10;
+    }
+
+    bool Guild::IsWidgetEnabled() {
+        return (flags & 0b100) == 0b100;
+    }
+
+    bool Guild::IsLarge() {
+        return (flags & 0b1000) == 0b1000;
+    }
+
+    bool Guild::IsUnavailable() {
+        return (flags & 0b10000) == 0b10000;
     }
 }

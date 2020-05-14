@@ -35,7 +35,7 @@ namespace discpp {
 
 		auto it = guild.emojis.find(id);
 		if (it != guild.emojis.end()) {
-			*this = *it->second;
+			*this = it->second;
 		}
 	}
 

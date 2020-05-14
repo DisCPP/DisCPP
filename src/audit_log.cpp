@@ -7,6 +7,7 @@
 #include "user.h"
 #include "guild.h"
 #include "message.h"
+#include "client.h"
 
 // This is extremely ugly and probably slow, maybe theres a way we could trim this down?
 discpp::AuditLogChangeKey GetKey(std::string key, rapidjson::Document& j) {
@@ -143,7 +144,10 @@ discpp::AuditLogChange::AuditLogChange(rapidjson::Document& json) {
 discpp::AuditEntryOptions::AuditEntryOptions(rapidjson::Document& json) {
 	delete_member_days = GetDataSafely<std::string>(json, "delete_member_days");
 	members_removed = GetDataSafely<std::string>(json, "members_removed");
-	channel = std::make_shared<discpp::Channel>(ConstructDiscppObjectFromID(json, "channel_id", discpp::Channel()));
+	// @TODO: Make channel valid.
+	if (ContainsNotNull(json, "channel_id")) {
+	    channel = std::make_shared<discpp::Channel>(globals::client_instance->GetChannel(discpp::SnowflakeFromString(json["channel_id"].GetString())));
+	} else channel = nullptr;
     message = std::make_shared<discpp::Message>(ConstructDiscppObjectFromID(json, "message_id", discpp::Message()));
 	count = GetDataSafely<std::string>(json, "count");
 	id = GetIDSafely(json, "id");

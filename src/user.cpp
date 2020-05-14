@@ -38,18 +38,16 @@ namespace discpp {
 
 		id = GetIDSafely(json, "id");
 		username = GetDataSafely<std::string>(json, "username");
-		discriminator = GetDataSafely<std::string>(json, "discriminator");
+		discriminator = (unsigned short) strtoul(GetDataSafely<std::string>(json, "discriminator").c_str(), nullptr, 0);
 		avatar = GetDataSafely<std::string>(json, "avatar");
-		bot = GetDataSafely<bool>(json, "bot");
-		system = GetDataSafely<bool>(json, "system");
-		mfa_enabled = GetDataSafely<bool>(json, "mfa_enabled");
+		if (GetDataSafely<bool>(json, "bot")) flags |= 0b1;
+        if (GetDataSafely<bool>(json, "system")) flags |= 0b10;
+        if (GetDataSafely<bool>(json, "mfa_enabled")) flags |= 0b100;
 		locale = GetDataSafely<std::string>(json, "locale");
 		verified = GetDataSafely<bool>(json, "verified");
 		flags = GetDataSafely<int>(json, "flags");
 		premium_type = static_cast<discpp::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type"));
 		public_flags = GetDataSafely<int>(json, "public_flags");
-		created_at = FormatTimeFromSnowflake(id);
-		mention = "<@" + std::to_string(id) + ">";
 	}
 
 	Connection::Connection(rapidjson::Document& json) {
@@ -86,8 +84,7 @@ namespace discpp {
 		itr = json.FindMember("visibility");
 		if (itr != json.MemberEnd()){
 			visibility = static_cast<ConnectionVisibility>(json["visibility"].GetInt());
-		}
-		else {
+		} else {
 			visibility = ConnectionVisibility::NONE;
 		}
 	}
@@ -146,7 +143,7 @@ namespace discpp {
 		 */
 
 		if (this->avatar == "") {
-			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(std::stoi(this->discriminator) % 5) + ".png");
+			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(this->discriminator % 5) + ".png");
 		} else {
 			std::string url = "https://cdn.discordapp.com/avatars/" + std::to_string(id) + "/" + this->avatar;
 			if (imgType == ImageType::AUTO) imgType = StartsWith(this->avatar, "a_") ? ImageType::GIF : ImageType::PNG;
@@ -164,4 +161,42 @@ namespace discpp {
 			}
 		}
 	}
+
+    std::string User::CreatedAt() {
+        /**
+         * @brief Gets the created at time and date for this user.
+         *
+         * ```cpp
+         *      std::string created_at = user.CreatedAt();
+         * ```
+         *
+         * @return std::string
+         */
+        return FormatTimeFromSnowflake(id);
+    }
+
+    std::string User::CreateMention() {
+        /**
+         * @brief Creates a mention string for this user.
+         *
+         * ```cpp
+         *      std::string mention = user.CreateMention();
+         * ```
+         *
+         * @return std::string
+         */
+        return "<@" + std::to_string(id) + ">";
+    }
+
+    bool User::IsBot() {
+	    return (flags & 0b1) == 0b1;
+    }
+
+    bool User::System() {
+        return (flags & 0b10) == 0b10;
+    }
+
+    bool User::MFAEnabled() {
+        return (flags & 0b100) == 0b100;
+    }
 }

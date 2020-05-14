@@ -74,6 +74,8 @@ namespace discpp {
 		Channel(snowflake id);
 		Channel(rapidjson::Document& json);
 
+		static discpp::Channel RequestChannel(discpp::snowflake);
+
 		discpp::Message Send(std::string text, bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
 		discpp::Channel Modify(ModifyRequests& modify_requests);
 		discpp::Channel Delete();
@@ -99,9 +101,16 @@ namespace discpp {
 		void BulkDeleteMessage(std::vector<snowflake>& messages);
 		void DeletePermission(discpp::Permissions& permissions); // TODO: https://discordapp.com/developers/docs/resources/channel#delete-channel-permission
 		void EditPermissions(discpp::Permissions& permissions);
-
 		GuildInvite CreateInvite(int max_age, int max_uses, bool temporary, bool unique);
 		std::vector<GuildInvite> GetInvites();
+
+        bool operator==(GuildChannel& other) const {
+            return this->id == other.id;
+        }
+
+        bool operator!=(GuildChannel& other) const {
+            return this->id != other.id;
+        }
 
 		bool nsfw; /**< Whether or not the current channel is not safe for work. */
 		int bitrate; /**< The bitrate (in bits) of the voice channel. */
@@ -122,6 +131,14 @@ namespace discpp {
 
 		void GroupDMAddRecipient(discpp::User& user);
 		void GroupDMRemoveRecipient(discpp::User& user);
+
+        bool operator==(GuildChannel& other) const {
+            return this->id == other.id;
+        }
+
+        bool operator!=(GuildChannel& other) const {
+            return this->id != other.id;
+        }
 
 		std::string icon; /**< Hashed icon for this channel. */
 		snowflake owner_id; /**< ID of the DM creator. */

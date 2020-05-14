@@ -15,10 +15,8 @@ namespace discpp {
 		 *
 		 * @return discpp::Channel, this is a constructor.
 		 */
-		auto it = discpp::globals::client_instance->channels.find(id);
-		if (it != discpp::globals::client_instance->channels.end()) {
-			*this = *it->second;
-		}
+
+		*this = globals::client_instance->GetChannel(id);
 	}
 
 	Channel::Channel(rapidjson::Document& json) {
@@ -261,29 +259,35 @@ namespace discpp {
 	}
 
 	std::vector<discpp::Message> Channel::GetPinnedMessages() {
-		/**
-		 * @brief Get all messages pinned to the channel.
-		 *
-		 * ```cpp
-		 *      channel.GetPinnedMessages();
-		 * ```
-		 *
-		 * @return std::vector<discpp::Message>
-		 */
+        /**
+         * @brief Get all messages pinned to the channel.
+         *
+         * ```cpp
+         *      channel.GetPinnedMessages();
+         * ```
+         *
+         * @return std::vector<discpp::Message>
+         */
 
-		rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) = "/pins"), DefaultHeaders(), {}, {});
-		
-		std::vector<discpp::Message> messages;
-		for (auto& message : result.GetArray()) {
-			rapidjson::Document message_json;
-			message_json.CopyFrom(message, message_json.GetAllocator());
-			messages.push_back(discpp::Message(message_json));
-		}
+        rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) = "/pins"),
+                                                    DefaultHeaders(), {}, {});
 
-		return messages;
-	}
+        std::vector<discpp::Message> messages;
+        for (auto &message : result.GetArray()) {
+            rapidjson::Document message_json;
+            message_json.CopyFrom(message, message_json.GetAllocator());
+            messages.push_back(discpp::Message(message_json));
+        }
 
-	GuildChannel::GuildChannel(rapidjson::Document& json) : Channel(json) {
+        return messages;
+    }
+
+    discpp::Channel Channel::RequestChannel(discpp::snowflake id) {
+        rapidjson::Document channel = SendGetRequest(Endpoint("/channels/" + std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+        return discpp::Channel(channel);
+    }
+
+    GuildChannel::GuildChannel(rapidjson::Document& json) : Channel(json) {
 		/**
 		 * @brief Constructs a discpp::GuildChannel object from json.
 		 *
@@ -313,12 +317,12 @@ namespace discpp {
 		category_id = GetIDSafely(json, "parent_id");
 	}
 
-	GuildChannel::GuildChannel(snowflake id, snowflake guild_id) : Channel(id) {
+	GuildChannel::GuildChannel(snowflake id, snowflake guild_id) {
 		/**
-		 * @brief Constructs a discpp::GuildChannel from id and guild
+		 * @brief Constructs a discpp::GuildChannel from id and guild's id.
 		 *
 		 * ```cpp
-		 *      discpp::GuildChannel GuildChannel(json);
+		 *      discpp::GuildChannel GuildChannel(channel_id, guild_id);
 		 * ```
 		 *
 		 * @param[in] id the id of the channel
@@ -331,7 +335,7 @@ namespace discpp {
 
 		auto channels = guild.channels.find(id);
 		if (channels != guild.channels.end()) {
-			*this = *channels->second;
+			*this = channels->second;
 		}
 	}
 
@@ -453,6 +457,25 @@ namespace discpp {
 
 		SendDeleteRequest(Endpoint("/channels/" + std::to_string(id) + "/permissions/" + std::to_string(permissions.role_user_id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
+
+    DMChannel::DMChannel(snowflake id) {
+        /**
+         * @brief Constructs a discpp::DMChannel from id.
+         *
+         * ```cpp
+         *      discpp::DMChannel GuildChannel(channel_id);
+         * ```
+         *
+         * @param[in] id the id of the channel
+         *
+         * @return discpp::DMChannel, this is a constructor.
+         */
+
+        auto private_channel = globals::client_instance->private_channels.find(id);
+        if (private_channel != globals::client_instance->private_channels.end()) {
+            *this = private_channel->second;
+        }
+    }
 
 	DMChannel::DMChannel(rapidjson::Document& json) : Channel(json) {
 		rapidjson::Value::ConstMemberIterator itr = json.FindMember("recipients");

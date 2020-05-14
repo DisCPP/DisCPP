@@ -238,6 +238,8 @@ namespace discpp {
     };
 
 	class Guild : public DiscordObject {
+    private:
+	    char flags;
 	public:
 		Guild() = default;
 		Guild(snowflake id);
@@ -245,9 +247,9 @@ namespace discpp {
 
 		discpp::Guild Modify(GuildModifyRequests modify_requests);
 		void DeleteGuild();
-		std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::GuildChannel>> GetChannels();
-        std::shared_ptr<discpp::GuildChannel> GetChannel(snowflake id);
-        std::shared_ptr<discpp::GuildChannel> CreateChannel(std::string name, std::string topic = "", ChannelType type = ChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discpp::Permissions> permission_overwrites = {}, discpp::Channel category = {}, bool nsfw = false);
+		std::unordered_map<discpp::snowflake, discpp::GuildChannel> GetChannels();
+        discpp::GuildChannel GetChannel(snowflake id);
+        discpp::GuildChannel CreateChannel(std::string name, std::string topic = "", ChannelType type = ChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discpp::Permissions> permission_overwrites = {}, discpp::Channel category = {}, bool nsfw = false);
 		void ModifyChannelPositions(std::vector<discpp::Channel>& new_channel_positions);
         std::shared_ptr<discpp::Member> GetMember(snowflake id);
 		void EnsureBotPermission(Permission req_perm);
@@ -278,48 +280,54 @@ namespace discpp {
 		discpp::GuildInvite GetVanityURL();
 		std::string GetWidgetImageURL(WidgetStyle widget_style = WidgetStyle::SHIELD);
 
-		std::unordered_map<snowflake, std::shared_ptr<discpp::Emoji>> GetEmojis();
-        std::shared_ptr<discpp::Emoji> GetEmoji(snowflake id);
-        std::shared_ptr<discpp::Emoji> CreateEmoji(std::string name, discpp::Image image, std::vector<discpp::Role>& roles);
-		std::shared_ptr<discpp::Emoji> ModifyEmoji(discpp::Emoji& emoji, std::string name, std::vector<discpp::Role>& roles);
+		std::unordered_map<snowflake, discpp::Emoji> GetEmojis();
+        discpp::Emoji GetEmoji(snowflake id);
+        discpp::Emoji CreateEmoji(std::string name, discpp::Image image, std::vector<discpp::Role>& roles);
+		discpp::Emoji ModifyEmoji(discpp::Emoji& emoji, std::string name, std::vector<discpp::Role>& roles);
 		void DeleteEmoji(discpp::Emoji& emoji);
 		std::string GetIconURL(discpp::ImageType imgType = discpp::ImageType::AUTO);
-    std::shared_ptr<discpp::Member> GetOwnerMember();
+        std::shared_ptr<discpp::Member> GetOwnerMember();
 		discpp::AuditLog GetAuditLog();
+
+		bool IsBotOwner();
+		bool IsEmbedEnabled();
+		bool IsWidgetEnabled();
+		bool IsLarge();
+		bool IsUnavailable();
 
 		std::string name; /**< Guild name. */
 		std::string icon; /**< Hashed guild icon. */
 		std::string splash; /**< Optional hashed guild splash. */
 		std::string discovery_splash; /**< Optional hashed discovery splash. */
-		bool owner; /**< Whether or not the bot is the owner of the guild. */
+		//bool owner; /**< Whether or not the bot is the owner of the guild. */
 		snowflake owner_id; /**< ID of the guild owner. */
 		int permissions; /**< Total permissions for the bot in the guild (does not include channel overrides). */
 		std::string region; /**< Voice region id for the guild. */
 		snowflake afk_channel_id; /**< ID of afk channel. */
 		int afk_timeout; /**< AFK timeout in seconds. */
-		bool embed_enabled;/**< Whether this guild is embeddable (e.g. widget). */
+		//bool embed_enabled;/**< Whether this guild is embeddable (e.g. widget). */
 		snowflake embed_channel_id;/**< If not null, the channel id that the widget will generate an invite to. */
 		discpp::specials::VerificationLevel verification_level; /**< Verification level required for the guild. */
 		discpp::specials::DefaultMessageNotificationLevel default_message_notifications; /**< Default message notifications level. */
 		discpp::specials::ExplicitContentFilterLevel explicit_content_filter; /**< Explicit content filter level. */
 		std::unordered_map<snowflake, std::shared_ptr<Role>> roles; /**< Roles in the guild. */
-		std::unordered_map<snowflake, std::shared_ptr<Emoji>> emojis; /**< Custom guild emojis. */
+		std::unordered_map<snowflake, Emoji> emojis; /**< Custom guild emojis. */
 		std::vector<std::string> features; /**< Enabled guild features. */
 		discpp::specials::MFALevel mfa_level; /**< Required MFA level for the guild. */
 		snowflake application_id; /**< Application id of the guild creator if it is bot-created. */
-		bool widget_enabled; /**< Whether or not the server widget is enabled. */
+		//bool widget_enabled; /**< Whether or not the server widget is enabled. */
 		snowflake widget_channel_id; /**< The channel id for the server widget. */
 		snowflake system_channel_id; /**< The id of the channel where guild notices such as welcome messages and boost events are posted. */
         int system_channel_flags; /**< System channel flags. */
         snowflake rules_channel_id; /**< The id of the channel where "PUBLIC" guilds display rules and/or guidelines. */
 		// @TODO: Convert to iso8601Time
 		std::string joined_at; /**< When this guild was joined at. */
-		bool large; /**< Whether this is considered a large guild. */
-		bool unavailable; /**< Whether this guild is unavailable. */
+		//bool large; /**< Whether this is considered a large guild. */
+		//bool unavailable; /**< Whether this guild is unavailable. */
 		int member_count; /**< Total number of members in this guild. */
 		std::vector<discpp::VoiceState> voice_states; /**< Array of partial voice state objects. */
 		std::unordered_map<snowflake, std::shared_ptr<Member>> members; /**< Users in the guild. */
-		std::unordered_map<snowflake, std::shared_ptr<GuildChannel>> channels; /**< Channels in the guild. */
+		std::unordered_map<snowflake, GuildChannel> channels; /**< Channels in the guild. */
 		int max_presences; /**< The maximum amount of presences for the guild (the default value, currently 25000, is in effect when null is returned). */
 		int max_members; /**< The maximum amount of members for the guild. */
 		std::string vanity_url_code; /**< The vanity url code for the guild. */

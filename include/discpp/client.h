@@ -55,7 +55,7 @@ namespace discpp {
 		discpp::User client_user; /**< discpp::User object representing current user. */
 		discpp::Logger* logger; /**< discpp::Logger object representing current logger. */
 
-		std::unordered_map<snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
+		//std::unordered_map<snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
 		std::unordered_map<snowflake, std::shared_ptr<Member>> members; /**< List of members the current bot can access. */
 		std::unordered_map<snowflake, std::shared_ptr<Guild>> guilds; /**< List of guilds the current bot can access. */
 		std::unordered_map<snowflake, std::shared_ptr<Message>> messages; /**< List of messages the current bot can access. */
@@ -95,6 +95,8 @@ namespace discpp {
         void UpdatePresence(discpp::Activity& activity);
 		discpp::User GetUser(discpp::snowflake id);
         std::vector<discpp::Connection> GetBotUserConnections();
+        discpp::Channel GetChannel(discpp::snowflake id);
+        discpp::DMChannel GetDMChannel(discpp::snowflake id);
         // std::vector<discpp::Channel> GetUserDMs(); // Not supported by bots.
         // discpp::Channel CreateGroupDM(std::vector<discpp::User> users); // Deprecated and will not be shown in the discord client.
 

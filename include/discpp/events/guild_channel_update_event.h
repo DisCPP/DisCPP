@@ -9,9 +9,9 @@
 namespace discpp {
 	class GuildChannelUpdateEvent : public Event {
 	public:
-		inline GuildChannelUpdateEvent(std::shared_ptr<discpp::GuildChannel> channel) : channel(channel) {}
+		inline GuildChannelUpdateEvent(discpp::GuildChannel channel) : channel(channel) {}
 
-		std::shared_ptr<discpp::GuildChannel> channel;
+		discpp::GuildChannel channel;
 	};
 }
 

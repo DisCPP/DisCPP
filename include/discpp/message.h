@@ -70,6 +70,7 @@ namespace discpp {
 	public:
 		Message() = default;
 		Message(snowflake id);
+		Message(snowflake message_id, snowflake channel_id);
 		Message(rapidjson::Document& json);
 
 		void AddReaction(discpp::Emoji emoji);
@@ -85,7 +86,7 @@ namespace discpp {
 		void PinMessage();
 		void UnpinMessage();
 
-        std::shared_ptr<discpp::Channel> channel;
+        discpp::Channel channel;
         std::shared_ptr<discpp::Guild> guild;
         std::shared_ptr<discpp::User> author;
 		std::string content;
@@ -95,7 +96,7 @@ namespace discpp {
 		bool mention_everyone;
 		std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::Member>> mentions;
 		std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::Role>> mentioned_roles;
-		std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::GuildChannel>> mention_channels;
+		std::unordered_map<discpp::snowflake, discpp::GuildChannel> mention_channels;
 		std::vector<discpp::Attachment> attachments;
 		std::vector<discpp::EmbedBuilder> embeds;
 		std::vector<discpp::Reaction> reactions;

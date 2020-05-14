@@ -4,6 +4,7 @@
 #include "discord_object.h"
 #include "user.h"
 #include "activity.h"
+#include "permission.h"
 
 #include <vector>
 
