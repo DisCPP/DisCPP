@@ -39,6 +39,7 @@ namespace discpp {
         } else {
             // Get the bot user
             rapidjson::Document user_json = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
+
             discpp::globals::client_instance->client_user = discpp::ClientUser(user_json);
         }
 

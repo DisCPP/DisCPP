@@ -47,35 +47,16 @@ namespace discpp {
 		std::string CreateMention();
 
 		bool IsBot();
-		bool System();
-		bool MFAEnabled();
+		bool IsSystemUser();
 
 		std::string username; /**< The user's username, not unique across the platform. */
 		unsigned short discriminator; /**< The user's 4-digit discord-tag. */
 		std::string avatar; /**< The user's avatar hash. */
-		//bool bot; /**< Whether the user belongs to an OAuth2 application. */
-		//bool system; /**< Whether the user is an Official Discord System user (part of the urgent message system). */
-		//bool mfa_enabled; /**< Whether the user has two factor enabled on their account.*/
 		std::string locale; /**< The user's chosen language option. */
 		bool verified; /**< Whether the email on this account has been verified. */
 		std::string email; /**< The user's email. */
-		//int flags; /**< The flags on a user's account. */
 		discpp::specials::NitroSubscription premium_type; /**< The type of Nitro subscription on a user's account. */
 		int public_flags;
-	};
-
-	class ClientUser : public User {
-	public:
-	    ClientUser() = default;
-	    ClientUser(snowflake id) : User(id) {}
-	    ClientUser(rapidjson::Document& json);
-
-	    std::vector<Connection> GetUserConnections();
-
-	    bool mfa_enabled;
-        std::string locale;
-        bool verified;
-        std::string email;
 	};
 }
 

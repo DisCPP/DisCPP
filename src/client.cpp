@@ -588,4 +588,33 @@ namespace discpp {
 
         return discpp::DMChannel();
     }
+
+	std::vector<Connection> ClientUser::GetUserConnections() {
+		/**
+		 * @brief Create all connections of this user.
+		 *
+		 * ```cpp
+		 *      std::vector<discpp::Connection> conntections = client->GetUserConnections();
+		 * ```
+		 *
+		 * @return std::vector<discpp::Connection>
+		 */
+
+		rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
+
+		std::vector<Connection> connections;
+		for (auto const& connection : result.GetArray()) {
+			rapidjson::Document connection_json;
+			connection_json.CopyFrom(connection, connection_json.GetAllocator());
+			connections.push_back(discpp::Connection(connection_json));
+		}
+
+		return connections;
+	}
+
+	ClientUser::ClientUser(rapidjson::Document& json) : User(json) {
+		mfa_enabled = GetDataSafely<bool>(json, "mfa_enabled");
+		locale = GetDataSafely<std::string>(json, "locale");
+		verified = GetDataSafely<bool>(json, "verified");
+	}
 }

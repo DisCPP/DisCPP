@@ -244,7 +244,7 @@ namespace discpp {
 		return discpp::Message(result);
 	}
 
-	inline void Channel::TriggerTypingIndicator() {
+	void Channel::TriggerTypingIndicator() {
 		/**
 		 * @brief Triggers a typing indicator.
 		 *

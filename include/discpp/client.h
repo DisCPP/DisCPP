@@ -47,6 +47,20 @@ namespace discpp {
         AuthenticationException() : std::runtime_error("Invalid token, failed to connect to gateway") {}
 	};
 
+	class ClientUser : public User {
+	public:
+		ClientUser() = default;
+		ClientUser(snowflake id) : User(id) {}
+		ClientUser(rapidjson::Document & json);
+
+		std::vector<Connection> GetUserConnections();
+
+		bool mfa_enabled;
+		std::string locale;
+		bool verified;
+		std::string email;
+	};
+
 	class Client {
 	public:
 		std::string token; /**< Token for the current client. */
@@ -97,6 +111,11 @@ namespace discpp {
         std::vector<discpp::Connection> GetBotUserConnections();
         discpp::Channel GetChannel(discpp::snowflake id);
         discpp::DMChannel GetDMChannel(discpp::snowflake id);
+		std::vector<Connection> GetUserConnections();
+
+		bool user_mfa_enabled;
+		std::string user_locale;
+		bool user_verified;
         // std::vector<discpp::Channel> GetUserDMs(); // Not supported by bots.
         // discpp::Channel CreateGroupDM(std::vector<discpp::User> users); // Deprecated and will not be shown in the discord client.
 

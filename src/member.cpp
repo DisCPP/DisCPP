@@ -80,11 +80,11 @@ namespace discpp {
 		}
 	}
 
-	inline bool Member::IsDeafened() {
+	bool Member::IsDeafened() {
 	    return (flags & 0b1) == 0b1;
 	}
 
-	inline bool Member::IsMuted() {
+	bool Member::IsMuted() {
         return (flags & 0b10) == 0b10;
 	}
 
@@ -133,7 +133,7 @@ namespace discpp {
 		SendPatchRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/" + std::to_string(id)), DefaultHeaders({ { "Content-Type", "application/json" } }), guild_id, RateLimitBucketType::GUILD, body);
 	}
 
-	inline void Member::AddRole(discpp::Role& role) {
+	void Member::AddRole(discpp::Role& role) {
 		/**
 		 * @brief Adds a role to a guild member.
 		 *
@@ -149,7 +149,7 @@ namespace discpp {
 		SendPutRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 	}
 
-	inline void Member::RemoveRole(discpp::Role& role) {
+	void Member::RemoveRole(discpp::Role& role) {
 		/**
 		 * @brief Removes a role to a guild member.
 		 *
