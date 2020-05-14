@@ -18,8 +18,8 @@ namespace discpp {
 		Member(rapidjson::Document& json, discpp::Guild& guild);
 
 		void ModifyMember(std::string nick, std::vector<discpp::Role>& roles, bool mute, bool deaf, snowflake channel_id);
-		void AddRole(discpp::Role& role);
-		void RemoveRole(discpp::Role& role);
+		inline void AddRole(discpp::Role& role);
+		inline void RemoveRole(discpp::Role& role);
 		bool IsBanned();
 		inline bool IsDeafened();
 		inline bool IsMuted();
@@ -37,9 +37,8 @@ namespace discpp {
 		discpp::Permissions permissions; /**< Guild permissions for the current member. */
 		discpp::Activity activity; /**< Activity for the current member. */
 		int hierarchy; /**< Role hierarchy for the current member. */
-
 	private:
-	    char flags;
+	    char flags; /**< Internal use only. */
 	};
 }
 

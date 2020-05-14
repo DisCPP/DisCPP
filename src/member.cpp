@@ -134,7 +134,7 @@ namespace discpp {
 		SendPatchRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/" + std::to_string(id)), DefaultHeaders({ { "Content-Type", "application/json" } }), guild_id, RateLimitBucketType::GUILD, body);
 	}
 
-	void Member::AddRole(discpp::Role& role) {
+	inline void Member::AddRole(discpp::Role& role) {
 		/**
 		 * @brief Adds a role to a guild member.
 		 *
@@ -150,7 +150,7 @@ namespace discpp {
 		SendPutRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 	}
 
-	void Member::RemoveRole(discpp::Role& role) {
+	inline void Member::RemoveRole(discpp::Role& role) {
 		/**
 		 * @brief Removes a role to a guild member.
 		 *
