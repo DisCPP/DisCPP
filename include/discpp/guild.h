@@ -286,7 +286,7 @@ namespace discpp {
 		discpp::Emoji ModifyEmoji(discpp::Emoji& emoji, std::string name, std::vector<discpp::Role>& roles);
 		void DeleteEmoji(discpp::Emoji& emoji);
 		std::string GetIconURL(discpp::ImageType imgType = discpp::ImageType::AUTO);
-        std::shared_ptr<discpp::Member> GetOwnerMember();
+        inline std::shared_ptr<discpp::Member> GetOwnerMember();
 		discpp::AuditLog GetAuditLog();
 
 		bool IsBotOwner();

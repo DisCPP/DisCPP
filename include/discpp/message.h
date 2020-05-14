@@ -83,8 +83,11 @@ namespace discpp {
 		discpp::Message EditMessage(discpp::EmbedBuilder embed);
 		discpp::Message EditMessage(int flags);
 		void DeleteMessage();
-		void PinMessage();
-		void UnpinMessage();
+		inline void PinMessage();
+		inline void UnpinMessage();
+        inline bool IsTTS();
+        inline bool MentionsEveryone();
+        inline bool IsPinned();
 
         discpp::Channel channel;
         std::shared_ptr<discpp::Guild> guild;
@@ -92,21 +95,20 @@ namespace discpp {
 		std::string content;
 		std::string timestamp; // TODO: Convert to iso8601Time
 		std::string edited_timestamp; // TODO: Convert to iso8601Time
-		bool tts;
-		bool mention_everyone;
 		std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::Member>> mentions;
 		std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::Role>> mentioned_roles;
 		std::unordered_map<discpp::snowflake, discpp::GuildChannel> mention_channels;
 		std::vector<discpp::Attachment> attachments;
 		std::vector<discpp::EmbedBuilder> embeds;
 		std::vector<discpp::Reaction> reactions;
-		bool pinned;
 		snowflake webhook_id;
 		int type;
 		discpp::MessageActivity activity;
 		discpp::MessageApplication application;
 		discpp::MessageReference message_reference;
 		int flags;
+	private:
+	    char bit_flags; /**< For internal use only. */
 	};
 }
 

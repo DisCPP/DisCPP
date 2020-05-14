@@ -18,11 +18,13 @@ namespace discpp {
 		Member(snowflake id, discpp::Guild& guild);
 		Member(rapidjson::Document& json, discpp::Guild& guild);
 
-		void ModifyMember(std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf, snowflake channel_id);
-		void AddRole(discpp::Role role);
-		void RemoveRole(discpp::Role role);
+		void ModifyMember(std::string nick, std::vector<discpp::Role>& roles, bool mute, bool deaf, snowflake channel_id);
+		inline void AddRole(discpp::Role& role);
+		inline void RemoveRole(discpp::Role& role);
 		bool IsBanned();
-		bool HasRole(discpp::Role role);
+		inline bool IsDeafened();
+		inline bool IsMuted();
+		bool HasRole(discpp::Role& role);
 		bool HasPermission(discpp::Permission perm);
 
 		discpp::User user; /**< The user this guild member represents. */
@@ -33,11 +35,11 @@ namespace discpp {
 		std::string joined_at; /**< When the user joined the guild. */
         // TODO: Convert to iso8601Time
 		std::string premium_since; /**< When the user started boosting the guild. */
-		bool deaf; /**< Whether the user is deafened in voice channels. */
-		bool mute; /**< Whether the user is muted in voice channels. */
 		discpp::Permissions permissions; /**< Guild permissions for the current member. */
 		discpp::Activity activity; /**< Activity for the current member. */
 		int hierarchy; /**< Role hierarchy for the current member. */
+	private:
+	    char flags; /**< Internal use only. */
 	};
 }
 

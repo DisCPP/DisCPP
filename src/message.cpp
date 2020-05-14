@@ -59,8 +59,12 @@ namespace discpp {
 		content = GetDataSafely<std::string>(json, "content");
 		timestamp = GetDataSafely<std::string>(json, "timestamp");
 		edited_timestamp = GetDataSafely<std::string>(json, "edited_timestamp");
-		tts = GetDataSafely<bool>(json, "tts");
-		mention_everyone = GetDataSafely<bool>(json, "mention_everyone");
+		if (GetDataSafely<bool>(json, "tts")) {
+		    bit_flags |= 0b1;
+		}
+		if (GetDataSafely<bool>(json, "mention_everyone")) {
+		    bit_flags |= 0b10;
+		}
 		if (ContainsNotNull(json, "mentions")) {
             for (auto const &mention : json["mentions"].GetArray()) {
                 if (!mention.IsNull()) {
@@ -148,13 +152,27 @@ namespace discpp {
                 reactions.push_back(tmp);
             }
         }
-		pinned = GetDataSafely<bool>(json, "pinned");
+        if (GetDataSafely<bool>(json, "pinned")) {
+            bit_flags |= 0b100;
+        }
 		webhook_id = GetIDSafely(json, "webhook_id");
 		type = GetDataSafely<int>(json, "type");
 		activity = ConstructDiscppObjectFromJson(json, "activity", discpp::MessageActivity());
         application = ConstructDiscppObjectFromJson(json, "application", discpp::MessageApplication());
         message_reference = ConstructDiscppObjectFromJson(json, "message_reference", discpp::MessageReference());
 		flags = GetDataSafely<int>(json, "flags");
+	}
+
+    inline bool Message::IsTTS() {
+        return (bit_flags & 0b1) == 0b1;
+    }
+
+    inline bool Message::MentionsEveryone() {
+        return (bit_flags & 0b10) == 0b10;
+    }
+
+	inline bool Message::IsPinned() {
+        return (bit_flags & 0b100) == 0b100;
 	}
 
 	void Message::AddReaction(discpp::Emoji emoji) {
@@ -365,7 +383,7 @@ namespace discpp {
 		*this = discpp::Message();
 	}
 
-	void Message::PinMessage() {
+	inline void Message::PinMessage() {
 		/**
 		 * @brief Pin the message to the channel.
 		 *
@@ -379,7 +397,7 @@ namespace discpp {
 		SendPutRequest(Endpoint("/channels/" + std::to_string(channel.id) + "/pins/" + std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 
-	void Message::UnpinMessage() {
+	inline void Message::UnpinMessage() {
 		/**
 		 * @brief Unpin this message.
 		 *

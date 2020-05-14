@@ -72,11 +72,23 @@ namespace discpp {
         }
 		joined_at = GetDataSafely<std::string>(json, "joined_at");
 		premium_since = GetDataSafely<std::string>(json, "premium_since");
-		deaf = GetDataSafely<bool>(json, "deaf");
-		mute = GetDataSafely<bool>(json, "mute");
+		if (GetDataSafely<bool>(json, "deaf")) {
+		    flags |= 0b1;
+		}
+		if (GetDataSafely<bool>(json, "mute")) {
+		    flags |= 0b10;
+		}
 	}
 
-	void Member::ModifyMember(std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf, snowflake channel_id) {
+	inline bool Member::IsDeafened() {
+	    return (flags & 0b1) == 0b1;
+	}
+
+	inline bool Member::IsMuted() {
+        return (flags & 0b10) == 0b10;
+	}
+
+	void Member::ModifyMember(std::string nick, std::vector<discpp::Role>& roles, bool mute, bool deaf, snowflake channel_id) {
 		/**
 		 * @brief Modifies this guild member.
 		 *
@@ -121,7 +133,7 @@ namespace discpp {
 		SendPatchRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/" + std::to_string(id)), DefaultHeaders({ { "Content-Type", "application/json" } }), guild_id, RateLimitBucketType::GUILD, body);
 	}
 
-	void Member::AddRole(discpp::Role role) {
+	inline void Member::AddRole(discpp::Role& role) {
 		/**
 		 * @brief Adds a role to a guild member.
 		 *
@@ -137,7 +149,7 @@ namespace discpp {
 		SendPutRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 	}
 
-	void Member::RemoveRole(discpp::Role role) {
+	inline void Member::RemoveRole(discpp::Role& role) {
 		/**
 		 * @brief Removes a role to a guild member.
 		 *
@@ -169,7 +181,7 @@ namespace discpp {
 		return itr != result.MemberEnd();
 	}
 
-	bool Member::HasRole(discpp::Role role) {
+	bool Member::HasRole(discpp::Role& role) {
 		/**
 		 * @brief Check if this member is a role.
 		 *

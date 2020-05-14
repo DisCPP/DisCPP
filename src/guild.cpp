@@ -1086,7 +1086,7 @@ namespace discpp {
 		}
 	}
 
-	std::shared_ptr<discpp::Member> Guild::GetOwnerMember() {
+	inline std::shared_ptr<discpp::Member> Guild::GetOwnerMember() {
 		/**
 		 * @brief Retrieve guild owner as a discpp::Member object
 		 *

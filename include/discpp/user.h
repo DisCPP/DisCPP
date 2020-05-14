@@ -42,7 +42,6 @@ namespace discpp {
 		User(rapidjson::Document& json);
 
 		discpp::Channel CreateDM();
-		std::vector<Connection> GetUserConnections();
 		std::string GetAvatarURL(ImageType imgType = ImageType::AUTO);
 		std::string CreatedAt();
 		std::string CreateMention();
@@ -63,6 +62,20 @@ namespace discpp {
 		//int flags; /**< The flags on a user's account. */
 		discpp::specials::NitroSubscription premium_type; /**< The type of Nitro subscription on a user's account. */
 		int public_flags;
+	};
+
+	class ClientUser : public User {
+	public:
+	    ClientUser() = default;
+	    ClientUser(snowflake id) : User(id) {}
+	    ClientUser(rapidjson::Document& json);
+
+	    std::vector<Connection> GetUserConnections();
+
+	    bool mfa_enabled;
+        std::string locale;
+        bool verified;
+        std::string email;
 	};
 }
 

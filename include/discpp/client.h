@@ -52,7 +52,7 @@ namespace discpp {
 		std::string token; /**< Token for the current client. */
 		ClientConfig* config; /**< Configuration for the current bot. */
 
-		discpp::User client_user; /**< discpp::User object representing current user. */
+		discpp::ClientUser client_user; /**< discpp::User object representing current user. */
 		discpp::Logger* logger; /**< discpp::Logger object representing current logger. */
 
 		//std::unordered_map<snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
