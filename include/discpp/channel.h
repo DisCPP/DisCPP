@@ -79,7 +79,7 @@ namespace discpp {
 		discpp::Channel Delete();
 		std::vector<discpp::Message> GetChannelMessages(int amount, GetChannelsMessagesMethod get_method = GetChannelsMessagesMethod::LIMIT);
 		discpp::Message FindMessage(snowflake message_id);
-		void TriggerTypingIndicator();
+		inlinevoid TriggerTypingIndicator();
 		std::vector<discpp::Message> GetPinnedMessages();
 
         ChannelType type; /**< The type of channel. */
