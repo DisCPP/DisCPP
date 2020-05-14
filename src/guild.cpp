@@ -968,7 +968,7 @@ namespace discpp {
 		return std::make_shared<discpp::Emoji>(discpp::Emoji(result));
 	}
 
-    std::shared_ptr<Emoji> Guild::CreateEmoji(std::string name, discpp::Image image, std::vector<discpp::Role>& roles) {
+    std::shared_ptr<Emoji> Guild::CreateEmoji(std::string name, discpp::Image& image, std::vector<discpp::Role>& roles) {
 		/**
 		 * @brief Create a guild emoji.
 		 *
@@ -1087,7 +1087,7 @@ namespace discpp {
 		}
 	}
 
-	std::shared_ptr<discpp::Member> Guild::GetOwnerMember() {
+	inline std::shared_ptr<discpp::Member> Guild::GetOwnerMember() {
 		/**
 		 * @brief Retrieve guild owner as a discpp::Member object
 		 *

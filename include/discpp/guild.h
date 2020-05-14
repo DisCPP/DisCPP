@@ -280,11 +280,11 @@ namespace discpp {
 
 		std::unordered_map<snowflake, std::shared_ptr<discpp::Emoji>> GetEmojis();
         std::shared_ptr<discpp::Emoji> GetEmoji(snowflake id);
-        std::shared_ptr<discpp::Emoji> CreateEmoji(std::string name, discpp::Image image, std::vector<discpp::Role>& roles);
+        std::shared_ptr<discpp::Emoji> CreateEmoji(std::string name, discpp::Image& image, std::vector<discpp::Role>& roles);
 		std::shared_ptr<discpp::Emoji> ModifyEmoji(discpp::Emoji& emoji, std::string name, std::vector<discpp::Role>& roles);
 		void DeleteEmoji(discpp::Emoji& emoji);
 		std::string GetIconURL(discpp::ImageType imgType = discpp::ImageType::AUTO);
-    std::shared_ptr<discpp::Member> GetOwnerMember();
+        inline std::shared_ptr<discpp::Member> GetOwnerMember();
 		discpp::AuditLog GetAuditLog();
 
 		std::string name; /**< Guild name. */
