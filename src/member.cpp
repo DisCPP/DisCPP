@@ -89,7 +89,7 @@ namespace discpp {
         return (flags & 0b10) == 0b10;
 	}
 
-	void Member::ModifyMember(std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf, snowflake channel_id) {
+	void Member::ModifyMember(std::string nick, std::vector<discpp::Role>& roles, bool mute, bool deaf, snowflake channel_id) {
 		/**
 		 * @brief Modifies this guild member.
 		 *
@@ -134,7 +134,7 @@ namespace discpp {
 		SendPatchRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/" + std::to_string(id)), DefaultHeaders({ { "Content-Type", "application/json" } }), guild_id, RateLimitBucketType::GUILD, body);
 	}
 
-	void Member::AddRole(discpp::Role role) {
+	void Member::AddRole(discpp::Role& role) {
 		/**
 		 * @brief Adds a role to a guild member.
 		 *
@@ -150,7 +150,7 @@ namespace discpp {
 		SendPutRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 	}
 
-	void Member::RemoveRole(discpp::Role role) {
+	void Member::RemoveRole(discpp::Role& role) {
 		/**
 		 * @brief Removes a role to a guild member.
 		 *
@@ -182,7 +182,7 @@ namespace discpp {
 		return itr != result.MemberEnd();
 	}
 
-	bool Member::HasRole(discpp::Role role) {
+	bool Member::HasRole(discpp::Role& role) {
 		/**
 		 * @brief Check if this member is a role.
 		 *

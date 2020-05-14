@@ -17,13 +17,13 @@ namespace discpp {
 		Member(snowflake id, discpp::Guild& guild);
 		Member(rapidjson::Document& json, discpp::Guild& guild);
 
-		void ModifyMember(std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf, snowflake channel_id);
-		void AddRole(discpp::Role role);
-		void RemoveRole(discpp::Role role);
+		void ModifyMember(std::string nick, std::vector<discpp::Role>& roles, bool mute, bool deaf, snowflake channel_id);
+		void AddRole(discpp::Role& role);
+		void RemoveRole(discpp::Role& role);
 		bool IsBanned();
 		inline bool IsDeafened();
 		inline bool IsMuted();
-		bool HasRole(discpp::Role role);
+		bool HasRole(discpp::Role& role);
 		bool HasPermission(discpp::Permission perm);
 
 		discpp::User user; /**< The user this guild member represents. */
