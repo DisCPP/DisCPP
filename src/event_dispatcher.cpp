@@ -43,7 +43,7 @@ namespace discpp {
             discpp::globals::client_instance->client_user = discpp::ClientUser(user_json);
         }
 
-        discpp::DispatchEvent(discpp::ReadyEvent());
+        discpp::DispatchEvent(discpp::ReadyEvent(result));
     }
 
     void EventDispatcher::ResumedEvent(rapidjson::Document& result) {

@@ -68,32 +68,11 @@ namespace discpp {
 		if (ContainsNotNull(json, "mentions")) {
             for (auto const &mention : json["mentions"].GetArray()) {
                 if (!mention.IsNull()) {
-                    // This has a weird layout, thats why theres so much json stuff.
-                    // The API docs says this type is an, "array of user objects, with an additional partial member field"
-
-                    rapidjson::Document mention_json;
+                    rapidjson::Document mention_json(rapidjson::kObjectType);
                     mention_json.CopyFrom(mention, mention_json.GetAllocator());
 
-                    rapidjson::Document new_member_json;
-                    new_member_json.SetObject();
-
-                    rapidjson::Document::AllocatorType &allocator = new_member_json.GetAllocator();
-                    new_member_json.AddMember("deaf", mention_json["member"]["deaf"], allocator);
-                    new_member_json.AddMember("deaf", mention_json["member"]["hoisted_role"], allocator);
-                    new_member_json.AddMember("deaf", mention_json["member"]["joined_at"], allocator);
-                    new_member_json.AddMember("deaf", mention_json["member"]["mute"], allocator);
-                    new_member_json.AddMember("deaf", mention_json["member"]["roles"], allocator);
-
-                    rapidjson::Value user(rapidjson::kObjectType);
-                    user.AddMember("id", mention_json["id"], allocator);
-                    user.AddMember("username", mention_json["username"], allocator);
-                    user.AddMember("discriminator", mention_json["discriminator"], allocator);
-                    user.AddMember("avatar", mention_json["avatar"], allocator);
-
-                    new_member_json.AddMember("user", user, allocator);
-
-                    std::shared_ptr<discpp::Member> tmp = guild->GetMember(SnowflakeFromString(new_member_json["user"]["id"].GetString()));
-                    mentions.insert({tmp->id, tmp});
+                    discpp::User tmp = discpp::User(SnowflakeFromString(mention_json["id"].GetString()));
+                    mentions.insert({ tmp.id, tmp });
                 }
             }
         }

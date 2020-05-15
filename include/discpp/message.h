@@ -95,7 +95,7 @@ namespace discpp {
 		std::string content;
 		std::string timestamp; // TODO: Convert to iso8601Time
 		std::string edited_timestamp; // TODO: Convert to iso8601Time
-		std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::Member>> mentions;
+		std::unordered_map<discpp::snowflake, discpp::User> mentions;
 		std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::Role>> mentioned_roles;
 		std::unordered_map<discpp::snowflake, discpp::GuildChannel> mention_channels;
 		std::vector<discpp::Attachment> attachments;

@@ -1,3 +1,4 @@
+#include <iomanip>
 #include "user.h"
 #include "client.h"
 
@@ -38,7 +39,7 @@ namespace discpp {
 
 		id = GetIDSafely(json, "id");
 		username = GetDataSafely<std::string>(json, "username");
-		discriminator = (unsigned short) strtoul(GetDataSafely<std::string>(json, "discriminator").c_str(), nullptr, 0);
+		discriminator = (unsigned short) strtoul(json["discriminator"].GetString(), nullptr, 10);
 		avatar = GetDataSafely<std::string>(json, "avatar");
 		if (GetDataSafely<bool>(json, "bot")) flags |= 0b1;
         if (GetDataSafely<bool>(json, "system")) flags |= 0b10;
@@ -163,10 +164,32 @@ namespace discpp {
     }
 
     bool User::IsBot() {
+        /**
+         * @brief Checks if the user is a bot
+         *
+         * @return bool
+         */
 	    return (flags & 0b1) == 0b1;
     }
 
     bool User::IsSystemUser() {
+        /**
+         * @brief Checks if the user is a discord staff user.
+         *
+         * @return bool
+         */
         return (flags & 0b10) == 0b10;
+    }
+
+    std::string User::GetDiscriminator() {
+        /**
+         * @brief Gets the users discriminator as a string.
+         *
+         * @return std::string
+         */
+        std::stringstream stream;
+        stream << std::setfill('0') << std::setw(4) << discriminator;
+
+        return stream.str();
     }
 }

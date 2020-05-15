@@ -58,11 +58,15 @@ namespace discpp {
 
         while (run) {
             for (size_t i = 0; i < futures.size(); i++) {
-                if (!futures[i].valid() ||
-                    !(futures[i].wait_for(std::chrono::seconds(0)) == std::future_status::ready)) {
-                    continue;
+                try {
+                    if (!futures[i].valid() ||
+                        !(futures[i].wait_for(std::chrono::seconds(0)) == std::future_status::ready)) {
+                        continue;
+                    }
+                    futures.erase(futures.begin() + i);
+                } catch (const std::exception& e) {
+                    logger->Warn("Caught exception: " + std::string(e.what()));
                 }
-                futures.erase(futures.begin() + i);
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
@@ -74,7 +78,7 @@ namespace discpp {
         if (!discpp::globals::client_instance->client_user.IsBot()) {
             throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            rapidjson::Document result = SendPostRequest(Endpoint("users/@me/relationships"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL, cpr::Body("{\"discriminator\":\"" + std::to_string(user.discriminator) + "\", \"username\":" + user.username + "\"}"));
+            rapidjson::Document result = SendPostRequest(Endpoint("users/@me/relationships"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL, cpr::Body("{\"discriminator\":\"" + user.GetDiscriminator() + "\", \"username\":" + user.username + "\"}"));
         }
     }
 
@@ -82,7 +86,7 @@ namespace discpp {
         if(discpp::globals::client_instance->client_user.IsBot()) {
             throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            rapidjson::Document result = SendDeleteRequest(Endpoint("users/@me/relationships/" + user.id), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            rapidjson::Document result = SendDeleteRequest(Endpoint("users/@me/relationships/" + std::to_string(user.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
     }
 
