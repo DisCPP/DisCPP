@@ -123,7 +123,7 @@ namespace discpp {
             (*embed_json)["description"].SetNull();
             (*embed_json)["description"].SetString(EscapeString(description).c_str(), embed_json->GetAllocator());
         } else {
-            embed_json->AddMember("description", rapidjson::StringRef(EscapeString(description)), embed_json->GetAllocator());
+            embed_json->AddMember("description", EscapeString(description), embed_json->GetAllocator());
         }
 
 		return *this;
@@ -144,9 +144,9 @@ namespace discpp {
 
         if (ContainsNotNull(*embed_json, "url")) {
             (*embed_json)["url"].SetNull();
-            (*embed_json)["url"].SetString(URIEncode(url).c_str(), embed_json->GetAllocator());
+            (*embed_json)["url"].SetString(url.c_str(), embed_json->GetAllocator());
         } else {
-            embed_json->AddMember("url", URIEncode(url), embed_json->GetAllocator());
+            embed_json->AddMember("url", url, embed_json->GetAllocator());
         }
 
 		return *this;
@@ -249,7 +249,7 @@ namespace discpp {
 		 */
 
         rapidjson::Value image(rapidjson::kObjectType);
-        image.AddMember("url", URIEncode(url), embed_json->GetAllocator());
+        image.AddMember("url", url, embed_json->GetAllocator());
 		if (height != -1) {
             image.AddMember("height", height, embed_json->GetAllocator());
 		}
@@ -283,7 +283,7 @@ namespace discpp {
 		 */
 
 		rapidjson::Value thumbnail(rapidjson::kObjectType);
-        thumbnail.AddMember("url", URIEncode(url), embed_json->GetAllocator());
+        thumbnail.AddMember("url", url, embed_json->GetAllocator());
         if (height != -1) {
             thumbnail.AddMember("height", height, embed_json->GetAllocator());
         }
@@ -317,7 +317,7 @@ namespace discpp {
 		 */
 
         rapidjson::Value video(rapidjson::kObjectType);
-        video.AddMember("url", URIEncode(url), embed_json->GetAllocator());
+        video.AddMember("url", url, embed_json->GetAllocator());
         if (height != -1) {
             video.AddMember("height", height, embed_json->GetAllocator());
         }
@@ -351,7 +351,7 @@ namespace discpp {
 
         rapidjson::Value provider(rapidjson::kObjectType);
         provider.AddMember("name", name, embed_json->GetAllocator());
-        provider.AddMember("url", URIEncode(url), embed_json->GetAllocator());
+        provider.AddMember("url", url, embed_json->GetAllocator());
 
         if (ContainsNotNull(*embed_json, "provider")) {
             (*embed_json)["provider"].SetNull();
@@ -387,10 +387,10 @@ namespace discpp {
         author.AddMember("name", EscapeString(name), embed_json->GetAllocator());
 
 		if (!url.empty()) {
-            author.AddMember("url", URIEncode(url), embed_json->GetAllocator());
+            author.AddMember("url", url, embed_json->GetAllocator());
 		}
 		if (!icon_url.empty()) {
-            author.AddMember("icon_url", URIEncode(icon_url), embed_json->GetAllocator());
+            author.AddMember("icon_url", icon_url, embed_json->GetAllocator());
 		}
 
         if (ContainsNotNull(*embed_json, "author")) {
