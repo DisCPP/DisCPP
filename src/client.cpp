@@ -58,15 +58,11 @@ namespace discpp {
 
         while (run) {
             for (size_t i = 0; i < futures.size(); i++) {
-                try {
-                    if (!futures[i].valid() ||
-                        !(futures[i].wait_for(std::chrono::seconds(0)) == std::future_status::ready)) {
-                        continue;
-                    }
-                    futures.erase(futures.begin() + i);
-                } catch (const std::exception& e) {
-                    logger->Warn("Caught exception: " + std::string(e.what()));
+                if (!futures[i].valid() ||
+                    !(futures[i].wait_for(std::chrono::seconds(0)) == std::future_status::ready)) {
+                    continue;
                 }
+                futures.erase(futures.begin() + i);
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
