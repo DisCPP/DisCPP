@@ -262,6 +262,7 @@ namespace discpp {
 		void UnbanMember(discpp::Member& member);
 		void UnbanMemberById(snowflake& user_id);
 		void KickMember(discpp::Member& member);
+        void KickMemberById(snowflake& member_id);
         std::shared_ptr<discpp::Role> GetRole(snowflake id);
         std::shared_ptr<discpp::Role> CreateRole(std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
 		void ModifyRolePositions(std::vector<discpp::Role>& new_role_positions);
