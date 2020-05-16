@@ -339,6 +339,20 @@ namespace discpp {
 		}
 	}
 
+	std::shared_ptr<discpp::Guild> GuildChannel::GetGuild() {
+	    /**
+	     * @brief Returns owning guild object
+	     *
+	     * ```cpp
+	     *      discpp::Guild = channel.GetGuild();
+	     * ```
+	     *
+	     * @return discpp::Guild
+	     */
+        std::shared_ptr<Guild> tmp = globals::client_instance->GetGuild(guild_id);
+        return tmp;
+	}
+
 	void GuildChannel::BulkDeleteMessage(std::vector<snowflake>& messages) {
 		/**
 		 * @brief Delete several messages (2-100).
@@ -456,6 +470,27 @@ namespace discpp {
 		 */
 
 		SendDeleteRequest(Endpoint("/channels/" + std::to_string(id) + "/permissions/" + std::to_string(permissions.role_user_id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+	}
+
+	std::unordered_map<discpp::snowflake, discpp::GuildChannel> CategoryChannel::GetChildren() {
+	    /**
+	     * @brief Lists children channels for this category.
+	     * ```cpp
+	     *      std::unordered_map<discpp::snowflake, discpp::GuildChannel> children = category.GetChildren();
+	     * ```
+	     *
+	     * @return std::unordered_map<discpp::snowflake, discpp::GuildChannel>
+	     */
+
+	    std::unordered_map<discpp::snowflake, discpp::GuildChannel> tmp;
+	    for (auto const chnl : this->GetGuild()->channels) {
+	        if (chnl.second.category_id == this->id) {
+                tmp.insert({chnl.first, chnl.second});
+	        } else {
+	            continue;
+	        }
+	    }
+	    return tmp;
 	}
 
     DMChannel::DMChannel(snowflake id) {

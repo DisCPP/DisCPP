@@ -536,16 +536,22 @@ void discpp::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBuc
 	if (HeaderContains(header, "x-ratelimit-global")) {
 		obj = &global_ratelimit;
 	} else if (HeaderContains(header, "x-ratelimit-limit")) {
-		if (ratelimit_bucket == RateLimitBucketType::CHANNEL) {
-			obj = &channel_ratelimit[object];
-		} else if (ratelimit_bucket == RateLimitBucketType::GUILD) {
-			obj = &guild_ratelimit[object];
-		} else if (ratelimit_bucket == RateLimitBucketType::WEBHOOK) {
-			obj = &webhook_ratelimit[object];
-		} else if (ratelimit_bucket == RateLimitBucketType::GLOBAL) {
-			obj = &global_ratelimit;
-		} else {
-			throw std::runtime_error("RateLimitBucketType is invalid!");
+		switch (ratelimit_bucket) {
+		    case RateLimitBucketType::CHANNEL:
+		        obj = &channel_ratelimit[object];
+		        break;
+		    case RateLimitBucketType::GUILD:
+		        obj = &guild_ratelimit[object];
+		        break;
+		    case RateLimitBucketType::WEBHOOK:
+		        obj = &webhook_ratelimit[object];
+		        break;
+		    case RateLimitBucketType::GLOBAL:
+		        obj = &global_ratelimit;
+		        break;
+		    default:
+		        throw std::runtime_error("Invalid RateLimitBucketType!");
+		        break;
 		}
 	} else {
 		return;
@@ -557,10 +563,8 @@ void discpp::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBuc
 }
 
 time_t discpp::TimeFromSnowflake(snowflake snow) {
-	int64_t unix = ((snow >> 22) + 1420070400000) / 1000;
-	time_t unix_time = unix;
-
-	return unix_time;
+    constexpr static uint64_t discord_epoch = 1420070400000;
+    return ((snow >> 22) + discord_epoch) / 1000;
 }
 
 std::string discpp::FormatTimeFromSnowflake(snowflake snow) {

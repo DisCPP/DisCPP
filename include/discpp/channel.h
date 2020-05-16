@@ -81,11 +81,7 @@ namespace discpp {
 		discpp::Channel Delete();
 		std::vector<discpp::Message> GetChannelMessages(int amount, GetChannelsMessagesMethod get_method = GetChannelsMessagesMethod::LIMIT);
 		discpp::Message FindMessage(snowflake message_id);
-<<<<<<< Updated upstream
 		void TriggerTypingIndicator();
-=======
-		inline void TriggerTypingIndicator();
->>>>>>> Stashed changes
 		std::vector<discpp::Message> GetPinnedMessages();
 
         ChannelType type; /**< The type of channel. */
@@ -105,6 +101,8 @@ namespace discpp {
 		void BulkDeleteMessage(std::vector<snowflake>& messages);
 		void DeletePermission(discpp::Permissions& permissions); // TODO: https://discordapp.com/developers/docs/resources/channel#delete-channel-permission
 		void EditPermissions(discpp::Permissions& permissions);
+		std::shared_ptr<discpp::Guild> GetGuild();
+
 		GuildInvite CreateInvite(int max_age, int max_uses, bool temporary, bool unique);
 		std::vector<GuildInvite> GetInvites();
 
@@ -124,8 +122,16 @@ namespace discpp {
 		snowflake guild_id; /**< Guild id of the current channel. */
 		snowflake category_id; /**< ID of the parent category for a channel (each parent category can contain up to 50 channels). */
 		std::vector<discpp::Permissions> permissions; /**< Explicit permission overwrites for members and roles. */
-
 	};
+
+    class CategoryChannel : public GuildChannel {
+    public:
+        CategoryChannel() = default;
+        CategoryChannel(snowflake id, snowflake guild_id) : GuildChannel(id, guild_id) {}
+        CategoryChannel(rapidjson::Document& json) : GuildChannel(json) {}
+
+        std::unordered_map<discpp::snowflake, discpp::GuildChannel> GetChildren();
+    };
 
 	class DMChannel : public Channel {
 	public: 

@@ -248,6 +248,7 @@ namespace discpp {
 		discpp::Guild Modify(GuildModifyRequests modify_requests);
 		void DeleteGuild();
 		std::unordered_map<discpp::snowflake, discpp::GuildChannel> GetChannels();
+		std::unordered_map<discpp::snowflake, discpp::CategoryChannel> GetCategories();
         discpp::GuildChannel GetChannel(snowflake id);
         discpp::GuildChannel CreateChannel(std::string name, std::string topic = "", ChannelType type = ChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discpp::Permissions> permission_overwrites = {}, discpp::Channel category = {}, bool nsfw = false);
 		void ModifyChannelPositions(std::vector<discpp::Channel>& new_channel_positions);

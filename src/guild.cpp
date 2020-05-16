@@ -224,6 +224,18 @@ namespace discpp {
 		return channels;
 	}
 
+    std::unordered_map<discpp::snowflake, discpp::CategoryChannel> Guild::GetCategories() {
+	    std::unordered_map<discpp::snowflake, discpp::CategoryChannel> tmp;
+	    for (auto const chnl : this->GetChannels()) {
+	        if (chnl.second.type == discpp::ChannelType::GROUP_CATEGORY) {
+	            tmp.insert({chnl.first, CategoryChannel(chnl.first, chnl.second.guild_id)});
+	        } else {
+	            continue;
+	        }
+	    }
+	    return tmp;
+	}
+
     discpp::GuildChannel Guild::GetChannel(snowflake id) {
 	    auto it = channels.find(id);
 	    if (it != channels.end()) {
