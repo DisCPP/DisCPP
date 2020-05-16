@@ -263,6 +263,7 @@ namespace discpp {
 		void UnbanMember(discpp::Member& member);
 		void UnbanMemberById(snowflake& user_id);
 		void KickMember(discpp::Member& member);
+        void KickMemberById(snowflake& member_id);
         std::shared_ptr<discpp::Role> GetRole(snowflake id);
         std::shared_ptr<discpp::Role> CreateRole(std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
 		void ModifyRolePositions(std::vector<discpp::Role>& new_role_positions);
@@ -358,11 +359,10 @@ namespace discpp {
              *
              * @return discpp::VoiceState, this is a constructor.
              */
-            guild_id = SnowflakeFromString(json["guild_id"].GetString());
-            channel_id = SnowflakeFromString(json["channel_id"].GetString());
+            guild_id = GetIDSafely(json, "guild_id");
+            channel_id = GetIDSafely(json, "channel_id");
             user_id = SnowflakeFromString(json["user_id"].GetString());
-            rapidjson::Value::ConstMemberIterator itr = json.FindMember("member");
-            if (itr != json.MemberEnd() && !json["member"].IsNull()) {
+            if (ContainsNotNull(json, "member")) {
                 rapidjson::Document member_json; 
                 member_json.CopyFrom(json["member"], member_json.GetAllocator());
 
@@ -374,7 +374,7 @@ namespace discpp {
             mute = json["mute"].GetBool();
             self_deaf = json["self_deaf"].GetBool();
             self_mute = json["self_mute"].GetBool();
-            self_stream = json["self_stream"].GetBool();
+            self_stream = GetDataSafely<bool>(json, "self_stream");
             suppress = json["suppress"].GetBool();
         }
 

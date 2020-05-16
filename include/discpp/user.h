@@ -35,7 +35,7 @@ namespace discpp {
 	class User : public DiscordObject {
 	private:
         char flags;
-
+        unsigned short discriminator;
 	public:
 		User() = default;
 		User(snowflake id);
@@ -45,12 +45,12 @@ namespace discpp {
 		std::string GetAvatarURL(ImageType imgType = ImageType::AUTO);
 		std::string CreatedAt();
 		std::string CreateMention();
+		std::string GetDiscriminator();
 
 		bool IsBot();
 		bool IsSystemUser();
 
 		std::string username; /**< The user's username, not unique across the platform. */
-		unsigned short discriminator; /**< The user's 4-digit discord-tag. */
 		std::string avatar; /**< The user's avatar hash. */
 		std::string locale; /**< The user's chosen language option. */
 		bool verified; /**< Whether the email on this account has been verified. */

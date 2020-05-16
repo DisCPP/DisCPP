@@ -495,9 +495,7 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
-		Guild::EnsureBotPermission(Permission::BAN_MEMBERS);
-		cpr::Body body("{\"reason\": \"" + EscapeString(reason) + "\"}");
-		SendPutRequest(Endpoint("/guilds/" + std::to_string(id) + "/bans/" + std::to_string(member.user.id)), DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
+		BanMemberById(member.user.id, reason);
 	}
 
     void Guild::BanMemberById(discpp::snowflake& user_id, std::string reason) {
@@ -530,8 +528,7 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
-		Guild::EnsureBotPermission(Permission::BAN_MEMBERS);
-		SendDeleteRequest(Endpoint("/guilds/" + std::to_string(id) + "/bans/" + std::to_string(member.user.id)), DefaultHeaders(), id, RateLimitBucketType::GUILD);
+		UnbanMemberById(member.user.id);
 	}
 
     void Guild::UnbanMemberById(discpp::snowflake& user_id) {
@@ -562,8 +559,12 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
-		Guild::EnsureBotPermission(Permission::KICK_MEMBERS);
-		SendDeleteRequest(Endpoint("guilds/" + std::to_string(id) + "/members/" + std::to_string(member.user.id)), DefaultHeaders(), id, RateLimitBucketType::GUILD);
+		KickMemberById(member.user.id);
+	}
+
+    void Guild::KickMemberById(snowflake& member_id) {
+        Guild::EnsureBotPermission(Permission::KICK_MEMBERS);
+        SendDeleteRequest(Endpoint("guilds/" + std::to_string(id) + "/members/" + std::to_string(member_id)), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
 	std::shared_ptr<discpp::Role> Guild::GetRole(snowflake id) {
