@@ -291,18 +291,23 @@ namespace discpp {
     }
 
     void EventDispatcher::MessageUpdateEvent(rapidjson::Document& result) {
-        auto message = discpp::globals::client_instance->messages.find(SnowflakeFromString(result["id"].GetString()));
+        auto message_it = discpp::globals::client_instance->messages.find(SnowflakeFromString(result["id"].GetString()));
 
-        if (message != discpp::globals::client_instance->messages.end()) {
+        discpp::Message old_message;
+        discpp::Message edited_message;
+        bool is_edited = ContainsNotNull(result, "edited_timestamp");
+        if (message_it != discpp::globals::client_instance->messages.end()) {
             if (discpp::globals::client_instance->messages.size() >= discpp::globals::client_instance->message_cache_count) {
                 discpp::globals::client_instance->messages.erase(discpp::globals::client_instance->messages.begin());
             }
 
-            discpp::Message old_message(SnowflakeFromString(result["id"].GetString()));
-            bool is_edited = ContainsNotNull(result, "edited_timestamp");
-
-            discpp::DispatchEvent(discpp::MessageUpdateEvent(*message->second, old_message, is_edited));
+            old_message = discpp::Message(SnowflakeFromString(result["id"].GetString()));
+            edited_message = *message_it->second;
+        } else {
+            edited_message = discpp::Message(result);
         }
+
+        discpp::DispatchEvent(discpp::MessageUpdateEvent(edited_message, old_message, is_edited));
     }
 
     void EventDispatcher::MessageDeleteEvent(rapidjson::Document& result) {
