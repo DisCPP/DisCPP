@@ -39,7 +39,7 @@ namespace discpp {
 
 		id = GetIDSafely(json, "id");
 		username = GetDataSafely<std::string>(json, "username");
-		discriminator = (unsigned short) strtoul(json["discriminator"].GetString(), nullptr, 10);
+		discriminator = (unsigned short) strtoul(GetDataSafely<std::string>(json, "discriminator").c_str(), nullptr, 10);
 		avatar = GetDataSafely<std::string>(json, "avatar");
 		if (GetDataSafely<bool>(json, "bot")) flags |= 0b1;
         if (GetDataSafely<bool>(json, "system")) flags |= 0b10;

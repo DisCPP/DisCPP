@@ -62,6 +62,7 @@ namespace discpp {
 		std::string message_json_str = "{\"content\":\"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
 		message_json.Parse(message_json_str);
 
+		// Send a file filled with message contents if the message is more than 2000 characters.
 		if (escaped_text.size() >= 2000) {
 			// Write message to file
 			std::ofstream message("message.txt", std::ios::out | std::ios::binary);
@@ -89,10 +90,10 @@ namespace discpp {
 		}
 
 		cpr::Body body;
-		if (embed != nullptr) {
+		if (embed != nullptr) { // Set the HTTP payload to an embed.
 		    rapidjson::Document embed_json = embed->ToJson();
 			body = cpr::Body("{\"embed\": " + DumpJson(embed_json) + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
-		} else if (!files.empty()) {
+		} else if (!files.empty()) { // Send files.
 			cpr::Multipart multipart_data{};
 
 			for (int i = 0; i < files.size(); i++) {
@@ -107,14 +108,12 @@ namespace discpp {
 
 			rapidjson::Document result_json(rapidjson::kObjectType);
 			result_json.Parse(response.text);
+
 			return discpp::Message(result_json);
 		} else {
-			rapidjson::StringBuffer buffer;
-			rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-			message_json.Accept(writer);
-			std::string json_payload = buffer.GetString();
-			body = cpr::Body(json_payload);
+			body = cpr::Body(DumpJson(message_json));
 		}
+
 		rapidjson::Document result = SendPostRequest(Endpoint("/channels/" + std::to_string(id) + "/messages"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
 		return discpp::Message(result);
