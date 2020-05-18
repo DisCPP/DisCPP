@@ -296,17 +296,14 @@ namespace discpp {
         auto message_it = discpp::globals::client_instance->messages.find(SnowflakeFromString(result["id"].GetString()));
 
         discpp::Message old_message;
-        discpp::Message edited_message;
+        discpp::Message edited_message = discpp::Message(result);
         bool is_edited = ContainsNotNull(result, "edited_timestamp");
         if (message_it != discpp::globals::client_instance->messages.end()) {
             if (discpp::globals::client_instance->messages.size() >= discpp::globals::client_instance->message_cache_count) {
                 discpp::globals::client_instance->messages.erase(discpp::globals::client_instance->messages.begin());
             }
 
-            old_message = discpp::Message(SnowflakeFromString(result["id"].GetString()));
-            edited_message = *message_it->second;
-        } else {
-            edited_message = discpp::Message(result);
+            old_message = *message_it->second;
         }
 
         discpp::DispatchEvent(discpp::MessageUpdateEvent(edited_message, old_message, is_edited));
