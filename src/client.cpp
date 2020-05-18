@@ -506,9 +506,7 @@ namespace discpp {
                     timer += (time(NULL) - timer);
                 }
 
-                // std::this_thread::sleep_for(std::chrono::milliseconds(heartbeat_interval - 10));
-
-                if (!heartbeat_acked) {
+                if (!heartbeat_acked && !reconnecting) {
                     logger->Warn(LogTextColor::YELLOW + "Heartbeat wasn't acked, trying to reconnect...");
                     disconnected = true;
 
@@ -516,7 +514,7 @@ namespace discpp {
                 }
             }
         } catch (std::exception& e) {
-            logger->Error(LogTextColor::RED + "ERROR: " + e.what());
+            logger->Error(LogTextColor::RED + "[HEARTBEAT THREAD] Exception: " + e.what());
         }
     }
 
