@@ -79,7 +79,9 @@ namespace discpp {
             std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
             auto guild_chan_it = guild->channels.find(updated_channel.id);
-            guild_chan_it->second = updated_channel;
+            if (guild_chan_it != guild->channels.end()) {
+                guild_chan_it->second = updated_channel;
+            }
 
             discpp::DispatchEvent(discpp::GuildChannelUpdateEvent(updated_channel));
         } else {
