@@ -92,7 +92,7 @@ namespace discpp {
 		discpp::snowflake id; /**< ID of the current emoji */
 		std::string name; /**< Name of the current emoji */
 		std::wstring unicode; /**< Unicode representation of the current emoji */
-		std::vector<discpp::Role> roles; /**< Roles */
+		std::vector<discpp::snowflake> roles; /**< Roles */
 		discpp::User user;
 		bool require_colons;
 		bool managed;

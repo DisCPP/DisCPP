@@ -136,7 +136,7 @@ namespace discpp {
 	}
 
 	void IterateThroughNotNullJson(rapidjson::Document& json, std::function<void(rapidjson::Document&)> func);
-    bool ContainsNotNull(rapidjson::Document& json, char * value_name);
+    bool ContainsNotNull(rapidjson::Document& json, const char * value_name);
     std::string DumpJson(rapidjson::Document& json);
     std::string DumpJson(rapidjson::Value& json);
     rapidjson::Document GetDocumentInsideJson(rapidjson::Document &json, const char* value_name);

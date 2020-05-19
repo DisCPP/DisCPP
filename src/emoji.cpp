@@ -58,7 +58,7 @@ namespace discpp {
 			for (auto& role : json["roles"].GetArray()) {
 				rapidjson::Document role_json;
 				role_json.CopyFrom(role, role_json.GetAllocator());
-				roles.push_back(discpp::Role(role_json));
+				roles.emplace_back(SnowflakeFromString(role.GetString()));
 			}
 		}
 		if (ContainsNotNull(json, "user")) {
