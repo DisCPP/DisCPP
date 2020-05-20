@@ -1,5 +1,5 @@
 //
-// Created by sean_ on 5/3/2020.
+// Created by SeanOMik on 5/3/2020.
 //
 
 #include "audit_log.h"
