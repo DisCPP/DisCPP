@@ -57,9 +57,10 @@ namespace discpp {
         WebSocketStart();
 
         while (run) {
-            for (size_t i = 0; i < futures.size(); i++) {
+            for (size_t i = 0; i < futures.size();) {
                 if (!futures[i].valid() ||
                     !(futures[i].wait_for(std::chrono::seconds(0)) == std::future_status::ready)) {
+                    i++;
                     continue;
                 }
                 futures.erase(futures.begin() + i);

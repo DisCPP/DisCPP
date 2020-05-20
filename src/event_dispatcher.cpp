@@ -269,9 +269,7 @@ namespace discpp {
 
     void EventDispatcher::GuildRoleDeleteEvent(rapidjson::Document& result) {
         discpp::Guild guild(SnowflakeFromString((result["guild_id"].GetString())));
-
-        rapidjson::Document role_json = GetDocumentInsideJson(result, "role");
-        discpp::Role role(role_json);
+        discpp::Role role(SnowflakeFromString(result["role_id"].GetString()), guild);
 
         guild.roles.erase(role.id);
 

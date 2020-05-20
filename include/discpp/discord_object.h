@@ -12,7 +12,7 @@ namespace discpp {
 		DiscordObject() = default;
 		DiscordObject(snowflake id);
 
-		snowflake id;
+		snowflake id = 0;
 
 		bool operator==(DiscordObject& other) const;
 		bool operator==(snowflake& other) const;

@@ -578,7 +578,7 @@ std::string discpp::FormatTimeFromSnowflake(snowflake snow) {
 	return buffer;
 }
 
-bool discpp::ContainsNotNull(rapidjson::Document &json, char *value_name) {
+bool discpp::ContainsNotNull(rapidjson::Document &json, const char *value_name) {
     rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
     if (itr != json.MemberEnd()) {
         return !json[value_name].IsNull();
