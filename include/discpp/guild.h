@@ -281,6 +281,7 @@ namespace discpp {
 		GuildEmbed ModifyGuildEmbed(snowflake channel_id, bool enabled);
 		discpp::GuildInvite GetVanityURL() const;
 		std::string GetWidgetImageURL(WidgetStyle widget_style = WidgetStyle::SHIELD) const;
+        std::shared_ptr<discpp::Member> RequestMemberIfNotExist(discpp::snowflake member_id);
 
 		std::unordered_map<snowflake, discpp::Emoji> GetEmojis();
         discpp::Emoji GetEmoji(snowflake id) const;

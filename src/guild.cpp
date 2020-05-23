@@ -1208,28 +1208,83 @@ namespace discpp {
     }
 
     discpp::AuditLog Guild::GetAuditLog() const {
+        /**
+         * @brief Returns an audit log object.
+         *
+         * ```cpp
+         *      discpp::GetAuditLog audit_log = ctx.guild->GetAuditLog();
+         * ```
+         *
+         * @return discpp::GetAuditLog
+         */
         rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/audit-logs"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 
         return discpp::AuditLog(result);
     }
 
     bool Guild::IsBotOwner() const {
+        /**
+         * @brief Returns if the client is the guild's owner.
+         *
+         * @return bool
+         */
         return (flags & 0b1) == 0b1;
     }
 
     bool Guild::IsEmbedEnabled() const {
+        /**
+         * @brief Returns if the guild has embeds enabled.
+         *
+         * @return bool
+         */
         return (flags & 0b10) == 0b10;
     }
 
     bool Guild::IsWidgetEnabled() const {
+        /**
+         * @brief Returns if the guild has widgets enabled.
+         *
+         * @return bool
+         */
         return (flags & 0b100) == 0b100;
     }
 
     bool Guild::IsLarge() const {
+        /**
+         * @brief Returns if the guild is large.
+         *
+         * @return bool
+         */
         return (flags & 0b1000) == 0b1000;
     }
 
     bool Guild::IsUnavailable() const {
+        /**
+         * @brief Returns if the guild has embeds enabled.
+         *
+         * @return bool
+         */
         return (flags & 0b10000) == 0b10000;
+    }
+
+    std::shared_ptr<discpp::Member> Guild::RequestMemberIfNotExist(discpp::snowflake member_id) {
+        /**
+         * @brief Returns the requested member.
+         *
+         * If its already cached return it, else send a REST request and return the requested member.
+         *
+         * @return std::shared_ptr<discpp::Member>
+         */
+        auto it = members.find(member_id);
+        if (it != members.end()) {
+            return it->second;
+        } else {
+            rapidjson::Document result = discpp::SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/members/" + std::to_string(member_id)), DefaultHeaders(), id, RateLimitBucketType::GUILD);
+
+            std::shared_ptr<discpp::Member> member = std::make_shared<discpp::Member>(result, *this);
+            members.insert({ member_id, member });
+
+            return member;
+        }
     }
 }
