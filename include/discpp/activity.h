@@ -45,6 +45,13 @@ namespace discpp {
 		std::string status;
 		bool afk;
 
+		Activity(rapidjson::Document& json) {
+		    std::cout << "Activity json: " << DumpJson(json) << std::endl;
+
+            /*text = json["text"].GetString();
+            type = json["type"]*/
+		}
+
 		Activity(std::string text, presence::ActivityType type, std::string status = "online", bool afk = false, std::string url = "") : text(text), type(type), status(status), afk(afk), url(url) {}
 
 		rapidjson::Document ToJson() {
