@@ -86,7 +86,7 @@ namespace discpp {
                 target_json.CopyFrom(json["target_user"], target_json.GetAllocator());
                 target_user = discpp::User(target_json);
             }
-            target_user_type = static_cast<TargetUserType>(json["target_user_type"].GetInt());
+            target_user_type = static_cast<TargetUserType>(GetDataSafely<int>(json, "target_user_type"));
             approximate_presence_count = json["approximate_presence_count"].GetInt();
             approximate_member_count = json["approximate_member_count"].GetInt();
         }
