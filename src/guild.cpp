@@ -226,7 +226,7 @@ namespace discpp {
 
     std::unordered_map<discpp::snowflake, discpp::CategoryChannel> Guild::GetCategories() {
 	    std::unordered_map<discpp::snowflake, discpp::CategoryChannel> tmp;
-	    for (auto const chnl : this->GetChannels()) {
+	    for (auto& chnl : this->GetChannels()) {
 	        if (chnl.second.type == discpp::ChannelType::GROUP_CATEGORY) {
 	            tmp.insert({chnl.first, CategoryChannel(chnl.first, chnl.second.guild_id)});
 	        } else {
@@ -236,7 +236,7 @@ namespace discpp {
 	    return tmp;
 	}
 
-    discpp::GuildChannel Guild::GetChannel(snowflake id) {
+    discpp::GuildChannel Guild::GetChannel(snowflake id) const {
 	    auto it = channels.find(id);
 	    if (it != channels.end()) {
 	        return it->second;
@@ -340,7 +340,7 @@ namespace discpp {
 		SendPatchRequest(Endpoint("/guilds/" + std::to_string(id) + "/channels"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::CHANNEL, body);
 	}
 
-	std::shared_ptr<discpp::Member> Guild::GetMember(snowflake id) {
+	std::shared_ptr<discpp::Member> Guild::GetMember(snowflake id) const {
 		/**
 		 * @brief Gets a discpp::Member from this guild.
 		 *
@@ -363,7 +363,7 @@ namespace discpp {
 		throw std::runtime_error("Member not found (Exceptions like these should be handled)!");
 	}
 
-	void Guild::EnsureBotPermission(Permission req_perm) {
+	void Guild::EnsureBotPermission(Permission req_perm) const {
 		/**
 		 * @brief Ensures the bot has a permission.
 		 *
@@ -435,7 +435,7 @@ namespace discpp {
 		SendDeleteRequest(Endpoint("/guilds/" + std::to_string(id) + "/members/" + std::to_string(member.user.id)), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-	std::vector<discpp::GuildBan> Guild::GetBans() {
+	std::vector<discpp::GuildBan> Guild::GetBans() const {
 		/**
 		 * @brief Get all guild bans
 		 *
@@ -463,7 +463,7 @@ namespace discpp {
 		return guild_bans;
 	}
 
-	std::string Guild::GetMemberBanReason(discpp::Member& member) {
+	std::string Guild::GetMemberBanReason(discpp::Member& member) const {
 		/**
 		 * @brief Get ban reasons if they are any.
 		 *
@@ -567,7 +567,7 @@ namespace discpp {
         SendDeleteRequest(Endpoint("guilds/" + std::to_string(id) + "/members/" + std::to_string(member_id)), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-	std::shared_ptr<discpp::Role> Guild::GetRole(snowflake id) {
+	std::shared_ptr<discpp::Role> Guild::GetRole(snowflake id) const {
 		/**
 		 * @brief Retrieve a guild role.
 		 *
@@ -704,7 +704,7 @@ namespace discpp {
 		roles.erase(role.id);
 	}
 
-	int Guild::GetPruneAmount(int days) {
+	int Guild::GetPruneAmount(int days) const {
 		/**
 		 * @brief Get guild prune amount.
 		 *
@@ -745,7 +745,7 @@ namespace discpp {
 		SendPostRequest(Endpoint("/guilds/" + std::to_string(id) + "/prune"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::GUILD, body);
 	}
 
-	std::vector<discpp::GuildInvite> Guild::GetInvites() {
+	std::vector<discpp::GuildInvite> Guild::GetInvites() const {
 		/**
 		 * @brief Get guild invites.
 		 *
@@ -771,7 +771,7 @@ namespace discpp {
 		return guild_invites;
 	}
 
-	std::vector<discpp::Integration> Guild::GetIntegrations() {
+	std::vector<discpp::Integration> Guild::GetIntegrations() const {
 		/**
 		 * @brief Get guild integrations.
 		 *
@@ -867,7 +867,7 @@ namespace discpp {
 		SendPostRequest(Endpoint("/guilds/" + std::to_string(id) + "/integrations/" + std::to_string(guild_integration.id) + "/sync"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-	discpp::GuildEmbed Guild::GetGuildEmbed() {
+	discpp::GuildEmbed Guild::GetGuildEmbed() const {
 		/**
 		 * @brief Get a guild embed.
 		 *
@@ -899,7 +899,7 @@ namespace discpp {
 		return discpp::GuildEmbed(result);
 	}
 
-	std::string Guild::GetWidgetImageURL(WidgetStyle widget_style) {
+	std::string Guild::GetWidgetImageURL(WidgetStyle widget_style) const {
 		/**
 		 * @brief Get a widget image url.
 		 *
@@ -962,7 +962,7 @@ namespace discpp {
 		return emojis;
 	}
 
-    Emoji Guild::GetEmoji(snowflake id) {
+    Emoji Guild::GetEmoji(snowflake id) const {
 		/**
 		 * @brief Get a guild emoji.
 		 *
@@ -1070,7 +1070,7 @@ namespace discpp {
 		emojis.erase(emoji.id);
 	}
 
-	std::string Guild::GetIconURL(discpp::ImageType imgType) {
+	std::string Guild::GetIconURL(discpp::ImageType imgType) const {
 		/**
 		 * @brief Retrieve guild icon url.
 		 *
@@ -1099,7 +1099,7 @@ namespace discpp {
 		}
 	}
 
-	inline std::shared_ptr<discpp::Member> Guild::GetOwnerMember() {
+	inline std::shared_ptr<discpp::Member> Guild::GetOwnerMember() const {
 		/**
 		 * @brief Retrieve guild owner as a discpp::Member object
 		 *
@@ -1189,7 +1189,7 @@ namespace discpp {
         return *this;
     }
 
-    discpp::GuildInvite Guild::GetVanityURL() {
+    discpp::GuildInvite Guild::GetVanityURL() const {
         /**
          * @brief Returns a partial invite object for guilds with that feature enabled.
          *
@@ -1207,29 +1207,29 @@ namespace discpp {
         return discpp::GuildInvite(result);
     }
 
-    discpp::AuditLog Guild::GetAuditLog() {
+    discpp::AuditLog Guild::GetAuditLog() const {
         rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/audit-logs"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 
         return discpp::AuditLog(result);
     }
 
-    bool Guild::IsBotOwner() {
+    bool Guild::IsBotOwner() const {
         return (flags & 0b1) == 0b1;
     }
 
-    bool Guild::IsEmbedEnabled() {
+    bool Guild::IsEmbedEnabled() const {
         return (flags & 0b10) == 0b10;
     }
 
-    bool Guild::IsWidgetEnabled() {
+    bool Guild::IsWidgetEnabled() const {
         return (flags & 0b100) == 0b100;
     }
 
-    bool Guild::IsLarge() {
+    bool Guild::IsLarge() const {
         return (flags & 0b1000) == 0b1000;
     }
 
-    bool Guild::IsUnavailable() {
+    bool Guild::IsUnavailable() const {
         return (flags & 0b10000) == 0b10000;
     }
 }

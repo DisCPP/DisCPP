@@ -250,7 +250,32 @@ namespace discpp {
     }
 
     void EventDispatcher::GuildMembersChunkEvent(rapidjson::Document& result) {
-        discpp::DispatchEvent(discpp::GuildMembersChunkEvent());
+        std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
+        std::unordered_map<discpp::snowflake, discpp::Member> members;
+        for (auto const& member : result["members"].GetArray()) {
+            rapidjson::Document member_json(rapidjson::kObjectType);
+            member_json.CopyFrom(member, member_json.GetAllocator());
+
+            discpp::Member tmp(member_json, *guild);
+            members.emplace(tmp.id, tmp);
+        }
+
+        int chunk_index = result["chunk_index"].GetInt();
+        int chunk_count = result["chunk_count"].GetInt();
+
+        std::vector<discpp::Activity> presences;
+        if (ContainsNotNull(result, "presences")) {
+            for (auto const &presence : result["presences"].GetArray()) {
+                rapidjson::Document presence_json(rapidjson::kObjectType);
+                presence_json.CopyFrom(presence, presence_json.GetAllocator());
+
+                discpp::Activity tmp(presence_json);
+                presences.push_back(tmp);
+            }
+        }
+        std::string nonce = GetDataSafely<std::string>(result, "nonce");
+
+        discpp::DispatchEvent(discpp::GuildMembersChunkEvent(guild, members, chunk_index, chunk_count, presences, nonce));
     }
 
     void EventDispatcher::GuildRoleCreateEvent(rapidjson::Document& result) {
