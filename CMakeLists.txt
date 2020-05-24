@@ -15,8 +15,7 @@ find_package(OpenSSL REQUIRED)
 find_package(cpr REQUIRED)
 find_package(CURL CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
-find_package(ixwebsocket REQUIRED)
-
+add_subdirectory(thirdparty/IXWebSocket)
 
 # required for intexisty to compile this library
 # on arch x86_64
@@ -28,7 +27,7 @@ endif()
 
 # link sources
 file(GLOB_RECURSE source_list src/*.cpp)
-add_library(discpp STATIC ${source_list} ${events_source_list})
+add_library(discpp STATIC ${source_list})
 
 # link headers
 target_include_directories(discpp PUBLIC include PRIVATE include/discpp)
