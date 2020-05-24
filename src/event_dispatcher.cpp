@@ -263,13 +263,13 @@ namespace discpp {
         int chunk_index = result["chunk_index"].GetInt();
         int chunk_count = result["chunk_count"].GetInt();
 
-        std::vector<discpp::Activity> presences;
+        std::vector<discpp::Presence> presences;
         if (ContainsNotNull(result, "presences")) {
             for (auto const &presence : result["presences"].GetArray()) {
                 rapidjson::Document presence_json(rapidjson::kObjectType);
                 presence_json.CopyFrom(presence, presence_json.GetAllocator());
 
-                discpp::Activity tmp(presence_json);
+                discpp::Presence tmp(presence_json);
                 presences.push_back(tmp);
             }
         }

@@ -24,7 +24,7 @@
 namespace discpp {
 	class Role;
 	class User;
-	class Activity;
+	class Presence;
 	class ClientConfig;
 
 	class ClientUser : public User {
@@ -99,9 +99,9 @@ namespace discpp {
         std::shared_ptr<discpp::Guild> GetGuild(snowflake guild_id);
         discpp::User ModifyCurrentUser(std::string username, discpp::Image avatar);
         void LeaveGuild(discpp::Guild& guild);
-        void UpdatePresence(discpp::Activity& activity);
+        void UpdatePresence(discpp::Presence& activity);
 		discpp::User ReqestUserIfNotCached(discpp::snowflake id);
-        std::vector<discpp::Connection> GetBotUserConnections();
+        std::vector<discpp::User::Connection> GetBotUserConnections();
         discpp::Channel GetChannel(discpp::snowflake id);
         discpp::DMChannel GetDMChannel(discpp::snowflake id);
         std::unordered_map<discpp::snowflake, discpp::DMChannel> GetUserDMs();

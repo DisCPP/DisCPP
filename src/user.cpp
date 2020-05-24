@@ -48,17 +48,17 @@ namespace discpp {
 		public_flags = GetDataSafely<int>(json, "public_flags");
 	}
 
-	Connection::Connection(rapidjson::Document& json) {
+	User::Connection::Connection(rapidjson::Document& json) {
 		/**
-		 * @brief Constructs a discpp::Connection object by parsing json.
+		 * @brief Constructs a discpp::User::Connection object by parsing json.
 		 *
 		 * ```cpp
-		 *      discpp::Connection connection(json);
+		 *      discpp::User::Connection connection(json);
 		 * ```
 		 *
 		 * @param[in] json The json that makes up the connection object.
 		 *
-		 * @return discpp::Connection, this is a constructor.
+		 * @return discpp::User::Connection, this is a constructor.
 		 */
 
 		id = SnowflakeFromString(json["id"].GetString());

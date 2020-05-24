@@ -129,8 +129,8 @@ int main(int argc, const char* argv[]) {
 			<< "ID: " << bot.bot_user.id << std::endl << "-----------------------------" << std::endl;
 
 		// Will show "Playing With Crashes!"
-		discpp::Activity activity = discpp::Activity("With Crashes!", discpp::presence::ActivityType::GAME, discpp::presence::Status::idle);
-		bot.UpdatePresence(activity);
+		discpp::Presence presence("With Crashes!", discpp::presence::ActivityType::GAME, discpp::presence::Status::idle);
+		bot.UpdatePresence(presence);
 	});
 
 	discpp::EventHandler<discpp::GuildMemberAddEvent>::RegisterListener([](discpp::GuildMemberAddEvent event) {

@@ -64,7 +64,7 @@ namespace discpp {
 		if (ContainsNotNull(json, "user")) {
 			rapidjson::Document user_json;
 			user_json.CopyFrom(json["user"], user_json.GetAllocator());
-			user = discpp::User(user_json);
+			creator = discpp::User(user_json);
 		}
 		require_colons = GetDataSafely<bool>(json, "require_colons");
         managed = GetDataSafely<bool>(json, "managed");

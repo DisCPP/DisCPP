@@ -5,7 +5,7 @@
 #include "channel.h"
 #include "message.h"
 #include "member.h"
-#include "activity.h"
+#include "presence.h"
 #include "event_handler.h"
 #include "event_dispatcher.h"
 #include "client_config.h"
@@ -70,7 +70,7 @@ namespace discpp {
         return 0;
     }
 
-    void Client::UpdatePresence(discpp::Activity& activity) {
+    void Client::UpdatePresence(discpp::Presence& presence) {
         /**
          * @brief Updates the bot's presence.
          *
@@ -84,7 +84,7 @@ namespace discpp {
          */
 
         rapidjson::Document payload(rapidjson::kObjectType);
-        rapidjson::Document activity_json = activity.ToJson();
+        rapidjson::Document activity_json = presence.ToJson();
 
         payload.AddMember("op", status_update, payload.GetAllocator());
         payload.AddMember("d", activity_json, payload.GetAllocator());
@@ -465,10 +465,10 @@ namespace discpp {
          * @brief Get all DM's for this user. Only supports user tokens!
          *
          * ```cpp
-         *      std::vector<discpp::Connection> conntections = client->GetUserConnections();
+         *      std::vector<discpp::User::Connection> conntections = client->GetUserConnections();
          * ```
          *
-         * @return std::vector<discpp::Connection>
+         * @return std::vector<discpp::User::Connection>
          */
 
         if (!discpp::globals::client_instance->client_user.IsBot()) {
@@ -489,15 +489,15 @@ namespace discpp {
         }
     }
 
-    std::vector<Connection> ClientUser::GetUserConnections() {
+    std::vector<discpp::User::Connection> ClientUser::GetUserConnections() {
 		/**
 		 * @brief Get all connections of this user.
 		 *
 		 * ```cpp
-		 *      std::vector<discpp::Connection> conntections = client->GetUserConnections();
+		 *      std::vector<discpp::User::Connection> conntections = client->GetUserConnections();
 		 * ```
 		 *
-		 * @return std::vector<discpp::Connection>
+		 * @return std::vector<discpp::User::Connection>
 		 */
 
 		rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
@@ -506,7 +506,7 @@ namespace discpp {
 		for (auto const& connection : result.GetArray()) {
 			rapidjson::Document connection_json;
 			connection_json.CopyFrom(connection, connection_json.GetAllocator());
-			connections.push_back(discpp::Connection(connection_json));
+			connections.push_back(discpp::User::Connection(connection_json));
 		}
 
 		return connections;
@@ -651,7 +651,7 @@ namespace discpp {
         return user;
     }
 
-    std::vector<discpp::Connection> Client::GetBotUserConnections() {
+    std::vector<discpp::User::Connection> Client::GetBotUserConnections() {
         /**
          * @brief Get the bot user connections.
          *
@@ -659,16 +659,16 @@ namespace discpp {
          *      bot.GetBotUserConnections();
          * ```
          *
-         * @return std::vector<discpp::Connection>
+         * @return std::vector<discpp::User::Connection>
          */
 
         rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
 
-        std::vector<discpp::Connection> connections;
+        std::vector<discpp::User::Connection> connections;
         for (auto const& connection : result.GetArray()) {
             rapidjson::Document connection_json;
             connection_json.CopyFrom(connection, connection_json.GetAllocator());
-            connections.push_back(discpp::Connection(connection_json));
+            connections.push_back(discpp::User::Connection(connection_json));
         }
 
         return connections;

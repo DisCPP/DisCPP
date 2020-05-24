@@ -3,40 +3,38 @@
 
 #include "discord_object.h"
 #include "utils.h"
-#include "activity.h"
-
 
 namespace discpp {
 	enum ImageType : int { AUTO, WEBP, PNG, JPEG, GIF };
 	class Channel;
 	class Integration;
 
-	enum class ConnectionVisibility : int {
-		NONE = 0,
-		EVERYONE = 1
-	};
-
-	class Connection {
-	public:
-		std::string id;
-		std::string name;
-		std::string type;
-		bool revoked;
-		std::vector<Integration> integrations;
-		bool verified;
-		bool friend_sync;
-		bool show_activity;
-		ConnectionVisibility visibility;
-
-		Connection() = default;
-		Connection(rapidjson::Document& json);
-	};
-
 	class User : public DiscordObject {
 	private:
         char flags;
         unsigned short discriminator;
 	public:
+        enum class ConnectionVisibility : int {
+            NONE = 0,
+            EVERYONE = 1
+        };
+
+        class Connection {
+        public:
+            std::string id;
+            std::string name;
+            std::string type;
+            bool revoked;
+            std::vector<Integration> integrations;
+            bool verified;
+            bool friend_sync;
+            bool show_activity;
+            ConnectionVisibility visibility;
+
+            Connection() = default;
+            Connection(rapidjson::Document& json);
+        };
+
 		User() = default;
 		User(snowflake id);
 		User(rapidjson::Document& json);

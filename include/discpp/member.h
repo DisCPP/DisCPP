@@ -3,7 +3,7 @@
 
 #include "discord_object.h"
 #include "user.h"
-#include "activity.h"
+#include "presence.h"
 #include "permission.h"
 
 #include <vector>
@@ -37,7 +37,7 @@ namespace discpp {
         // TODO: Convert to iso8601Time
 		std::string premium_since; /**< When the user started boosting the guild. */
 		discpp::Permissions permissions; /**< Guild permissions for the current member. */
-		discpp::Activity activity; /**< Activity for the current member. */
+		discpp::Presence presence; /**< Presence for the current member. */
 		int hierarchy; /**< Role hierarchy for the current member. */
 	private:
 	    char flags; /**< Internal use only. */

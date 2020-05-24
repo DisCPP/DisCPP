@@ -8,17 +8,12 @@
 #include "role.h"
 #include "utils.h"
 
-
-
-//#include <cpprest/uri.h>
-
 #include <locale>
 #include <codecvt>
 #include <string>
 
 namespace discpp {
 	class Guild;
-	class User;
 
 	class Emoji {
 	public:
@@ -93,7 +88,7 @@ namespace discpp {
 		std::string name; /**< Name of the current emoji */
 		std::wstring unicode; /**< Unicode representation of the current emoji */
 		std::vector<discpp::snowflake> roles; /**< Roles */
-		discpp::User user;
+		discpp::User creator;
 		bool require_colons;
 		bool managed;
 		bool animated; /**< Whether or not the current emoji is animated */

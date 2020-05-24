@@ -154,23 +154,9 @@ namespace discpp {
                         activity_json.CopyFrom(json["game"], activity_json.GetAllocator());
                     }
 
-                    discpp::Activity act;
+                    discpp::Presence presence(presence_json);
 
-                    if (ContainsNotNull(presence_json, "status")) {
-                        act.status = presence_json["status"].GetString();
-                    }
-
-                    if (!activity_json.IsNull()) {
-                        act.text = activity_json["name"].GetString();
-                        act.type = static_cast<presence::ActivityType>(activity_json["type"].GetInt());
-                        if (ContainsNotNull(activity_json, "url")) {
-                            act.url = activity_json["url"].GetString();
-                        }
-                        act.application_id = activity_json["id"].GetString();
-                        act.created_at = std::to_string(activity_json["created_at"].GetInt());
-                    }
-
-                    it->second->activity = act;
+                    it->second->presence = presence;
                 }
             }
 		}
