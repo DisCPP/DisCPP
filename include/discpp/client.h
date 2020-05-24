@@ -27,26 +27,6 @@ namespace discpp {
 	class Activity;
 	class ClientConfig;
 
-	class InvalidGuildException : public std::runtime_error {
-	public:
-		InvalidGuildException() : std::runtime_error("Guild not found") {}
-	};
-
-	class StartLimitException : public std::runtime_error {
-	public:
-		StartLimitException() : std::runtime_error("Maximum start limit reached") {}
-	};
-
-    class ProhibitedEndpointException : public std::runtime_error {
-    public:
-        ProhibitedEndpointException(std::string msg) : std::runtime_error(msg) {}
-    };
-
-	class AuthenticationException : public std::runtime_error {
-	public:
-        AuthenticationException() : std::runtime_error("Invalid token, failed to connect to gateway") {}
-	};
-
 	class ClientUser : public User {
 	public:
 		ClientUser() = default;
@@ -59,6 +39,21 @@ namespace discpp {
 		std::string locale;
 		bool verified;
 		std::string email;
+	};
+
+	class UserRelationship {
+	private:
+	    int type;
+	public:
+        UserRelationship() = default;
+        UserRelationship(rapidjson::Document& json);
+
+        bool IsFriend();
+        bool IsBlocked();
+
+        discpp::snowflake id;
+        std::string nickname;
+        discpp::User user;
 	};
 
 	class Client {
@@ -100,7 +95,7 @@ namespace discpp {
 		// Discord based methods.
 		void AddFriend(discpp::User user);
 		void RemoveFriend(discpp::User user);
-		void GetFriends();
+        std::unordered_map<discpp::snowflake, discpp::UserRelationship> GetRelationships();
         std::shared_ptr<discpp::Guild> GetGuild(snowflake guild_id);
         discpp::User ModifyCurrentUser(std::string username, discpp::Image avatar);
         void LeaveGuild(discpp::Guild& guild);
@@ -109,13 +104,12 @@ namespace discpp {
         std::vector<discpp::Connection> GetBotUserConnections();
         discpp::Channel GetChannel(discpp::snowflake id);
         discpp::DMChannel GetDMChannel(discpp::snowflake id);
-		//std::vector<Connection> GetUserConnections();
+        std::unordered_map<discpp::snowflake, discpp::DMChannel> GetUserDMs();
+        // discpp::Channel CreateGroupDM(std::vector<discpp::User> users); // Deprecated and will not be shown in the discord client.
 
 		bool user_mfa_enabled;
 		std::string user_locale;
 		bool user_verified;
-        // std::vector<discpp::Channel> GetUserDMs(); // Not supported by bots.
-        // discpp::Channel CreateGroupDM(std::vector<discpp::User> users); // Deprecated and will not be shown in the discord client.
 
 		template <typename FType, typename... T>
 		void DoFunctionLater(FType&& func, T&&... args) {

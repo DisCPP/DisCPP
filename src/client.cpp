@@ -9,6 +9,7 @@
 #include "event_handler.h"
 #include "event_dispatcher.h"
 #include "client_config.h"
+#include "exceptions.h"
 
 #include <ixwebsocket/IXNetSystem.h>
 
@@ -67,137 +68,6 @@ namespace discpp {
         }
 
         return 0;
-    }
-
-    void Client::AddFriend(discpp::User user) {
-        if (!discpp::globals::client_instance->client_user.IsBot()) {
-            throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
-        } else {
-            rapidjson::Document result = SendPostRequest(Endpoint("users/@me/relationships"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL, cpr::Body("{\"discriminator\":\"" + user.GetDiscriminator() + "\", \"username\":" + user.username + "\"}"));
-        }
-    }
-
-    void Client::RemoveFriend(discpp::User user) {
-        if(discpp::globals::client_instance->client_user.IsBot()) {
-            throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
-        } else {
-            rapidjson::Document result = SendDeleteRequest(Endpoint("users/@me/relationships/" + std::to_string(user.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
-        }
-    }
-
-    void Client::GetFriends() {
-        //todo implement this endpoint
-        if(discpp::globals::client_instance->client_user.IsBot()) {
-            throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
-        } else {
-            rapidjson::Document result = SendGetRequest(Endpoint("users/@me/relationships/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
-        }
-    }
-
-    std::shared_ptr<discpp::Guild> Client::GetGuild(snowflake guild_id) {
-        /**
-         * @brief Gets a discpp::Guild from a guild id.
-         *
-         * This will throw a runtime exception if the guild is not found.
-         *
-         * ```cpp
-         *      std::shared_ptr<discpp::Guild> guild = bot.GetGuild(583251190591258624);
-         * ```
-         *
-         * @param[in] guild_id The guild id of the guild you want to get.
-         *
-         * @return std::shared_ptr<discpp::Guild>
-         */
-
-        auto it = discpp::globals::client_instance->guilds.find(guild_id);
-        if (it != discpp::globals::client_instance->guilds.end()) {
-            return it->second;
-        }
-
-        throw new InvalidGuildException();
-    }
-
-    discpp::User Client::ModifyCurrentUser(std::string username, discpp::Image avatar) {
-        /**
-         * @brief Modify the bot's username.
-         *
-         * ```cpp
-         *      discpp::User user = bot.ModifyCurrent("New bot name!", new_avatar);
-         * ```
-         *
-         * @param[in] username The new username.
-         * @param[in] avatar The new avatar.
-         *
-         * @return discpp::User
-         */
-
-        cpr::Body body("{\"username\": \"" + username + "\", \"avatar\": " + avatar.ToDataURI() + "}");
-        rapidjson::Document result = SendPatchRequest(Endpoint("/users/@me"), DefaultHeaders(), 0, discpp::RateLimitBucketType::GLOBAL, body);
-
-        client_user = discpp::ClientUser(result);
-
-        return client_user;
-    }
-
-    void Client::LeaveGuild(discpp::Guild& guild) {
-        /**
-         * @brief Leave the guild
-         *
-         * ```cpp
-         *      bot.LeaveGuild(guild);
-         * ```
-         *
-         * @param[in] guild The guild the bot will be leaving.
-         *
-         * @return void
-         */
-
-        SendDeleteRequest(Endpoint("/users/@me/guilds/" + guild.id), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
-    }
-
-    discpp::User Client::ReqestUserIfNotCached(discpp::snowflake id) {
-        /**
-         * @brief Get a user.
-         *
-         * ```cpp
-         *      bot.GetUser("150312037426135041");
-         * ```
-         *
-         * @param[in] id The user to get with this id.
-         *
-         * @return discpp::User
-         */
-
-        discpp::User user(id);
-        if (user.username.empty()) {
-            rapidjson::Document result = SendGetRequest(Endpoint("/users/" + std::to_string(id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
-            return discpp::User(result);
-        }
-
-        return user;
-    }
-
-    std::vector<discpp::Connection> Client::GetBotUserConnections() {
-        /**
-         * @brief Get the bot user connections.
-         *
-         * ```cpp
-         *      bot.GetBotUserConnections();
-         * ```
-         *
-         * @return std::vector<discpp::Connection>
-         */
-
-        rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
-
-        std::vector<discpp::Connection> connections;
-        for (auto const& connection : result.GetArray()) {
-            rapidjson::Document connection_json;
-            connection_json.CopyFrom(connection, connection_json.GetAllocator());
-            connections.push_back(discpp::Connection(connection_json));
-        }
-
-        return connections;
     }
 
     void Client::UpdatePresence(discpp::Activity& activity) {
@@ -590,9 +460,38 @@ namespace discpp {
         return discpp::DMChannel();
     }
 
-	std::vector<Connection> ClientUser::GetUserConnections() {
+    std::unordered_map<discpp::snowflake, discpp::DMChannel> Client::GetUserDMs() {
+        /**
+         * @brief Get all DM's for this user. Only supports user tokens!
+         *
+         * ```cpp
+         *      std::vector<discpp::Connection> conntections = client->GetUserConnections();
+         * ```
+         *
+         * @return std::vector<discpp::Connection>
+         */
+
+        if (!discpp::globals::client_instance->client_user.IsBot()) {
+            throw new ProhibitedEndpointException("/users/@me/channels is a user only endpoint");
+        } else {
+            std::unordered_map<discpp::snowflake, discpp::DMChannel> dm_channels;
+
+            rapidjson::Document result = SendGetRequest(Endpoint("users/@me/channels"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            for (auto const& channel : result.GetArray()) {
+                rapidjson::Document channel_json(rapidjson::kObjectType);
+                channel_json.CopyFrom(channel, channel_json.GetAllocator());
+
+                discpp::DMChannel tmp(channel_json);
+                dm_channels.emplace(tmp.id, tmp);
+            }
+
+            return dm_channels;
+        }
+    }
+
+    std::vector<Connection> ClientUser::GetUserConnections() {
 		/**
-		 * @brief Create all connections of this user.
+		 * @brief Get all connections of this user.
 		 *
 		 * ```cpp
 		 *      std::vector<discpp::Connection> conntections = client->GetUserConnections();
@@ -618,4 +517,190 @@ namespace discpp {
 		locale = GetDataSafely<std::string>(json, "locale");
 		verified = GetDataSafely<bool>(json, "verified");
 	}
+
+    void Client::AddFriend(discpp::User user) {
+        /**
+         * @brief Add a friend. Only supports user tokens!
+         *
+         * @return void
+         */
+        if (!discpp::globals::client_instance->client_user.IsBot()) {
+            throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+        } else {
+            rapidjson::Document result = SendPutRequest(Endpoint("users/@me/relationships/" + std::to_string(user.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+        }
+    }
+
+    void Client::RemoveFriend(discpp::User user) {
+        /**
+         * @brief Remove a friend. Only supports user tokens!
+         *
+         * @return void
+         */
+        if(discpp::globals::client_instance->client_user.IsBot()) {
+            throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+        } else {
+            rapidjson::Document result = SendDeleteRequest(Endpoint("users/@me/relationships/" + std::to_string(user.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+        }
+    }
+
+    std::unordered_map<discpp::snowflake, discpp::UserRelationship> Client::GetRelationships() {
+        /**
+         * @brief Get all friends. Only supports user tokens!
+         *
+         * @return std::unordered_map<discpp::snowflake, discpp::UserRelationship>
+         */
+        //todo implement this endpoint
+        if(discpp::globals::client_instance->client_user.IsBot()) {
+            throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+        } else {
+            std::unordered_map<discpp::snowflake, discpp::UserRelationship> relationships;
+
+            rapidjson::Document result = SendGetRequest(Endpoint("users/@me/relationships/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            for (auto const& relationship : result.GetArray()) {
+                rapidjson::Document relationship_json(rapidjson::kObjectType);
+                relationship_json.CopyFrom(relationship, relationship_json.GetAllocator());
+
+                discpp::UserRelationship tmp(relationship_json);
+                relationships.emplace(tmp.id, tmp);
+            }
+            return relationships;
+        }
+    }
+
+    std::shared_ptr<discpp::Guild> Client::GetGuild(snowflake guild_id) {
+        /**
+         * @brief Gets a discpp::Guild from a guild id.
+         *
+         * This will throw a runtime exception if the guild is not found.
+         *
+         * ```cpp
+         *      std::shared_ptr<discpp::Guild> guild = bot.GetGuild(583251190591258624);
+         * ```
+         *
+         * @param[in] guild_id The guild id of the guild you want to get.
+         *
+         * @return std::shared_ptr<discpp::Guild>
+         */
+
+        auto it = discpp::globals::client_instance->guilds.find(guild_id);
+        if (it != discpp::globals::client_instance->guilds.end()) {
+            return it->second;
+        }
+
+        throw new DiscordObjectNotFound("Guild not found");
+    }
+
+    discpp::User Client::ModifyCurrentUser(std::string username, discpp::Image avatar) {
+        /**
+         * @brief Modify the bot's username.
+         *
+         * ```cpp
+         *      discpp::User user = bot.ModifyCurrent("New bot name!", new_avatar);
+         * ```
+         *
+         * @param[in] username The new username.
+         * @param[in] avatar The new avatar.
+         *
+         * @return discpp::User
+         */
+
+        cpr::Body body("{\"username\": \"" + username + "\", \"avatar\": " + avatar.ToDataURI() + "}");
+        rapidjson::Document result = SendPatchRequest(Endpoint("/users/@me"), DefaultHeaders(), 0, discpp::RateLimitBucketType::GLOBAL, body);
+
+        client_user = discpp::ClientUser(result);
+
+        return client_user;
+    }
+
+    void Client::LeaveGuild(discpp::Guild& guild) {
+        /**
+         * @brief Leave the guild
+         *
+         * ```cpp
+         *      bot.LeaveGuild(guild);
+         * ```
+         *
+         * @param[in] guild The guild the bot will be leaving.
+         *
+         * @return void
+         */
+
+        SendDeleteRequest(Endpoint("/users/@me/guilds/" + guild.id), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+    }
+
+    discpp::User Client::ReqestUserIfNotCached(discpp::snowflake id) {
+        /**
+         * @brief Get a user.
+         *
+         * ```cpp
+         *      bot.GetUser("150312037426135041");
+         * ```
+         *
+         * @param[in] id The user to get with this id.
+         *
+         * @return discpp::User
+         */
+
+        discpp::User user(id);
+        if (user.username.empty()) {
+            rapidjson::Document result = SendGetRequest(Endpoint("/users/" + std::to_string(id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            return discpp::User(result);
+        }
+
+        return user;
+    }
+
+    std::vector<discpp::Connection> Client::GetBotUserConnections() {
+        /**
+         * @brief Get the bot user connections.
+         *
+         * ```cpp
+         *      bot.GetBotUserConnections();
+         * ```
+         *
+         * @return std::vector<discpp::Connection>
+         */
+
+        rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+
+        std::vector<discpp::Connection> connections;
+        for (auto const& connection : result.GetArray()) {
+            rapidjson::Document connection_json;
+            connection_json.CopyFrom(connection, connection_json.GetAllocator());
+            connections.push_back(discpp::Connection(connection_json));
+        }
+
+        return connections;
+    }
+
+    UserRelationship::UserRelationship(rapidjson::Document& json) {
+        /**
+         * @brief Contructs a UserRelationship from json
+         *
+         * @return discpp::UserRelationship
+         */
+        id = SnowflakeFromString(json["id"].GetString());
+        nickname = GetDataSafely<std::string>(json, "nickname");
+        type = json["type"].GetInt();
+        user = ConstructDiscppObjectFromJson(json, "user", discpp::User());
+    }
+
+    bool UserRelationship::IsFriend() {
+        /**
+         * @brief Returns if this relation is a friend.
+         *
+         * @return bool
+         */
+        return type == 1;
+    }
+
+    bool UserRelationship::IsBlocked() {
+        /**
+         * @brief Returns if this relation is a block.
+         *
+         * @return bool
+         */
+        return type == 2;
+    }
 }

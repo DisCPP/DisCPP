@@ -16,9 +16,23 @@
 namespace discpp {
     class DiscordObjectNotFound : public std::runtime_error {
     public:
-        DiscordObjectNotFound(rapidjson::Document& json) : std::runtime_error(std::to_string(json["code"].GetInt()) + ": " + json["message"].GetString()) {
+        DiscordObjectNotFound(rapidjson::Document& json) : std::runtime_error(std::to_string(json["code"].GetInt()) + ": " + json["message"].GetString()) {}
+        DiscordObjectNotFound(std::string str) : std::runtime_error(str) {}
+    };
 
-        }
+    class StartLimitException : public std::runtime_error {
+    public:
+        StartLimitException() : std::runtime_error("Maximum start limit reached") {}
+    };
+
+    class ProhibitedEndpointException : public std::runtime_error {
+    public:
+        ProhibitedEndpointException(std::string msg) : std::runtime_error(msg) {}
+    };
+
+    class AuthenticationException : public std::runtime_error {
+    public:
+        AuthenticationException() : std::runtime_error("Invalid token, failed to connect to gateway") {}
     };
 
     inline std::runtime_error GetException(rapidjson::Document& json) {
