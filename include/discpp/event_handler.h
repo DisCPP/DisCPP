@@ -92,7 +92,7 @@ namespace discpp {
 			discpp::globals::client_instance->logger->Debug("Event listener triggered: " + std::string(typeid(T).name()));
 
 			for (std::pair<IdType, std::function<void(const T&)>> handler : GetHandlers()) {
-				discpp::globals::client_instance->futures.push_back(std::async(std::launch::async, handler.second, e));
+                discpp::globals::client_instance->DoFunctionLater(handler.second, e);
 			}
 		}
 

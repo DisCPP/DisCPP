@@ -618,9 +618,9 @@ namespace discpp {
         }
 
         if (internal_event_map.find(event_name) != internal_event_map.end()) {
-            globals::client_instance->futures.push_back(std::async(std::launch::async, [data_ptr, event_name] {
+            globals::client_instance->DoFunctionLater([data_ptr, event_name] {
                 internal_event_map[event_name](*data_ptr);
-            }));
+            });
         }
     }
 }

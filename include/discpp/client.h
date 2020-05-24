@@ -28,7 +28,7 @@ namespace discpp {
 	class ClientConfig;
 
 	class InvalidGuildException : public std::runtime_error {
-	public: 
+	public:
 		InvalidGuildException() : std::runtime_error("Guild not found") {}
 	};
 
@@ -75,8 +75,6 @@ namespace discpp {
 		std::unordered_map<snowflake, std::shared_ptr<Message>> messages; /**< List of messages the current bot can access. */
         std::unordered_map<discpp::snowflake, discpp::DMChannel> private_channels; /**< List of dm channels the current client can access. */
 
-		std::vector<std::future<void>> futures; /**< List of events. */
-
 		enum packet_opcode : int {
 			dispatch = 0,				// Receive
 			heartbeat = 1,				// Send/Receive
@@ -111,7 +109,7 @@ namespace discpp {
         std::vector<discpp::Connection> GetBotUserConnections();
         discpp::Channel GetChannel(discpp::snowflake id);
         discpp::DMChannel GetDMChannel(discpp::snowflake id);
-		std::vector<Connection> GetUserConnections();
+		//std::vector<Connection> GetUserConnections();
 
 		bool user_mfa_enabled;
 		std::string user_locale;
@@ -134,7 +132,10 @@ namespace discpp {
 			 * @return void
 			 */
 
-			futures.push_back(std::async(std::launch::async, func, std::forward<T>(args)...));
+            {
+                std::lock_guard<std::mutex> futures_guard(futures_mutex);
+                futures.push_back(std::async(std::launch::async, func, std::forward<T>(args)...));
+            }
 		}
 	private:
 		friend class EventDispatcher;
@@ -143,6 +144,8 @@ namespace discpp {
 		bool reconnecting = false;
 		bool stay_disconnected = false;
 		bool run = true;
+
+        std::vector<std::future<void>> futures;
 
 		std::string session_id;
 		std::string gateway_endpoint;
@@ -153,6 +156,7 @@ namespace discpp {
 		std::thread future_loop_thread;
 
 		std::mutex websocket_client_mutex;
+		std::mutex futures_mutex;
 
 		ix::WebSocket websocket;
 
