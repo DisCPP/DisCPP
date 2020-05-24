@@ -107,7 +107,7 @@ namespace discpp {
         discpp::User ModifyCurrentUser(std::string username, discpp::Image avatar);
         void LeaveGuild(discpp::Guild& guild);
         void UpdatePresence(discpp::Activity& activity);
-		discpp::User GetUser(discpp::snowflake id);
+		discpp::User ReqestUserIfNotCached(discpp::snowflake id);
         std::vector<discpp::Connection> GetBotUserConnections();
         discpp::Channel GetChannel(discpp::snowflake id);
         discpp::DMChannel GetDMChannel(discpp::snowflake id);

@@ -1,6 +1,7 @@
 #include "utils.h"
 #include "client.h"
 #include "client_config.h"
+#include "exceptions.h"
 
 #include <stdlib.h>
 #include <numeric>
@@ -62,6 +63,11 @@ rapidjson::Document discpp::HandleResponse(cpr::Response response, snowflake obj
 
 	HandleRateLimits(response.header, object, ratelimit_bucket);
 	tmp.Parse((!response.text.empty() ? response.text.c_str() : "{}"));
+
+	// Check if we were returned an error and throw an exception if so.
+	if (!tmp.IsNull() && tmp.IsObject() && ContainsNotNull(tmp, "code")) {
+        throw discpp::GetException(tmp);
+    }
 
     // This shows an error in inteliisense for some reason but compiles fine.
 #ifndef __INTELLISENSE__

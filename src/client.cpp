@@ -58,6 +58,8 @@ namespace discpp {
 
         while (run) {
             for (size_t i = 0; i < futures.size();) {
+                if (i >= futures.size()) break;
+
                 if (!futures[i].valid() ||
                     !(futures[i].wait_for(std::chrono::seconds(0)) == std::future_status::ready)) {
                     i++;
@@ -157,7 +159,7 @@ namespace discpp {
         SendDeleteRequest(Endpoint("/users/@me/guilds/" + guild.id), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
     }
 
-    discpp::User Client::GetUser(discpp::snowflake id) {
+    discpp::User Client::ReqestUserIfNotCached(discpp::snowflake id) {
         /**
          * @brief Get a user.
          *
@@ -170,9 +172,13 @@ namespace discpp {
          * @return discpp::User
          */
 
-        rapidjson::Document result = SendGetRequest(Endpoint("/users/" + std::to_string(id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+        discpp::User user(id);
+        if (user.username.empty()) {
+            rapidjson::Document result = SendGetRequest(Endpoint("/users/" + std::to_string(id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            return discpp::User(result);
+        }
 
-        return discpp::User(result);
+        return user;
     }
 
     std::vector<discpp::Connection> Client::GetBotUserConnections() {
