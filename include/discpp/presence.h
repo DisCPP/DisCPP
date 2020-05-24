@@ -133,17 +133,19 @@ namespace discpp {
             }
 		}
 
-		Presence(std::string text, discpp::Activity::ActivityType type, std::string status = "online", std::string url = "") : status(status) {
+		Presence(std::string text, discpp::Activity::ActivityType type, std::string status = "online", bool afk = false, std::string url = "") : status(status), afk(afk) {
 		    game.name = text;
 		    game.type = type;
 		    game.url = url;
 		}
 
+		Presence(discpp::Activity activity, bool afk, std::string status) : game(activity), afk(afk), status(status) {}
+
 		rapidjson::Document ToJson() {
             rapidjson::Document result;
 
             std::string str_activity = "{\"status\": \"" + status + "\", \"game\": " + \
-                    "{\"name\": \"" + game.name + "\", \"type\": " + std::to_string(static_cast<int>(game.type)) + ((!game.url.empty()) ? ", \"url\": \"" + game.url + "\"" : "") + "}, \"since\": \"" + std::to_string(time(NULL) - 10) + "\"}";
+                    "{\"name\": \"" + game.name + "\", \"afk\": " + (afk ? "true" : "false") + ",\"type\": " + std::to_string(static_cast<int>(game.type)) + ((!game.url.empty()) ? ", \"url\": \"" + game.url + "\"" : "") + "}, \"since\": \"" + std::to_string(time(NULL) - 10) + "\"}";
             result.Parse(str_activity.c_str());
 
 			return std::move(result);
@@ -152,6 +154,7 @@ namespace discpp {
 		std::string status;
 		discpp::Activity game;
 		std::vector<discpp::Activity> activities;
+		bool afk;
 	};
 }
 
