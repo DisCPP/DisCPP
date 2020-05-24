@@ -32,12 +32,14 @@ Please follow [Google's styling guide](https://google.github.io/styleguide/cppgu
 
 ## Building
 1. Install vcpkg onto the root of your C drive.
-2. Install dependencies by running command: `vcpkg install rapidjson cpr ixwebsocket openssl --triplet x64-[windows/linux]`.
+2. Install dependencies by running command: `vcpkg install rapidjson cpr openssl --triplet x64-[windows/linux]`.
     * Replace [windows/linux] with your operating system.
 3. Then run `vcpkg integrate install`.
     * Should get an output similar to: `"-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"`.
     * Save the directory that was given (Ex. `C:/vcpkg/scripts/buildsystems/vcpkg.cmake`).
 4. Clone this repository.
+    * `git clone https://github.com/DisCPP/DisCPP.git`
+    * `git submodule update --init`
 5. Open the CMake project in Visual Studio.
     * On the welcome screen under the create a project or open project buttons, click `Continue without code`
     * Open the CMakeLists.txt by `File > Open > Cmake`
