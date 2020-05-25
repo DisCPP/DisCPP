@@ -68,6 +68,20 @@ namespace discpp {
 
 	class Message : public DiscordObject {
 	public:
+	    class ChannelMention : public DiscordObject {
+	    public:
+            ChannelMention(rapidjson::Document& json) {
+                id = SnowflakeFromString(json["id"].GetString());
+                guild_id = SnowflakeFromString(json["id"].GetString());
+                type = static_cast<discpp::ChannelType>(json["type"].GetInt());
+                name = json["name"].GetString();
+            }
+
+            discpp::snowflake guild_id;
+            discpp::ChannelType type;
+            std::string name;
+	    };
+
 		Message() = default;
 		Message(snowflake id);
 		Message(snowflake message_id, snowflake channel_id);
@@ -96,8 +110,8 @@ namespace discpp {
 		std::string timestamp; // TODO: Convert to iso8601Time
 		std::string edited_timestamp; // TODO: Convert to iso8601Time
 		std::unordered_map<discpp::snowflake, discpp::User> mentions;
-		std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::Role>> mentioned_roles;
-		std::unordered_map<discpp::snowflake, discpp::GuildChannel> mention_channels;
+		std::vector<discpp::snowflake> mentioned_roles;
+        std::unordered_map<discpp::snowflake, ChannelMention> mention_channels;
 		std::vector<discpp::Attachment> attachments;
 		std::vector<discpp::EmbedBuilder> embeds;
 		std::vector<discpp::Reaction> reactions;

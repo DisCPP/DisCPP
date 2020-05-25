@@ -39,9 +39,9 @@ namespace discpp {
             int max_size;
         };
 
-        struct Asset {
-            Asset() = default;
-            Asset(rapidjson::Document& json) {
+        struct Assets {
+            Assets() = default;
+            Assets(rapidjson::Document& json) {
                 large_image = GetDataSafely<std::string>(json, "large_image");
                 large_text = GetDataSafely<std::string>(json, "large_text");
                 small_image = GetDataSafely<std::string>(json, "small_image");
@@ -75,7 +75,7 @@ namespace discpp {
             created_at = json["created_at"].Get<std::time_t>();
             if (ContainsNotNull(json, "timestamps")) {
                 rapidjson::Document timestamps_json(rapidjson::kObjectType);
-                timestamps_json.CopyFrom(json["timestamps_json"], timestamps_json.GetAllocator());
+                timestamps_json.CopyFrom(json["timestamps"], timestamps_json.GetAllocator());
 
                 if (ContainsNotNull(timestamps_json, "start")) {
                     this->timestamps.emplace("start", timestamps_json["start"].Get<std::time_t>());
@@ -90,14 +90,7 @@ namespace discpp {
             state = GetDataSafely<std::string>(json, "state");
             emoji = ConstructDiscppObjectFromJson(json, "emoji", discpp::Emoji());
             party = ConstructDiscppObjectFromJson(json, "party", discpp::Activity::Party());
-            if (ContainsNotNull(json, "assets")) {
-                for (auto const& asset : json["assets"].GetArray()) {
-                    rapidjson::Document asset_json(rapidjson::kObjectType);
-                    asset_json.CopyFrom(asset, asset_json.GetAllocator());
-
-                    assets.emplace_back(asset_json);
-                }
-            }
+            assets = ConstructDiscppObjectFromJson(json, "assets", discpp::Activity::Assets());
             secrets = ConstructDiscppObjectFromJson(json, "secrets", discpp::Activity::Secrets());
             instance = GetDataSafely<bool>(json, "instance");
             flags = GetDataSafely<int>(json, "flags");
@@ -113,7 +106,7 @@ namespace discpp {
         std::string state;
         discpp::Emoji emoji;
         discpp::Activity::Party party;
-        std::vector<discpp::Activity::Asset> assets;
+        discpp::Activity::Assets assets;
         discpp::Activity::Secrets secrets;
         bool instance;
         int flags;

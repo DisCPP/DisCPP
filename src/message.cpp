@@ -66,24 +66,21 @@ namespace discpp {
 		    bit_flags |= 0b10;
 		}
 		if (ContainsNotNull(json, "mentions")) {
-            for (auto const &mention : json["mentions"].GetArray()) {
-                if (!mention.IsNull()) {
-                    rapidjson::Document mention_json(rapidjson::kObjectType);
-                    mention_json.CopyFrom(mention, mention_json.GetAllocator());
+            for (auto const& mention : json["mentions"].GetArray()) {
+                rapidjson::Document mention_json(rapidjson::kObjectType);
+                mention_json.CopyFrom(mention, mention_json.GetAllocator());
 
-                    discpp::User tmp = discpp::User(SnowflakeFromString(mention_json["id"].GetString()));
-                    mentions.insert({ tmp.id, tmp });
-                }
+                discpp::User tmp = discpp::User(mention_json);
+                mentions.insert({ tmp.id, tmp });
             }
         }
 
-        if (ContainsNotNull(json, "mentioned_roles")) {
-            for (auto const& mentioned_role : json["mentioned_roles"].GetArray()) {
+        if (ContainsNotNull(json, "mention_roles")) {
+            for (auto const& mentioned_role : json["mention_roles"].GetArray()) {
                 rapidjson::Document mentioned_role_json;
                 mentioned_role_json.CopyFrom(mentioned_role, mentioned_role_json.GetAllocator());
 
-                std::shared_ptr<discpp::Role> tmp = guild->GetRole(SnowflakeFromString(mentioned_role_json.GetString()));
-                mentioned_roles.insert({ tmp->id, tmp });
+                mentioned_roles.push_back(SnowflakeFromString(mentioned_role_json.GetString()));
             }
         }
 
@@ -92,15 +89,8 @@ namespace discpp {
                 rapidjson::Document mention_channel_json;
                 mention_channel_json.CopyFrom(mention_channel, mention_channel_json.GetAllocator());
 
-                /*discpp::GuildChannel channel(mention_channel["id"].GetString(), guild.id);
-                channel.type = static_cast<ChannelType>(mention_channel["type"].GetInt());
-                channel.guild_id = mention_channel["guild_id"].GetString();
-                channel.name = mention_channel["name"].GetString();*/
-
-                std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(mention_channel["guild_id"].GetString()));
-                discpp::GuildChannel channel = guild->GetChannel(SnowflakeFromString(mention_channel["id"].GetString()));
-
-                mention_channels.insert({ channel.id, channel });
+                discpp::Message::ChannelMention channel_mention(mention_channel_json);
+                mention_channels.emplace(channel_mention.id, mention_channel_json);
             }
         }
 

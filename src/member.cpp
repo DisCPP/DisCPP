@@ -78,6 +78,7 @@ namespace discpp {
 		if (GetDataSafely<bool>(json, "mute")) {
 		    flags |= 0b10;
 		}
+		presence = ConstructDiscppObjectFromJson(json, "presence", discpp::Presence());
 	}
 
 	bool Member::IsDeafened() {

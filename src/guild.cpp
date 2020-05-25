@@ -345,7 +345,6 @@ namespace discpp {
             return it->second;
         }
 
-		globals::client_instance->logger->Error(LogTextColor::RED + "Member not found (Exceptions like these should be handled)!");
 		throw std::runtime_error("Member not found (Exceptions like these should be handled)!");
 	}
 
