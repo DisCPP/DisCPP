@@ -367,7 +367,7 @@ namespace discpp {
 
                 // Wait for the required heartbeat interval, while waiting it should be acked from another thread.
                 // This also checks it should stop this thread.
-                int timer = time(NULL);
+                long int timer = static_cast<long int>(time(nullptr));
                 int ending_time = timer + heartbeat_interval / 1000.0 - 10;
 
                 while (timer <= ending_time) {

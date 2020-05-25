@@ -3,7 +3,7 @@
 
 #include <fstream>
 #include <utility>
-#include <time.h>
+#include <ctime>
 
 #include "utils.h"
 
@@ -133,14 +133,13 @@ namespace discpp {
 		void AutoLog(LogSeverity sev, std::string text) {
             if (!CanLog(sev)) return;
 
-            time_t rawtime;
-            struct tm* timeinfo;
+            time_t now_time_t = std::time(0);
+            std::tm now{};
             char st[80];
 
-            time(&rawtime);
-            timeinfo = localtime(&rawtime);
+            localtime_s(&now, &now_time_t);
 
-            strftime(st, 80, "[%H:%M:%S]", timeinfo);
+            strftime(st, 80, "[%H:%M:%S]", &now);
 
             std::string time(st);
             text = time + " [" + SeverityToString(sev) + "] " + text + LogTextEffect::RESET;
