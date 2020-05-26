@@ -47,6 +47,8 @@ jobs:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+    - script: git submodule update --init
+      displayName: Checkout IXWebsocket submodule.
     - task: Cache@2
       displayName: Cache vcpkg
       inputs:

@@ -3,6 +3,7 @@
 #
 cmake_minimum_required (VERSION 3.6)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
+set(USE_TLS TRUE)
 project(discpp)
 
 # set options
@@ -51,7 +52,7 @@ target_include_directories(discpp PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
 target_link_libraries(discpp PUBLIC ZLIB::ZLIB)
 target_link_libraries(discpp PUBLIC CURL::libcurl)
 target_link_libraries(discpp PUBLIC OpenSSL::SSL OpenSSL::Crypto)
-target_link_libraries(discpp PUBLIC ${IXWEBSOCKET_LIBRARY})
+target_link_libraries(discpp PUBLIC ixwebsocket)
 target_link_libraries(discpp PUBLIC cpr)
 
 # build unit tests
