@@ -542,7 +542,7 @@ namespace discpp {
             ClientUserSettings old_settings = this->settings;
             if (settings.afk_timeout != old_settings.afk_timeout) new_settings.AddMember("afk_timeout", settings.afk_timeout, allocator);
             if (settings.custom_status != old_settings.custom_status) new_settings.AddMember("custom_status", settings.custom_status, allocator);
-            if (settings.explicit_content_filter != old_settings.explicit_content_filter) new_settings.AddMember("explicit_content_filter", settings.explicit_content_filter, allocator);
+            if (settings.explicit_content_filter != old_settings.explicit_content_filter) new_settings.AddMember("explicit_content_filter", (int) settings.explicit_content_filter, allocator);
             rapidjson::Value friend_source_flags(rapidjson::kObjectType);
             bool add_friend_source_flags = false;
             if (settings.friend_source_flags.GetAll() != old_settings.friend_source_flags.GetAll()) {

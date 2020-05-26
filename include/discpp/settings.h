@@ -20,7 +20,7 @@ namespace discpp {
 		PL, PT_BR, RO, FI,
 		/* Swedish, Vietnamese, Turkish, Czech */
 		SV_SE, VI, TR, CS,
-		/* Greek, Bulgarian, Russian, Ukranian */
+		/* Greek, Bulgarian, Russian, Ukrainian */
 		EL, BG, RU, UK,
 		/* Thai, Chinese (China), Japanese, Chinese (Taiwan) */
 		TH, ZH_CN, JA, ZH_TW,
@@ -29,14 +29,14 @@ namespace discpp {
 	};
 
 	std::unordered_map<Locale, std::string> locale_str_map = {
-		{DA, "da"}, {DE, "de"}, {EN_GB, "en-GB"}, {EN_US, "en-US"},
-		{ES_ES, "es-ES"}, {FR, "fr"}, {HR, "hr"}, {IT, "it"},
-		{LT, "lt"}, {HU, "hu"}, {NL, "nl"}, {NO, "no"},
-		{PL, "pl"}, {PT_BR, "pt-BR"}, {RO, "ro"}, {FI, "fi"},
-		{SV_SE, "sv-SE"}, {VI, "vi"}, {TR, "tr"}, {CS, "cs"},
-		{EL, "el"}, {BG, "bg"}, {RU, "ru"}, {UK, "uk"},
-		{TH, "th"}, {ZH_CN, "zh-CN"}, {JA, "ja"}, {ZH_TW, "zh-TW"},
-		{KO, "ko"}
+		{Locale::DA, "da"}, {Locale::DE, "de"}, {Locale::EN_GB, "en-GB"}, {Locale::EN_US, "en-US"},
+		{Locale::ES_ES, "es-ES"}, {Locale::FR, "fr"}, {Locale::HR, "hr"}, {Locale::IT, "it"},
+		{Locale::LT, "lt"}, {Locale::HU, "hu"}, {Locale::NL, "nl"}, {Locale::NO, "no"},
+		{Locale::PL, "pl"}, {Locale::PT_BR, "pt-BR"}, {Locale::RO, "ro"}, {Locale::FI, "fi"},
+		{Locale::SV_SE, "sv-SE"}, {Locale::VI, "vi"}, {Locale::TR, "tr"}, {Locale::CS, "cs"},
+		{Locale::EL, "el"}, {Locale::BG, "bg"}, {Locale::RU, "ru"}, {Locale::UK, "uk"},
+		{Locale::TH, "th"}, {Locale::ZH_CN, "zh-CN"}, {Locale::JA, "ja"}, {Locale::ZH_TW, "zh-TW"},
+		{Locale::KO, "ko"}
 	};
 
 	inline std::string LocaleToString(Locale locale) {
@@ -52,7 +52,7 @@ namespace discpp {
 	};
 
 	std::unordered_map<Theme, std::string> theme_str_map = {
-		{DARK, "dark"}, {LIGHT, "light"}
+		{Theme::DARK, "dark"}, {Theme::LIGHT, "light"}
 	};
 
 	inline std::string ThemeToString(Theme theme) {
