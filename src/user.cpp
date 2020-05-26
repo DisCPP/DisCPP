@@ -104,7 +104,7 @@ namespace discpp {
 		return discpp::Channel(result);
 	}
 	
-	std::string User::GetAvatarURL(ImageType imgType) {
+	std::string User::GetAvatarURL(ImageType imgType) const {
 		/**
 		 * @brief Retrieve user avatar url.
 		 *
