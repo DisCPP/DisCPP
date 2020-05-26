@@ -43,7 +43,7 @@ namespace discpp {
 		std::string GetAvatarURL(ImageType imgType = ImageType::AUTO) const;
 		std::string CreatedAt();
 		std::string CreateMention();
-		std::string GetDiscriminator();
+		std::string GetDiscriminator() const;
 
 		bool IsBot();
 		bool IsSystemUser();

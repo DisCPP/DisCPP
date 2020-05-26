@@ -181,7 +181,7 @@ namespace discpp {
         return (flags & 0b10) == 0b10;
     }
 
-    std::string User::GetDiscriminator() {
+    std::string User::GetDiscriminator() const {
         /**
          * @brief Gets the users discriminator as a string.
          *
