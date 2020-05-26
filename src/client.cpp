@@ -518,6 +518,69 @@ namespace discpp {
 		verified = GetDataSafely<bool>(json, "verified");
 	}
 
+    ClientUserSettings ClientUser::GetSettings() {
+        if (!discpp::globals::client_instance->client_user.IsBot()) {
+            throw new ProhibitedEndpointException("users/@me/settings is a user only endpoint");
+        }
+        else {
+            rapidjson::Document result = SendGetRequest(Endpoint("users/@me/settings/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            ClientUserSettings settings(result);
+            this->settings = settings;
+            return settings;
+        }
+    }
+
+    void ClientUser::ModifySettings(ClientUserSettings& settings) {
+        if (!discpp::globals::client_instance->client_user.IsBot()) {
+            throw new ProhibitedEndpointException("users/@me/settings is a user only endpoint");
+        }
+        else {
+            rapidjson::Document new_settings;
+            new_settings.SetObject();
+
+            rapidjson::Document::AllocatorType& allocator = new_settings.GetAllocator();
+            ClientUserSettings old_settings = this->settings;
+            if (settings.afk_timeout != old_settings.afk_timeout) new_settings.AddMember("afk_timeout", settings.afk_timeout, allocator);
+            if (settings.custom_status != old_settings.custom_status) new_settings.AddMember("custom_status", settings.custom_status, allocator);
+            if (settings.explicit_content_filter != old_settings.explicit_content_filter) new_settings.AddMember("explicit_content_filter", settings.explicit_content_filter, allocator);
+            rapidjson::Value friend_source_flags(rapidjson::kObjectType);
+            bool add_friend_source_flags = false;
+            if (settings.friend_source_flags.GetAll() != old_settings.friend_source_flags.GetAll()) {
+                friend_source_flags.AddMember("all", settings.friend_source_flags.GetAll(), allocator);
+                add_friend_source_flags = true;
+            }
+            if (settings.friend_source_flags.GetMutualFriends() != old_settings.friend_source_flags.GetMutualFriends()) {
+                friend_source_flags.AddMember("mutual_friends", settings.friend_source_flags.GetMutualFriends(), allocator);
+                add_friend_source_flags = true;
+            }
+            if (settings.friend_source_flags.GetMutualGuilds() != old_settings.friend_source_flags.GetMutualGuilds()) {
+                friend_source_flags.AddMember("mutual_guilds", settings.friend_source_flags.GetMutualGuilds(), allocator);
+                add_friend_source_flags = true;
+            }
+            if (add_friend_source_flags) new_settings.AddMember("friend_source_flags", friend_source_flags, allocator);
+            if (settings.GetAllowAccessibilityDetection() != old_settings.GetAllowAccessibilityDetection()) new_settings.AddMember("allow_accessibility_detection", settings.GetAllowAccessibilityDetection(), allocator);
+            if (settings.GetAnimateEmoji() != old_settings.GetAnimateEmoji()) new_settings.AddMember("animate_emoji", settings.GetAnimateEmoji(), allocator);
+            if (settings.GetContactSyncEnabled() != old_settings.GetContactSyncEnabled()) new_settings.AddMember("contact_sync_enabled", settings.GetContactSyncEnabled(), allocator);
+            if (settings.GetConvertEmoticons() != old_settings.GetConvertEmoticons()) new_settings.AddMember("convert_emoticons", settings.GetConvertEmoticons(), allocator);
+            if (settings.GetDefaultGuildsRestricted() != old_settings.GetDefaultGuildsRestricted()) new_settings.AddMember("default_guilds_restricted", settings.GetDefaultGuildsRestricted(), allocator);
+            if (settings.GetDetectPlatformAccounts() != old_settings.GetDetectPlatformAccounts()) new_settings.AddMember("detect_platform_accounts", settings.GetDetectPlatformAccounts(), allocator);
+            if (settings.GetDeveloperMode() != old_settings.GetDeveloperMode()) new_settings.AddMember("developer_mode", settings.GetDeveloperMode(), allocator);
+            if (settings.GetDisableGamesTab() != old_settings.GetDisableGamesTab()) new_settings.AddMember("disable_games_tab", settings.GetDisableGamesTab(), allocator);
+            if (settings.GetEnableTtsCommand() != old_settings.GetEnableTtsCommand()) new_settings.AddMember("enable_tts_command", settings.GetEnableTtsCommand(), allocator);
+            if (settings.GetGifAutoPlay() != old_settings.GetGifAutoPlay()) new_settings.AddMember("gif_auto_play", settings.GetGifAutoPlay(), allocator);
+            if (settings.GetInlineAttachmentMedia() != old_settings.GetInlineAttachmentMedia()) new_settings.AddMember("inline_attachment_media", settings.GetInlineAttachmentMedia(), allocator);
+            if (settings.GetInlineEmbedMedia() != old_settings.GetInlineEmbedMedia()) new_settings.AddMember("inline_embed_media", settings.GetInlineEmbedMedia(), allocator);
+            if (settings.GetMessageDisplayCompact() != old_settings.GetMessageDisplayCompact()) new_settings.AddMember("message_display_compact", settings.GetMessageDisplayCompact(), allocator);
+            if (settings.GetNativePhoneIntegrationEnabled() != old_settings.GetNativePhoneIntegrationEnabled()) new_settings.AddMember("native_phone_integration_enabled", settings.GetNativePhoneIntegrationEnabled(), allocator);
+            if (settings.GetRenderEmbeds() != old_settings.GetRenderEmbeds()) new_settings.AddMember("render_embeds", settings.GetRenderEmbeds(), allocator);
+            if (settings.GetRenderReactions() != old_settings.GetRenderReactions()) new_settings.AddMember("render_reactions", settings.GetRenderReactions(), allocator);
+            if (settings.GetShowCurrentGame() != old_settings.GetShowCurrentGame()) new_settings.AddMember("show_current_game", settings.GetShowCurrentGame(), allocator);
+            if (settings.GetStreamNotificationsEnabled() != old_settings.GetStreamNotificationsEnabled()) new_settings.AddMember("stream_notifications_enabled", settings.GetStreamNotificationsEnabled(), allocator);
+
+            rapidjson::Document result = SendPatchRequest(Endpoint("users/@me/settings/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL, cpr::Body(DumpJson(new_settings)));
+        }
+    }
+
     void Client::AddFriend(discpp::User user) {
         /**
          * @brief Add a friend. Only supports user tokens!
