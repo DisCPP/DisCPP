@@ -4,6 +4,7 @@
 cmake_minimum_required (VERSION 3.6)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 set(USE_TLS TRUE)
+set(USE_OPEN_SSL TRUE)
 project(discpp)
 
 # set options
@@ -35,7 +36,7 @@ target_include_directories(discpp PUBLIC include PRIVATE include/discpp)
 
 # required for windows support
 if (WIN32)
-	target_link_libraries(discpp PUBLIC wsock32 ws2_32 shlwapi ${MBEDTLS_LIBRARY})
+	target_link_libraries(discpp PUBLIC wsock32 ws2_32 shlwapi)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	if (USE_TLS)
 		target_link_libraries(discpp PUBLIC Crypt32)
