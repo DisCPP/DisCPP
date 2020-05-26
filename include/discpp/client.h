@@ -20,6 +20,7 @@
 #include "member.h"
 #include "guild.h"
 #include "log.h"
+#include "settings.h"
 
 namespace discpp {
 	class Role;
@@ -34,7 +35,10 @@ namespace discpp {
 		ClientUser(rapidjson::Document & json);
 
 		std::vector<Connection> GetUserConnections();
+		ClientUserSettings GetSettings();
+		void ModifySettings(ClientUserSettings& settings);
 
+		ClientUserSettings settings;
 		bool mfa_enabled;
 		std::string locale;
 		bool verified;
