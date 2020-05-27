@@ -73,12 +73,12 @@ namespace discpp {
 	class Channel : public DiscordObject {
 	public:
 		Channel() = default;
-		Channel(snowflake id);
+		Channel(snowflake& id);
 		Channel(rapidjson::Document& json);
 
 		static discpp::Channel RequestChannel(discpp::snowflake);
 
-		discpp::Message Send(std::string text, bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
+		discpp::Message Send(const std::string& text, const bool& tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
 		discpp::Channel Modify(ModifyRequests& modify_requests);
 		discpp::Channel Delete();
 		std::vector<discpp::Message> GetChannelMessages(int amount, GetChannelsMessagesMethod get_method = GetChannelsMessagesMethod::LIMIT);

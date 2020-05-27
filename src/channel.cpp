@@ -3,7 +3,7 @@
 #include "client.h"
 
 namespace discpp {
-	Channel::Channel(snowflake id) : discpp::DiscordObject(id) {
+	Channel::Channel(snowflake& id) : discpp::DiscordObject(id) {
 		/**
 		 * @brief Constructs a discpp::Channel object from the id.
 		 *
@@ -39,7 +39,7 @@ namespace discpp {
 		last_pin_timestamp = GetDataSafely<std::string>(json, "last_pin_timestamp");
 	}
 
-	discpp::Message Channel::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<File> files) {
+	discpp::Message Channel::Send(const std::string& text, const bool& tts, discpp::EmbedBuilder* embed, std::vector<File> files) {
 		/**
 		 * @brief Send a message in this channel.
 		 *
