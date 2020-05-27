@@ -1,13 +1,17 @@
 #ifndef DISCPP_EMOJI_H
 #define DISCPP_EMOJI_H
 
-#ifdef WIN32
-#include <winsock2.h>
+#ifndef _WINDOWS_
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <winsock2.h>
+#undef WIN32_LEAN_AND_MEAN
 #else
 #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
 #include <codecvt>
 #endif
+
+#include <codecvt>
 
 #include "discord_object.h"
 #include "user.h"
