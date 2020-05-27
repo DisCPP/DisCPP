@@ -90,9 +90,9 @@ namespace discpp {
 		void ModifyMutualFriends(bool mutual_friends);
 		void ModifyMutualGuilds(bool mutual_guilds);
 
-		bool GetAll() const;
-		bool GetMutualFriends() const;
-		bool GetMutualGuilds() const;
+		[[nodiscard]] bool GetAll() const;
+		[[nodiscard]] bool GetMutualFriends() const;
+		[[nodiscard]] bool GetMutualGuilds() const;
 
 	private:
 		int flags;
