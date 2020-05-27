@@ -33,7 +33,7 @@ namespace discpp {
 	class ClientUser : public User {
 	public:
 		ClientUser() = default;
-		ClientUser(snowflake id) : User(id) {}
+		ClientUser(const snowflake& id) : User(id) {}
 		ClientUser(rapidjson::Document & json);
 
 		std::vector<Connection> GetUserConnections();
@@ -90,26 +90,26 @@ namespace discpp {
 			heartbeat_ack = 11			// Receive
 		};
 
-		Client(std::string token, ClientConfig* config);
+		Client(const std::string& token, ClientConfig* config);
 		int Run();
-		void CreateWebsocketRequest(rapidjson::Document& json, std::string message = "");
-		void SetCommandHandler(std::function<void(discpp::Client*, discpp::Message)> command_handler);
+		void CreateWebsocketRequest(rapidjson::Document& json, const std::string& message = "");
+		void SetCommandHandler(const std::function<void(discpp::Client*, discpp::Message)>& command_handler);
 		void DisconnectWebsocket();
 		void StopClient();
 		void ReconnectToWebsocket();
 
 		// Discord based methods.
-		void AddFriend(discpp::User user);
-		void RemoveFriend(discpp::User user);
+		void AddFriend(const discpp::User& user);
+		void RemoveFriend(const discpp::User& user);
         std::unordered_map<discpp::snowflake, discpp::UserRelationship> GetRelationships();
-        std::shared_ptr<discpp::Guild> GetGuild(snowflake guild_id);
-        discpp::User ModifyCurrentUser(std::string username, discpp::Image avatar);
-        void LeaveGuild(discpp::Guild& guild);
+        std::shared_ptr<discpp::Guild> GetGuild(const snowflake& guild_id);
+        discpp::User ModifyCurrentUser(const std::string& username, discpp::Image& avatar);
+        void LeaveGuild(const discpp::Guild& guild);
         void UpdatePresence(discpp::Presence& activity);
-		discpp::User ReqestUserIfNotCached(discpp::snowflake id);
+		discpp::User ReqestUserIfNotCached(const discpp::snowflake& id);
         std::vector<discpp::User::Connection> GetBotUserConnections();
-        discpp::Channel GetChannel(discpp::snowflake id);
-        discpp::DMChannel GetDMChannel(discpp::snowflake id);
+        discpp::Channel GetChannel(const discpp::snowflake& id);
+        discpp::DMChannel GetDMChannel(const discpp::snowflake& id);
         std::unordered_map<discpp::snowflake, discpp::DMChannel> GetUserDMs();
         // discpp::Channel CreateGroupDM(std::vector<discpp::User> users); // Deprecated and will not be shown in the discord client.
 

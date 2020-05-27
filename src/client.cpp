@@ -15,7 +15,7 @@
 #include <ixwebsocket/IXNetSystem.h>
 
 namespace discpp {
-    Client::Client(std::string token, ClientConfig* config) : token(token), config(config) {
+    Client::Client(const std::string& token, ClientConfig* config) : token(token), config(config) {
         /**
          * @brief Constructs a discpp::Bot object.
          *
@@ -93,7 +93,7 @@ namespace discpp {
         CreateWebsocketRequest(payload);
     }
 
-    void discpp::Client::CreateWebsocketRequest(rapidjson::Document& json, std::string message) {
+    void discpp::Client::CreateWebsocketRequest(rapidjson::Document& json, const std::string& message) {
         /**
          * @brief Send a request to the websocket.
          *
@@ -122,7 +122,7 @@ namespace discpp {
         websocket.sendText(json_payload);
     }
 
-    void Client::SetCommandHandler(std::function<void(discpp::Client*, discpp::Message)> command_handler) {
+    void Client::SetCommandHandler(const std::function<void(discpp::Client*, discpp::Message)>& command_handler) {
         /**
          * @brief Change the command handler.
          *
@@ -438,7 +438,7 @@ namespace discpp {
         if (heartbeat_thread.joinable()) heartbeat_thread.join();
     }
 
-    discpp::Channel Client::GetChannel(discpp::snowflake id) {
+    discpp::Channel Client::GetChannel(const discpp::snowflake& id) {
         discpp::Channel channel = GetDMChannel(id);
 
         if (channel.id == 0) {
@@ -452,7 +452,7 @@ namespace discpp {
         return channel;
     }
 
-    discpp::DMChannel Client::GetDMChannel(discpp::snowflake id) {
+    discpp::DMChannel Client::GetDMChannel(const discpp::snowflake& id) {
         auto it = private_channels.find(id);
         if (it != private_channels.end()) {
             return it->second;
@@ -583,7 +583,7 @@ namespace discpp {
         }
     }
 
-    void Client::AddFriend(discpp::User user) {
+    void Client::AddFriend(const discpp::User& user) {
         /**
          * @brief Add a friend. Only supports user tokens!
          *
@@ -596,7 +596,7 @@ namespace discpp {
         }
     }
 
-    void Client::RemoveFriend(discpp::User user) {
+    void Client::RemoveFriend(const discpp::User& user) {
         /**
          * @brief Remove a friend. Only supports user tokens!
          *
@@ -633,7 +633,7 @@ namespace discpp {
         }
     }
 
-    std::shared_ptr<discpp::Guild> Client::GetGuild(snowflake guild_id) {
+    std::shared_ptr<discpp::Guild> Client::GetGuild(const snowflake& guild_id) {
         /**
          * @brief Gets a discpp::Guild from a guild id.
          *
@@ -656,7 +656,7 @@ namespace discpp {
         throw new DiscordObjectNotFound("Guild not found");
     }
 
-    discpp::User Client::ModifyCurrentUser(std::string username, discpp::Image avatar) {
+    discpp::User Client::ModifyCurrentUser(const std::string& username, discpp::Image& avatar) {
         /**
          * @brief Modify the bot's username.
          *
@@ -678,7 +678,7 @@ namespace discpp {
         return client_user;
     }
 
-    void Client::LeaveGuild(discpp::Guild& guild) {
+    void Client::LeaveGuild(const discpp::Guild& guild) {
         /**
          * @brief Leave the guild
          *
@@ -694,7 +694,7 @@ namespace discpp {
         SendDeleteRequest(Endpoint("/users/@me/guilds/" + std::to_string(guild.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
     }
 
-    discpp::User Client::ReqestUserIfNotCached(discpp::snowflake id) {
+    discpp::User Client::ReqestUserIfNotCached(const discpp::snowflake& id) {
         /**
          * @brief Get a user.
          *
