@@ -405,19 +405,8 @@ namespace discpp {
             discpp::User user(SnowflakeFromString(result["user_id"].GetString()));
 
             auto reaction = std::find_if(message->second->reactions.begin(), message->second->reactions.end(),
-            [emoji](discpp::Reaction react) {
-                 auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
-
-                 // If the other's name is empty but mine is not then it must have unicode.
-                 if (react.emoji.name.empty() && !emoji.name.empty() && emoji.unicode.empty()) {
-                     return wstr_converter.to_bytes(react.emoji.unicode) == emoji.name;
-                 } else if (!react.emoji.name.empty() && emoji.name.empty() && !emoji.unicode.empty()) {
-                     return wstr_converter.to_bytes(emoji.unicode) == emoji.name;
-                 } else if (react.emoji.id != 0 && emoji.id != 0 && !react.emoji.name.empty() && !emoji.name.empty()) {
-                     return react.emoji.id == emoji.id && react.emoji.name == emoji.name;
-                 }
-
-                 return false;
+            [&emoji](discpp::Reaction react) {
+                return react.emoji == emoji;
             });
 
             if (reaction != message->second->reactions.end()) {
@@ -462,20 +451,9 @@ namespace discpp {
             discpp::User user(SnowflakeFromString(result["user_id"].GetString()));
 
             auto reaction = std::find_if(message->second->reactions.begin(), message->second->reactions.end(),
-                [emoji](discpp::Reaction react) {
-                    auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
-
-                    // If the other's name is empty but mine is not then it must have unicode.
-                    if (react.emoji.name.empty() && !emoji.name.empty() && emoji.unicode.empty()) {
-                        return wstr_converter.to_bytes(react.emoji.unicode) == emoji.name;
-                    } else if (!react.emoji.name.empty() && emoji.name.empty() && !emoji.unicode.empty()) {
-                        return wstr_converter.to_bytes(emoji.unicode) == emoji.name;
-                    } else if (react.emoji.id != 0 && emoji.id != 0 && !react.emoji.name.empty() && !emoji.name.empty()) {
-                        return react.emoji.id == emoji.id && react.emoji.name == emoji.name;
-                    }
-
-                    return false;
-                });
+                 [&emoji](discpp::Reaction react) {
+                     return react.emoji == emoji;
+                 });
 
             if (reaction != message->second->reactions.end()) {
                 if (reaction->count == 1) {

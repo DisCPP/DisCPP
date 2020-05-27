@@ -1,7 +1,9 @@
 #ifndef DISCPP_GUILD_H
 #define DISCPP_GUILD_H
 
+#ifndef RAPIDJSON_HAS_STDSTRING
 #define RAPIDJSON_HAS_STDSTRING 1
+#endif
 
 #include "discord_object.h"
 #include "emoji.h"

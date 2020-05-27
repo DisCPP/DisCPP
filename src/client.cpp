@@ -369,7 +369,7 @@ namespace discpp {
                 // Wait for the required heartbeat interval, while waiting it should be acked from another thread.
                 // This also checks it should stop this thread.
                 long int timer = static_cast<long int>(time(nullptr));
-                int ending_time = timer + heartbeat_interval / 1000.0 - 10;
+                double ending_time = timer + heartbeat_interval / 1000.0 - 10;
 
                 while (timer <= ending_time) {
                     if (!run) {
@@ -377,7 +377,7 @@ namespace discpp {
                     }
 
                     // Increment the timer
-                    timer += (time(NULL) - timer);
+                    timer += ( ((unsigned int)time(nullptr)) - timer);
                 }
 
                 if (!heartbeat_acked && !reconnecting) {
@@ -691,7 +691,7 @@ namespace discpp {
          * @return void
          */
 
-        SendDeleteRequest(Endpoint("/users/@me/guilds/" + guild.id), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+        SendDeleteRequest(Endpoint("/users/@me/guilds/" + std::to_string(guild.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
     }
 
     discpp::User Client::ReqestUserIfNotCached(discpp::snowflake id) {

@@ -1,7 +1,9 @@
 #ifndef DISCPP_UTILS_H
 #define DISCPP_UTILS_H
 
+#ifndef RAPIDJSON_HAS_STDSTRING
 #define RAPIDJSON_HAS_STDSTRING 1
+#endif
 
 #include "discord_object.h"
 
@@ -160,8 +162,8 @@ namespace discpp {
 	inline std::unordered_map<snowflake, RateLimit> webhook_ratelimit;
 	inline RateLimit global_ratelimit;
 
-	inline int WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bucket);
-	inline void HandleRateLimits(cpr::Header header, snowflake object, RateLimitBucketType ratelimit_bucket);
+	int WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bucket);
+	void HandleRateLimits(cpr::Header header, snowflake object, RateLimitBucketType ratelimit_bucket);
 	// End of rate limits
 
 	extern rapidjson::Document HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket);

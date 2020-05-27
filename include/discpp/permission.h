@@ -1,7 +1,9 @@
 #ifndef DISCPP_PERMISSION_H
 #define DISCPP_PERMISSION_H
 
+#ifndef RAPIDJSON_HAS_STDSTRING
 #define RAPIDJSON_HAS_STDSTRING 1
+#endif
 
 #include <unordered_map>
 

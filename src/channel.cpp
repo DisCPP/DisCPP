@@ -139,6 +139,8 @@ namespace discpp {
                 return "permission_overwrites";
             case ChannelProperty::PARENT_ID:
                 return "parent_id";
+            default:
+                return "";
         }
 	}
 

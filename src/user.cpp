@@ -61,7 +61,7 @@ namespace discpp {
 		 * @return discpp::User::Connection, this is a constructor.
 		 */
 
-		id = SnowflakeFromString(json["id"].GetString());
+		id = json["id"].GetString();
 		name = json["name"].GetString();
 		type = json["type"].GetString();
 		revoked = json["revoked"].GetBool();

@@ -1,7 +1,10 @@
 #ifndef DISCPP_EVENT_DISPATCHER_H
 #define DISCPP_EVENT_DISPATCHER_H
 
+#ifndef RAPIDJSON_HAS_STDSTRING
 #define RAPIDJSON_HAS_STDSTRING 1
+#endif
+
 #include <rapidjson/document.h>
 
 #include "event.h"

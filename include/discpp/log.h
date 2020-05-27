@@ -3,6 +3,11 @@
 
 #include <fstream>
 #include <utility>
+
+#ifndef __STDC_LIB_EXT1__
+#define __STDC_WANT_LIB_EXT1__ 1
+#endif
+
 #include <ctime>
 
 #include "utils.h"
@@ -137,7 +142,11 @@ namespace discpp {
             std::tm now{};
             char st[80];
 
+#ifdef __STDC_LIB_EXT1__
             localtime_s(&now, &now_time_t);
+#else
+            now = *localtime(&now_time_t);
+#endif
 
             strftime(st, 80, "[%H:%M:%S]", &now);
 

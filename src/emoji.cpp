@@ -97,7 +97,18 @@ namespace discpp {
          *
          * @return discpp::Emoji, this is a constructor.
          */
+
+#ifdef WIN32
+        wchar_t thick_emoji[MAX_PATH];
+        if (!MultiByteToWideChar(CP_ACP, WC_COMPOSITECHECK, s_unicode.c_str(), -1, thick_emoji, MAX_PATH)) {
+            throw std::runtime_error("Failed to convert emoji to string!");
+        } else {
+            std::cout << "Just processed: " << thick_emoji << std::endl;
+            this->unicode = thick_emoji;
+        }
+#else
         auto converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
         this->unicode = converter.from_bytes(s_unicode);
+#endif
     }
 }

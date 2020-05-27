@@ -1130,6 +1130,8 @@ namespace discpp {
                 return "public_updates_channel_id";
             case GuildProperty::PREFERRED_LOCALE:
                 return "preferred_locale";
+            default:
+                return "";
         }
     }
 
