@@ -99,10 +99,9 @@ namespace discpp {
             // @TODO THIS:
 		    ix::HttpClient* client = new ix::HttpClient();
 
-
             ix::HttpRequestArgsPtr args = client->createRequest();
             args->logger = [](const std::string& msg) { globals::client_instance->logger->Debug(msg); };
-            args->extraHeaders = DefaultHeaders({ {"Content-Type", "multipart/form-data"} });
+            //args->extraHeaders = DefaultHeaders();
 
             ix::HttpFormDataParameters data_parameters;
             for (int i = 0; i < files.size(); i++) {
@@ -605,4 +604,4 @@ namespace discpp {
 
 		SendDeleteRequest(Endpoint("/channels/" + std::to_string(id) + "/recipients/" + std::to_string(user.id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
-}  
+}
