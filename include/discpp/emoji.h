@@ -1,7 +1,7 @@
 #ifndef DISCPP_EMOJI_H
 #define DISCPP_EMOJI_H
 
-#ifndef _WINDOWS_
+#ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winsock2.h>
