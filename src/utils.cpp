@@ -7,6 +7,7 @@
 #include <numeric>
 
 #include <ixwebsocket/IXHttpClient.h>
+#include <ixwebsocket/IXNetSystem.h>
 
 std::string discpp::GetOsName() {
 	/**
@@ -97,7 +98,11 @@ rapidjson::Document discpp::SendGetRequest(std::string url, ix::WebSocketHttpHea
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + body);
     }
-    
+
+#ifdef _WIN32
+        ix::initNetSystem();
+#endif
+
     WaitForRateLimits(object, ratelimit_bucket);
 
     ix::HttpClient httpClient;
@@ -135,7 +140,11 @@ rapidjson::Document discpp::SendPostRequest(std::string url, ix::WebSocketHttpHe
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + body);
     }
-    
+
+#ifdef _WIN32
+    ix::initNetSystem();
+#endif
+
     WaitForRateLimits(object, ratelimit_bucket);
 
     ix::HttpClient httpClient;
@@ -167,7 +176,11 @@ rapidjson::Document discpp::SendPutRequest(std::string url, ix::WebSocketHttpHea
     if (globals::client_instance != nullptr) {
 	    globals::client_instance->logger->Debug("Sending put request, URL: " + url + ", body: " + body);
     }
-    
+
+#ifdef _WIN32
+    ix::initNetSystem();
+#endif
+
 	WaitForRateLimits(object, ratelimit_bucket);
 
     ix::HttpClient httpClient;
@@ -199,13 +212,18 @@ rapidjson::Document discpp::SendPatchRequest(std::string url, ix::WebSocketHttpH
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + body);
     }
+
+#ifdef _WIN32
+    ix::initNetSystem();
+#endif
+
     WaitForRateLimits(object, ratelimit_bucket);
 
     ix::HttpClient httpClient;
     ix::HttpRequestArgsPtr args = httpClient.createRequest();
     args->extraHeaders = headers;
     ix::HttpResponsePtr result;
-    result = httpClient.request(url, "PATCH", body, args);
+    result = httpClient.patch(url, body, args);
 
     return HandleResponse(result, object, ratelimit_bucket);
 }
@@ -227,6 +245,11 @@ rapidjson::Document discpp::SendDeleteRequest(std::string url, ix::WebSocketHttp
      */
 
     globals::client_instance->logger->Debug("Sending delete request, URL: " + url);
+
+#ifdef _WIN32
+    ix::initNetSystem();
+#endif
+
     WaitForRateLimits(object, ratelimit_bucket);
 
     ix::HttpClient httpClient;
@@ -355,7 +378,15 @@ std::string discpp::ReadEntireFile(std::ifstream& file) {
 	 * @return std::string
 	 */
 
-	return std::string((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
+    if (file) {
+        std::string contents;
+        file.seekg(0, std::ios::end);
+        contents.resize(file.tellg());
+        file.seekg(0, std::ios::beg);
+        file.read(&contents[0], contents.size());
+        file.close();
+        return(contents);
+    }
 }
 
 static const std::string base64_chars =

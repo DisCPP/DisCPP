@@ -99,13 +99,25 @@ namespace discpp {
          */
 
 #ifdef WIN32
-        wchar_t thick_emoji[MAX_PATH];
-        if (!MultiByteToWideChar(CP_ACP, WC_COMPOSITECHECK, s_unicode.c_str(), -1, thick_emoji, MAX_PATH)) {
+        size_t charsNeeded = ::MultiByteToWideChar(CP_UTF8, 0, s_unicode.data(), (int) s_unicode.size(), nullptr, 0);
+        if (charsNeeded == 0) {
+            throw std::runtime_error("Failed converting UTF-8 string to UTF-16");
+        }
+
+        std::vector<wchar_t> buffer(charsNeeded);
+        int charsConverted = ::MultiByteToWideChar(CP_UTF8, 0, s_unicode.data(), (int) s_unicode.size(), &buffer[0], buffer.size());
+        if (charsConverted == 0) {
+            throw std::runtime_error("Failed converting UTF-8 string to UTF-16");
+        }
+        this->unicode = std::wstring(&buffer[0], charsConverted);
+
+        /*wchar_t thick_emoji[MAX_PATH];
+        if (!MultiByteToWideChar(CP_ACP, WC_COMPOSITECHECK, s_unicode.c_str(), (int) s_unicode.size(), thick_emoji, MAX_PATH)) {
             throw std::runtime_error("Failed to convert emoji to string!");
         } else {
             std::cout << "Just processed: " << thick_emoji << std::endl;
             this->unicode = thick_emoji;
-        }
+        }*/
 #else
         auto converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
         this->unicode = converter.from_bytes(s_unicode);
