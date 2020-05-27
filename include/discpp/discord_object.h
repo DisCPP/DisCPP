@@ -10,7 +10,7 @@ namespace discpp {
 	class DiscordObject {
 	public:
 		DiscordObject() = default;
-		DiscordObject(snowflake id);
+		DiscordObject(const snowflake& id);
 
 		snowflake id = 0;
 
