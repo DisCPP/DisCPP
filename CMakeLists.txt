@@ -43,8 +43,8 @@ if (WIN32)
 	endif()
 else()
 	# required by other operating systems
-	find_package(Threads)
-	target_link_libraries(discpp PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+	# find_package(Threads)
+	# target_link_libraries(discpp PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 # link dependencies
