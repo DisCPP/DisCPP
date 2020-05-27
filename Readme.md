@@ -7,6 +7,9 @@ Simplified, but feature rich Discord API wrapper written in modern C++.
 ## DisC++
 DisC++ is a simplified, but feature rich Discord API wrapper written in modern C++. It can run on Linux and Windows. Its also focused on being multi threaded so commands and event listeners are ran on seperate threads, this means you dont have to worry about slowing the bot down with a certain command.
 
+## State
+This library is ready to use but is still in development so you may encounter a few issues, if you do, please submit an issue!
+
 <table align="center">
   <tr>
     <th>Master</th>
