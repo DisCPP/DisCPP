@@ -10,6 +10,7 @@
 #include "event_dispatcher.h"
 #include "client_config.h"
 #include "exceptions.h"
+#include "settings.h"
 
 #include <ixwebsocket/IXNetSystem.h>
 
@@ -543,6 +544,7 @@ namespace discpp {
             if (settings.afk_timeout != old_settings.afk_timeout) new_settings.AddMember("afk_timeout", settings.afk_timeout, allocator);
             if (settings.custom_status != old_settings.custom_status) new_settings.AddMember("custom_status", settings.custom_status, allocator);
             if (settings.explicit_content_filter != old_settings.explicit_content_filter) new_settings.AddMember("explicit_content_filter", (int) settings.explicit_content_filter, allocator);
+            if (settings.theme != old_settings.theme) new_settings.AddMember("theme", ThemeToString(settings.theme), allocator);
             rapidjson::Value friend_source_flags(rapidjson::kObjectType);
             bool add_friend_source_flags = false;
             if (settings.friend_source_flags.GetAll() != old_settings.friend_source_flags.GetAll()) {

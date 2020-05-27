@@ -44,14 +44,14 @@ namespace discpp {
 	}
 	
 	std::unordered_map<std::string, Locale> str_locale_map = {
-		{"da", DA}, {"de", DE}, {"en-GB", EN_GB}, {"en-US", EN_US},
-		{"es-ES", ES_ES}, {"fr", FR}, {"hr", HR}, {"it", IT},
-		{"lt", LT}, {"hu", HU}, {"nl", NL}, {"no", NO},
-		{"pl", PL}, {"pt-BR", PT_BR}, {"ro", RO}, {"fi", FI},
-		{"sv-SE", SV_SE}, {"vi", VI}, {"tr", TR}, {"cs", CS},
-		{"el", EL}, {"bg", BG}, {"ru", RU}, {"uk", UK},
-		{"th", TH}, {"zh-CN", ZH_CN}, {"ja", JA}, {"zh-TW", ZH_TW},
-		{"ko", KO}
+		{"da", Locale::DA}, {"de", Locale::DE}, {"en-GB", Locale::EN_GB}, {"en-US", Locale::EN_US},
+		{"es-ES", Locale::ES_ES}, {"fr", Locale::FR}, {"hr", Locale::HR}, {"it", Locale::IT},
+		{"lt", Locale::LT}, {"hu", Locale::HU}, {"nl", Locale::NL}, {"no", Locale::NO},
+		{"pl", Locale::PL}, {"pt-BR", Locale::PT_BR}, {"ro", Locale::RO}, {"fi", Locale::FI},
+		{"sv-SE", Locale::SV_SE}, {"vi", Locale::VI}, {"tr", Locale::TR}, {"cs", Locale::CS},
+		{"el", Locale::EL}, {"bg", Locale::BG}, {"ru", Locale::RU}, {"uk", Locale::UK},
+		{"th", Locale::TH}, {"zh-CN", Locale::ZH_CN}, {"ja", Locale::JA}, {"zh-TW", Locale::ZH_TW},
+		{"ko", Locale::KO}
 	};
 
 	inline Locale StringToLocale(std::string locale) {
@@ -104,9 +104,9 @@ namespace discpp {
 		void ModifyMutualFriends(bool mutual_friends);
 		void ModifyMutualGuilds(bool mutual_guilds);
 
-		inline bool GetAll();
-		inline bool GetMutualFriends();
-		inline bool GetMutualGuilds();
+		inline bool GetAll() const;
+		inline bool GetMutualFriends() const;
+		inline bool GetMutualGuilds() const;
 
 	private:
 		int flags;
@@ -136,31 +136,31 @@ namespace discpp {
 		void ModifyContactSyncEnabled(bool contact_sync_enabled);
 		void ModifyNativePhoneIntegrationEnabled(bool native_phone_integration_enabled);
 
-		inline bool GetShowCurrentGame();
-		inline bool GetDefaultGuildsRestricted();
-		inline bool GetInlineAttachmentMedia();
-		inline bool GetInlineEmbedMedia();
-		inline bool GetGifAutoPlay();
-		inline bool GetRenderEmbeds();
-		inline bool GetRenderReactions();
-		inline bool GetAnimateEmoji();
-		inline bool GetEnableTtsCommand();
-		inline bool GetMessageDisplayCompact();
-		inline bool GetConvertEmoticons();
-		inline bool GetDisableGamesTab();
-		inline bool GetDeveloperMode();
-		inline bool GetDetectPlatformAccounts();
-		inline bool GetStreamNotificationsEnabled();
-		inline bool GetAllowAccessibilityDetection();
-		inline bool GetContactSyncEnabled();
-		inline bool GetNativePhoneIntegrationEnabled();
+		[[nodiscard]] inline bool GetShowCurrentGame() const;
+		[[nodiscard]] inline bool GetDefaultGuildsRestricted() const;
+		[[nodiscard]] inline bool GetInlineAttachmentMedia() const;
+		[[nodiscard]] inline bool GetInlineEmbedMedia() const;
+		[[nodiscard]] inline bool GetGifAutoPlay() const;
+		[[nodiscard]] inline bool GetRenderEmbeds() const;
+		[[nodiscard]] inline bool GetRenderReactions() const;
+		[[nodiscard]] inline bool GetAnimateEmoji() const;
+		[[nodiscard]] inline bool GetEnableTtsCommand() const;
+		[[nodiscard]] inline bool GetMessageDisplayCompact() const;
+		[[nodiscard]] inline bool GetConvertEmoticons() const;
+		[[nodiscard]] inline bool GetDisableGamesTab() const;
+		[[nodiscard]] inline bool GetDeveloperMode() const;
+		[[nodiscard]] inline bool GetDetectPlatformAccounts() const;
+		[[nodiscard]] inline bool GetStreamNotificationsEnabled() const;
+		[[nodiscard]] inline bool GetAllowAccessibilityDetection() const;
+		[[nodiscard]] inline bool GetContactSyncEnabled() const;
+		[[nodiscard]] inline bool GetNativePhoneIntegrationEnabled() const;
 
-		std::string locale;
 		std::string status;
 		std::string custom_status;
 		std::vector<snowflake> guild_positions;
 		ExplicitContentFilter explicit_content_filter;
-		FriendSourceFlags friend_source_flags;
+		FriendSourceFlags friend_source_flags{};
+        Locale locale;
 		Theme theme;
 		int afk_timeout;
 		int timezone_offset;
