@@ -11,7 +11,7 @@ namespace discpp {
 	    embed_json = std::make_shared<rapidjson::Document>(std::move(doc));
 	}
 
-	EmbedBuilder::EmbedBuilder(std::string title, std::string description, discpp::Color color) : EmbedBuilder() {
+	EmbedBuilder::EmbedBuilder(const std::string& title, const std::string& description, const discpp::Color& color) : EmbedBuilder() {
 		/**
 		 * @brief Constructs a discpp::EmbedBuilder object with a title, description, and color.
 		 *
@@ -49,7 +49,7 @@ namespace discpp {
 		embed_json->CopyFrom(json, embed_json->GetAllocator());
 	}
 
-	EmbedBuilder& EmbedBuilder::SetTitle(std::string title) {
+	EmbedBuilder& EmbedBuilder::SetTitle(const std::string& title) {
 		/**
 		 * @brief Set the title of the embed.
 		 *
@@ -79,7 +79,7 @@ namespace discpp {
 		return *this;
 	}
 
-	EmbedBuilder& EmbedBuilder::SetType(std::string type) {
+	EmbedBuilder& EmbedBuilder::SetType(const std::string& type) {
 		/**
 		 * @brief Set the type of the embed.
 		 *
@@ -101,7 +101,7 @@ namespace discpp {
 
 		return *this;
 	}
-	EmbedBuilder& EmbedBuilder::SetDescription(std::string description) {
+	EmbedBuilder& EmbedBuilder::SetDescription(const std::string& description) {
 		/**
 		 * @brief Set the description of the embed.
 		 *
@@ -129,7 +129,7 @@ namespace discpp {
 		return *this;
 	}
 	
-	EmbedBuilder& EmbedBuilder::SetUrl(std::string url) {
+	EmbedBuilder& EmbedBuilder::SetUrl(const std::string& url) {
 		/**
 		 * @brief Sets the URL of the embed.
 		 *
@@ -152,7 +152,7 @@ namespace discpp {
 		return *this;
 	}
 
-	EmbedBuilder& EmbedBuilder::SetTimestamp(std::string timestamp) {
+	EmbedBuilder& EmbedBuilder::SetTimestamp(const std::string& timestamp) {
 		/**
 		 * @brief Set the timestamp for the embed.
 		 *
@@ -175,7 +175,7 @@ namespace discpp {
 		return *this;
 	}
 
-	EmbedBuilder& EmbedBuilder::SetColor(Color color) {
+	EmbedBuilder& EmbedBuilder::SetColor(const Color& color) {
 		/**
 		 * @brief Set the color of the embed.
 		 *
@@ -198,7 +198,7 @@ namespace discpp {
 		return *this;
 	}
 
-	EmbedBuilder& EmbedBuilder::SetFooter(std::string text, std::string icon_url) {
+	EmbedBuilder& EmbedBuilder::SetFooter(const std::string& text, const std::string& icon_url) {
 		/**
 		 * @brief Set the footer of the embed.
 		 *
@@ -233,7 +233,7 @@ namespace discpp {
 		return *this;
 	}
 
-	EmbedBuilder& EmbedBuilder::SetImage(std::string url, int height, int width) {
+	EmbedBuilder& EmbedBuilder::SetImage(const std::string& url, const int& height, const int& width) {
 		/**
 		 * @brief Set the image of the embed.
 		 *
@@ -267,7 +267,7 @@ namespace discpp {
 		return *this;
 	}
 
-	EmbedBuilder& EmbedBuilder::SetThumbnail(std::string url, int height, int width) {
+	EmbedBuilder& EmbedBuilder::SetThumbnail(const std::string& url, const int& height, const int& width) {
 		/**
 		 * @brief Set the thumbnail of the embed.
 		 *
@@ -301,7 +301,7 @@ namespace discpp {
 		return *this;
 	}
 
-	EmbedBuilder& EmbedBuilder::SetVideo(std::string url, int height, int width) {
+	EmbedBuilder& EmbedBuilder::SetVideo(const std::string& url, const int& height, const int& width) {
 		/**
 		 * @brief Set the video of the embed.
 		 *
@@ -335,7 +335,7 @@ namespace discpp {
 		return *this;
 	}
 
-	EmbedBuilder& EmbedBuilder::SetProvider(std::string name, std::string url) {
+	EmbedBuilder& EmbedBuilder::SetProvider(const std::string& name, const std::string& url) {
 		/**
 		 * @brief Set the provider of the embed.
 		 *
@@ -363,7 +363,7 @@ namespace discpp {
 		return *this;
 	}
 
-	EmbedBuilder& EmbedBuilder::SetAuthor(std::string name, std::string url, std::string icon_url) {
+	EmbedBuilder& EmbedBuilder::SetAuthor(const std::string& name, const std::string& url, const std::string& icon_url) {
 		/**
 		 * @brief Set the author of the embed.
 		 *
@@ -403,7 +403,7 @@ namespace discpp {
 		return *this;
 	}
 
-	EmbedBuilder& EmbedBuilder::AddField(std::string name, std::string value, bool is_inline) {
+	EmbedBuilder& EmbedBuilder::AddField(const std::string& name, const std::string& value, const bool& is_inline) {
 		/**
 		 * @brief Add a field to the embed.
 		 *

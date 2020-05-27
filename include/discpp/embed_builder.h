@@ -15,22 +15,22 @@ namespace discpp {
 	class EmbedBuilder {
 	public:
 		EmbedBuilder();
-		EmbedBuilder(std::string title, std::string description, Color color);
+		EmbedBuilder(const std::string& title, const std::string& description, const Color& color);
 		EmbedBuilder(rapidjson::Document& json);
 
-		EmbedBuilder& SetTitle(std::string title);
-		EmbedBuilder& SetType(std::string type);
-		EmbedBuilder& SetDescription(std::string description);
-		EmbedBuilder& SetUrl(std::string url);
-		EmbedBuilder& SetTimestamp(std::string timestamp);
-		EmbedBuilder& SetColor(Color color);
-		EmbedBuilder& SetFooter(std::string text, std::string icon_url = "");
-		EmbedBuilder& SetImage(std::string url, int height = -1, int width = -1);
-		EmbedBuilder& SetThumbnail(std::string url, int height = -1, int width = -1);
-		EmbedBuilder& SetVideo(std::string url, int height = -1, int width = -1);
-		EmbedBuilder& SetProvider(std::string name, std::string url);
-		EmbedBuilder& SetAuthor(std::string name, std::string url = "", std::string icon_url = "");
-		EmbedBuilder& AddField(std::string name, std::string value, bool is_inline = false);
+		EmbedBuilder& SetTitle(const std::string& title);
+		EmbedBuilder& SetType(const std::string& type);
+		EmbedBuilder& SetDescription(const std::string& description);
+		EmbedBuilder& SetUrl(const std::string& url);
+		EmbedBuilder& SetTimestamp(const std::string& timestamp);
+		EmbedBuilder& SetColor(const Color& color);
+		EmbedBuilder& SetFooter(const std::string& text, const std::string& icon_url = "");
+		EmbedBuilder& SetImage(const std::string& url, const int& height = -1, const int& width = -1);
+		EmbedBuilder& SetThumbnail(const std::string& url, const int& height = -1, const int& width = -1);
+		EmbedBuilder& SetVideo(const std::string& url, const int& height = -1, const int& width = -1);
+		EmbedBuilder& SetProvider(const std::string& name, const std::string& url);
+		EmbedBuilder& SetAuthor(const std::string& name, const std::string& url = "", const std::string& icon_url = "");
+		EmbedBuilder& AddField(const std::string& name, const std::string& value, const bool& is_inline = false);
 
 		std::string GetDescription();
 		std::string GetTitle();
