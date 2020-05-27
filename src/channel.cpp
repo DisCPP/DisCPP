@@ -1,3 +1,4 @@
+#include <ixwebsocket/IXHttpClient.h>
 #include "channel.h"
 #include "utils.h"
 #include "client.h"
@@ -94,7 +95,52 @@ namespace discpp {
 		    rapidjson::Document embed_json = embed->ToJson();
 			body = cpr::Body("{\"embed\": " + DumpJson(embed_json) + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
 		} else if (!files.empty()) { // Send files.
-			cpr::Multipart multipart_data{};
+
+            // @TODO THIS:
+		    ix::HttpClient* client = new ix::HttpClient(true);
+
+
+            ix::HttpRequestArgsPtr args = client->createRequest();
+            args->logger = [](const std::string& msg) { globals::client_instance->logger->Debug(msg); };
+            args->extraHeaders = DefaultHeaders({ {"Content-Type", "multipart/form-data"} });
+
+            ix::HttpFormDataParameters data_parameters;
+            for (int i = 0; i < files.size(); i++) {
+                std::vector<uint8_t> memblock;
+                std::ifstream file(files[i].file_path);
+
+                file.seekg(0, file.end);
+                std::streamoff size = file.tellg();
+                file.seekg(0, file.beg);
+
+                memblock.resize(size);
+
+                file.read((char*) &memblock.front(), static_cast<std::streamsize>(size));
+
+                std::string file_bytes(memblock.begin(), memblock.end());
+
+                data_parameters["file_" + std::to_string(i)] = file_bytes;
+            }
+            //data_parameters["payload_json"] = "{\"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "\"}";
+
+            std::string multipart_bound = client->generateMultipartBoundary();
+            args->multipartBoundary = multipart_bound;
+            args->body = client->serializeHttpFormDataParameters(multipart_bound, data_parameters);
+
+            WaitForRateLimits(id, RateLimitBucketType::CHANNEL);
+            globals::client_instance->logger->Debug("Sending patch request, URL: " + Endpoint("/channels/" + std::to_string(id) + "/messages") + ", body: " + args->body);
+
+            ix::HttpResponsePtr result = client->post(Endpoint("/channels/" + std::to_string(id) + "/messages"), data_parameters, args);
+
+            globals::client_instance->logger->Debug("Received requested payload: " + result->payload);
+
+            rapidjson::Document result_json(rapidjson::kObjectType);
+            result_json.Parse(result->payload);
+
+            return discpp::Message(result_json);
+
+
+			/*cpr::Multipart multipart_data{};
 
 			for (int i = 0; i < files.size(); i++) {
 				multipart_data.parts.emplace_back("file" + std::to_string(i), cpr::File(files[i].file_path), "application/octet-stream");
@@ -107,9 +153,9 @@ namespace discpp {
 			HandleRateLimits(response.header, id, RateLimitBucketType::CHANNEL);
 
 			rapidjson::Document result_json(rapidjson::kObjectType);
-			result_json.Parse(response.text);
+			result_json.Parse(response.text);*/
 
-			return discpp::Message(result_json);
+			//return discpp::Message(result_json);
 		} else {
 			body = cpr::Body(DumpJson(message_json));
 		}
@@ -164,8 +210,6 @@ namespace discpp {
 		 *
 		 * @return discpp::Channel - This method also sets the channel reference to the returned channel.
 		 */
-
-		cpr::Header headers = DefaultHeaders({ {"Content-Type", "application/json" } });
 		std::string field;
 
         rapidjson::Document j_body(rapidjson::kObjectType);
@@ -179,7 +223,7 @@ namespace discpp {
         }
 
 		cpr::Body body(DumpJson(j_body));
-		rapidjson::Document result = SendPatchRequest(Endpoint("/channels/" + std::to_string(id)), headers, id, RateLimitBucketType::CHANNEL, body);
+		rapidjson::Document result = SendPatchRequest(Endpoint("/channels/" + std::to_string(id)), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 		
 		*this = discpp::Channel(result);
 		return *this;
@@ -558,4 +602,4 @@ namespace discpp {
 
 		SendDeleteRequest(Endpoint("/channels/" + std::to_string(id) + "/recipients/" + std::to_string(user.id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
-}
+}  

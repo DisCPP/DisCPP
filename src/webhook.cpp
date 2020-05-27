@@ -61,7 +61,8 @@ namespace discpp {
 			body = cpr::Body("{\"embed\": " + DumpJson(json) + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
 		}
 		else if (!files.empty()) {
-			cpr::Multipart multipart_data{};
+		    // @TODO: THIS!
+			/*cpr::Multipart multipart_data{};
 
 			for (int i = 0; i < files.size(); i++) {
 				multipart_data.parts.emplace_back("file" + std::to_string(i), cpr::File(files[i].file_path), "application/octet-stream");
@@ -75,7 +76,7 @@ namespace discpp {
 
             rapidjson::Document result_json(rapidjson::kObjectType);
             result_json.Parse(response.text);
-			return discpp::Message(result_json);
+			return discpp::Message(result_json);*/
 		} else {
 			body = cpr::Body(DumpJson(message_json));
 		}
