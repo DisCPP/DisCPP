@@ -11,7 +11,7 @@
 namespace discpp {
 	inline std::unordered_map<std::string, Command*> registered_commands;
 
-	void FireCommand(discpp::Client* bot, discpp::Message message);
+	void FireCommand(discpp::Client* bot, const discpp::Message& message);
 }
 
 #endif
