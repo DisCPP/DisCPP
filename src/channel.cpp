@@ -97,7 +97,7 @@ namespace discpp {
 		} else if (!files.empty()) { // Send files.
 
             // @TODO THIS:
-		    ix::HttpClient* client = new ix::HttpClient(true);
+		    ix::HttpClient* client = new ix::HttpClient();
 
 
             ix::HttpRequestArgsPtr args = client->createRequest();
@@ -126,11 +126,14 @@ namespace discpp {
             std::string multipart_bound = client->generateMultipartBoundary();
             args->multipartBoundary = multipart_bound;
             args->body = client->serializeHttpFormDataParameters(multipart_bound, data_parameters);
+            args->logger = [](const std::string& msg) { globals::client_instance->logger->Debug(msg); };
+            args->verbose = true;
 
             WaitForRateLimits(id, RateLimitBucketType::CHANNEL);
-            globals::client_instance->logger->Debug("Sending patch request, URL: " + Endpoint("/channels/" + std::to_string(id) + "/messages") + ", body: " + args->body);
+            //globals::client_instance->logger->Debug("Sending patch request, URL: " + Endpoint("/channels/" + std::to_string(id) + "/messages") + ", body: " + args->body);
 
-            ix::HttpResponsePtr result = client->post(Endpoint("/channels/" + std::to_string(id) + "/messages"), data_parameters, args);
+            ix::HttpResponsePtr result = client->post("http://localhost:8000", data_parameters, args);
+            //ix::HttpResponsePtr result = client->post(Endpoint("/channels/" + std::to_string(id) + "/messages"), data_parameters, args);
 
             globals::client_instance->logger->Debug("Received requested payload: " + result->payload);
 
