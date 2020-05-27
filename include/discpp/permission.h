@@ -47,42 +47,41 @@ namespace discpp {
 		MANAGE_WEBHOOKS = 0x20000000,
 		MANAGE_EMOJIS = 0x40000000,
 	};
-	
-	inline std::unordered_map<Permission, std::string> permission_str_map = {
-		{Permission::CREATE_INSTANT_INVITE, "CREATE_INSTANT_INVITE"},
-		{Permission::KICK_MEMBERS, "KICK_MEMBERS"},
-		{Permission::BAN_MEMBERS, "BAN_MEMBERS"},
-		{Permission::ADMINISTRATOR, "ADMINISTRATOR"},
-		{Permission::MANAGE_CHANNELS, "MANAGE_CHANNELS"},
-		{Permission::MANAGE_GUILD, "MANAGE_GUILD"},
-		{Permission::ADD_REACTIONS, "ADD_REACTIONS"},
-		{Permission::VIEW_AUDIT_LOG, "VIEW_AUDIT_LOG"},
-		{Permission::READ_MESSAGES, "READ_MESSAGES"},
-		{Permission::SEND_MESSAGES, "SEND_MESSAGES"},
-		{Permission::SEND_TTS_MESSAGES, "SEND_TTS_MESSAGES"},
-		{Permission::MANAGE_MESSAGES, "MANAGE_MESSAGES"},
-		{Permission::EMBED_LINKS, "EMBED_LINKS"},
-		{Permission::ATTACH_FILES, "ATTACH_FILES"},
-		{Permission::READ_MESSAGE_HISTORY, "READ_MESSAGE_HISTORY"},
-		{Permission::MENTION_EVERYONE_HERE_ALL_ROLES, "MENTION_EVERYONE_HERE_ALL_ROLES"},
-		{Permission::USE_EXTERNAL_EMOJIS, "USE_EXTERNAL_EMOJIS"},
-		{Permission::CONNECT, "CONNECT"},
-		{Permission::SPEAK, "SPEAK"},
-		{Permission::MUTE_MEMBERS, "MUTE_MEMBERS"},
-		{Permission::DEAFEN_MEMBERS, "DEAFEN_MEMBERS"},
-		{Permission::MOVE_MEMBERS, "MOVE_MEMBERS"},
-		{Permission::USE_VAD, "USE_VAD"},
-		{Permission::PRIORITY_SPEAKER, "PRIORITY_SPEAKER"},
-		{Permission::STREAM, "STREAM"},
-		{Permission::CHANGE_NICKNAME, "CHANGE_NICKNAME"},
-		{Permission::MANAGE_NICKNAMES, "MANAGE_NICKNAMES"},
-		{Permission::MANAGE_ROLES, "MANAGE_ROLES"},
-		{Permission::MANAGE_WEBHOOKS, "MANAGE_WEBHOOKS"},
-		{Permission::MANAGE_EMOJIS, "MANAGE_EMOJIS"}
-	};
 
 	inline std::string PermissionToString(Permission perm) {
-		return permission_str_map[perm];
+        std::unordered_map<Permission, std::string> permission_str_map = {
+                {Permission::CREATE_INSTANT_INVITE, "CREATE_INSTANT_INVITE"},
+                {Permission::KICK_MEMBERS, "KICK_MEMBERS"},
+                {Permission::BAN_MEMBERS, "BAN_MEMBERS"},
+                {Permission::ADMINISTRATOR, "ADMINISTRATOR"},
+                {Permission::MANAGE_CHANNELS, "MANAGE_CHANNELS"},
+                {Permission::MANAGE_GUILD, "MANAGE_GUILD"},
+                {Permission::ADD_REACTIONS, "ADD_REACTIONS"},
+                {Permission::VIEW_AUDIT_LOG, "VIEW_AUDIT_LOG"},
+                {Permission::READ_MESSAGES, "READ_MESSAGES"},
+                {Permission::SEND_MESSAGES, "SEND_MESSAGES"},
+                {Permission::SEND_TTS_MESSAGES, "SEND_TTS_MESSAGES"},
+                {Permission::MANAGE_MESSAGES, "MANAGE_MESSAGES"},
+                {Permission::EMBED_LINKS, "EMBED_LINKS"},
+                {Permission::ATTACH_FILES, "ATTACH_FILES"},
+                {Permission::READ_MESSAGE_HISTORY, "READ_MESSAGE_HISTORY"},
+                {Permission::MENTION_EVERYONE_HERE_ALL_ROLES, "MENTION_EVERYONE_HERE_ALL_ROLES"},
+                {Permission::USE_EXTERNAL_EMOJIS, "USE_EXTERNAL_EMOJIS"},
+                {Permission::CONNECT, "CONNECT"},
+                {Permission::SPEAK, "SPEAK"},
+                {Permission::MUTE_MEMBERS, "MUTE_MEMBERS"},
+                {Permission::DEAFEN_MEMBERS, "DEAFEN_MEMBERS"},
+                {Permission::MOVE_MEMBERS, "MOVE_MEMBERS"},
+                {Permission::USE_VAD, "USE_VAD"},
+                {Permission::PRIORITY_SPEAKER, "PRIORITY_SPEAKER"},
+                {Permission::STREAM, "STREAM"},
+                {Permission::CHANGE_NICKNAME, "CHANGE_NICKNAME"},
+                {Permission::MANAGE_NICKNAMES, "MANAGE_NICKNAMES"},
+                {Permission::MANAGE_ROLES, "MANAGE_ROLES"},
+                {Permission::MANAGE_WEBHOOKS, "MANAGE_WEBHOOKS"},
+                {Permission::MANAGE_EMOJIS, "MANAGE_EMOJIS"}
+        };
+	    return permission_str_map[perm];
 	}
 
 	class PermissionOverwrite {
