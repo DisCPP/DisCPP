@@ -28,33 +28,33 @@ namespace discpp {
 		KO
 	};
 
-	std::unordered_map<Locale, std::string> locale_str_map = {
-		{Locale::DA, "da"}, {Locale::DE, "de"}, {Locale::EN_GB, "en-GB"}, {Locale::EN_US, "en-US"},
-		{Locale::ES_ES, "es-ES"}, {Locale::FR, "fr"}, {Locale::HR, "hr"}, {Locale::IT, "it"},
-		{Locale::LT, "lt"}, {Locale::HU, "hu"}, {Locale::NL, "nl"}, {Locale::NO, "no"},
-		{Locale::PL, "pl"}, {Locale::PT_BR, "pt-BR"}, {Locale::RO, "ro"}, {Locale::FI, "fi"},
-		{Locale::SV_SE, "sv-SE"}, {Locale::VI, "vi"}, {Locale::TR, "tr"}, {Locale::CS, "cs"},
-		{Locale::EL, "el"}, {Locale::BG, "bg"}, {Locale::RU, "ru"}, {Locale::UK, "uk"},
-		{Locale::TH, "th"}, {Locale::ZH_CN, "zh-CN"}, {Locale::JA, "ja"}, {Locale::ZH_TW, "zh-TW"},
-		{Locale::KO, "ko"}
-	};
-
 	inline std::string LocaleToString(Locale locale) {
+		/* conversions */
+		std::unordered_map<Locale, std::string> locale_str_map = {
+			{Locale::DA, "da"}, {Locale::DE, "de"}, {Locale::EN_GB, "en-GB"}, {Locale::EN_US, "en-US"},
+			{Locale::ES_ES, "es-ES"}, {Locale::FR, "fr"}, {Locale::HR, "hr"}, {Locale::IT, "it"},
+			{Locale::LT, "lt"}, {Locale::HU, "hu"}, {Locale::NL, "nl"}, {Locale::NO, "no"},
+			{Locale::PL, "pl"}, {Locale::PT_BR, "pt-BR"}, {Locale::RO, "ro"}, {Locale::FI, "fi"},
+			{Locale::SV_SE, "sv-SE"}, {Locale::VI, "vi"}, {Locale::TR, "tr"}, {Locale::CS, "cs"},
+			{Locale::EL, "el"}, {Locale::BG, "bg"}, {Locale::RU, "ru"}, {Locale::UK, "uk"},
+			{Locale::TH, "th"}, {Locale::ZH_CN, "zh-CN"}, {Locale::JA, "ja"}, {Locale::ZH_TW, "zh-TW"},
+			{Locale::KO, "ko"}
+		};
 		return locale_str_map[locale];
 	}
-	
-	std::unordered_map<std::string, Locale> str_locale_map = {
-		{"da", Locale::DA}, {"de", Locale::DE}, {"en-GB", Locale::EN_GB}, {"en-US", Locale::EN_US},
-		{"es-ES", Locale::ES_ES}, {"fr", Locale::FR}, {"hr", Locale::HR}, {"it", Locale::IT},
-		{"lt", Locale::LT}, {"hu", Locale::HU}, {"nl", Locale::NL}, {"no", Locale::NO},
-		{"pl", Locale::PL}, {"pt-BR", Locale::PT_BR}, {"ro", Locale::RO}, {"fi", Locale::FI},
-		{"sv-SE", Locale::SV_SE}, {"vi", Locale::VI}, {"tr", Locale::TR}, {"cs", Locale::CS},
-		{"el", Locale::EL}, {"bg", Locale::BG}, {"ru", Locale::RU}, {"uk", Locale::UK},
-		{"th", Locale::TH}, {"zh-CN", Locale::ZH_CN}, {"ja", Locale::JA}, {"zh-TW", Locale::ZH_TW},
-		{"ko", Locale::KO}
-	};
 
 	inline Locale StringToLocale(std::string locale) {
+		/* conversions */
+		std::unordered_map<std::string, Locale> str_locale_map = {
+			{"da", Locale::DA}, {"de", Locale::DE}, {"en-GB", Locale::EN_GB}, {"en-US", Locale::EN_US},
+			{"es-ES", Locale::ES_ES}, {"fr", Locale::FR}, {"hr", Locale::HR}, {"it", Locale::IT},
+			{"lt", Locale::LT}, {"hu", Locale::HU}, {"nl", Locale::NL}, {"no", Locale::NO},
+			{"pl", Locale::PL}, {"pt-BR", Locale::PT_BR}, {"ro", Locale::RO}, {"fi", Locale::FI},
+			{"sv-SE", Locale::SV_SE}, {"vi", Locale::VI}, {"tr", Locale::TR}, {"cs", Locale::CS},
+			{"el", Locale::EL}, {"bg", Locale::BG}, {"ru", Locale::RU}, {"uk", Locale::UK},
+			{"th", Locale::TH}, {"zh-CN", Locale::ZH_CN}, {"ja", Locale::JA}, {"zh-TW", Locale::ZH_TW},
+			{"ko", Locale::KO}
+		};
 		return str_locale_map[locale];
 	}
 
