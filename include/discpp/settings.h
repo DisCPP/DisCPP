@@ -86,9 +86,9 @@ namespace discpp {
 		FriendSource() = default;
 		FriendSource(rapidjson::Document& json);
 
-		void ModifyAll(bool all);
-		void ModifyMutualFriends(bool mutual_friends);
-		void ModifyMutualGuilds(bool mutual_guilds);
+		void ModifyAll(const bool& all);
+		void ModifyMutualFriends(const bool& mutual_friends);
+		void ModifyMutualGuilds(const bool& mutual_guilds);
 
 		[[nodiscard]] bool GetAll() const;
 		[[nodiscard]] bool GetMutualFriends() const;
@@ -124,24 +124,24 @@ namespace discpp {
 		ClientUserSettings() = default;
 		ClientUserSettings(rapidjson::Document& json);
 
-		void ModifyShowCurrentGame(bool show_current_game);
-		void ModifyDefaultGuildsRestricted(bool default_guilds_restricted);
-		void ModifyInlineAttachmentMedia(bool inline_attachment_media);
-		void ModifyInlineEmbedMedia(bool inline_embed_media);
-		void ModifyGifAutoPlay(bool gif_auto_play);
-		void ModifyRenderEmbeds(bool render_embeds);
-		void ModifyRenderReactions(bool render_reactions);
-		void ModifyAnimateEmoji(bool animate_emoji);
-		void ModifyEnableTtsCommand(bool enable_tts_command);
-		void ModifyMessageDisplayCompact(bool message_display_compact);
-		void ModifyConvertEmoticons(bool convert_emoticons);
-		void ModifyDisableGamesTab(bool disable_games_tab);
-		void ModifyDeveloperMode(bool developer_mode);
-		void ModifyDetectPlatformAccounts(bool detect_platform_accounts);
-		void ModifyStreamNotificationsEnabled(bool stream_notifications_enabled);
-		void ModifyAllowAccessibilityDetection(bool allow_accessibility_detection);
-		void ModifyContactSyncEnabled(bool contact_sync_enabled);
-		void ModifyNativePhoneIntegrationEnabled(bool native_phone_integration_enabled);
+		void ModifyShowCurrentGame(const bool& show_current_game);
+		void ModifyDefaultGuildsRestricted(const bool& default_guilds_restricted);
+		void ModifyInlineAttachmentMedia(const bool& inline_attachment_media);
+		void ModifyInlineEmbedMedia(const bool& inline_embed_media);
+		void ModifyGifAutoPlay(const bool& gif_auto_play);
+		void ModifyRenderEmbeds(const bool& render_embeds);
+		void ModifyRenderReactions(const bool& render_reactions);
+		void ModifyAnimateEmoji(const bool& animate_emoji);
+		void ModifyEnableTtsCommand(const bool& enable_tts_command);
+		void ModifyMessageDisplayCompact(const bool& message_display_compact);
+		void ModifyConvertEmoticons(const bool& convert_emoticons);
+		void ModifyDisableGamesTab(const bool& disable_games_tab);
+		void ModifyDeveloperMode(const bool& developer_mode);
+		void ModifyDetectPlatformAccounts(const bool& detect_platform_accounts);
+		void ModifyStreamNotificationsEnabled(const bool& stream_notifications_enabled);
+		void ModifyAllowAccessibilityDetection(const bool& allow_accessibility_detection);
+		void ModifyContactSyncEnabled(const bool& contact_sync_enabled);
+		void ModifyNativePhoneIntegrationEnabled(const bool& native_phone_integration_enabled);
 
 		[[nodiscard]] bool GetShowCurrentGame() const;
 		[[nodiscard]] bool GetDefaultGuildsRestricted() const;
