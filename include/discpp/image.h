@@ -9,7 +9,7 @@ namespace discpp {
 	class Image : public DiscordObject {
 	public:
 		Image() = default;
-		Image(std::ifstream* image, std::string location);
+		Image(std::ifstream* image, const std::string& location);
 
 		std::string ToDataURI();
 	private:

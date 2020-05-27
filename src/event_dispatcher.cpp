@@ -573,7 +573,7 @@ namespace discpp {
         internal_event_map["WEBHOOKS_UPDATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::WebhooksUpdateEvent(result); };
     }
 
-    void EventDispatcher::RegisterCustomEvent(const char* event_name, std::function<void(const rapidjson::Document&)> func) {
+    void EventDispatcher::RegisterCustomEvent(const char* event_name, const std::function<void(const rapidjson::Document&)>& func) {
         internal_event_map[event_name] = func;
     }
 

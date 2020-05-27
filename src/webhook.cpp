@@ -17,12 +17,12 @@ namespace discpp {
         token = GetDataSafely<std::string>(json, "token");
     }
 
-	Webhook::Webhook(discpp::snowflake id, std::string token) : DiscordObject(id) {
+	Webhook::Webhook(const discpp::snowflake& id, const std::string& token) : DiscordObject(id) {
 		this->token = token;
 		this->id = id;
 	};
 
-	discpp::Message Webhook::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<discpp::File> files) {
+	discpp::Message Webhook::Send(const std::string& text, const bool& tts, discpp::EmbedBuilder* embed, const std::vector<discpp::File>& files) {
 
 		std::string escaped_text = EscapeString(text);
         rapidjson::Document message_json = rapidjson::Document(rapidjson::kObjectType);

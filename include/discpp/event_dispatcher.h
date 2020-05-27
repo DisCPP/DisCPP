@@ -62,7 +62,7 @@ namespace discpp {
 	public:
         static void BindEvents();
 		static void HandleDiscordEvent(rapidjson::Document& j, std::string event_name);
-        static void RegisterCustomEvent(const char* event_name, std::function<void(const rapidjson::Document&)> func);
+        [[maybe_unused]] static void RegisterCustomEvent(const char* event_name, const std::function<void(const rapidjson::Document&)>& func);
 	};
 }
 

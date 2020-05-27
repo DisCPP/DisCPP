@@ -3,7 +3,7 @@
 #include <climits>
 
 namespace discpp {
-	Member::Member(snowflake id, discpp::Guild& guild) : discpp::DiscordObject(id) {
+	Member::Member(const snowflake& id, const discpp::Guild& guild) : discpp::DiscordObject(id) {
 		/**
 		 * @brief Constructs a discpp::Member object using its id and the guild that it is in.
 		 *
@@ -22,7 +22,7 @@ namespace discpp {
 		*this = *guild.GetMember(id);
 	}
 
-	Member::Member(rapidjson::Document& json, discpp::Guild& guild) : guild_id(guild.id) {
+	Member::Member(rapidjson::Document& json, const discpp::Guild& guild) : guild_id(guild.id) {
 		/**
 		 * @brief Constructs a discpp::Member object by parsing json and stores the guild_id.
 		 *
@@ -89,7 +89,7 @@ namespace discpp {
         return (flags & 0b10) == 0b10;
 	}
 
-	void Member::ModifyMember(std::string nick, std::vector<discpp::Role>& roles, bool mute, bool deaf, snowflake channel_id) {
+	void Member::ModifyMember(const std::string& nick, std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf, const snowflake& channel_id) {
 		/**
 		 * @brief Modifies this guild member.
 		 *
@@ -134,7 +134,7 @@ namespace discpp {
 		SendPatchRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/" + std::to_string(id)), DefaultHeaders({ { "Content-Type", "application/json" } }), guild_id, RateLimitBucketType::GUILD, body);
 	}
 
-	void Member::AddRole(discpp::Role& role) {
+	void Member::AddRole(const discpp::Role& role) {
 		/**
 		 * @brief Adds a role to a guild member.
 		 *
@@ -150,7 +150,7 @@ namespace discpp {
 		SendPutRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 	}
 
-	void Member::RemoveRole(discpp::Role& role) {
+	void Member::RemoveRole(const discpp::Role& role) {
 		/**
 		 * @brief Removes a role to a guild member.
 		 *
@@ -182,7 +182,7 @@ namespace discpp {
 		return itr != result.MemberEnd();
 	}
 
-	bool Member::HasRole(discpp::Role& role) {
+	bool Member::HasRole(const discpp::Role& role) {
 		/**
 		 * @brief Check if this member is a role.
 		 *
@@ -198,7 +198,7 @@ namespace discpp {
 		return count_if(roles.begin(), roles.end(), [role](std::pair<discpp::snowflake, std::shared_ptr<discpp::Role>> pair) { return role.id == pair.second->id; }) != 0;
 	}
 
-	bool Member::HasPermission(discpp::Permission perm) {
+	bool Member::HasPermission(const discpp::Permission& perm) {
 		/**
 		 * @brief Check if this member has a permission. It will also check if it has the Administrator permission or is guild owner.
 		 *

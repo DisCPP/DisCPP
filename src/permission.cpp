@@ -2,7 +2,7 @@
 #include "utils.h"
 
 namespace discpp {
-	Permissions::Permissions(PermissionType permission_type, int byte_set) : permission_type(permission_type) {
+	Permissions::Permissions(const PermissionType& permission_type, const int& byte_set) : permission_type(permission_type) {
 		/**
 		 * @brief Constructs a discpp::Permission object with its type and byte set.
 		 *
@@ -60,7 +60,7 @@ namespace discpp {
 		return json;
 	}
 
-	PermissionOverwrite::PermissionOverwrite(int value) : value(value) { 
+	PermissionOverwrite::PermissionOverwrite(const int& value) : value(value) {
 		/**
 		 * @brief Constructs a discpp::PermissionOverwrite object with its permission value.
 		 *
@@ -74,7 +74,7 @@ namespace discpp {
 		 */
 	}
 
-	bool PermissionOverwrite::HasPermission(Permission permission) {
+	bool PermissionOverwrite::HasPermission(const Permission& permission) {
 		/**
 		 * @brief Checks if the permission overwrites has a permission.
 		 *
@@ -90,7 +90,7 @@ namespace discpp {
 		return (value & permission) == permission;
 	}
 
-	void PermissionOverwrite::AddPermission(Permission permission) {
+	void PermissionOverwrite::AddPermission(const Permission& permission) {
 		/**
 		 * @brief Add a permission.
 		 *

@@ -83,19 +83,19 @@ namespace discpp {
 	    };
 
 		Message() = default;
-		Message(snowflake id);
-		Message(snowflake message_id, snowflake channel_id);
+		Message(const snowflake& id);
+		Message(const snowflake& message_id, const snowflake& channel_id);
 		Message(rapidjson::Document& json);
 
-		void AddReaction(discpp::Emoji emoji);
-		void RemoveBotReaction(discpp::Emoji emoji);
-		void RemoveReaction(discpp::User user, discpp::Emoji emoji);
-        std::unordered_map<discpp::snowflake, discpp::User> GetReactorsOfEmoji(discpp::Emoji emoji, int amount);
-		std::unordered_map<discpp::snowflake, discpp::User> GetReactorsOfEmoji(discpp::Emoji emoji, discpp::User user, GetReactionsMethod method);
+		void AddReaction(const discpp::Emoji& emoji);
+		void RemoveBotReaction(const discpp::Emoji& emoji);
+		void RemoveReaction(const discpp::User& user, const discpp::Emoji& emoji);
+        std::unordered_map<discpp::snowflake, discpp::User> GetReactorsOfEmoji(const discpp::Emoji& emoji, const int& amount);
+		std::unordered_map<discpp::snowflake, discpp::User> GetReactorsOfEmoji(const discpp::Emoji& emoji, const discpp::User& user, const GetReactionsMethod& method);
 		void ClearReactions();
-		discpp::Message EditMessage(std::string text);
-		discpp::Message EditMessage(discpp::EmbedBuilder embed);
-		discpp::Message EditMessage(int flags);
+		discpp::Message EditMessage(const std::string& text);
+		discpp::Message EditMessage(discpp::EmbedBuilder& embed);
+		discpp::Message EditMessage(const int& flags);
 		void DeleteMessage();
 		inline void PinMessage();
 		inline void UnpinMessage();

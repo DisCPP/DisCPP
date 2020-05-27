@@ -12,7 +12,7 @@ namespace discpp {
 	public:
 		Reaction() = default;
 		Reaction(rapidjson::Document& json);
-		Reaction(int count, bool from_bot, discpp::Emoji emoji) : count(count), from_bot(from_bot), emoji(emoji) { }
+		Reaction(const int& count, const bool& from_bot, const discpp::Emoji& emoji) : count(count), from_bot(from_bot), emoji(emoji) { }
 
 		int count;
 		bool from_bot;

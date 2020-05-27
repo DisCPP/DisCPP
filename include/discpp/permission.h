@@ -90,17 +90,17 @@ namespace discpp {
 	class PermissionOverwrite {
 	public:
 		PermissionOverwrite() = default;
-		PermissionOverwrite(int value);
+		PermissionOverwrite(const int& value);
 
-		bool HasPermission(Permission permission);
-		void AddPermission(Permission permission);
+		bool HasPermission(const Permission& permission);
+		void AddPermission(const Permission& permission);
 
 		int value = 0;
 	};
 
 	class NoPermissionException : public std::runtime_error {
 	public: 
-		NoPermissionException (Permission req_perm) : std::runtime_error("Required permission " + PermissionToString(req_perm) + " not met.") {}
+		NoPermissionException (const Permission& req_perm) : std::runtime_error("Required permission " + PermissionToString(req_perm) + " not met.") {}
 	};
 
 	class NotGuildOwnerException : public std::runtime_error {
@@ -111,7 +111,7 @@ namespace discpp {
 	class Permissions {
 	public:
 		Permissions() = default;
-		Permissions(PermissionType permission_type, int byte_set);
+		Permissions(const PermissionType& permission_type, const int& byte_set);
 		Permissions(rapidjson::Document& json);
         rapidjson::Document ToJson();
 

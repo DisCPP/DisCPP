@@ -12,7 +12,7 @@ namespace discpp {
 	class Role : public DiscordObject {
 	public:
 		Role() = default;
-		Role(snowflake role_id, discpp::Guild& guild);
+		Role(const snowflake& role_id, const discpp::Guild& guild);
 		Role(rapidjson::Document& json);
 
 		//snowflake id;  /**< Id of the current role */

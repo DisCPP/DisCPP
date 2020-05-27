@@ -28,11 +28,11 @@ namespace discpp {
 	class Emoji {
 	public:
 		Emoji() = default;
-		Emoji(std::string name, snowflake id);
-		Emoji(discpp::Guild& guild, snowflake id);
+		Emoji(const std::string& name, const snowflake& id);
+		Emoji(const discpp::Guild& guild, const snowflake& id);
 		Emoji(rapidjson::Document& json);
-		Emoji(std::wstring w_unicode);
-		Emoji(std::string s_unicode);
+		Emoji(const std::wstring& w_unicode);
+		Emoji(const std::string& s_unicode);
 
         bool operator==(Emoji& other) const {
 #ifndef WIN32

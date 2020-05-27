@@ -36,11 +36,11 @@ namespace discpp {
         };
 
 		User() = default;
-		User(snowflake id);
+		User(const snowflake& id);
 		User(rapidjson::Document& json);
 
 		discpp::Channel CreateDM();
-		std::string GetAvatarURL(ImageType imgType = ImageType::AUTO) const;
+		std::string GetAvatarURL(const ImageType& imgType = ImageType::AUTO) const;
 		std::string CreatedAt();
 		std::string CreateMention();
 		std::string GetDiscriminator() const;

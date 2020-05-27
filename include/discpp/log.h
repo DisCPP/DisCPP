@@ -98,7 +98,7 @@ namespace discpp {
             SEV_DEBUG = 3
         };
 
-		bool CanLog(LogSeverity sev) {
+		bool CanLog(const LogSeverity& sev) {
 			if ((flags & logger_flags::DISABLE) == logger_flags::DISABLE) {
 				return false; // Just return false if they disabled logger.
 			} else if ((flags & logger_flags::ALL_SEVERITY) == logger_flags::ALL_SEVERITY && sev != LogSeverity::SEV_DEBUG) {
@@ -119,7 +119,7 @@ namespace discpp {
 			}
 		}
 
-		std::string SeverityToString(LogSeverity sev) {
+		std::string SeverityToString(const LogSeverity& sev) {
             switch (sev) {
                 case LogSeverity::SEV_INFO:
                     return "INFO";
@@ -135,7 +135,7 @@ namespace discpp {
 		}
 
 		// Logs the text if it can be logged and prefix the text with the log time and the severity.
-		void AutoLog(LogSeverity sev, std::string text) {
+		void AutoLog(const LogSeverity& sev, const std::string& text) {
             if (!CanLog(sev)) return;
 
             time_t now_time_t = std::time(0);
@@ -150,31 +150,31 @@ namespace discpp {
 
             strftime(st, 80, "[%H:%M:%S]", &now);
 
-            std::string time(st);
-            text = time + " [" + SeverityToString(sev) + "] " + text + LogTextEffect::RESET;
+            std::string time(st), tmp;
+            tmp = time + " [" + SeverityToString(sev) + "] " + text + LogTextEffect::RESET;
 
 
             if ((flags & logger_flags::FILE_ONLY) == logger_flags::FILE_ONLY) {
                 std::lock_guard<std::mutex> lock_guard(file_mutex);
                 // Log to file
-                log_file << text << std::endl;
+                log_file << tmp << std::endl;
 
                 return;
             }
 
             { // Log to console
                 std::lock_guard<std::mutex> lock_guard(console_mutex);
-                std::cout << text << std::endl;
+                std::cout << tmp << std::endl;
             }
 
             { // Log to file
                 std::lock_guard<std::mutex> lock_guard(file_mutex);
-                log_file << text << std::endl;
+                log_file << tmp << std::endl;
             }
 		}
 
 	public:
-		inline Logger(std::string file_path, int logger_flags = logger_flags::ALL_SEVERITY) : flags(logger_flags) {
+		inline Logger(const std::string& file_path, const int& logger_flags = logger_flags::ALL_SEVERITY) : flags(logger_flags) {
 			/**
 			 * @brief Constructs a logger.
 			 *
@@ -196,7 +196,7 @@ namespace discpp {
 			}
 		}
 
-		inline Logger(int logger_flags = logger_flags::ALL_SEVERITY) : flags(logger_flags) {
+		inline Logger(const int& logger_flags = logger_flags::ALL_SEVERITY) : flags(logger_flags) {
 			/**
 			 * @brief Constructs a logger.
 			 *
@@ -230,7 +230,7 @@ namespace discpp {
 		}
 
 
-		inline void Debug(std::string text) {
+		inline void Debug(const std::string& text) {
             /**
              * @brief Logs to console or file, maybe even both in the debug severity.
              *
@@ -248,7 +248,7 @@ namespace discpp {
             AutoLog(LogSeverity::SEV_DEBUG, text);
 		}
 
-        inline void Warn(std::string text) {
+        inline void Warn(const std::string& text) {
             /**
              * @brief Logs to console or file, maybe even both in the warn severity.
              *
@@ -266,7 +266,7 @@ namespace discpp {
             AutoLog(LogSeverity::SEV_WARN, text);
         }
 
-        inline void Error(std::string text) {
+        inline void Error(const std::string& text) {
             /**
              * @brief Logs to console or file, maybe even both in the error severity.
              *
@@ -284,7 +284,7 @@ namespace discpp {
             AutoLog(LogSeverity::SEV_ERROR, text);
         }
 
-        inline void Info(std::string text) {
+        inline void Info(const std::string& text) {
             /**
              * @brief Logs to console or file, maybe even both in the error severity.
              *

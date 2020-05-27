@@ -128,13 +128,13 @@ namespace discpp {
             }
 		}
 
-		Presence(std::string text, discpp::Activity::ActivityType type, std::string status = "online", bool afk = false, std::string url = "") : status(status), afk(afk) {
+		Presence(const std::string& text, const discpp::Activity::ActivityType& type, const std::string& status = "online", const bool& afk = false, const std::string& url = "") : status(status), afk(afk) {
 		    game.name = text;
 		    game.type = type;
 		    game.url = url;
 		}
 
-		Presence(discpp::Activity activity, bool afk, std::string status) : game(activity), afk(afk), status(status) {}
+		Presence(const discpp::Activity& activity, const bool& afk, const std::string& status) : game(activity), afk(afk), status(status) {}
 
 		rapidjson::Document ToJson() {
             rapidjson::Document result;

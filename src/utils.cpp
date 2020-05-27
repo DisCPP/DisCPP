@@ -35,7 +35,7 @@ std::string discpp::GetOsName() {
 }
 
 // @TODO: Test if the json document type returned is what its supposed to be, like an array or object.
-rapidjson::Document discpp::HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket) {
+rapidjson::Document discpp::HandleResponse(cpr::Response& response, const snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
 	/**
 	 * @brief Handles a response from the discpp servers.
 	 *
@@ -75,7 +75,7 @@ rapidjson::Document discpp::HandleResponse(cpr::Response response, snowflake obj
 #endif
 }
 
-std::string CprBodyToString(cpr::Body body) {
+std::string CprBodyToString(const cpr::Body& body) {
 	if (body.empty()) {
 		return "Empty";
 	}
@@ -83,7 +83,7 @@ std::string CprBodyToString(cpr::Body body) {
 	return body;
 }
 
-rapidjson::Document discpp::SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendGetRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
 	/**
 	 * @brief Sends a get request to a url.
 	 *
@@ -114,7 +114,7 @@ rapidjson::Document discpp::SendGetRequest(std::string url, cpr::Header headers,
 #endif
 }
 
-rapidjson::Document discpp::SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendPostRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
 	/**
 	 * @brief Sends a post request to a url.
 	 *
@@ -139,7 +139,7 @@ rapidjson::Document discpp::SendPostRequest(std::string url, cpr::Header headers
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendPutRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
 	/**
 	 * @brief Sends a put request to a url.
 	 *
@@ -164,7 +164,7 @@ rapidjson::Document discpp::SendPutRequest(std::string url, cpr::Header headers,
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendPatchRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
 	/**
 	 * @brief Sends a patch request to a url.
 	 *
@@ -189,7 +189,7 @@ rapidjson::Document discpp::SendPatchRequest(std::string url, cpr::Header header
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket) {
+rapidjson::Document discpp::SendDeleteRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
 	/**
 	 * @brief Sends a delete request to a url.
 	 *
@@ -213,7 +213,7 @@ rapidjson::Document discpp::SendDeleteRequest(std::string url, cpr::Header heade
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-cpr::Header discpp::DefaultHeaders(cpr::Header add) {
+cpr::Header discpp::DefaultHeaders(const cpr::Header& add) {
 	/**
 	 * @brief Gets the default headers to communicate with the discpp servers.
 	 *
@@ -243,7 +243,7 @@ cpr::Header discpp::DefaultHeaders(cpr::Header add) {
 	return headers;
 }
 
-bool discpp::StartsWith(std::string string, std::string prefix) {
+bool discpp::StartsWith(const std::string& string, const std::string& prefix) {
 	/**
 	 * @brief Check if a string starts with another string.
 	 *
@@ -260,7 +260,7 @@ bool discpp::StartsWith(std::string string, std::string prefix) {
 	return string.substr(0, prefix.size()) == prefix;
 }
 
-std::vector<std::string> discpp::SplitString(std::string str, std::string delimiter) {
+std::vector<std::string> discpp::SplitString(const std::string& str, const std::string& delimiter) {
 	/**
 	 * @brief Split a string into a vector.
 	 *
@@ -276,31 +276,31 @@ std::vector<std::string> discpp::SplitString(std::string str, std::string delimi
 
     size_t pos = 0;
     std::vector<std::string> tokens;
-    std::string token;
-    while ((pos = str.find(delimiter)) != std::string::npos) {
-        token = str.substr(0, pos);
+    std::string token, tmp = str;
+    while ((pos = tmp.find(delimiter)) != std::string::npos) {
+        token = tmp.substr(0, pos);
 
         // If the string is not empty then add it to the vector.
         if (!token.empty()) {
             tokens.push_back(token);
         }
 
-        str.erase(0, pos + delimiter.length());
+        tmp.erase(0, pos + delimiter.length());
     }
 
     // Push back the last token from the string.
-    size_t last_token = str.find_last_of(delimiter);
-    tokens.push_back(str.substr(last_token + 1));
+    size_t last_token = tmp.find_last_of(delimiter);
+    tokens.push_back(tmp.substr(last_token + 1));
 
     // If the vector is empty, then just return a vector filled with the given string.
     if (tokens.empty()) {
-        return { str };
+        return { tmp };
     }
 
 	return tokens;
 }
 
-std::string discpp::CombineStringVector(std::vector<std::string> vector, std::string delimiter, int offset) {
+std::string discpp::CombineStringVector(const std::vector<std::string>& vector, const std::string& delimiter, const int& offset) {
 	/**
 	 * @brief Combine a vector into a string with spaces between each element.
 	 *
@@ -341,7 +341,7 @@ static const std::string base64_chars =
         "abcdefghijklmnopqrstuvwxyz"
         "0123456789+/";
 
-std::string discpp::Base64Encode(std::string text) {
+std::string discpp::Base64Encode(const std::string& text) {
 	/**
 	 * @brief Encode Base64.
 	 *
@@ -398,7 +398,7 @@ std::string discpp::Base64Encode(std::string text) {
     return ret;
 }
 
-std::string discpp::ReplaceAll(std::string data, std::string to_search, std::string replace_str) {
+std::string discpp::ReplaceAll(const std::string& data, const std::string& to_search, const std::string& replace_str) {
 	/**
 	 * @brief Replace all occurences of sub strings
 	 *
@@ -410,22 +410,22 @@ std::string discpp::ReplaceAll(std::string data, std::string to_search, std::str
 	 *
 	 * @return std::string
 	 */
-
+	std::string tmp = data;
     // Get the first occurrence
-    size_t pos = data.find(to_search);
+    size_t pos = tmp.find(to_search);
 
     // Repeat till end is reached
     while(pos != std::string::npos) {
         // Replace this occurrence of Sub String
-        data.replace(pos, to_search.size(), replace_str);
+        tmp.replace(pos, to_search.size(), replace_str);
         // Get the next occurrence from the current position
-        pos = data.find(to_search, pos + replace_str.size());
+        pos = tmp.find(to_search, pos + replace_str.size());
     }
 
-	return data;
+	return tmp;
 }
 
-std::string discpp::EscapeString(std::string string) {
+std::string discpp::EscapeString(const std::string& string) {
 	/**
 	 * @brief Escape strings for discpp json endpoints and cpr body
 	 *
@@ -439,20 +439,20 @@ std::string discpp::EscapeString(std::string string) {
 	 *
 	 * @return std::string
 	 */
-
-	string = ReplaceAll(string, "\\", "\\\\");
-	string = ReplaceAll(string, "\"", "\\\"");
-	string = ReplaceAll(string, "\a", "\\a");
-	string = ReplaceAll(string, "\b", "\\b");
-	string = ReplaceAll(string, "\f", "\\f");
-	string = ReplaceAll(string, "\r", "\\r");
-	string = ReplaceAll(string, "\t", "\\t");
+    std::string tmp = string;
+	tmp = ReplaceAll(string, "\\", "\\\\");
+	tmp = ReplaceAll(string, "\"", "\\\"");
+	tmp = ReplaceAll(string, "\a", "\\a");
+	tmp = ReplaceAll(string, "\b", "\\b");
+	tmp = ReplaceAll(string, "\f", "\\f");
+	tmp = ReplaceAll(string, "\r", "\\r");
+	tmp = ReplaceAll(string, "\t", "\\t");
 	// \u + four-hex-digits
 
-	return string;
+	return tmp;
 }
 
-int discpp::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bucket) {
+int discpp::WaitForRateLimits(const snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
 	/**
 	 * @brief Wait for rate limits.
 	 *
@@ -503,7 +503,7 @@ int discpp::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bu
 	return 0;
 }
 
-bool HeaderContains(cpr::Header header, std::string key) {
+bool HeaderContains(const cpr::Header& header, const std::string& key) {
 	/**
 	 * @brief Check if a cpr::Header contains a specific key.
 	 *
@@ -523,7 +523,7 @@ bool HeaderContains(cpr::Header header, std::string key) {
 	return false;
 }
 
-void discpp::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBucketType ratelimit_bucket) {
+void discpp::HandleRateLimits(cpr::Header& header, const snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
 	/**
 	 * @brief Handle rate limites
 	 *
@@ -568,12 +568,12 @@ void discpp::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBuc
 	obj->ratelimit_reset = std::stod(header["x-ratelimit-reset"]);
 }
 
-time_t discpp::TimeFromSnowflake(snowflake snow) {
+time_t discpp::TimeFromSnowflake(const snowflake& snow) {
     constexpr static uint64_t discord_epoch = 1420070400000;
     return ((snow >> 22) + discord_epoch) / 1000;
 }
 
-std::string discpp::FormatTimeFromSnowflake(snowflake snow) {
+std::string discpp::FormatTimeFromSnowflake(const snowflake& snow) {
 	time_t unix_time = TimeFromSnowflake(snow);
 
 	tm* n = std::gmtime(&unix_time);
@@ -593,7 +593,7 @@ bool discpp::ContainsNotNull(rapidjson::Document &json, const char *value_name) 
     return false;
 }
 
-void discpp::IterateThroughNotNullJson(rapidjson::Document &json, std::function<void(rapidjson::Document&)> func) {
+void discpp::IterateThroughNotNullJson(rapidjson::Document &json, const std::function<void(rapidjson::Document&)>& func) {
     for (auto const& object : json.GetArray()) {
         if (!object.IsNull()) {
             rapidjson::Document object_json;
@@ -656,7 +656,7 @@ char SAFE[256] = {
         /* F */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0
 };
 
-std::string discpp::URIEncode(std::string str) {
+std::string discpp::URIEncode(const std::string& str) {
     const char DEC2HEX[16 + 1] = "0123456789ABCDEF";
     const unsigned char * pSrc = (const unsigned char *) str.c_str();
     const size_t SRC_LEN = str.length();
@@ -680,6 +680,6 @@ std::string discpp::URIEncode(std::string str) {
     return sResult;
 }
 
-discpp::snowflake discpp::SnowflakeFromString(std::string str) {
+discpp::snowflake discpp::SnowflakeFromString(const std::string& str) {
     return strtoll(str.c_str(), NULL, 10);
 }

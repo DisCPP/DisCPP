@@ -2,7 +2,7 @@
 #include "guild.h"
 
 namespace discpp {
-	Emoji::Emoji(std::string name, snowflake id) : name(EscapeString(name)), id(id) {
+	Emoji::Emoji(const std::string& name, const snowflake& id) : name(EscapeString(name)), id(id) {
 		/**
 		 * @brief Constructs a discpp::Emoji object with a name and id.
 		 *
@@ -17,7 +17,7 @@ namespace discpp {
 		 */
 	}
 
-	Emoji::Emoji(discpp::Guild& guild, snowflake id) : id(id) {
+	Emoji::Emoji(const discpp::Guild& guild, const snowflake& id) : id(id) {
 		/**
 		 * @brief Constructs a discpp::Emoji object using a guild object and id.
 		 *
@@ -71,7 +71,7 @@ namespace discpp {
         animated = GetDataSafely<bool>(json, "animated");
 	}
 
-	Emoji::Emoji(std::wstring w_unicode) : unicode(w_unicode) {
+	Emoji::Emoji(const std::wstring& w_unicode) : unicode(w_unicode) {
 		/**
 		 * @brief Constructs a discpp::Emoji object with a std::wstring unicode representation.
 		 *
@@ -85,7 +85,7 @@ namespace discpp {
 		 */
 	}
 
-    Emoji::Emoji(std::string s_unicode) {
+    Emoji::Emoji(const std::string& s_unicode) {
         /**
          * @brief Constructs a discpp::Emoji object with a std::string unicode representation.
          *

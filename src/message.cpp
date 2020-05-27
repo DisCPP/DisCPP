@@ -2,7 +2,7 @@
 #include "client.h"
 
 namespace discpp {
-	Message::Message(snowflake id) : discpp::DiscordObject(id) {
+	Message::Message(const snowflake& id) : discpp::DiscordObject(id) {
 		/**
 		 * @brief Constructs a discpp::Message object from an id.
 		 *
@@ -21,7 +21,7 @@ namespace discpp {
 		}
 	}
 
-    Message::Message(snowflake message_id, snowflake channel_id) {
+    Message::Message(const snowflake& message_id, const snowflake& channel_id) {
         /**
 		 * @brief Sends a REST request to get the message, use this if the message isn't cached.
 		 *
@@ -144,7 +144,7 @@ namespace discpp {
         return (bit_flags & 0b100) == 0b100;
 	}
 
-	void Message::AddReaction(discpp::Emoji emoji) {
+	void Message::AddReaction(const discpp::Emoji& emoji) {
 		/**
 		 * @brief Add a reaction to the message.
 		 *
@@ -156,12 +156,13 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
+        discpp::Emoji tmp = emoji;
 
-		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + emoji.ToURL() + "/@me");
+		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + tmp.ToURL() + "/@me");
 		SendPutRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
-	void Message::RemoveBotReaction(discpp::Emoji emoji) {
+	void Message::RemoveBotReaction(const discpp::Emoji& emoji) {
 		/**
 		 * @brief Remove a bot reaction from the message.
 		 *
@@ -173,12 +174,12 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
-
-		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + emoji.ToURL() + "/@me");
+        discpp::Emoji tmp = emoji;
+		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + tmp.ToURL() + "/@me");
 		SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
-	void Message::RemoveReaction(discpp::User user, discpp::Emoji emoji) {
+	void Message::RemoveReaction(const discpp::User& user, const discpp::Emoji& emoji) {
 		/**
 		 * @brief Removes a user's reaction from the message.
 		 *
@@ -191,13 +192,13 @@ namespace discpp {
 		 *
 		 * @return void
 		 */
-
-		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + emoji.ToURL() + "/" + std::to_string(user.id));
+        discpp::Emoji tmp = emoji;
+		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + tmp.ToURL() + "/" + std::to_string(user.id));
 		SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
-	std::unordered_map<discpp::snowflake, discpp::User> Message::GetReactorsOfEmoji(discpp::Emoji emoji, int amount) {
-		/**
+	std::unordered_map<discpp::snowflake, discpp::User> Message::GetReactorsOfEmoji(const discpp::Emoji& emoji, const int& amount) {
+		/**n
 		 * @brief Get reactors of a specific emoji.
 		 *
 		 * You can use `std::unordered_map::find` to check if a user is contained in it with the users id.
@@ -211,8 +212,8 @@ namespace discpp {
 		 *
 		 * @return std::vector<discpp::User>
 		 */
-
-		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + emoji.ToURL());
+        discpp::Emoji tmp = emoji;
+		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + tmp.ToURL());
 		cpr::Body body("{\"limit\": " + std::to_string(amount) + "}");
 		rapidjson::Document result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
 		
@@ -225,7 +226,7 @@ namespace discpp {
 		return users;
 	}
 
-	std::unordered_map<discpp::snowflake, discpp::User> Message::GetReactorsOfEmoji(discpp::Emoji emoji, discpp::User user, GetReactionsMethod method) {
+	std::unordered_map<discpp::snowflake, discpp::User> Message::GetReactorsOfEmoji(const discpp::Emoji& emoji, const discpp::User& user, const GetReactionsMethod& method) {
 		/**
 		 * @brief Get reactors of a specific emoji of the specific method.
 		 *
@@ -241,8 +242,8 @@ namespace discpp {
 		 *
 		 * @return std::vector<discpp::User>
 		 */
-
-		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + emoji.ToURL());
+        discpp::Emoji tmp = emoji;
+		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + tmp.ToURL());
 		std::string method_str = (method == GetReactionsMethod::BEFORE_USER) ? "before" : "after";
 		cpr::Body body("{\"" + method_str + "\": " + std::to_string(user.id) + "}");
 		rapidjson::Document result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
@@ -271,7 +272,7 @@ namespace discpp {
 		SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
-	discpp::Message Message::EditMessage(std::string text) {
+	discpp::Message Message::EditMessage(const std::string& text) {
 		/**
 		 * @brief Edit the message's text.
 		 *
@@ -292,7 +293,7 @@ namespace discpp {
 		return *this;
 	}
 
-	discpp::Message Message::EditMessage(discpp::EmbedBuilder embed) {
+	discpp::Message Message::EditMessage(discpp::EmbedBuilder& embed) {
 		/**
 		 * @brief Edit the message's embed.
 		 *
@@ -314,7 +315,7 @@ namespace discpp {
 		return *this;
 	}
 
-	discpp::Message Message::EditMessage(int flags) {
+	discpp::Message Message::EditMessage(const int& flags) {
 		/**
 		 * @brief Edit the message's embed.
 		 *

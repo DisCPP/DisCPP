@@ -63,20 +63,20 @@ namespace discpp {
 
 	std::string GetOsName();
 
-	inline std::string Endpoint(std::string endpoint_format) {
-		endpoint_format = endpoint_format[0] == '/' ? endpoint_format : '/' + endpoint_format;
-		return "https://discordapp.com/api/v6" + endpoint_format;
+	inline std::string Endpoint(const std::string& endpoint_format) {
+		std::string tmp = endpoint_format[0] == '/' ? endpoint_format : '/' + endpoint_format;
+		return "https://discordapp.com/api/v6" + tmp;
 	}
 
 	template <typename type>
-	inline type GetFromVector(std::vector<type> vector, type item) {
+	inline type GetFromVector(const std::vector<type>& vector, const type& item) {
 		auto new_item = std::find_if(vector.begin(), vector.end(), [](type a, type b) { return a == b; });
 
 		if (new_item != vector.end()) return new_item;
 		return nullptr;
 	}
 
-    discpp::snowflake SnowflakeFromString(std::string str);
+    discpp::snowflake SnowflakeFromString(const std::string& str);
 
 	inline discpp::snowflake GetIDSafely(rapidjson::Document& json, const char* value_name) {
         rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
@@ -137,7 +137,7 @@ namespace discpp {
         return default_val;
 	}
 
-	void IterateThroughNotNullJson(rapidjson::Document& json, std::function<void(rapidjson::Document&)> func);
+	void IterateThroughNotNullJson(rapidjson::Document& json, const std::function<void(rapidjson::Document&)>& func);
     bool ContainsNotNull(rapidjson::Document& json, const char * value_name);
     std::string DumpJson(rapidjson::Document& json);
     std::string DumpJson(rapidjson::Value& json);
@@ -162,28 +162,28 @@ namespace discpp {
 	inline std::unordered_map<snowflake, RateLimit> webhook_ratelimit;
 	inline RateLimit global_ratelimit;
 
-	int WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bucket);
-	void HandleRateLimits(cpr::Header header, snowflake object, RateLimitBucketType ratelimit_bucket);
+	int WaitForRateLimits(const snowflake& object, const RateLimitBucketType& ratelimit_bucket);
+	void HandleRateLimits(cpr::Header& header, const snowflake& object, const RateLimitBucketType& ratelimit_bucket);
 	// End of rate limits
 
-	extern rapidjson::Document HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket);
-	extern rapidjson::Document SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern rapidjson::Document SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern rapidjson::Document SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern rapidjson::Document SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern rapidjson::Document SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket);
+	extern rapidjson::Document HandleResponse(cpr::Response& response, const snowflake& object, const RateLimitBucketType& ratelimit_bucket);
+	extern rapidjson::Document SendGetRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+	extern rapidjson::Document SendPostRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+	extern rapidjson::Document SendPutRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+	extern rapidjson::Document SendPatchRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+	extern rapidjson::Document SendDeleteRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket);
 
-	cpr::Header DefaultHeaders(cpr::Header add = {});
-	bool StartsWith(std::string string, std::string prefix);
-	std::vector<std::string> SplitString(std::string str, std::string delimter);
-	std::string CombineStringVector(std::vector<std::string> v, std::string delimiter = " ", int offset = 0);
+	cpr::Header DefaultHeaders(const cpr::Header& add = {});
+	bool StartsWith(const std::string& string, const std::string& prefix);
+	std::vector<std::string> SplitString(const std::string& str, const std::string& delimter);
+	std::string CombineStringVector(const std::vector<std::string>& v, const std::string& delimiter = " ", const int& offset = 0);
 	std::string ReadEntireFile(std::ifstream& file);
-	std::string Base64Encode(std::string text);
-	std::string ReplaceAll(std::string data, std::string to_search, std::string replace_str);
-	std::string EscapeString(std::string string);
-	time_t TimeFromSnowflake(snowflake snow);
-	std::string FormatTimeFromSnowflake(snowflake snow);
-	std::string URIEncode(std::string str);
+	std::string Base64Encode(const std::string& text);
+	std::string ReplaceAll(const std::string& data, const std::string& to_search, const std::string& replace_str);
+	std::string EscapeString(const std::string& string);
+	time_t TimeFromSnowflake(const snowflake& snow);
+	std::string FormatTimeFromSnowflake(const snowflake& snow);
+	std::string URIEncode(const std::string& str);
 }
 
 #endif

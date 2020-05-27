@@ -3,7 +3,7 @@
 #include "client.h"
 
 namespace discpp {
-	User::User(snowflake id) : discpp::DiscordObject(id) {
+	User::User(const snowflake& id) : discpp::DiscordObject(id) {
 		/**
 		 * @brief Constructs a discpp::User object from an id.
 		 *
@@ -104,7 +104,7 @@ namespace discpp {
 		return discpp::Channel(result);
 	}
 	
-	std::string User::GetAvatarURL(ImageType imgType) const {
+	std::string User::GetAvatarURL(const ImageType& imgType) const {
 		/**
 		 * @brief Retrieve user avatar url.
 		 *
@@ -121,7 +121,8 @@ namespace discpp {
 			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(this->discriminator % 5) + ".png");
 		} else {
 			std::string url = "https://cdn.discordapp.com/avatars/" + std::to_string(id) + "/" + this->avatar;
-			if (imgType == ImageType::AUTO) imgType = StartsWith(this->avatar, "a_") ? ImageType::GIF : ImageType::PNG;
+			ImageType tmp = imgType;
+			if (tmp == ImageType::AUTO) tmp = StartsWith(this->avatar, "a_") ? ImageType::GIF : ImageType::PNG;
 			switch (imgType) {
 			case ImageType::GIF:
 				return cpr::Url(url + ".gif");

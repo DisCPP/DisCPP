@@ -23,7 +23,7 @@ namespace discpp {
 	class Guild;
     class VoiceState;
 	struct GuildBan {
-		GuildBan(std::string reason, discpp::User user) : reason(reason), user(user) {
+		GuildBan(const std::string& reason, const discpp::User& user) : reason(reason), user(user) {
             /**
              * @brief Constructs a discpp::GuildBan object.
              *
@@ -227,14 +227,14 @@ namespace discpp {
     struct GuildModifyRequests {
         std::unordered_map<GuildProperty, std::variant<std::string, int, Image>> guild_requests;
 
-        GuildModifyRequests(GuildProperty key, const std::variant<std::string, int, Image>& value ) : guild_requests({{ key, value }}) {};
+        GuildModifyRequests(const GuildProperty& key, const std::variant<std::string, int, Image>& value ) : guild_requests({{ key, value }}) {};
         GuildModifyRequests(std::unordered_map<GuildProperty, std::variant<std::string, int, Image>> guild_requests) : guild_requests(std::move(guild_requests)) {};
 
-        void Add(GuildProperty key, const std::variant<std::string, int, Image>& value) {
+        void Add(const GuildProperty& key, const std::variant<std::string, int, Image>& value) {
             guild_requests.insert({key, value});
         };
 
-        void Remove(GuildProperty key) {
+        void Remove(const GuildProperty& key) {
             guild_requests.erase(guild_requests.find(key));
         }
     };
@@ -244,53 +244,53 @@ namespace discpp {
 	    char flags;
 	public:
 		Guild() = default;
-		Guild(snowflake id);
+		Guild(const snowflake& id);
 		Guild(rapidjson::Document& json);
 
 		discpp::Guild Modify(GuildModifyRequests modify_requests);
 		void DeleteGuild();
 		std::unordered_map<discpp::snowflake, discpp::GuildChannel> GetChannels();
 		std::unordered_map<discpp::snowflake, discpp::CategoryChannel> GetCategories();
-        discpp::GuildChannel GetChannel(snowflake id) const;
-        discpp::GuildChannel CreateChannel(std::string name, std::string topic = "", ChannelType type = ChannelType::GUILD_TEXT, int bitrate = 0, int user_limit = 0, int rate_limit_per_user = 0, int position = 0, std::vector<discpp::Permissions> permission_overwrites = {}, discpp::Channel category = {}, bool nsfw = false);
-		void ModifyChannelPositions(std::vector<discpp::Channel>& new_channel_positions);
-        std::shared_ptr<discpp::Member> GetMember(snowflake id) const;
-		void EnsureBotPermission(Permission req_perm) const;
-        std::shared_ptr<discpp::Member> AddMember(snowflake id, std::string access_token, std::string nick, std::vector<discpp::Role>& roles, bool mute, bool deaf);
-		void RemoveMember(discpp::Member& member);
+        discpp::GuildChannel GetChannel(const snowflake& id) const;
+        discpp::GuildChannel CreateChannel(const std::string& name, const std::string& topic = "", const ChannelType& type = ChannelType::GUILD_TEXT, const int& bitrate = 0, const int& user_limit = 0, const int& rate_limit_per_user = 0, const int& position = 0, const std::vector<discpp::Permissions>& permission_overwrites = {}, const discpp::CategoryChannel& category = {}, const bool& nsfw = false);
+		void ModifyChannelPositions(const std::vector<discpp::Channel>& new_channel_positions);
+        std::shared_ptr<discpp::Member> GetMember(const snowflake& id) const;
+		void EnsureBotPermission(const Permission& req_perm) const;
+        std::shared_ptr<discpp::Member> AddMember(const snowflake& id, const std::string& access_token, const std::string& nick, const std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf);
+		void RemoveMember(const discpp::Member& member);
 		std::vector<discpp::GuildBan> GetBans() const;
-		std::string GetMemberBanReason(discpp::Member& member) const;
-		void BanMember(discpp::Member& member, std::string reason = "");
-		void BanMemberById(snowflake& user_id, std::string reason = "");
-		void UnbanMember(discpp::Member& member);
-		void UnbanMemberById(snowflake& user_id);
-		void KickMember(discpp::Member& member);
-        void KickMemberById(snowflake& member_id);
-        std::shared_ptr<discpp::Role> GetRole(snowflake id) const;
-        std::shared_ptr<discpp::Role> CreateRole(std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
-		void ModifyRolePositions(std::vector<discpp::Role>& new_role_positions);
-        std::shared_ptr<discpp::Role> ModifyRole(discpp::Role role, std::string name, Permissions permissions = Permissions(), int color = 0, bool hoist = false, bool mentionable = false);
-		void DeleteRole(discpp::Role& role);
-		int GetPruneAmount(int days) const;
-		void BeginPrune(int days);
+		std::string GetMemberBanReason(const discpp::Member& member) const;
+		void BanMember(const discpp::Member& member, const std::string& reason = "");
+		void BanMemberById(const snowflake& user_id, const std::string& reason = "");
+		void UnbanMember(const discpp::Member& member);
+		void UnbanMemberById(const snowflake& user_id);
+		void KickMember(const discpp::Member& member);
+        void KickMemberById(const snowflake& member_id);
+        std::shared_ptr<discpp::Role> GetRole(const snowflake& id) const;
+        std::shared_ptr<discpp::Role> CreateRole(const std::string& name, const Permissions& permissions = Permissions(), const int& color = 0, const bool& hoist = false, const bool& mentionable = false);
+		void ModifyRolePositions(const std::vector<discpp::Role>& new_role_positions);
+        std::shared_ptr<discpp::Role> ModifyRole(const discpp::Role& role, const std::string& name, const Permissions& permissions = Permissions(), const int& color = 0, const bool& hoist = false, const bool& mentionable = false);
+		void DeleteRole(const discpp::Role& role);
+		int GetPruneAmount(const int& days) const;
+		void BeginPrune(const int& days);
 		std::vector<discpp::GuildInvite> GetInvites() const;
 		std::vector<discpp::Integration> GetIntegrations() const;
-		void CreateIntegration(snowflake id, std::string type);
-		void ModifyIntegration(discpp::Integration& guild_integration, int expire_behavior, int expire_grace_period, bool enable_emoticons);
-		void DeleteIntegration(discpp::Integration& guild_integration);
-		void SyncIntegration(discpp::Integration& guild_integration);
+		void CreateIntegration(const snowflake& id, const std::string& type);
+		void ModifyIntegration(const discpp::Integration& guild_integration, const int& expire_behavior, const int& expire_grace_period, const bool& enable_emoticons);
+		void DeleteIntegration(const discpp::Integration& guild_integration);
+		void SyncIntegration(const discpp::Integration& guild_integration);
 		GuildEmbed GetGuildEmbed() const;
-		GuildEmbed ModifyGuildEmbed(snowflake channel_id, bool enabled);
+		GuildEmbed ModifyGuildEmbed(const snowflake& channel_id, const bool& enabled);
 		discpp::GuildInvite GetVanityURL() const;
-		std::string GetWidgetImageURL(WidgetStyle widget_style = WidgetStyle::SHIELD) const;
-        std::shared_ptr<discpp::Member> RequestMemberIfNotExist(discpp::snowflake member_id);
+		std::string GetWidgetImageURL(const WidgetStyle& widget_style = WidgetStyle::SHIELD) const;
+        std::shared_ptr<discpp::Member> RequestMemberIfNotExist(const snowflake& member_id);
 
 		std::unordered_map<snowflake, discpp::Emoji> GetEmojis();
-        discpp::Emoji GetEmoji(snowflake id) const;
-        discpp::Emoji CreateEmoji(std::string name, discpp::Image image, std::vector<discpp::Role>& roles);
-		discpp::Emoji ModifyEmoji(discpp::Emoji& emoji, std::string name, std::vector<discpp::Role>& roles);
-		void DeleteEmoji(discpp::Emoji& emoji);
-		std::string GetIconURL(discpp::ImageType imgType = discpp::ImageType::AUTO) const;
+        discpp::Emoji GetEmoji(const snowflake& id) const;
+        discpp::Emoji CreateEmoji(const std::string& name, discpp::Image& image, const std::vector<discpp::Role>& roles);
+		discpp::Emoji ModifyEmoji(const discpp::Emoji& emoji, const std::string& name, const std::vector<discpp::Role>& roles);
+		void DeleteEmoji(const discpp::Emoji& emoji);
+		std::string GetIconURL(const discpp::ImageType& imgType = discpp::ImageType::AUTO) const;
         inline std::shared_ptr<discpp::Member> GetOwnerMember() const;
 		discpp::AuditLog GetAuditLog() const;
 
