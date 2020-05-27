@@ -26,9 +26,9 @@ namespace discpp {
 		std::string remainder;
 		std::vector<std::string> arguments;
 
-		Context(discpp::Client* client, discpp::Channel channel, std::shared_ptr<discpp::Member> author, discpp::Message message, std::string remainder, std::vector<std::string> arguments);
+		Context(discpp::Client* client, discpp::Channel channel, std::shared_ptr<discpp::Member> author, const discpp::Message& message, std::string remainder, std::vector<std::string> arguments);
 
-		discpp::Message Send(std::string text, bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
+		discpp::Message Send(const std::string& text, const bool& tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
 	};
 }
 

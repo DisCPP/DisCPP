@@ -1,6 +1,7 @@
 #include "context.h"
+#include <utility>
 
-discpp::Context::Context(discpp::Client* client, discpp::Channel channel, std::shared_ptr<discpp::Member> author, discpp::Message message, std::string remainder, std::vector<std::string> arguments) : client(client), guild(message.guild), channel(channel), author(author), user(message.author), message(message), remainder(remainder), arguments(arguments) {
+discpp::Context::Context(discpp::Client* client, discpp::Channel channel, std::shared_ptr<discpp::Member> author, const discpp::Message& message, std::string remainder, std::vector<std::string> arguments) : client(client), guild(message.guild), channel(std::move(channel)), author(std::move(author)), user(message.author), message(message), remainder(std::move(remainder)), arguments(std::move(arguments)) {
 	/**
 	 * @brief Constructs a discpp::Context object.
 	 *
@@ -18,7 +19,7 @@ discpp::Context::Context(discpp::Client* client, discpp::Channel channel, std::s
 	 */
 }
 
-discpp::Message discpp::Context::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<discpp::File> files) {
+discpp::Message discpp::Context::Send(const std::string& text, const bool& tts, discpp::EmbedBuilder* embed, std::vector<discpp::File> files) {
 	/**
 	 * @brief Sends a text message (Shortcut for `channel.send(text, tts, embed, files)`).
 	 *
