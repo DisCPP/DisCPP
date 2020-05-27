@@ -139,8 +139,8 @@ namespace discpp {
 		rapidjson::Document ToJson() {
             rapidjson::Document result;
 
-            std::string str_activity = "{\"status\": \"" + status + "\", \"game\": " + \
-                    "{\"name\": \"" + game.name + "\", \"afk\": " + (afk ? "true" : "false") + ",\"type\": " + std::to_string(static_cast<int>(game.type)) + ((!game.url.empty()) ? ", \"url\": \"" + game.url + "\"" : "") + "}, \"since\": \"" + std::to_string(time(NULL) - 10) + "\"}";
+            std::string str_activity = "{\"status\": \"" + status + "\", \"afk\": " + (afk ? "true" : "false") + ", \"game\": " + \
+                    "{\"name\": \"" + game.name + "\", \"type\": " + std::to_string(static_cast<int>(game.type)) + ((!game.url.empty()) ? ", \"url\": \"" + game.url + "\"" : "") + "}, \"since\": \"" + std::to_string(time(NULL) - 10) + "\"}";
             result.Parse(str_activity.c_str());
 
 			return std::move(result);
