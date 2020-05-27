@@ -6,6 +6,7 @@
 #endif
 
 #include <unordered_map>
+#include <stdexcept>
 
 #include <rapidjson/document.h>
 
