@@ -1,11 +1,11 @@
 #include "command.h"
 #include "command_handler.h"
 
-discpp::Command::Command(std::string name) : name(name) {
+discpp::Command::Command(const std::string& name) : name(name) {
 	discpp::registered_commands.insert(std::make_pair(name, this));
 }
 
-discpp::Command::Command(std::string name, std::string desc, std::vector<std::string> hint_args, std::function<void(discpp::Context)> function, std::vector<std::function<bool(discpp::Context)>> requirements) : Command() {
+discpp::Command::Command(const std::string& name, const std::string& desc, const std::vector<std::string>& hint_args, const std::function<void(discpp::Context)>& function, const std::vector<std::function<bool(discpp::Context)>>& requirements) : Command() {
 	/**
 	 * @brief Constructs a discpp::Command
 	 *
@@ -35,7 +35,7 @@ discpp::Command::Command(std::string name, std::string desc, std::vector<std::st
 	discpp::registered_commands.insert(std::make_pair(name, this));
 }
 
-void discpp::Command::CommandBody(discpp::Context ctx) {
+void discpp::Command::CommandBody(const discpp::Context& ctx) {
 	/**
 	 * @brief The method that is executed when the command is triggered if overrided.
 	 *
@@ -51,7 +51,7 @@ void discpp::Command::CommandBody(discpp::Context ctx) {
 	}
 }
 
-bool discpp::Command::CanRun(discpp::Context ctx) {
+bool discpp::Command::CanRun(const discpp::Context& ctx) {
 	/**
 	 * @brief This method checks if the requirements of the command allowes it to run.
 	 *

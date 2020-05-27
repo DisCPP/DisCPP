@@ -12,11 +12,11 @@ namespace discpp {
 	public:
 
 		Command() = default;
-		Command(std::string name);
-		Command(std::string name, std::string desc, std::vector<std::string> hint_args, std::function<void(discpp::Context)> function, std::vector<std::function<bool(discpp::Context)>> requirements);
+		Command(const std::string& name);
+		Command(const std::string& name, const std::string& desc, const std::vector<std::string>& hint_args, const std::function<void(discpp::Context)>& function, const std::vector<std::function<bool(discpp::Context)>>& requirements);
 
-		virtual void CommandBody(discpp::Context ctx);
-		virtual bool CanRun(discpp::Context ctx);
+		virtual void CommandBody(const discpp::Context& ctx);
+		virtual bool CanRun(const discpp::Context& ctx);
 
 		std::function<void(discpp::Context)> function = nullptr;
 		std::string name; /**< Name of the current command. Ex: "ping"*/
