@@ -74,6 +74,29 @@ namespace discpp {
 		return theme_str_map[theme];
 	}
 
+	enum class FriendSourceFlags : int {
+		ALL = 0b1, 
+		MUTUAL_FRIENDS = 0b01, 
+		MUTUAL_GUILDS = 0b001
+	};
+
+	class FriendSource {
+	public:
+		FriendSource() = default;
+		FriendSource(rapidjson::Document& json);
+
+		void ModifyAll(bool all);
+		void ModifyMutualFriends(bool mutual_friends);
+		void ModifyMutualGuilds(bool mutual_guilds);
+
+		inline bool GetAll() const;
+		inline bool GetMutualFriends() const;
+		inline bool GetMutualGuilds() const;
+
+	private:
+		int flags;
+	};
+
 	enum class ClientUserSettingsFlags {
 		SHOW_CURRENT_GAME = 0b1,
 		DEFAULT_GUILDS_RESTRICTED = 0b01,
@@ -93,23 +116,6 @@ namespace discpp {
 		ALLOW_ACCESSIBILITY_DETECTION = 0b0000000000000001,
 		CONTACT_SYNC_ENABLED = 0b00000000000000001,
 		NATIVE_PHONE_INTEGRATION_ENABLED = 0b00000000000000001
-	};
-
-	class FriendSourceFlags {
-	public:
-		FriendSourceFlags() = default;
-		FriendSourceFlags(rapidjson::Document& json);
-
-		void ModifyAll(bool all);
-		void ModifyMutualFriends(bool mutual_friends);
-		void ModifyMutualGuilds(bool mutual_guilds);
-
-		inline bool GetAll() const;
-		inline bool GetMutualFriends() const;
-		inline bool GetMutualGuilds() const;
-
-	private:
-		int flags;
 	};
 
 	class ClientUserSettings {
@@ -159,7 +165,7 @@ namespace discpp {
 		std::string custom_status;
 		std::vector<snowflake> guild_positions;
 		ExplicitContentFilter explicit_content_filter;
-		FriendSourceFlags friend_source_flags{};
+		FriendSource friend_source_flags;
         Locale locale;
 		Theme theme;
 		int afk_timeout;

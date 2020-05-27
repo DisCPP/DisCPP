@@ -1,46 +1,46 @@
 #include "settings.h"
 
 namespace discpp {
-	FriendSourceFlags::FriendSourceFlags(rapidjson::Document& json) {
-		if (GetDataSafely<bool>(json, "all")) flags |= 0b1;
-		if (GetDataSafely<bool>(json, "mutual_friends")) flags |= 0b01;
-		if (GetDataSafely<bool>(json, "mutual_guilds")) flags |= 0b001;
+	FriendSource::FriendSource(rapidjson::Document& json) {
+		if (GetDataSafely<bool>(json, "all")) flags |= (int)FriendSourceFlags::ALL;
+		if (GetDataSafely<bool>(json, "mutual_friends")) flags |= (int)FriendSourceFlags::MUTUAL_FRIENDS;
+		if (GetDataSafely<bool>(json, "mutual_guilds")) flags |= (int)FriendSourceFlags::MUTUAL_GUILDS;
 	}
 
-	void FriendSourceFlags::ModifyAll(bool all) {
+	void FriendSource::ModifyAll(bool all) {
 		if (all) {
-			this->flags |= 0b1;
+			this->flags |= (int)FriendSourceFlags::ALL;
 		} else {
-			this->flags = this->flags & ~0b1;
+			this->flags = this->flags & ~(int)FriendSourceFlags::ALL;
 		}
 	}
 	
-	void FriendSourceFlags::ModifyMutualFriends(bool mutual_friends) {
+	void FriendSource::ModifyMutualFriends(bool mutual_friends) {
 		if (mutual_friends) {
-			this->flags |= 0b01;
+			this->flags |= (int)FriendSourceFlags::MUTUAL_FRIENDS;
 		} else {
-			this->flags = this->flags & ~0b01;
+			this->flags = this->flags & ~(int)FriendSourceFlags::MUTUAL_FRIENDS;
 		}
 	}
 
-	void FriendSourceFlags::ModifyMutualGuilds(bool mutual_guilds) {
+	void FriendSource::ModifyMutualGuilds(bool mutual_guilds) {
 		if (mutual_guilds) {
-			this->flags |= 0b001;
+			this->flags |= (int)FriendSourceFlags::MUTUAL_GUILDS;
 		} else {
-			this->flags = this->flags & ~0b001;
+			this->flags = this->flags & ~(int)FriendSourceFlags::MUTUAL_GUILDS;
 		}
 	}
 
-	inline bool FriendSourceFlags::GetAll() const {
-		return (this->flags & 0b1) == 0b1;
+	inline bool FriendSource::GetAll() const {
+		return (this->flags & (int)FriendSourceFlags::ALL) == (int)FriendSourceFlags::ALL;
 	}
 
-	inline bool FriendSourceFlags::GetMutualFriends() const {
-		return (this->flags & 0b01) == 0b01;
+	inline bool FriendSource::GetMutualFriends() const {
+		return (this->flags & (int)FriendSourceFlags::MUTUAL_FRIENDS) == (int)FriendSourceFlags::MUTUAL_FRIENDS;
 	}
 
-	inline bool FriendSourceFlags::GetMutualGuilds() const {
-		return (this->flags & 0b001) == 0b001;
+	inline bool FriendSource::GetMutualGuilds() const {
+		return (this->flags & (int)FriendSourceFlags::MUTUAL_GUILDS) == (int)FriendSourceFlags::MUTUAL_GUILDS;
 	}
 
 	ClientUserSettings::ClientUserSettings(rapidjson::Document& json) {
@@ -60,7 +60,7 @@ namespace discpp {
 		explicit_content_filter = static_cast<discpp::ExplicitContentFilter>(json["explicit_content_filter"].GetInt());
 		rapidjson::Document friend_source_flags_json;
 		friend_source_flags_json.CopyFrom(json["friend_source_flags"], friend_source_flags_json.GetAllocator());
-		friend_source_flags = FriendSourceFlags(friend_source_flags_json);
+		friend_source_flags = FriendSource(friend_source_flags_json);
 
 		if (GetDataSafely<bool>(json, "show_current_game")) flags |= (int)ClientUserSettingsFlags::SHOW_CURRENT_GAME;
 		if (GetDataSafely<bool>(json, "default_guilds_restricted")) flags |= (int)ClientUserSettingsFlags::DEFAULT_GUILDS_RESTRICTED;
