@@ -29,7 +29,7 @@ namespace discpp {
 	class Color {
 	public:
 		Color() = default;
-		Color(int red, int green, int blue) : red(red), green(green), blue(blue) {
+		Color(const int& red, const int& green, const int& blue) : red(red), green(green), blue(blue) {
 			/**
 			 * @brief Constructor to convert an rgb color to a discpp::Color
 			 *
@@ -46,7 +46,7 @@ namespace discpp {
 			color_hex = (red << 16) + (green << 8) + (blue);
 		}
 
-		Color(int color_hex) : color_hex(color_hex) {
+		Color(const int& color_hex) : color_hex(color_hex) {
 			/**
 			 * @brief Constructor to go from a hex color value to a discpp::Color
 			 *
