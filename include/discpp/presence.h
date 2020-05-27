@@ -70,7 +70,7 @@ namespace discpp {
         };
 
         Activity() = default;
-        Activity(rapidjson::Document& json) {
+        Activity(rapidjson::Document& json) { // @TODO: Add documentation.
             name = json["name"].GetString();
             type = static_cast<ActivityType>(json["type"].GetInt());
             url = GetDataSafely<std::string>(json, "url");
@@ -114,7 +114,7 @@ namespace discpp {
         int flags;
     };
 
-	class Presence {
+	class Presence { // @TODO: Add documentation.
 	public:
 	    Presence() = default;
 		Presence(rapidjson::Document& json) {

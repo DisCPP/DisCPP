@@ -1156,7 +1156,6 @@ namespace discpp {
          * @return discpp::Channel - This method also sets the guild reference to the returned guild.
          */
 		Guild::EnsureBotPermission(Permission::MANAGE_GUILD);
-        cpr::Header headers = DefaultHeaders({ {"Content-Type", "application/json" } });
         std::string field;
 
         rapidjson::Document j_body(rapidjson::kObjectType);
@@ -1170,7 +1169,7 @@ namespace discpp {
         }
 
         cpr::Body body(DumpJson(j_body));
-        rapidjson::Document result = SendPatchRequest(Endpoint("/guilds/" + std::to_string(id)), headers, id, RateLimitBucketType::CHANNEL, body);
+        rapidjson::Document result = SendPatchRequest(Endpoint("/guilds/" + std::to_string(id)), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
         *this = discpp::Guild(result);
         return *this;
