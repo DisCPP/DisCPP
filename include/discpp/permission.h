@@ -1,14 +1,16 @@
 #ifndef DISCPP_PERMISSION_H
 #define DISCPP_PERMISSION_H
 
+#ifndef RAPIDJSON_HAS_STDSTRING
 #define RAPIDJSON_HAS_STDSTRING 1
+#endif
 
 #include <unordered_map>
 
 #include <rapidjson/document.h>
 
 namespace discpp {
-	typedef std::string snowflake;
+	typedef uint64_t snowflake;
 
 	enum class PermissionType : int {
 		ROLE,
@@ -24,14 +26,14 @@ namespace discpp {
 		MANAGE_GUILD = 0x00000020,
 		ADD_REACTIONS = 0x00000040,
 		VIEW_AUDIT_LOG = 0x00000080,
-		VIEW_CHANNEL = 0x00000400,
+		READ_MESSAGES = 0x00000400,
 		SEND_MESSAGES = 0x00000800,
 		SEND_TTS_MESSAGES = 0x00001000,
 		MANAGE_MESSAGES = 0x00002000,
 		EMBED_LINKS = 0x00004000,
 		ATTACH_FILES = 0x00008000,
 		READ_MESSAGE_HISTORY = 0x00010000,
-		MENTION_EVERYONE = 0x00020000,
+        MENTION_EVERYONE_HERE_ALL_ROLES = 0x00020000,
 		USE_EXTERNAL_EMOJIS = 0x00040000,
 		CONNECT = 0x00100000,
 		SPEAK = 0x00200000,
@@ -45,44 +47,43 @@ namespace discpp {
 		MANAGE_NICKNAMES = 0x08000000,
 		MANAGE_ROLES = 0x10000000,
 		MANAGE_WEBHOOKS = 0x20000000,
-		MANAGE_EMOJIS = 0x40000000
-	};
-	
-	inline std::unordered_map<Permission, std::string> permission_str_map = {
-		{Permission::CREATE_INSTANT_INVITE, "CREATE_INSTANT_INVITE"},
-		{Permission::KICK_MEMBERS, "KICK_MEMBERS"},
-		{Permission::BAN_MEMBERS, "BAN_MEMBERS"},
-		{Permission::ADMINISTRATOR, "ADMINISTRATOR"},
-		{Permission::MANAGE_CHANNELS, "MANAGE_CHANNELS"},
-		{Permission::MANAGE_GUILD, "MANAGE_GUILD"},
-		{Permission::ADD_REACTIONS, "ADD_REACTIONS"},
-		{Permission::VIEW_AUDIT_LOG, "VIEW_AUDIT_LOG"},
-		{Permission::VIEW_CHANNEL, "VIEW_CHANNEL"},
-		{Permission::SEND_MESSAGES, "SEND_MESSAGES"},
-		{Permission::SEND_TTS_MESSAGES, "SEND_TTS_MESSAGES"},
-		{Permission::MANAGE_MESSAGES, "MANAGE_MESSAGES"},
-		{Permission::EMBED_LINKS, "EMBED_LINKS"},
-		{Permission::ATTACH_FILES, "ATTACH_FILES"},
-		{Permission::READ_MESSAGE_HISTORY, "READ_MESSAGE_HISTORY"},
-		{Permission::MENTION_EVERYONE, "MENTION_EVERYONE"},
-		{Permission::USE_EXTERNAL_EMOJIS, "USE_EXTERNAL_EMOJIS"},
-		{Permission::CONNECT, "CONNECT"},
-		{Permission::SPEAK, "SPEAK"},
-		{Permission::MUTE_MEMBERS, "MUTE_MEMBERS"},
-		{Permission::DEAFEN_MEMBERS, "DEAFEN_MEMBERS"},
-		{Permission::MOVE_MEMBERS, "MOVE_MEMBERS"},
-		{Permission::USE_VAD, "USE_VAD"},
-		{Permission::PRIORITY_SPEAKER, "PRIORITY_SPEAKER"},
-		{Permission::STREAM, "STREAM"},
-		{Permission::CHANGE_NICKNAME, "CHANGE_NICKNAME"},
-		{Permission::MANAGE_NICKNAMES, "MANAGE_NICKNAMES"},
-		{Permission::MANAGE_ROLES, "MANAGE_ROLES"},
-		{Permission::MANAGE_WEBHOOKS, "MANAGE_WEBHOOKS"},
-		{Permission::MANAGE_EMOJIS, "MANAGE_EMOJIS"}
+		MANAGE_EMOJIS = 0x40000000,
 	};
 
 	inline std::string PermissionToString(Permission perm) {
-		return permission_str_map[perm];
+        std::unordered_map<Permission, std::string> permission_str_map = {
+                {Permission::CREATE_INSTANT_INVITE, "CREATE_INSTANT_INVITE"},
+                {Permission::KICK_MEMBERS, "KICK_MEMBERS"},
+                {Permission::BAN_MEMBERS, "BAN_MEMBERS"},
+                {Permission::ADMINISTRATOR, "ADMINISTRATOR"},
+                {Permission::MANAGE_CHANNELS, "MANAGE_CHANNELS"},
+                {Permission::MANAGE_GUILD, "MANAGE_GUILD"},
+                {Permission::ADD_REACTIONS, "ADD_REACTIONS"},
+                {Permission::VIEW_AUDIT_LOG, "VIEW_AUDIT_LOG"},
+                {Permission::READ_MESSAGES, "READ_MESSAGES"},
+                {Permission::SEND_MESSAGES, "SEND_MESSAGES"},
+                {Permission::SEND_TTS_MESSAGES, "SEND_TTS_MESSAGES"},
+                {Permission::MANAGE_MESSAGES, "MANAGE_MESSAGES"},
+                {Permission::EMBED_LINKS, "EMBED_LINKS"},
+                {Permission::ATTACH_FILES, "ATTACH_FILES"},
+                {Permission::READ_MESSAGE_HISTORY, "READ_MESSAGE_HISTORY"},
+                {Permission::MENTION_EVERYONE_HERE_ALL_ROLES, "MENTION_EVERYONE_HERE_ALL_ROLES"},
+                {Permission::USE_EXTERNAL_EMOJIS, "USE_EXTERNAL_EMOJIS"},
+                {Permission::CONNECT, "CONNECT"},
+                {Permission::SPEAK, "SPEAK"},
+                {Permission::MUTE_MEMBERS, "MUTE_MEMBERS"},
+                {Permission::DEAFEN_MEMBERS, "DEAFEN_MEMBERS"},
+                {Permission::MOVE_MEMBERS, "MOVE_MEMBERS"},
+                {Permission::USE_VAD, "USE_VAD"},
+                {Permission::PRIORITY_SPEAKER, "PRIORITY_SPEAKER"},
+                {Permission::STREAM, "STREAM"},
+                {Permission::CHANGE_NICKNAME, "CHANGE_NICKNAME"},
+                {Permission::MANAGE_NICKNAMES, "MANAGE_NICKNAMES"},
+                {Permission::MANAGE_ROLES, "MANAGE_ROLES"},
+                {Permission::MANAGE_WEBHOOKS, "MANAGE_WEBHOOKS"},
+                {Permission::MANAGE_EMOJIS, "MANAGE_EMOJIS"}
+        };
+	    return permission_str_map[perm];
 	}
 
 	class PermissionOverwrite {
@@ -111,7 +112,7 @@ namespace discpp {
 		Permissions() = default;
 		Permissions(PermissionType permission_type, int byte_set);
 		Permissions(rapidjson::Document& json);
-        rapidjson::Document& ToJson();
+        rapidjson::Document ToJson();
 
 		snowflake role_user_id;
 		PermissionOverwrite allow_perms;

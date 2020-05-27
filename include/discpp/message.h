@@ -32,7 +32,7 @@ namespace discpp {
 		MessageActivity() = default;
 		MessageActivity(rapidjson::Document& json) {
 			type = static_cast<ActivityType>(json["type"].GetInt());
-			party_id = GetDataSafely<std::string>(json, "pary_id");
+			party_id = GetDataSafely<std::string>(json, "party_id");
 		}
 	};
 
@@ -45,7 +45,7 @@ namespace discpp {
 
 		MessageApplication() = default;
 		MessageApplication(rapidjson::Document& json) {
-			id = json["id"].GetString();
+			id = SnowflakeFromString(json["id"].GetString());
 			cover_image = GetDataSafely<std::string>(json, "cover_image");
 			description = json["description"].GetString();
 			icon = json["icon"].GetString();
@@ -60,16 +60,31 @@ namespace discpp {
 
 		MessageReference() = default;
 		MessageReference(rapidjson::Document& json) {
-			message_id = GetDataSafely<snowflake>(json, "message_id");
-			channel_id = json["channel_id"].GetString();
-			guild_id = GetDataSafely<snowflake>(json, "guild_id");
+			message_id = GetIDSafely(json, "message_id");
+			channel_id = SnowflakeFromString(json["channel_id"].GetString());
+			guild_id = GetIDSafely(json, "guild_id");
 		}
 	};
 
 	class Message : public DiscordObject {
 	public:
+	    class ChannelMention : public DiscordObject {
+	    public:
+            ChannelMention(rapidjson::Document& json) {
+                id = SnowflakeFromString(json["id"].GetString());
+                guild_id = SnowflakeFromString(json["id"].GetString());
+                type = static_cast<discpp::ChannelType>(json["type"].GetInt());
+                name = json["name"].GetString();
+            }
+
+            discpp::snowflake guild_id;
+            discpp::ChannelType type;
+            std::string name;
+	    };
+
 		Message() = default;
 		Message(snowflake id);
+		Message(snowflake message_id, snowflake channel_id);
 		Message(rapidjson::Document& json);
 
 		void AddReaction(discpp::Emoji emoji);
@@ -82,30 +97,32 @@ namespace discpp {
 		discpp::Message EditMessage(discpp::EmbedBuilder embed);
 		discpp::Message EditMessage(int flags);
 		void DeleteMessage();
-		void PinMessage();
-		void UnpinMessage();
+		inline void PinMessage();
+		inline void UnpinMessage();
+        inline bool IsTTS();
+        inline bool MentionsEveryone();
+        inline bool IsPinned();
 
-		discpp::Channel channel;
-		discpp::Guild guild;
-		discpp::User author;
+        discpp::Channel channel;
+        std::shared_ptr<discpp::Guild> guild;
+        std::shared_ptr<discpp::User> author;
 		std::string content;
 		std::string timestamp; // TODO: Convert to iso8601Time
 		std::string edited_timestamp; // TODO: Convert to iso8601Time
-		bool tts;
-		bool mention_everyone;
-		std::unordered_map<discpp::snowflake, discpp::Member> mentions;
-		std::unordered_map<discpp::snowflake, discpp::Role> mentioned_roles;
-		std::unordered_map<discpp::snowflake, discpp::GuildChannel> mention_channels;
+		std::unordered_map<discpp::snowflake, discpp::User> mentions;
+		std::vector<discpp::snowflake> mentioned_roles;
+        std::unordered_map<discpp::snowflake, ChannelMention> mention_channels;
 		std::vector<discpp::Attachment> attachments;
 		std::vector<discpp::EmbedBuilder> embeds;
 		std::vector<discpp::Reaction> reactions;
-		bool pinned;
 		snowflake webhook_id;
 		int type;
 		discpp::MessageActivity activity;
 		discpp::MessageApplication application;
 		discpp::MessageReference message_reference;
 		int flags;
+	private:
+	    char bit_flags; /**< For internal use only. */
 	};
 }
 

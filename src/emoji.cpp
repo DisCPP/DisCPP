@@ -33,7 +33,7 @@ namespace discpp {
 		 * @return discpp::Emoji, this is a constructor.
 		 */
 
-		std::unordered_map<snowflake, Emoji>::iterator it = guild.emojis.find(id);
+		auto it = guild.emojis.find(id);
 		if (it != guild.emojis.end()) {
 			*this = it->second;
 		}
@@ -52,28 +52,23 @@ namespace discpp {
 		 * @return discpp::Emoji, this is a constructor.
 		 */
 
-		id = json["id"].GetString();
-		name = json["name"].GetString();
-		rapidjson::Value::ConstMemberIterator itr = json.FindMember("roles");
-		
-		if (itr != json.MemberEnd()) {
+		id = GetIDSafely(json, "id");
+		name = GetDataSafely<std::string>(json, "name");
+		if (ContainsNotNull(json, "roles")) {
 			for (auto& role : json["roles"].GetArray()) {
 				rapidjson::Document role_json;
 				role_json.CopyFrom(role, role_json.GetAllocator());
-				roles.push_back(discpp::Role(role_json));
+				roles.emplace_back(SnowflakeFromString(role.GetString()));
 			}
 		}
-
-		itr = json.FindMember("user");
-		if (itr != json.MemberEnd()) {
+		if (ContainsNotNull(json, "user")) {
 			rapidjson::Document user_json;
 			user_json.CopyFrom(json["user"], user_json.GetAllocator());
-			user = discpp::User(user_json);
+			creator = discpp::User(user_json);
 		}
-
-		require_colons = json["require_colons"].GetBool();
-		managed = json["managed"].GetBool();
-		animated = json["animated"].GetBool();
+		require_colons = GetDataSafely<bool>(json, "require_colons");
+        managed = GetDataSafely<bool>(json, "managed");
+        animated = GetDataSafely<bool>(json, "animated");
 	}
 
 	Emoji::Emoji(std::wstring w_unicode) : unicode(w_unicode) {
@@ -102,7 +97,18 @@ namespace discpp {
          *
          * @return discpp::Emoji, this is a constructor.
          */
+
+#ifdef WIN32
+        wchar_t thick_emoji[MAX_PATH];
+        if (!MultiByteToWideChar(CP_ACP, WC_COMPOSITECHECK, s_unicode.c_str(), -1, thick_emoji, MAX_PATH)) {
+            throw std::runtime_error("Failed to convert emoji to string!");
+        } else {
+            std::cout << "Just processed: " << thick_emoji << std::endl;
+            this->unicode = thick_emoji;
+        }
+#else
         auto converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
         this->unicode = converter.from_bytes(s_unicode);
+#endif
     }
 }

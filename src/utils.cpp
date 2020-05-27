@@ -1,5 +1,11 @@
 #include "utils.h"
 #include "client.h"
+#include "client_config.h"
+#include "exceptions.h"
+
+#include <cstdlib>
+#include <numeric>
+
 #include <ixwebsocket/IXHttpClient.h>
 
 std::string discpp::GetOsName() {
@@ -36,16 +42,19 @@ rapidjson::Document discpp::HandleResponse(ix::HttpResponsePtr response, snowfla
      * @brief Handles a response from the discpp servers.
      *
      * ```cpp
-     *      nlohmann::json response = discpp::HandleResponse(cpr_response, object, discpp::RateLimitBucketType::CHANNEL);
+     *      nlohmann::json response = discpp::HandleResponse(response, object, discpp::RateLimitBucketType::CHANNEL);
      * ```
      *
-     * @param[in] reponse The cpr response from the servers.
+     * @param[in] reponse The response from the servers.
      * @param[in] object The object id to handle the ratelimits for.
      * @param[in] ratelimit_bucket The rate limit bucket.
      *
      * @return nlohmann::json
      */
-    globals::client_instance->logger->Debug("Received requested payload: " + response->payload);
+
+    if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("Received requested payload: " + response->payload);
+    }
 
     rapidjson::Document tmp;
     if (!response->payload.empty() && response->payload[0] == '[' && response->payload[response->payload.size() - 1] == ']') {
@@ -56,6 +65,11 @@ rapidjson::Document discpp::HandleResponse(ix::HttpResponsePtr response, snowfla
 
     HandleRateLimits(response->headers, object, ratelimit_bucket);
     tmp.Parse((!response->payload.empty() ? response->payload.c_str() : "{}"));
+
+	// Check if we were returned an error and throw an exception if so.
+	if (!tmp.IsNull() && tmp.IsObject() && ContainsNotNull(tmp, "code")) {
+        throw discpp::GetException(tmp);
+    }
 
     // This shows an error in inteliisense for some reason but compiles fine.
 #ifndef __INTELLISENSE__
@@ -75,12 +89,15 @@ rapidjson::Document discpp::SendGetRequest(std::string url, ix::WebSocketHttpHea
      * @param[in] headers The http header.
      * @param[in] object The object id to handle the ratelimits for.
      * @param[in] ratelimit_bucket The rate limit bucket.
-     * @param[in] The cpr response body.
+     * @param[in] The request body.
      *
      * @return nlohmann::json
      */
 
-    globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + body);
+    if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + body);
+    }
+    
     WaitForRateLimits(object, ratelimit_bucket);
 
     ix::HttpClient httpClient;
@@ -110,12 +127,15 @@ rapidjson::Document discpp::SendPostRequest(std::string url, ix::WebSocketHttpHe
      * @param[in] headers The http header.
      * @param[in] object The object id to handle the ratelimits for.
      * @param[in] ratelimit_bucket The rate limit bucket.
-     * @param[in] The cpr response body.
+     * @param[in] The request body.
      *
      * @return nlohmann::json
      */
 
-    globals::client_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + body);
+    if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + body);
+    }
+    
     WaitForRateLimits(object, ratelimit_bucket);
 
     ix::HttpClient httpClient;
@@ -132,19 +152,22 @@ rapidjson::Document discpp::SendPutRequest(std::string url, ix::WebSocketHttpHea
 	 * @brief Sends a put request to a url.
 	 *
 	 * ```cpp
-	 *      nlohmann::Json response = discpp::SendPutRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+	 *      rapidjson::Document response = discpp::SendPutRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
 	 * ```
 	 *
 	 * @param[in] url The url to create a request to.
 	 * @param[in] headers The http header.
 	 * @param[in] object The object id to handle the ratelimits for.
 	 * @param[in] ratelimit_bucket The rate limit bucket.
-	 * @param[in] The cpr response body.
+	 * @param[in] The request body.
 	 *
-	 * @return nlohmann::json
+	 * @return rapidjson::Document
 	 */
 
-	globals::client_instance->logger->Debug("Sending put request, URL: " + url + ", body: " + body);
+    if (globals::client_instance != nullptr) {
+	    globals::client_instance->logger->Debug("Sending put request, URL: " + url + ", body: " + body);
+    }
+    
 	WaitForRateLimits(object, ratelimit_bucket);
 
     ix::HttpClient httpClient;
@@ -168,12 +191,14 @@ rapidjson::Document discpp::SendPatchRequest(std::string url, ix::WebSocketHttpH
      * @param[in] headers The http header.
      * @param[in] object The object id to handle the ratelimits for.
      * @param[in] ratelimit_bucket The rate limit bucket.
-     * @param[in] The cpr response body.
+     * @param[in] The request body.
      *
      * @return nlohmann::json
      */
 
-    globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + body);
+    if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + body);
+    }
     WaitForRateLimits(object, ratelimit_bucket);
 
     ix::HttpClient httpClient;
@@ -352,7 +377,7 @@ std::string discpp::Base64Encode(std::string text) {
 	 */
 
     unsigned char* buf = (unsigned char *) text.c_str();
-    unsigned int buf_len = text.size();
+    size_t buf_len = text.size();
     std::string ret;
     int i = 0;
     int j = 0;
@@ -424,13 +449,7 @@ std::string discpp::ReplaceAll(std::string data, std::string to_search, std::str
 
 std::string discpp::EscapeString(std::string string) {
 	/**
-	 * @brief Escape strings for discpp json endpoints and cpr body
-	 *
-	 * ```cpp
-	 *      std::string raw_text = "{\"content\":\"" + EscapeString(text) + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
-	 *		cpr::Body body = cpr::Body(raw_text);
-	 *		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
-	 * ```
+	 * @brief Escape strings for discpp json endpoints and json
 	 *
 	 * @param[in] string The string to escape.
 	 *
@@ -500,29 +519,9 @@ int discpp::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bu
 	return 0;
 }
 
-bool HeaderContains(cpr::Header header, std::string key) {
-	/**
-	 * @brief Check if a cpr::Header contains a specific key.
-	 *
-	 * ```cpp
-	 *      bool contains = discpp::HeaderContains(headers, "auth");
-	 * ```
-	 *
-	 * @param[in] header The headers to see if the key is contained in.
-	 * @param[in] key The key to check if the headers contain.
-	 *
-	 * @return bool
-	 */
-
-	for (auto head : header) {
-		if (head.first == key) return true;
-	}
-	return false;
-}
-
 bool HeaderContains(ix::WebSocketHttpHeaders header, std::string key) {
     /**
-     * @brief Check if a cpr::Header contains a specific key.
+     * @brief Check if a ix::WebSocketHttpHeaders contains a specific key.
      *
      * ```cpp
      *      bool contains = discpp::HeaderContains(headers, "auth");
@@ -534,10 +533,7 @@ bool HeaderContains(ix::WebSocketHttpHeaders header, std::string key) {
      * @return bool
      */
 
-    for (auto head : header) {
-        if (head.first == key) return true;
-    }
-    return false;
+    return header.count(key) > 0;
 }
 
 void discpp::HandleRateLimits(ix::WebSocketHttpHeaders header, snowflake object, RateLimitBucketType ratelimit_bucket) {
@@ -580,10 +576,8 @@ void discpp::HandleRateLimits(ix::WebSocketHttpHeaders header, snowflake object,
 }
 
 time_t discpp::TimeFromSnowflake(snowflake snow) {
-	int64_t unix = ((std::strtoll(snow.c_str(), NULL, 10) >> 22) + 1420070400000) / 1000;
-	time_t unix_time = unix;
-
-	return unix_time;
+    constexpr static uint64_t discord_epoch = 1420070400000;
+    return ((snow >> 22) + discord_epoch) / 1000;
 }
 
 std::string discpp::FormatTimeFromSnowflake(snowflake snow) {
@@ -597,7 +591,7 @@ std::string discpp::FormatTimeFromSnowflake(snowflake snow) {
 	return buffer;
 }
 
-bool discpp::ContainsNotNull(rapidjson::Document &json, char *value_name) {
+bool discpp::ContainsNotNull(rapidjson::Document &json, const char *value_name) {
     rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
     if (itr != json.MemberEnd()) {
         return !json[value_name].IsNull();
@@ -643,4 +637,56 @@ std::string discpp::DumpJson(rapidjson::Value &json) {
     std::string tmp = buffer.GetString();
 
     return tmp;
+}
+
+// Safe characters for URIEncode
+char SAFE[256] = {
+        /*      0 1 2 3  4 5 6 7  8 9 A B  C D E F */
+        /* 0 */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* 1 */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* 2 */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* 3 */ 1,1,1,1, 1,1,1,1, 1,1,0,0, 0,0,0,0,
+
+        /* 4 */ 0,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1,
+        /* 5 */ 1,1,1,1, 1,1,1,1, 1,1,1,0, 0,0,0,0,
+        /* 6 */ 0,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1,
+        /* 7 */ 1,1,1,1, 1,1,1,1, 1,1,1,0, 0,0,0,0,
+
+        /* 8 */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* 9 */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* A */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* B */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+
+        /* C */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* D */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* E */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* F */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0
+};
+
+std::string discpp::URIEncode(std::string str) {
+    const char DEC2HEX[16 + 1] = "0123456789ABCDEF";
+    const unsigned char * pSrc = (const unsigned char *) str.c_str();
+    const size_t SRC_LEN = str.length();
+    unsigned char * const pStart = new unsigned char[SRC_LEN * 3];
+    unsigned char * pEnd = pStart;
+    const unsigned char * const SRC_END = pSrc + SRC_LEN;
+
+    for (; pSrc < SRC_END; ++pSrc) {
+        if (SAFE[*pSrc]) {
+            *pEnd++ = *pSrc;
+        } else {
+            // escape this char
+            *pEnd++ = '%';
+            *pEnd++ = DEC2HEX[*pSrc >> 4];
+            *pEnd++ = DEC2HEX[*pSrc & 0x0F];
+        }
+    }
+
+    std::string sResult((char *)pStart, (char *)pEnd);
+    delete [] pStart;
+    return sResult;
+}
+
+discpp::snowflake discpp::SnowflakeFromString(std::string str) {
+    return strtoll(str.c_str(), NULL, 10);
 }

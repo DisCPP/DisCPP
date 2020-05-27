@@ -34,18 +34,18 @@ int main(int argc, const char* argv[]) {
 	// New event system
 	discpp::EventHandler<discpp::ReadyEvent>::RegisterListener([&bot](discpp::ReadyEvent event) {
 		std::cout << "Ready!" << std::endl
-			<< "Logged in as: " << bot.client_user.username << "#" << bot.client_user.discriminator << std::endl
+			<< "Logged in as: " << bot.client_user.username << "#" << bot.client_user.GetDiscriminator() << std::endl
 			<< "ID: " << bot.client_user.id << std::endl << "-----------------------------" << std::endl;
 
 		// Will show "Playing With Crashes!"
-		discpp::Activity activity = discpp::Activity("With Crashes!", discpp::presence::ActivityType::GAME, discpp::presence::Status::idle);
+		discpp::Presences activity("With Crashes!", discpp::presence::ActivityType::GAME, discpp::presence::Status::idle);
 		bot.UpdatePresence(activity);
 	});
 
 	discpp::EventHandler<discpp::GuildMemberAddEvent>::RegisterListener([](discpp::GuildMemberAddEvent event) {
 		discpp::Channel channel((discpp::snowflake) "638156895953223714");
 
-		channel.Send("Welcome <@" + event.member.user.id + ">, hope you enjoy!");
+		channel.Send("Welcome <@" + std::to_string(event.member->user.id) + ">, hope you enjoy!");
 	});
 
 	discpp::EventHandler<discpp::ChannelPinsUpdateEvent>::RegisterListener([](discpp::ChannelPinsUpdateEvent event)->bool {

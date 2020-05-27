@@ -1,7 +1,10 @@
 #ifndef DISCPP_EVENT_DISPATCHER_H
 #define DISCPP_EVENT_DISPATCHER_H
 
+#ifndef RAPIDJSON_HAS_STDSTRING
 #define RAPIDJSON_HAS_STDSTRING 1
+#endif
+
 #include <rapidjson/document.h>
 
 #include "event.h"
@@ -59,6 +62,7 @@ namespace discpp {
 	public:
         static void BindEvents();
 		static void HandleDiscordEvent(rapidjson::Document& j, std::string event_name);
+        static void RegisterCustomEvent(const char* event_name, std::function<void(const rapidjson::Document&)> func);
 	};
 }
 

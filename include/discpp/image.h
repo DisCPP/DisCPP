@@ -3,7 +3,7 @@
 
 #include "discord_object.h"
 
-#include <nlohmann/json.hpp>
+
 
 namespace discpp {
 	class Image : public DiscordObject {

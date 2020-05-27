@@ -6,7 +6,8 @@ out/*
 html/*
 latex/*
 .idea/*
-cmake-build-debug/*
+cmake-build-debug-w10/*
+cmake-build-debug-wsl/*
 
 # Compiled source #
 ###################

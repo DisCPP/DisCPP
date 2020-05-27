@@ -17,9 +17,9 @@ namespace discpp {
 		 * @return discpp::Role, this is a constructor.
 		 */
 
-		std::unordered_map<snowflake, Role>::iterator it = guild.roles.find(role_id); 
+		auto it = guild.roles.find(role_id);
 		if (it != guild.roles.end()) {
-			*this = it->second;
+			*this = *it->second;
 		}
 	}
 
@@ -36,7 +36,7 @@ namespace discpp {
 		 * @return discpp::Role, this is a constructor.
 		 */
 
-		id = static_cast<snowflake>(json["id"].GetString());
+		id = SnowflakeFromString(json["id"].GetString());
 		name = json["name"].GetString();
 		color = json["color"].GetInt();
 		hoist = json["hoist"].GetBool();

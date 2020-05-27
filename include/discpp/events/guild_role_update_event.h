@@ -4,7 +4,7 @@
 #include "../event.h"
 #include "../role.h"
 
-#include <nlohmann/json.hpp>
+
 
 namespace discpp {
 	class GuildRoleUpdateEvent : public Event {

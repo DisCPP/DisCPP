@@ -6,7 +6,7 @@
 variables:
   #2020.1
   vcpkgGitRef: 7aebb481085de7387f8a9975652c26f9053f66df
-  vcpkgArgs: nlohmann-json cpr ixwebsocket openssl
+  vcpkgArgs: rapidjson cpr openssl
   vcpkgLocation: '$(Build.SourcesDirectory)/vcpkg'
 
 trigger:
@@ -18,6 +18,8 @@ jobs:
     pool:
       vmImage: 'windows-latest'
     steps:
+    - script: git submodule update --init
+      displayName: Checkout IXWebsocket submodule.
     - task: Cache@2
       displayName: Cache vcpkg
       inputs:
@@ -45,6 +47,8 @@ jobs:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+    - script: git submodule update --init
+      displayName: Checkout IXWebsocket submodule.
     - task: Cache@2
       displayName: Cache vcpkg
       inputs:

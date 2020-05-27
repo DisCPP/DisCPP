@@ -1,7 +1,9 @@
 #ifndef DISCPP_UTILS_H
 #define DISCPP_UTILS_H
 
+#ifndef RAPIDJSON_HAS_STDSTRING
 #define RAPIDJSON_HAS_STDSTRING 1
+#endif
 
 #include "discord_object.h"
 
@@ -75,6 +77,22 @@ namespace discpp {
 		return nullptr;
 	}
 
+    discpp::snowflake SnowflakeFromString(std::string str);
+
+	inline discpp::snowflake GetIDSafely(rapidjson::Document& json, const char* value_name) {
+        rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
+        if (itr != json.MemberEnd()) {
+            if (!json[value_name].IsNull()) {
+                rapidjson::Document t_doc;
+                t_doc.CopyFrom(json[value_name], t_doc.GetAllocator());
+
+                return SnowflakeFromString(std::string(t_doc.GetString()));
+            }
+        }
+
+        return 0;
+	}
+
     template<typename T>
     inline T GetDataSafely(rapidjson::Document & json, const char* value_name) {
         rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
@@ -98,7 +116,7 @@ namespace discpp {
                 rapidjson::Document t_doc;
                 t_doc.CopyFrom(doc[value_name], t_doc.GetAllocator());
 
-                return T(t_doc.GetString());
+                return T(SnowflakeFromString(t_doc.GetString()));
             }
         }
 
@@ -121,7 +139,7 @@ namespace discpp {
 	}
 
 	void IterateThroughNotNullJson(rapidjson::Document& json, std::function<void(rapidjson::Document&)> func);
-    bool ContainsNotNull(rapidjson::Document& json, char * value_name);
+    bool ContainsNotNull(rapidjson::Document& json, const char * value_name);
     std::string DumpJson(rapidjson::Document& json);
     std::string DumpJson(rapidjson::Value& json);
     rapidjson::Document GetDocumentInsideJson(rapidjson::Document &json, const char* value_name);
@@ -145,8 +163,8 @@ namespace discpp {
 	inline std::unordered_map<snowflake, RateLimit> webhook_ratelimit;
 	inline RateLimit global_ratelimit;
 
-	inline int WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bucket);
-    inline void HandleRateLimits(ix::WebSocketHttpHeaders header, snowflake object, RateLimitBucketType ratelimit_bucket);
+	int WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bucket);
+	void HandleRateLimits(cpr::Header header, snowflake object, RateLimitBucketType ratelimit_bucket);
 	// End of rate limits
 
     extern rapidjson::Document HandleResponse(ix::HttpResponsePtr response, snowflake object, RateLimitBucketType ratelimit_bucket);
@@ -166,6 +184,7 @@ namespace discpp {
 	std::string EscapeString(std::string string);
 	time_t TimeFromSnowflake(snowflake snow);
 	std::string FormatTimeFromSnowflake(snowflake snow);
+	std::string URIEncode(std::string str);
 }
 
 #endif

@@ -4,7 +4,7 @@
 #include "../event.h"
 #include "../user.h"
 
-#include <nlohmann/json.hpp>
+
 
 namespace discpp {
 	class UserUpdateEvent : public Event {

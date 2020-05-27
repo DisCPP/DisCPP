@@ -1,15 +1,15 @@
 #ifndef DISCPP_BOT_H
 #define DISCPP_BOT_H
 
+#ifndef RAPIDJSON_HAS_STDSTRING
 #define RAPIDJSON_HAS_STDSTRING 1
+#endif
 
 #include <string>
 #include <future>
 #include <string_view>
 #include <optional>
 #include <vector>
-
-#include <nlohmann/json.hpp>
 
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
@@ -22,43 +22,59 @@
 #include "member.h"
 #include "guild.h"
 #include "log.h"
+#include "settings.h"
 
 namespace discpp {
 	class Role;
 	class User;
-	class Activity;
+	class Presence;
 	class ClientConfig;
 
-	class InvalidGuildException : public std::runtime_error {
-	public: 
-		InvalidGuildException() : std::runtime_error("Guild not found") {}
+	class ClientUser : public User {
+	public:
+		ClientUser() = default;
+		ClientUser(snowflake id) : User(id) {}
+		ClientUser(rapidjson::Document & json);
+
+		std::vector<Connection> GetUserConnections();
+		ClientUserSettings GetSettings();
+		void ModifySettings(ClientUserSettings& settings);
+
+		ClientUserSettings settings;
+		bool mfa_enabled;
+		std::string locale;
+		bool verified;
+		std::string email;
 	};
 
-	class StartLimitException : public std::runtime_error {
+	class UserRelationship {
+	private:
+	    int type;
 	public:
-		StartLimitException() : std::runtime_error("Maximum start limit reached") {}
-	};
+        UserRelationship() = default;
+        UserRelationship(rapidjson::Document& json);
 
-	class AuthenticationException : public std::runtime_error {
-	public:
-        AuthenticationException() : std::runtime_error("Invalid token, failed to connect to gateway") {}
+        bool IsFriend();
+        bool IsBlocked();
+
+        discpp::snowflake id;
+        std::string nickname;
+        discpp::User user;
 	};
 
 	class Client {
 	public:
-		std::string token; /**< Token for the current client */
-		ClientConfig* config; /**< Configuration for the current bot */
+		std::string token; /**< Token for the current client. */
+		ClientConfig* config; /**< Configuration for the current bot. */
 
-		discpp::User client_user; /**< discpp::User object representing current user */
-		discpp::Logger* logger; /**< discpp::Logger object representing current logger */
+		discpp::ClientUser client_user; /**< discpp::User object representing current user. */
+		discpp::Logger* logger; /**< discpp::Logger object representing current logger. */
 
-		std::unordered_map<snowflake, Channel> channels; /**< List of channels the current bot can access */
-		std::unordered_map<snowflake, Member> members; /**< List of members the current bot can access */
-		std::unordered_map<snowflake, Guild> guilds; /**< List of guilds the current bot can access */ 
-		std::unordered_map<snowflake, Message> messages; /**< List of messages the current bot can access */
-        std::unordered_map<discpp::snowflake, discpp::DMChannel> private_channels; /**< List of dm channels the current client can access */
-
-		std::vector<std::future<void>> futures; /**< List of events */
+		//std::unordered_map<snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
+		std::unordered_map<snowflake, std::shared_ptr<Member>> members; /**< List of members the current bot can access. */
+		std::unordered_map<snowflake, std::shared_ptr<Guild>> guilds; /**< List of guilds the current bot can access. */
+		std::unordered_map<snowflake, std::shared_ptr<Message>> messages; /**< List of messages the current bot can access. */
+        std::unordered_map<discpp::snowflake, discpp::DMChannel> private_channels; /**< List of dm channels the current client can access. */
 
 		enum packet_opcode : int {
 			dispatch = 0,				// Receive
@@ -79,17 +95,27 @@ namespace discpp {
 		void CreateWebsocketRequest(rapidjson::Document& json, std::string message = "");
 		void SetCommandHandler(std::function<void(discpp::Client*, discpp::Message)> command_handler);
 		void DisconnectWebsocket();
+		void StopClient();
 		void ReconnectToWebsocket();
 
 		// Discord based methods.
-        discpp::Guild GetGuild(snowflake guild_id);
+		void AddFriend(discpp::User user);
+		void RemoveFriend(discpp::User user);
+        std::unordered_map<discpp::snowflake, discpp::UserRelationship> GetRelationships();
+        std::shared_ptr<discpp::Guild> GetGuild(snowflake guild_id);
         discpp::User ModifyCurrentUser(std::string username, discpp::Image avatar);
         void LeaveGuild(discpp::Guild& guild);
-        void UpdatePresence(discpp::Activity& activity);
-		discpp::User GetUser(discpp::snowflake id);
-        std::vector<discpp::Connection> GetBotUserConnections();
-        // std::vector<discpp::Channel> GetUserDMs(); // Not supported by bots.
+        void UpdatePresence(discpp::Presence& activity);
+		discpp::User ReqestUserIfNotCached(discpp::snowflake id);
+        std::vector<discpp::User::Connection> GetBotUserConnections();
+        discpp::Channel GetChannel(discpp::snowflake id);
+        discpp::DMChannel GetDMChannel(discpp::snowflake id);
+        std::unordered_map<discpp::snowflake, discpp::DMChannel> GetUserDMs();
         // discpp::Channel CreateGroupDM(std::vector<discpp::User> users); // Deprecated and will not be shown in the discord client.
+
+		bool user_mfa_enabled;
+		std::string user_locale;
+		bool user_verified;
 
 		template <typename FType, typename... T>
 		void DoFunctionLater(FType&& func, T&&... args) {
@@ -106,13 +132,20 @@ namespace discpp {
 			 * @return void
 			 */
 
-			futures.push_back(std::async(std::launch::async, func, std::forward<T>(args)...));
+            {
+                std::lock_guard<std::mutex> futures_guard(futures_mutex);
+                futures.push_back(std::async(std::launch::async, func, std::forward<T>(args)...));
+            }
 		}
 	private:
 		friend class EventDispatcher;
 		bool ready = false;
 		bool disconnected = true;
 		bool reconnecting = false;
+		bool stay_disconnected = false;
+		bool run = true;
+
+        std::vector<std::future<void>> futures;
 
 		std::string session_id;
 		std::string gateway_endpoint;
@@ -120,9 +153,10 @@ namespace discpp {
 		rapidjson::Document hello_packet;
 
 		std::thread heartbeat_thread;
+		std::thread future_loop_thread;
 
 		std::mutex websocket_client_mutex;
-		//websocket_callback_client websocket_client;
+		std::mutex futures_mutex;
 
 		ix::WebSocket websocket;
 

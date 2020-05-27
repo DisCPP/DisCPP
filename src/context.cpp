@@ -1,6 +1,6 @@
 #include "context.h"
 
-discpp::Context::Context(discpp::Client* bot, discpp::Channel channel, discpp::Member author, discpp::Message message, std::string remainder, std::vector<std::string> arguments) : client(bot), guild(message.guild), channel(channel), author(author), user(message.author), message(message), remainder(remainder), arguments(arguments) {
+discpp::Context::Context(discpp::Client* client, discpp::Channel channel, std::shared_ptr<discpp::Member> author, discpp::Message message, std::string remainder, std::vector<std::string> arguments) : client(client), guild(message.guild), channel(channel), author(author), user(message.author), message(message), remainder(remainder), arguments(arguments) {
 	/**
 	 * @brief Constructs a discpp::Context object.
 	 *

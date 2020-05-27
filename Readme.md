@@ -23,7 +23,7 @@ DisC++ is a simplified, but feature rich Discord API wrapper written in modern C
 </table>
 
 ## Dependencies
-- [Nlohmann JSON](https://github.com/nlohmann/json)
+- [RapidJSON](https://github.com/Tencent/rapidjson)
 - [cpr](https://github.com/whoshuu/cpr)
 - [IXWebSocket](https://github.com/machinezone/IXWebSocket)
 
@@ -32,12 +32,14 @@ Please follow [Google's styling guide](https://google.github.io/styleguide/cppgu
 
 ## Building
 1. Install vcpkg onto the root of your C drive.
-2. Install dependencies by running command: `vcpkg install nlohmann-json cpr ixwebsocket openssl --triplet x64-[windows/linux]`.
+2. Install dependencies by running command: `vcpkg install rapidjson cpr openssl --triplet x64-[windows/linux]`.
     * Replace [windows/linux] with your operating system.
 3. Then run `vcpkg integrate install`.
     * Should get an output similar to: `"-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"`.
     * Save the directory that was given (Ex. `C:/vcpkg/scripts/buildsystems/vcpkg.cmake`).
 4. Clone this repository.
+    * `git clone https://github.com/DisCPP/DisCPP.git`
+    * `git submodule update --init`
 5. Open the CMake project in Visual Studio.
     * On the welcome screen under the create a project or open project buttons, click `Continue without code`
     * Open the CMakeLists.txt by `File > Open > Cmake`
@@ -80,6 +82,7 @@ target_link_libraries(main PRIVATE discpp)
 - [ ] Make sure all endpoints are implemented and add them if they aren't.
 - [ ] Voice websocket connection.
 - [ ] Sending audio through a voice connection.
+- [ ] Make the audit log cleaner and easier to use.
 
 ## Documentation
 Currently the only documentation is from Doxygen; its currently completely up to date. You can view it [here](https://discpp.github.io/). If you want to generate documentation you need to install Doxygen and run doxygen in the root DisCPP directory and run the terminal command: ```doxygen Doxyfile```
@@ -126,8 +129,8 @@ int main(int argc, const char* argv[]) {
 			<< "ID: " << bot.bot_user.id << std::endl << "-----------------------------" << std::endl;
 
 		// Will show "Playing With Crashes!"
-		discpp::Activity activity = discpp::Activity("With Crashes!", discpp::presence::ActivityType::GAME, discpp::presence::Status::idle);
-		bot.UpdatePresence(activity);
+		discpp::Presence presence("With Crashes!", discpp::presence::ActivityType::GAME, discpp::presence::Status::idle);
+		bot.UpdatePresence(presence);
 	});
 
 	discpp::EventHandler<discpp::GuildMemberAddEvent>::RegisterListener([](discpp::GuildMemberAddEvent event) {

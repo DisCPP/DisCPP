@@ -4,14 +4,14 @@
 #include "../event.h"
 #include "../guild.h"
 
-#include <nlohmann/json.hpp>
+
 
 namespace discpp {
 	class GuildCreateEvent : public Event {
 	public:
-		inline GuildCreateEvent(discpp::Guild guild) : guild(guild) {}
+		inline GuildCreateEvent(std::shared_ptr<discpp::Guild> guild) : guild(guild) {}
 
-		discpp::Guild guild;
+        std::shared_ptr<discpp::Guild> guild;
 	};
 }
 

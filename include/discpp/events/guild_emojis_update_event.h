@@ -4,14 +4,14 @@
 #include "../event.h"
 #include "../guild.h"
 
-#include <nlohmann/json.hpp>
+
 
 namespace discpp {
 	class GuildEmojisUpdateEvent : public Event {
 	public:
-		inline GuildEmojisUpdateEvent(discpp::Guild guild) : guild(guild) {}
+		inline GuildEmojisUpdateEvent(std::shared_ptr<discpp::Guild> guild) : guild(guild) {}
 
-		discpp::Guild guild;
+        std::shared_ptr<discpp::Guild> guild;
 	};
 }
 

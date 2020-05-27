@@ -5,7 +5,7 @@
 #include "../user.h"
 #include "../channel.h"
 
-#include <nlohmann/json.hpp>
+
 
 namespace discpp {
 	class TypingStartEvent : public Event {

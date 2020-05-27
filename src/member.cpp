@@ -3,7 +3,7 @@
 #include <climits>
 
 namespace discpp {
-	Member::Member(snowflake id, discpp::Guild guild) : discpp::DiscordObject(id) {
+	Member::Member(snowflake id, discpp::Guild& guild) : discpp::DiscordObject(id) {
 		/**
 		 * @brief Constructs a discpp::Member object using its id and the guild that it is in.
 		 *
@@ -19,17 +19,10 @@ namespace discpp {
 		 * @return discpp::Member, this is a constructor.
 		 */
 
-		*this = guild.GetMember(id);
-
-		/*auto it = std::find_if(discpp::globals::bot_instance->members.begin(), discpp::globals::bot_instance->members.end(),
-		        [](std::unordered_map<snowflake, Member>::) {});
-
-		if (it != discpp::globals::bot_instance->members.end()) {
-			*this = it->second;
-		}*/
+		*this = *guild.GetMember(id);
 	}
 
-	Member::Member(rapidjson::Document& json, discpp::Guild guild) : guild_id(guild.id) {
+	Member::Member(rapidjson::Document& json, discpp::Guild& guild) : guild_id(guild.id) {
 		/**
 		 * @brief Constructs a discpp::Member object by parsing json and stores the guild_id.
 		 *
@@ -44,7 +37,7 @@ namespace discpp {
 		 */
 
 		user = ConstructDiscppObjectFromJson(json, "user", discpp::User());
-		if (!user.id.empty()) id = user.id;
+		if (user.id != 0) id = user.id;
 		nick = GetDataSafely<std::string>(json, "nick");
 
         int highest_hiearchy = 0;
@@ -52,21 +45,23 @@ namespace discpp {
 			for (auto& role : json["roles"].GetArray()) {
 				rapidjson::Document role_json;
 				role_json.CopyFrom(role, role_json.GetAllocator());
-				discpp::Role r(static_cast<snowflake>(role_json.GetString()), guild);
-				if (r.position > highest_hiearchy) {
-					highest_hiearchy = r.position;
+
+				std::shared_ptr<discpp::Role> r = guild.GetRole(SnowflakeFromString(role_json.GetString()));
+
+				if (r->position > highest_hiearchy) {
+					highest_hiearchy = r->position;
 				}
 
 				// Save permissions
 				if (json["roles"][0] == role) {
-					permissions.allow_perms.value = r.permissions.allow_perms.value;
-					permissions.deny_perms.value = r.permissions.deny_perms.value;
+					permissions.allow_perms.value = r->permissions.allow_perms.value;
+					permissions.deny_perms.value = r->permissions.deny_perms.value;
 				} else {
-					permissions.allow_perms.value |= r.permissions.allow_perms.value;
-					permissions.deny_perms.value |= r.permissions.deny_perms.value;
+					permissions.allow_perms.value |= r->permissions.allow_perms.value;
+					permissions.deny_perms.value |= r->permissions.deny_perms.value;
 				}
 
-				roles.push_back(r);
+				roles.insert({ r->id, r });
 			}
 		}
 
@@ -77,12 +72,24 @@ namespace discpp {
         }
 		joined_at = GetDataSafely<std::string>(json, "joined_at");
 		premium_since = GetDataSafely<std::string>(json, "premium_since");
-		deaf = GetDataSafely<bool>(json, "deaf");
-		mute = GetDataSafely<bool>(json, "mute");
-		user.mention = "<@!" + id + ">";
+		if (GetDataSafely<bool>(json, "deaf")) {
+		    flags |= 0b1;
+		}
+		if (GetDataSafely<bool>(json, "mute")) {
+		    flags |= 0b10;
+		}
+		presence = ConstructDiscppObjectFromJson(json, "presence", discpp::Presence());
 	}
 
-	void Member::ModifyMember(std::string nick, std::vector<discpp::Role> roles, bool mute, bool deaf, snowflake channel_id) {
+	bool Member::IsDeafened() {
+	    return (flags & 0b1) == 0b1;
+	}
+
+	bool Member::IsMuted() {
+        return (flags & 0b10) == 0b10;
+	}
+
+	void Member::ModifyMember(std::string nick, std::vector<discpp::Role>& roles, bool mute, bool deaf, snowflake channel_id) {
 		/**
 		 * @brief Modifies this guild member.
 		 *
@@ -102,10 +109,10 @@ namespace discpp {
 		std::string json_roles = "[";
 		for (discpp::Role role : roles) {
 			if (&role == &roles.front()) {
-				json_roles += "\"" + role.id + "\"";
+				json_roles += "\"" + std::to_string(role.id) + "\"";
 			}
 			else {
-				json_roles += ", \"" + role.id + "\"";
+				json_roles += ", \"" + std::to_string(role.id) + "\"";
 			}
 		}
 		json_roles += "]";
@@ -123,11 +130,11 @@ namespace discpp {
 			}
 		}
 
-		cpr::Body body("{\"nick\": \"" + EscapeString(nick) + "\", \"roles\": " + json_roles + ", \"mute\": " + std::to_string(mute) + ", \"deaf\": " + std::to_string(deaf) + "\"channel_id\": \"" + channel_id + "\"" + "}");
-		SendPatchRequest(Endpoint("/guilds/" + this->id + "/members/" + id), DefaultHeaders({ { "Content-Type", "application/json" } }), guild_id, RateLimitBucketType::GUILD, body);
+		cpr::Body body("{\"nick\": \"" + EscapeString(nick) + "\", \"roles\": " + json_roles + ", \"mute\": " + std::to_string(mute) + ", \"deaf\": " + std::to_string(deaf) + "\"channel_id\": \"" + std::to_string(channel_id) + "\"" + "}");
+		SendPatchRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/" + std::to_string(id)), DefaultHeaders({ { "Content-Type", "application/json" } }), guild_id, RateLimitBucketType::GUILD, body);
 	}
 
-	void Member::AddRole(discpp::Role role) {
+	void Member::AddRole(discpp::Role& role) {
 		/**
 		 * @brief Adds a role to a guild member.
 		 *
@@ -140,10 +147,10 @@ namespace discpp {
 		 * @return void
 		 */
 
-		SendPutRequest(Endpoint("/guilds/" + guild_id + "/members/" + id + "/roles/" + role.id), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
+		SendPutRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 	}
 
-	void Member::RemoveRole(discpp::Role role) {
+	void Member::RemoveRole(discpp::Role& role) {
 		/**
 		 * @brief Removes a role to a guild member.
 		 *
@@ -156,7 +163,7 @@ namespace discpp {
 		 * @return void
 		 */
 
-		SendDeleteRequest(Endpoint("/guilds/" + guild_id + "/members/" + id + "/roles/" + role.id), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
+		SendDeleteRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 	}
 
 	bool Member::IsBanned() {
@@ -170,12 +177,12 @@ namespace discpp {
 		 * @return bool
 		 */
 
-		rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + guild_id + "/bans/" + id), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
+		rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/bans/" + std::to_string(id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 		rapidjson::Value::ConstMemberIterator itr = result.FindMember("reason");
 		return itr != result.MemberEnd();
 	}
 
-	bool Member::HasRole(discpp::Role role) {
+	bool Member::HasRole(discpp::Role& role) {
 		/**
 		 * @brief Check if this member is a role.
 		 *
@@ -188,7 +195,7 @@ namespace discpp {
 		 * @return bool
 		 */
 
-		return count_if(roles.begin(), roles.end(), [role](discpp::Role r) { return role.id == r.id; }) != 0;
+		return count_if(roles.begin(), roles.end(), [role](std::pair<discpp::snowflake, std::shared_ptr<discpp::Role>> pair) { return role.id == pair.second->id; }) != 0;
 	}
 
 	bool Member::HasPermission(discpp::Permission perm) {

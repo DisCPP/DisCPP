@@ -5,15 +5,15 @@
 #include "../guild.h"
 #include "../member.h"
 
-#include <nlohmann/json.hpp>
+
 
 namespace discpp {
 	class GuildMemberAddEvent : public Event {
 	public:
-		inline GuildMemberAddEvent(discpp::Guild guild, discpp::Member member) : guild(guild), member(member) {}
+		inline GuildMemberAddEvent(std::shared_ptr<discpp::Guild> guild, std::shared_ptr<discpp::Member> member) : guild(guild), member(member) {}
 
-		discpp::Guild guild;
-		discpp::Member member;
+        std::shared_ptr<discpp::Guild> guild;
+        std::shared_ptr<discpp::Member> member;
 	};
 }
 

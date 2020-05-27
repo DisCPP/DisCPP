@@ -1,10 +1,11 @@
 #ifndef DISCPP_ALL_DISCORD_EVENTS_H
 #define DISCPP_ALL_DISCORD_EVENTS_H
 
-#include "channel_create_event.h"
-#include "channel_delete_event.h"
+#include "dm_channel_create_event.h"
+#include "dm_channel_delete_event.h"
+#include "dm_channel_update_event.h"
 #include "channel_pins_update_event.h"
-#include "channel_update_event.h"
+#include "guild_channel_update_event.h"
 #include "guild_ban_add_event.h"
 #include "guild_ban_remove_event.h"
 #include "guild_create_event.h"
@@ -19,6 +20,9 @@
 #include "guild_role_delete_event.h"
 #include "guild_role_update_event.h"
 #include "guild_update_event.h"
+#include "guild_channel_create_event.h"
+#include "guild_channel_delete_event.h"
+#include "guild_channel_update_event.h"
 #include "invalid_session_event.h"
 #include "message_bulk_delete_event.h"
 #include "message_create_event.h"

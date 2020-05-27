@@ -5,14 +5,14 @@
 #include <iostream>
 
 namespace discpp {
-	typedef std::string snowflake;
+	typedef uint64_t snowflake;
 
 	class DiscordObject {
 	public:
 		DiscordObject() = default;
 		DiscordObject(snowflake id);
 
-		snowflake id;
+		snowflake id = 0;
 
 		bool operator==(DiscordObject& other) const;
 		bool operator==(snowflake& other) const;
