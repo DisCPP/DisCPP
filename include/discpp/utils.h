@@ -164,7 +164,7 @@ namespace discpp {
 	inline RateLimit global_ratelimit;
 
 	int WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bucket);
-	void HandleRateLimits(cpr::Header header, snowflake object, RateLimitBucketType ratelimit_bucket);
+	void HandleRateLimits(ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket);
 	// End of rate limits
 
     extern rapidjson::Document HandleResponse(ix::HttpResponsePtr response, snowflake object, RateLimitBucketType ratelimit_bucket);
