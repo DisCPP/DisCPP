@@ -31,15 +31,15 @@ namespace discpp {
 		}
 	}
 
-	inline bool FriendSource::GetAll() const {
+	bool FriendSource::GetAll() const {
 		return (this->flags & (int)FriendSourceFlags::ALL) == (int)FriendSourceFlags::ALL;
 	}
 
-	inline bool FriendSource::GetMutualFriends() const {
+	bool FriendSource::GetMutualFriends() const {
 		return (this->flags & (int)FriendSourceFlags::MUTUAL_FRIENDS) == (int)FriendSourceFlags::MUTUAL_FRIENDS;
 	}
 
-	inline bool FriendSource::GetMutualGuilds() const {
+	bool FriendSource::GetMutualGuilds() const {
 		return (this->flags & (int)FriendSourceFlags::MUTUAL_GUILDS) == (int)FriendSourceFlags::MUTUAL_GUILDS;
 	}
 
@@ -226,75 +226,75 @@ namespace discpp {
 		}
 	}
 
-	inline bool ClientUserSettings::GetShowCurrentGame() const {
+	bool ClientUserSettings::GetShowCurrentGame() const {
 		return (this->flags & (int)ClientUserSettingsFlags::SHOW_CURRENT_GAME) == (int)ClientUserSettingsFlags::SHOW_CURRENT_GAME;
 	}
 	
-	inline bool ClientUserSettings::GetDefaultGuildsRestricted() const {
+	bool ClientUserSettings::GetDefaultGuildsRestricted() const {
 		return (this->flags & (int)ClientUserSettingsFlags::DEFAULT_GUILDS_RESTRICTED) == (int)ClientUserSettingsFlags::DEFAULT_GUILDS_RESTRICTED;
 	}
 	
-	inline bool ClientUserSettings::GetInlineAttachmentMedia() const {
+	bool ClientUserSettings::GetInlineAttachmentMedia() const {
 		return (this->flags & (int)ClientUserSettingsFlags::INLINE_ATTACHMENT_MEDIA) == (int)ClientUserSettingsFlags::INLINE_ATTACHMENT_MEDIA;
 	}
 	
-	inline bool ClientUserSettings::GetInlineEmbedMedia() const {
+	bool ClientUserSettings::GetInlineEmbedMedia() const {
 		return (this->flags & (int)ClientUserSettingsFlags::INLINE_EMBED_MEDIA) == (int)ClientUserSettingsFlags::INLINE_EMBED_MEDIA;
 	}
 	
-	inline bool ClientUserSettings::GetGifAutoPlay() const {
+	bool ClientUserSettings::GetGifAutoPlay() const {
 		return (this->flags & (int)ClientUserSettingsFlags::GIF_AUTO_PLAY) == (int)ClientUserSettingsFlags::GIF_AUTO_PLAY;
 	}
 	
-	inline bool ClientUserSettings::GetRenderEmbeds() const {
+	bool ClientUserSettings::GetRenderEmbeds() const {
 		return (this->flags & (int)ClientUserSettingsFlags::RENDER_EMBEDS) == (int)ClientUserSettingsFlags::RENDER_EMBEDS;
 	}
 	
-	inline bool ClientUserSettings::GetRenderReactions() const {
+	bool ClientUserSettings::GetRenderReactions() const {
 		return (this->flags & (int)ClientUserSettingsFlags::RENDER_REACTIONS) == (int)ClientUserSettingsFlags::RENDER_REACTIONS;
 	}
 	
-	inline bool ClientUserSettings::GetAnimateEmoji() const {
+	bool ClientUserSettings::GetAnimateEmoji() const {
 		return (this->flags & (int)ClientUserSettingsFlags::ANIMATE_EMOJI) == (int)ClientUserSettingsFlags::ANIMATE_EMOJI;
 	}
 	
-	inline bool ClientUserSettings::GetEnableTtsCommand() const {
+	bool ClientUserSettings::GetEnableTtsCommand() const {
 		return (this->flags & (int)ClientUserSettingsFlags::ENABLE_TTS_COMMAND) == (int)ClientUserSettingsFlags::ENABLE_TTS_COMMAND;
 	}
 	
-	inline bool ClientUserSettings::GetMessageDisplayCompact() const {
+	bool ClientUserSettings::GetMessageDisplayCompact() const {
 		return (this->flags & (int)ClientUserSettingsFlags::MESSAGE_DISPLAY_COMPACT) == (int)ClientUserSettingsFlags::MESSAGE_DISPLAY_COMPACT;
 	}
 	
-	inline bool ClientUserSettings::GetConvertEmoticons() const {
+	bool ClientUserSettings::GetConvertEmoticons() const {
 		return (this->flags & (int)ClientUserSettingsFlags::CONVERT_EMOTICONS) == (int)ClientUserSettingsFlags::CONVERT_EMOTICONS;
 	}
 	
-	inline bool ClientUserSettings::GetDisableGamesTab() const {
+	bool ClientUserSettings::GetDisableGamesTab() const {
 		return (this->flags & (int)ClientUserSettingsFlags::DISABLE_GAMES_TAB) == (int)ClientUserSettingsFlags::DISABLE_GAMES_TAB;
 	}
 	
-	inline bool ClientUserSettings::GetDeveloperMode() const {
+	bool ClientUserSettings::GetDeveloperMode() const {
 		return (this->flags & (int)ClientUserSettingsFlags::DEVELOPER_MODE) == (int)ClientUserSettingsFlags::DEVELOPER_MODE;
 	}
 	
-	inline bool ClientUserSettings::GetDetectPlatformAccounts() const {
+	bool ClientUserSettings::GetDetectPlatformAccounts() const {
 		return (this->flags & (int)ClientUserSettingsFlags::DETECT_PLATFORM_ACCOUNTS) == (int)ClientUserSettingsFlags::DETECT_PLATFORM_ACCOUNTS;
 	}
 	
-	inline bool ClientUserSettings::GetStreamNotificationsEnabled() const {
+	bool ClientUserSettings::GetStreamNotificationsEnabled() const {
 		return (this->flags & (int)ClientUserSettingsFlags::STREAM_NOTIFICATIONS_ENABLED) == (int)ClientUserSettingsFlags::STREAM_NOTIFICATIONS_ENABLED;
 	}
 	
-	inline bool ClientUserSettings::GetAllowAccessibilityDetection() const {
+	bool ClientUserSettings::GetAllowAccessibilityDetection() const {
 		return (this->flags & (int)ClientUserSettingsFlags::ALLOW_ACCESSIBILITY_DETECTION) == (int)ClientUserSettingsFlags::ALLOW_ACCESSIBILITY_DETECTION;
 	}
 	
-	inline bool ClientUserSettings::GetContactSyncEnabled() const {
+	bool ClientUserSettings::GetContactSyncEnabled() const {
 		return (this->flags & (int)ClientUserSettingsFlags::CONTACT_SYNC_ENABLED) == (int)ClientUserSettingsFlags::CONTACT_SYNC_ENABLED;
 	}
 	
-	inline bool ClientUserSettings::GetNativePhoneIntegrationEnabled() const {
+	bool ClientUserSettings::GetNativePhoneIntegrationEnabled() const {
 		return (this->flags & (int)ClientUserSettingsFlags::NATIVE_PHONE_INTEGRATION_ENABLED) == (int)ClientUserSettingsFlags::NATIVE_PHONE_INTEGRATION_ENABLED;
 	}
 }

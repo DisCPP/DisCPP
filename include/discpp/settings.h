@@ -88,9 +88,9 @@ namespace discpp {
 		void ModifyMutualFriends(bool mutual_friends);
 		void ModifyMutualGuilds(bool mutual_guilds);
 
-		inline bool GetAll() const;
-		inline bool GetMutualFriends() const;
-		inline bool GetMutualGuilds() const;
+		bool GetAll() const;
+		bool GetMutualFriends() const;
+		bool GetMutualGuilds() const;
 
 	private:
 		int flags;
@@ -141,24 +141,24 @@ namespace discpp {
 		void ModifyContactSyncEnabled(bool contact_sync_enabled);
 		void ModifyNativePhoneIntegrationEnabled(bool native_phone_integration_enabled);
 
-		[[nodiscard]] inline bool GetShowCurrentGame() const;
-		[[nodiscard]] inline bool GetDefaultGuildsRestricted() const;
-		[[nodiscard]] inline bool GetInlineAttachmentMedia() const;
-		[[nodiscard]] inline bool GetInlineEmbedMedia() const;
-		[[nodiscard]] inline bool GetGifAutoPlay() const;
-		[[nodiscard]] inline bool GetRenderEmbeds() const;
-		[[nodiscard]] inline bool GetRenderReactions() const;
-		[[nodiscard]] inline bool GetAnimateEmoji() const;
-		[[nodiscard]] inline bool GetEnableTtsCommand() const;
-		[[nodiscard]] inline bool GetMessageDisplayCompact() const;
-		[[nodiscard]] inline bool GetConvertEmoticons() const;
-		[[nodiscard]] inline bool GetDisableGamesTab() const;
-		[[nodiscard]] inline bool GetDeveloperMode() const;
-		[[nodiscard]] inline bool GetDetectPlatformAccounts() const;
-		[[nodiscard]] inline bool GetStreamNotificationsEnabled() const;
-		[[nodiscard]] inline bool GetAllowAccessibilityDetection() const;
-		[[nodiscard]] inline bool GetContactSyncEnabled() const;
-		[[nodiscard]] inline bool GetNativePhoneIntegrationEnabled() const;
+		[[nodiscard]] bool GetShowCurrentGame() const;
+		[[nodiscard]] bool GetDefaultGuildsRestricted() const;
+		[[nodiscard]] bool GetInlineAttachmentMedia() const;
+		[[nodiscard]] bool GetInlineEmbedMedia() const;
+		[[nodiscard]] bool GetGifAutoPlay() const;
+		[[nodiscard]] bool GetRenderEmbeds() const;
+		[[nodiscard]] bool GetRenderReactions() const;
+		[[nodiscard]] bool GetAnimateEmoji() const;
+		[[nodiscard]] bool GetEnableTtsCommand() const;
+		[[nodiscard]] bool GetMessageDisplayCompact() const;
+		[[nodiscard]] bool GetConvertEmoticons() const;
+		[[nodiscard]] bool GetDisableGamesTab() const;
+		[[nodiscard]] bool GetDeveloperMode() const;
+		[[nodiscard]] bool GetDetectPlatformAccounts() const;
+		[[nodiscard]] bool GetStreamNotificationsEnabled() const;
+		[[nodiscard]] bool GetAllowAccessibilityDetection() const;
+		[[nodiscard]] bool GetContactSyncEnabled() const;
+		[[nodiscard]] bool GetNativePhoneIntegrationEnabled() const;
 
 		std::string status;
 		std::string custom_status;
