@@ -43,6 +43,21 @@ namespace discpp {
 		return locale_str_map[locale];
 	}
 	
+	std::unordered_map<std::string, Locale> str_locale_map = {
+		{"da", DA}, {"de", DE}, {"en-GB", EN_GB}, {"en-US", EN_US},
+		{"es-ES", ES_ES}, {"fr", FR}, {"hr", HR}, {"it", IT},
+		{"lt", LT}, {"hu", HU}, {"nl", NL}, {"no", NO},
+		{"pl", PL}, {"pt-BR", PT_BR}, {"ro", RO}, {"fi", FI},
+		{"sv-SE", SV_SE}, {"vi", VI}, {"tr", TR}, {"cs", CS},
+		{"el", EL}, {"bg", BG}, {"ru", RU}, {"uk", UK},
+		{"th", TH}, {"zh-CN", ZH_CN}, {"ja", JA}, {"zh-TW", ZH_TW},
+		{"ko", KO}
+	};
+
+	inline Locale StringToLocale(std::string locale) {
+		return str_locale_map[locale];
+	}
+
 	enum class ExplicitContentFilter : int {
 		OFF = 0, MODERATE, SEVERE
 	};
