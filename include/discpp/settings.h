@@ -66,11 +66,10 @@ namespace discpp {
 		DARK, LIGHT
 	};
 
-	std::unordered_map<Theme, std::string> theme_str_map = {
-		{Theme::DARK, "dark"}, {Theme::LIGHT, "light"}
-	};
-
 	inline std::string ThemeToString(Theme theme) {
+		std::unordered_map<Theme, std::string> theme_str_map = {
+			{Theme::DARK, "dark"}, {Theme::LIGHT, "light"}
+		};
 		return theme_str_map[theme];
 	}
 
