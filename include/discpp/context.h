@@ -53,7 +53,7 @@ namespace discpp {
          * ```
          *
          * @param[in] text The text that will be sent.
-         * @param[in] tts If the text could be spoken through text to speach.
+         * @param[in] tts If the text could be spoken through text to speech.
          * @param[in] embed Optional embed to send
          * @param[in] files Option files to send
          *
