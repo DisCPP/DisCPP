@@ -3,15 +3,6 @@
 #include "client_config.h"
 
 void discpp::FireCommand(discpp::Client* bot, const discpp::Message& message) {
-    /**
-     * @brief Detects if a command has ran, and if it has then execute it.
-     *
-     * @param[in] bot A reference to the discpp bot.
-     * @param[in] message The message that was sent.
-     *
-     * @return void
-     */
-
     size_t prefixSize = 0;
     bool trigger = false;
     for (std::string const& prefix : bot->config->prefixes) {
