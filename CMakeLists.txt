@@ -19,14 +19,6 @@ find_package(CURL CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
 add_subdirectory(thirdparty/IXWebSocket)
 
-# required for intexisty to compile this library
-# on arch x86_64
-if (UNIX)
-	link_libraries(z)
-	link_libraries(ssl)
-	link_libraries(crypto)
-endif()
-
 # link sources
 file(GLOB_RECURSE source_list src/*.cpp)
 add_library(discpp STATIC ${source_list})
