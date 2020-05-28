@@ -30,7 +30,7 @@ namespace discpp {
 		KO
 	};
 
-	inline std::string LocaleToString(Locale locale) {
+	inline std::string LocaleToString(const Locale& locale) {
 		/* conversions */
 		std::unordered_map<Locale, std::string> locale_str_map = {
 			{Locale::DA, "da"}, {Locale::DE, "de"}, {Locale::EN_GB, "en-GB"}, {Locale::EN_US, "en-US"},
@@ -45,7 +45,7 @@ namespace discpp {
 		return locale_str_map[locale];
 	}
 
-	inline Locale StringToLocale(std::string locale) {
+	inline Locale StringToLocale(const std::string& locale) {
 		/* conversions */
 		std::unordered_map<std::string, Locale> str_locale_map = {
 			{"da", Locale::DA}, {"de", Locale::DE}, {"en-GB", Locale::EN_GB}, {"en-US", Locale::EN_US},
@@ -68,11 +68,18 @@ namespace discpp {
 		DARK, LIGHT
 	};
 
-	inline std::string ThemeToString(Theme theme) {
+	inline std::string ThemeToString(const Theme& theme) {
 		std::unordered_map<Theme, std::string> theme_str_map = {
 			{Theme::DARK, "dark"}, {Theme::LIGHT, "light"}
 		};
 		return theme_str_map[theme];
+	}
+
+	inline Theme StringToTheme(const std::string& theme) {
+	    std::unordered_map<std::string, Theme> str_theme_map = {
+            {"dark", Theme::DARK}, {"light", Theme::LIGHT}
+	    };
+	    return str_theme_map[theme];
 	}
 
 	enum class FriendSourceFlags : int {
