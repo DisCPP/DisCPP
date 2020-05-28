@@ -10,7 +10,7 @@
 #include "client.h"
 
 // This is extremely ugly and probably slow, maybe theres a way we could trim this down?
-discpp::AuditLogChangeKey GetKey(std::string key, rapidjson::Document& j) {
+discpp::AuditLogChangeKey GetKey(const std::string& key, rapidjson::Document& j) {
 	discpp::AuditLogChangeKey a_key;
 
 	if (key == "name") {
