@@ -16,21 +16,6 @@
 
 namespace discpp {
     Client::Client(const std::string& token, ClientConfig* config) : token(token), config(config) {
-        /**
-         * @brief Constructs a discpp::Bot object.
-         *
-         * ```cpp
-         *      discpp::Bot bot(TOKEN, {"+", "bot "}, discpp::logger_flags::ERROR_SEVERITY | discpp::logger_flags::WARNING_SEVERITY, "log.txt");
-         * ```
-         *
-         * @param[in] token The discpp token the bot needs to run.
-         * @param[in] prefixes The bot's prefixes that will be used for command handling.
-         * @param[in] logger_flags The flags that will be passed to the logger->
-         * @param[in] logger_path The file path for the logger, doesn't need one as it can just log to console/terminal instead.
-         *
-         * @return discpp::Bot, this is a constructor.
-         */
-
         fire_command_method = std::bind(discpp::FireCommand, std::placeholders::_1, std::placeholders::_2);
 
         discpp::globals::client_instance = this;
@@ -45,17 +30,6 @@ namespace discpp {
     }
 
     int Client::Run() {
-        /**
-         * @brief Executes the discpp bot.
-         *
-         * ```cpp
-         *      discpp::Bot bot(TOKEN, {"+", "bot ", discpp::logger_flags::ERROR_SEVERITY | discpp::logger_flags::WARNING_SEVERITY, "log.txt");
-         *		bot.Run();
-         * ```
-         *
-         * @return int, currently only returns zero.
-         */
-
         WebSocketStart();
 
         while (run) {
@@ -71,43 +45,7 @@ namespace discpp {
         return 0;
     }
 
-    void Client::UpdatePresence(discpp::Presence& presence) {
-        /**
-         * @brief Updates the bot's presence.
-         *
-         * ```cpp
-         *      bot.UpdatePresence(activity);
-         * ```
-         *
-         * @param[in] activity The presence the bot will update to.
-         *
-         * @return void
-         */
-
-        rapidjson::Document payload(rapidjson::kObjectType);
-        rapidjson::Document activity_json = presence.ToJson();
-
-        payload.AddMember("op", status_update, payload.GetAllocator());
-        payload.AddMember("d", activity_json, payload.GetAllocator());
-
-        CreateWebsocketRequest(payload);
-    }
-
     void discpp::Client::CreateWebsocketRequest(rapidjson::Document& json, const std::string& message) {
-        /**
-         * @brief Send a request to the websocket.
-         *
-         * Be cautious with this as it may close the websocket connection if it is invalid.
-         *
-         * ```cpp
-         *      bot.CreateWebsocketRequest(request_json);
-         * ```
-         *
-         * @param[in] json The request to send to the websocket.
-         * @param[in] message The message to print to the debug log. If this is empty it will be set to default. (Default: "Sending gateway payload" + payload)
-         *
-         * @return void
-         */
         std::string json_payload = DumpJson(json);
 
         if (message.empty()) {
@@ -123,20 +61,6 @@ namespace discpp {
     }
 
     void Client::SetCommandHandler(const std::function<void(discpp::Client*, discpp::Message)>& command_handler) {
-        /**
-         * @brief Change the command handler.
-         *
-         * This is used in case you wanted to add functionality to the command handler.
-         *
-         * ```cpp
-         *      bot.SetCommandHandler(std::bind(&my_discpp_bot::command_handler::HandleCommands, std::placeholders::_1, std::placeholders::_2));
-         * ```
-         *
-         * @param[in] command_handler The method that will handle commands from a user.
-         *
-         * @return void
-         */
-
         fire_command_method = command_handler;
     }
 
@@ -462,15 +386,6 @@ namespace discpp {
     }
 
     std::unordered_map<discpp::snowflake, discpp::DMChannel> Client::GetUserDMs() {
-        /**
-         * @brief Get all DM's for this user. Only supports user tokens!
-         *
-         * ```cpp
-         *      std::vector<discpp::User::Connection> conntections = client->GetUserConnections();
-         * ```
-         *
-         * @return std::vector<discpp::User::Connection>
-         */
 
         if (!discpp::globals::client_instance->client_user.IsBot()) {
             throw new ProhibitedEndpointException("/users/@me/channels is a user only endpoint");
@@ -491,16 +406,6 @@ namespace discpp {
     }
 
     std::vector<discpp::User::Connection> ClientUser::GetUserConnections() {
-		/**
-		 * @brief Get all connections of this user.
-		 *
-		 * ```cpp
-		 *      std::vector<discpp::User::Connection> conntections = client->GetUserConnections();
-		 * ```
-		 *
-		 * @return std::vector<discpp::User::Connection>
-		 */
-
 		rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
 
 		std::vector<Connection> connections;
@@ -584,11 +489,6 @@ namespace discpp {
     }
 
     void Client::AddFriend(const discpp::User& user) {
-        /**
-         * @brief Add a friend. Only supports user tokens!
-         *
-         * @return void
-         */
         if (!discpp::globals::client_instance->client_user.IsBot()) {
             throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
@@ -597,11 +497,6 @@ namespace discpp {
     }
 
     void Client::RemoveFriend(const discpp::User& user) {
-        /**
-         * @brief Remove a friend. Only supports user tokens!
-         *
-         * @return void
-         */
         if(discpp::globals::client_instance->client_user.IsBot()) {
             throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
@@ -610,11 +505,6 @@ namespace discpp {
     }
 
     std::unordered_map<discpp::snowflake, discpp::UserRelationship> Client::GetRelationships() {
-        /**
-         * @brief Get all friends. Only supports user tokens!
-         *
-         * @return std::unordered_map<discpp::snowflake, discpp::UserRelationship>
-         */
         //todo implement this endpoint
         if(discpp::globals::client_instance->client_user.IsBot()) {
             throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
@@ -634,19 +524,6 @@ namespace discpp {
     }
 
     std::shared_ptr<discpp::Guild> Client::GetGuild(const snowflake& guild_id) {
-        /**
-         * @brief Gets a discpp::Guild from a guild id.
-         *
-         * This will throw a runtime exception if the guild is not found.
-         *
-         * ```cpp
-         *      std::shared_ptr<discpp::Guild> guild = bot.GetGuild(583251190591258624);
-         * ```
-         *
-         * @param[in] guild_id The guild id of the guild you want to get.
-         *
-         * @return std::shared_ptr<discpp::Guild>
-         */
 
         auto it = discpp::globals::client_instance->guilds.find(guild_id);
         if (it != discpp::globals::client_instance->guilds.end()) {
@@ -657,19 +534,6 @@ namespace discpp {
     }
 
     discpp::User Client::ModifyCurrentUser(const std::string& username, discpp::Image& avatar) {
-        /**
-         * @brief Modify the bot's username.
-         *
-         * ```cpp
-         *      discpp::User user = bot.ModifyCurrent("New bot name!", new_avatar);
-         * ```
-         *
-         * @param[in] username The new username.
-         * @param[in] avatar The new avatar.
-         *
-         * @return discpp::User
-         */
-
         cpr::Body body("{\"username\": \"" + username + "\", \"avatar\": " + avatar.ToDataURI() + "}");
         rapidjson::Document result = SendPatchRequest(Endpoint("/users/@me"), DefaultHeaders(), 0, discpp::RateLimitBucketType::GLOBAL, body);
 
@@ -679,34 +543,21 @@ namespace discpp {
     }
 
     void Client::LeaveGuild(const discpp::Guild& guild) {
-        /**
-         * @brief Leave the guild
-         *
-         * ```cpp
-         *      bot.LeaveGuild(guild);
-         * ```
-         *
-         * @param[in] guild The guild the bot will be leaving.
-         *
-         * @return void
-         */
 
         SendDeleteRequest(Endpoint("/users/@me/guilds/" + std::to_string(guild.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
     }
 
-    discpp::User Client::ReqestUserIfNotCached(const discpp::snowflake& id) {
-        /**
-         * @brief Get a user.
-         *
-         * ```cpp
-         *      bot.GetUser("150312037426135041");
-         * ```
-         *
-         * @param[in] id The user to get with this id.
-         *
-         * @return discpp::User
-         */
+    void Client::UpdatePresence(discpp::Presence& presence) {
+        rapidjson::Document payload(rapidjson::kObjectType);
+        rapidjson::Document activity_json = presence.ToJson();
 
+        payload.AddMember("op", status_update, payload.GetAllocator());
+        payload.AddMember("d", activity_json, payload.GetAllocator());
+
+        CreateWebsocketRequest(payload);
+    }
+
+    discpp::User Client::ReqestUserIfNotCached(const discpp::snowflake& id) {
         discpp::User user(id);
         if (user.username.empty()) {
             rapidjson::Document result = SendGetRequest(Endpoint("/users/" + std::to_string(id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
@@ -717,18 +568,7 @@ namespace discpp {
     }
 
     std::vector<discpp::User::Connection> Client::GetBotUserConnections() {
-        /**
-         * @brief Get the bot user connections.
-         *
-         * ```cpp
-         *      bot.GetBotUserConnections();
-         * ```
-         *
-         * @return std::vector<discpp::User::Connection>
-         */
-
         rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
-
         std::vector<discpp::User::Connection> connections;
         for (auto const& connection : result.GetArray()) {
             rapidjson::Document connection_json;
@@ -740,11 +580,6 @@ namespace discpp {
     }
 
     UserRelationship::UserRelationship(rapidjson::Document& json) {
-        /**
-         * @brief Contructs a UserRelationship from json
-         *
-         * @return discpp::UserRelationship
-         */
         id = SnowflakeFromString(json["id"].GetString());
         nickname = GetDataSafely<std::string>(json, "nickname");
         type = json["type"].GetInt();
@@ -752,20 +587,10 @@ namespace discpp {
     }
 
     bool UserRelationship::IsFriend() {
-        /**
-         * @brief Returns if this relation is a friend.
-         *
-         * @return bool
-         */
         return type == 1;
     }
 
     bool UserRelationship::IsBlocked() {
-        /**
-         * @brief Returns if this relation is a block.
-         *
-         * @return bool
-         */
         return type == 2;
     }
 }

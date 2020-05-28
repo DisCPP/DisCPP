@@ -36,7 +36,17 @@ namespace discpp {
 		ClientUser(const snowflake& id) : User(id) {}
 		ClientUser(rapidjson::Document & json);
 
-		std::vector<Connection> GetUserConnections();
+
+        /**
+         * @brief Get all connections of this user.
+         *
+         * ```cpp
+         *      std::vector<discpp::User::Connection> conntections = client->GetUserConnections();
+         * ```
+         *
+         * @return std::vector<discpp::User::Connection>
+         */
+        std::vector<Connection> GetUserConnections();
 		ClientUserSettings GetSettings();
 		void ModifySettings(ClientUserSettings& settings);
 
@@ -54,7 +64,18 @@ namespace discpp {
         UserRelationship() = default;
         UserRelationship(rapidjson::Document& json);
 
+        /**
+         * @brief Returns if this relation is a friend.
+         *
+         * @return bool
+         */
         bool IsFriend();
+
+        /**
+         * @brief Returns if this relation is a block.
+         *
+         * @return bool
+         */
         bool IsBlocked();
 
         discpp::snowflake id;
@@ -90,26 +111,191 @@ namespace discpp {
 			heartbeat_ack = 11			// Receive
 		};
 
+
+        /**
+         * @brief Constructs a discpp::Bot object.
+         *
+         * ```cpp
+         *      discpp::Bot bot(TOKEN, {"+", "bot "}, discpp::logger_flags::ERROR_SEVERITY | discpp::logger_flags::WARNING_SEVERITY, "log.txt");
+         * ```
+         *
+         * @param[in] token The discpp token the bot needs to run.
+         * @param[in] prefixes The bot's prefixes that will be used for command handling.
+         * @param[in] logger_flags The flags that will be passed to the logger->
+         * @param[in] logger_path The file path for the logger, doesn't need one as it can just log to console/terminal instead.
+         *
+         * @return discpp::Bot, this is a constructor.
+         */
 		Client(const std::string& token, ClientConfig* config);
+
+        /**
+         * @brief Executes the discpp bot.
+         *
+         * ```cpp
+         *      discpp::Bot bot(TOKEN, {"+", "bot ", discpp::logger_flags::ERROR_SEVERITY | discpp::logger_flags::WARNING_SEVERITY, "log.txt");
+         *		bot.Run();
+         * ```
+         *
+         * @return int, currently only returns zero.
+         */
 		int Run();
+
+        /**
+         * @brief Send a request to the websocket.
+         *
+         * Be cautious with this as it may close the websocket connection if it is invalid.
+         *
+         * ```cpp
+         *      bot.CreateWebsocketRequest(request_json);
+         * ```
+         *
+         * @param[in] json The request to send to the websocket.
+         * @param[in] message The message to print to the debug log. If this is empty it will be set to default. (Default: "Sending gateway payload" + payload)
+         *
+         * @return void
+         */
 		void CreateWebsocketRequest(rapidjson::Document& json, const std::string& message = "");
+
+        /**
+         * @brief Change the command handler.
+         *
+         * This is used in case you wanted to add functionality to the command handler.
+         *
+         * ```cpp
+         *      bot.SetCommandHandler(std::bind(&my_discpp_bot::command_handler::HandleCommands, std::placeholders::_1, std::placeholders::_2));
+         * ```
+         *
+         * @param[in] command_handler The method that will handle commands from a user.
+         *
+         * @return void
+         */
 		void SetCommandHandler(const std::function<void(discpp::Client*, discpp::Message)>& command_handler);
 		void DisconnectWebsocket();
 		void StopClient();
 		void ReconnectToWebsocket();
 
 		// Discord based methods.
+
+        /**
+         * @brief Add a friend. Only supports user tokens!
+         *
+         * @return void
+         */
 		void AddFriend(const discpp::User& user);
+
+        /**
+         * @brief Remove a friend. Only supports user tokens!
+         *
+         * @return void
+         */
 		void RemoveFriend(const discpp::User& user);
+
+        /**
+         * @brief Get all friends. Only supports user tokens!
+         *
+         * @return std::unordered_map<discpp::snowflake, discpp::UserRelationship>
+         */
         std::unordered_map<discpp::snowflake, discpp::UserRelationship> GetRelationships();
+
+        /**
+         * @brief Gets a discpp::Guild from a guild id.
+         *
+         * This will throw a runtime exception if the guild is not found.
+         *
+         * ```cpp
+         *      std::shared_ptr<discpp::Guild> guild = bot.GetGuild(583251190591258624);
+         * ```
+         *
+         * @param[in] guild_id The guild id of the guild you want to get.
+         *
+         * @return std::shared_ptr<discpp::Guild>
+         */
         std::shared_ptr<discpp::Guild> GetGuild(const snowflake& guild_id);
+
+
+        /**
+         * @brief Modify the bot's username.
+         *
+         * ```cpp
+         *      discpp::User user = bot.ModifyCurrent("New bot name!", new_avatar);
+         * ```
+         *
+         * @param[in] username The new username.
+         * @param[in] avatar The new avatar.
+         *
+         * @return discpp::User
+         */
         discpp::User ModifyCurrentUser(const std::string& username, discpp::Image& avatar);
+
+        /**
+         * @brief Leave the guild
+         *
+         * ```cpp
+         *      bot.LeaveGuild(guild);
+         * ```
+         *
+         * @param[in] guild The guild the bot will be leaving.
+         *
+         * @return void
+         */
         void LeaveGuild(const discpp::Guild& guild);
+
+        /**
+         * @brief Updates the bot's presence.
+         *
+         * ```cpp
+         *      bot.UpdatePresence(activity);
+         * ```
+         *
+         * @param[in] activity The presence the bot will update to.
+         *
+         * @return void
+         */
         void UpdatePresence(discpp::Presence& activity);
+
+        /**
+         * @brief Get a user.
+         *
+         * ```cpp
+         *      bot.GetUser("150312037426135041");
+         * ```
+         *
+         * @param[in] id The user to get with this id.
+         *
+         * @return discpp::User
+         */
 		discpp::User ReqestUserIfNotCached(const discpp::snowflake& id);
+
+        /**
+         * @brief Get the bot user connections.
+         *
+         * ```cpp
+         *      bot.GetBotUserConnections();
+         * ```
+         *
+         * @return std::vector<discpp::User::Connection>
+         */
         std::vector<discpp::User::Connection> GetBotUserConnections();
+
+        /**
+         * @brief Contructs a UserRelationship from json
+         *
+         * @return discpp::UserRelationship
+         */
         discpp::Channel GetChannel(const discpp::snowflake& id);
+
+
         discpp::DMChannel GetDMChannel(const discpp::snowflake& id);
+
+        /**
+         * @brief Get all DM's for this user. Only supports user tokens!
+         *
+         * ```cpp
+         *      std::vector<discpp::User::Connection> conntections = client->GetUserConnections();
+         * ```
+         *
+         * @return std::vector<discpp::User::Connection>
+         */
         std::unordered_map<discpp::snowflake, discpp::DMChannel> GetUserDMs();
         // discpp::Channel CreateGroupDM(std::vector<discpp::User> users); // Deprecated and will not be shown in the discord client.
 
