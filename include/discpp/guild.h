@@ -244,60 +244,666 @@ namespace discpp {
 	    char flags;
 	public:
 		Guild() = default;
+
+        /**
+         * @brief Constructs a discpp::Guild object from an id.
+         *
+         * This constructor searches the guild cache to get a guild object.
+         *
+         * ```cpp
+         *      discpp::Guild guild(583251190591258624);
+         * ```
+         *
+         * @param[in] id The id of the guild
+         *
+         * @return discpp::Guild, this is a constructor.
+         */
 		Guild(const snowflake& id);
+
+        /**
+         * @brief Constructs a discpp::Guild object by parsing json
+         *
+         * ```cpp
+         *      discpp::Guild guild(json);
+         * ```
+         *
+         * @param[in] json The json that makes up the guild.
+         *
+         * @return discpp::Guild, this is a constructor.
+         */
 		Guild(rapidjson::Document& json);
 
+        /**
+         * @brief Modify the guild.
+         *
+         * Use discpp::GuildModifyRequests to modify a field of the guild.
+         *
+         * ```cpp
+         *		// Change the name of the guild to "Test"
+         *		discpp::ModifyRequests request(discpp::GuildProperty::NAME, "Test");
+         *      guild.Modify(request);
+         * ```
+         *
+         * @param[in] modify_request The field to modify, and what to set it to.
+         *
+         * @return discpp::Channel - This method also sets the guild reference to the returned guild.
+         */
 		discpp::Guild Modify(GuildModifyRequests modify_requests);
+
+        /**
+         * @brief Deletes this guild.
+         *
+         * ```cpp
+         *      guild.DeleteGuild();
+         * ```
+         *
+         * @return void
+         */
 		void DeleteGuild();
+
+        /**
+         * @brief Gets a list of channels in this guild.
+         *
+         * The first element in the map is the id of the channel, while the second in the channel.
+         * This makes it easy to find a channel in the array by using the `std::unordered_map::find()` method.
+         *
+         * ```cpp
+         *      std::unordered_map<discpp::snowflake, discpp::GuildChannel> guild.GetChannels();
+         * ```
+         *
+         * @return std::unordered_map<discpp::snowflake, discpp::GuildChannel>
+         */
 		std::unordered_map<discpp::snowflake, discpp::GuildChannel> GetChannels();
+
+        /**
+         * @brief Gets a list of channel categories in this guild.
+         *
+         * The first element in the map is the id of the category, while the second in the category.
+         * This makes it easy to find a channel in the array by using the `std::unordered_map::find()` method.
+         *
+         * ```cpp
+         *      std::unordered_map<discpp::snowflake, discpp::CategoryChannel> guild.GetCategories();
+         * ```
+         *
+         * @return std::unordered_map<discpp::snowflake, discpp::CategoryChannel>
+         */
 		std::unordered_map<discpp::snowflake, discpp::CategoryChannel> GetCategories();
+
+        /**
+         * @brief Gets a channel in this guild.
+         *
+         * ```cpp
+         *      discpp::GuildChannel chnl = guild.GetChannel(snowflake);
+         * ```
+         *
+         * @param[in] id The id of the channel you want to retrieve
+         *
+         * @return discpp::GuildChannel
+         */
         discpp::GuildChannel GetChannel(const snowflake& id) const;
+
+        /**
+         * @brief Creates a channel for this Guild.
+         *
+         * ```cpp
+         *      discpp::Channel channel = guild.CreateChannel("Test", discpp::GuildChannelType::GUILD_TEXT, "Just a test channel", 0, 0, 0, 0, overwrites, category_channel, false);
+         * ```
+         *
+         * @param[in] name The name of the new channel.
+         * @param[in] topic The topic of the new channel.
+         * @param[in] type The type of the new channel.
+         * @param[in] bitrate The bitrate of the new channel (only for voice channels).
+         * @param[in] user_limit The user limit of the new channel (only for voice channels).
+         * @param[in] rate_limit_per_user The chat delay for a user of the new channel.
+         * @param[in] position The sorting position of the new channel.
+         * @param[in] permission_overwrites Array of permission overwrite objects.
+         * @param[in] parent_id The parent id of the new channel.
+         * @param[in] nsfw Whether the new channel is marked as nsfw.
+         *
+         * @return std::shared_ptr<discpp::GuildChannel>
+         */
         discpp::GuildChannel CreateChannel(const std::string& name, const std::string& topic = "", const ChannelType& type = ChannelType::GUILD_TEXT, const int& bitrate = 0, const int& user_limit = 0, const int& rate_limit_per_user = 0, const int& position = 0, const std::vector<discpp::Permissions>& permission_overwrites = {}, const discpp::CategoryChannel& category = {}, const bool& nsfw = false);
-		void ModifyChannelPositions(const std::vector<discpp::Channel>& new_channel_positions);
+
+        /**
+         * @brief Modifies channel's positions in order to vector elements.
+         *
+         * ```cpp
+         *      guild.ModifyChannelPositions(new_channel_positions);
+         * ```
+         *
+         * @param[in] new_channel_positions The new channel positions in order of the vector elements.
+         *
+         * @return void
+         */
+        void ModifyChannelPositions(const std::vector<discpp::Channel>& new_channel_positions);
+
+        /**
+         * @brief Gets a discpp::Member from this guild.
+         *
+         * ```cpp
+         *      discpp::Member member = guild.GetMember("228846961774559232");
+         * ```
+         *
+         * @param[in] id The member's id
+         *
+         * @return std::shared_ptr<discpp::Member>
+         */
         std::shared_ptr<discpp::Member> GetMember(const snowflake& id) const;
-		void EnsureBotPermission(const Permission& req_perm) const;
+
+        /**
+         * @brief Ensures the bot has a permission.
+         *
+         * If the bot does not have the permission a discpp::NoPermissionException will be thrown.
+         *
+         * ```cpp
+         *      Guild::EnsureBotPermission(Permission::MANAGE_CHANNELS);
+         * ```
+         *
+         * @param[in] req_perm The permission to check if the bot has.
+         *
+         */
+        void EnsureBotPermission(const Permission& req_perm) const;
+
+        /**
+         * @brief Adds a discpp::Member to this guild.
+         *
+         * ```cpp
+         *      discpp::Member added_member =  guild.AddMember(119886831578775554, access_token, "New User is here", roles, false, false);
+         * ```
+         *
+         * @param[in] id The id of this member.
+         * @param[in] access_token The oauth2 token granted with guilds.join to the bot's application for the member.
+         * @param[in] nick The user nick name.
+         * @param[in] roles The users role.
+         * @param[in] mute Whether the user is muted in voice channels.
+         * @param[in] deaf Whether the user is deafened in voice channels.
+         *
+         * @return std::shared_ptr<discpp::Member>
+         */
         std::shared_ptr<discpp::Member> AddMember(const snowflake& id, const std::string& access_token, const std::string& nick, const std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf);
-		void RemoveMember(const discpp::Member& member);
+
+        /**
+         * @brief Remove a member from the guild.
+         *
+         * ```cpp
+         *      guild.RemoveMember(member);
+         * ```
+         *
+         * @param[in] member The member to remove from the guild.
+         *
+         * @return void
+         */
+        void RemoveMember(const discpp::Member& member);
+
+        /**
+         * @brief Get all guild bans
+         *
+         * ```cpp
+         *      std::vector<discpp::GuildBan> bans = guild.GetBans();
+         * ```
+         *
+         * @return std::vector<discpp::GuildBan>
+         */
 		std::vector<discpp::GuildBan> GetBans() const;
+
+        /**
+         * @brief Get ban reasons if they are any.
+         *
+         * ```cpp
+         *      std::optional<std::string> reason = guild.GetMemberBanReason(member);
+         * ```
+         *
+         * @param[in] member The member to get a ban remove of.
+         *
+         * @return std::optional<std::string>
+         */
 		std::string GetMemberBanReason(const discpp::Member& member) const;
+
+        /**
+         * @brief Ban a guild member.
+         *
+         * ```cpp
+         *      guild.BanMember(member, "Reason");
+         * ```
+         *
+         * @param[in] member The member to ban.
+         * @param[in] reason The reason to ban them.
+         *
+         * @return void
+         */
 		void BanMember(const discpp::Member& member, const std::string& reason = "");
+
+        /**
+         * @brief Ban a guild member by id.
+         *
+         * ```cpp
+         *      guild.BanMemberById(150312037426135041, "Reason");
+         * ```
+         *
+         * @param[in] user_id The id to ban.
+         * @param[in] reason The reason to ban them.
+         *
+         * @return void
+         */
 		void BanMemberById(const snowflake& user_id, const std::string& reason = "");
+
+        /**
+         * @brief Unban a guild member.
+         *
+         * ```cpp
+         *      guild.UnbanMember(member);
+         * ```
+         *
+         * @param[in] member The member to unban.
+         *
+         * @return void
+         */
 		void UnbanMember(const discpp::Member& member);
+
+        /**
+         * @brief Unban a guild member.
+         *
+         * ```cpp
+         *      guild.UnbanMemberById(150312037426135041);
+         * ```
+         *
+         * @param[in] user_id The id to unban.
+         *
+         * @return void
+         */
 		void UnbanMemberById(const snowflake& user_id);
+
+        /**
+         * @brief Kick a guild member.
+         *
+         * ```cpp
+         *      guild.KickMember(member);
+         * ```
+         *
+         * @param[in] member The member to kick.
+         *
+         * @return void
+         */
 		void KickMember(const discpp::Member& member);
+
+        /**
+         * @brief Kick a guild member by id.
+         *
+         * ```cpp
+         *      guild.KickMemberById(150312037426135041);
+         * ```
+         *
+         * @param[in] user_id The id to kick.
+         *
+         * @return void
+         */
         void KickMemberById(const snowflake& member_id);
+
+        /**
+         * @brief Retrieve a guild role.
+         *
+         * ```cpp
+         *      discpp::Role new_role = guild.GetRole(638157816325996565)
+         * ```
+         *
+         * @param[in] id The id of the role you want to retrieve
+         *
+         * @return std::shared_ptr<discpp::Role>
+         */
         std::shared_ptr<discpp::Role> GetRole(const snowflake& id) const;
+
+        /**
+         * @brief Create a guild role.
+         *
+         * ```cpp
+         *      discpp::Role new_role = guild.CreateRole("New Role", permissions, 0xffffff, false, true);
+         * ```
+         *
+         * @param[in] name The new role name.
+         * @param[in] permissions The new role permissions.
+         * @param[in] color The new role color.
+         * @param[in] hoist Whether or not to hoist the role.
+         * @param[in] mentionable Whether or not the role is mentionable.
+         *
+         * @return discpp::Role
+         */
         std::shared_ptr<discpp::Role> CreateRole(const std::string& name, const Permissions& permissions = Permissions(), const int& color = 0, const bool& hoist = false, const bool& mentionable = false);
-		void ModifyRolePositions(const std::vector<discpp::Role>& new_role_positions);
+
+        /**
+         * @brief Modifies role's positions in order to vector elements.
+         *
+         * ```cpp
+         *      guild.ModifyRolePositions(new_role_positions);
+         * ```
+         *
+         * @param[in] new_role_positions The new role positions in order of the vector elements.
+         *
+         * @return void
+         */
+        void ModifyRolePositions(const std::vector<discpp::Role>& new_role_positions);
+
+        /**
+         * @brief Modify a guild role.
+         *
+         * ```cpp
+         *      discpp::Role modified_role = guild.ModifyRole(role, "New Role", permissions, 0xffffff, false, true);
+         * ```
+         *
+         * @param[in] name The new role name.
+         * @param[in] permissions The new role permissions.
+         * @param[in] color The new role color.
+         * @param[in] hoist Whether or not to hoist the role.
+         * @param[in] mentionable Whether or not the role is mentionable.
+         *
+         * @return discpp::Role
+         */
         std::shared_ptr<discpp::Role> ModifyRole(const discpp::Role& role, const std::string& name, const Permissions& permissions = Permissions(), const int& color = 0, const bool& hoist = false, const bool& mentionable = false);
-		void DeleteRole(const discpp::Role& role);
+
+        /**
+         * @brief Deleted a guild role.
+         *
+         * ```cpp
+         *      guild.DeleteRole(role);
+         * ```
+         *
+         * @param[in] role The role to delete.
+         *
+         * @return void
+         */
+        void DeleteRole(const discpp::Role& role);
+
+        /**
+         * @brief Get guild prune amount.
+         *
+         * ```cpp
+         *      int amount_pruned = guild.GetPruneAmount(10);
+         * ```
+         *
+         * @param[in] days Number of days to count prune for.
+         *
+         * @return int - Amount of users pruned.
+         */
 		int GetPruneAmount(const int& days) const;
+
+        /**
+         * @brief Begin a guild prune (kicks inactive players).
+         *
+         * ```cpp
+         *      guild.BeginPrune(14);
+         * ```
+         *
+         * @param[in] days Number of days to prune.
+         *
+         * @return void
+         */
 		void BeginPrune(const int& days);
+
+        /**
+         * @brief Get guild invites.
+         *
+         * ```cpp
+         *      std::vector<discpp::GuildInvite> invites = guild.GetInvites();
+         * ```
+         *
+         * @return std::vector<discpp::GuildInvite>
+         */
 		std::vector<discpp::GuildInvite> GetInvites() const;
+
+        /**
+         * @brief Get guild integrations.
+         *
+         * ```cpp
+         *      std::vector<discpp::Integration> integration = guild.GetIntegrations();
+         * ```
+         *
+         * @return std::vector<discpp::Integration>
+         */
 		std::vector<discpp::Integration> GetIntegrations() const;
+
+        /**
+         * @brief Create a guild integration.
+         *
+         * ```cpp
+         *      guild.CreateIntegration(integration_id, integration_type);
+         * ```
+         *
+         * @param[in] id The integration id.
+         * @param[in] type The integration type.
+         *
+         * @return void
+         */
 		void CreateIntegration(const snowflake& id, const std::string& type);
+
+        /**
+         * @brief Modify a guild integration.
+         *
+         * ```cpp
+         *      guild.ModifyIntegration(integration, 0, 2, true);
+         * ```
+         *
+         * @param[in] guild_integration The guild integration to modify.
+         * @param[in] expire_behavior The behavior when an integration subscription lapses.
+         * @param[in] expire_grace_period Period (in days) where the integration will ignore lapsed subscriptions.
+         * @param[in] enable_emoticons Whether emoticons should be synced for this integration (twitch only currently).
+         *
+         * @return void
+         */
 		void ModifyIntegration(const discpp::Integration& guild_integration, const int& expire_behavior, const int& expire_grace_period, const bool& enable_emoticons);
+
+        /**
+         * @brief Delete a guild integration.
+         *
+         * ```cpp
+         *      guild.DeleteIntegration(integration);
+         * ```
+         *
+         * @param[in] guild_integration The guild integration to delete.
+         *
+         * @return void
+         */
 		void DeleteIntegration(const discpp::Integration& guild_integration);
+
+        /**
+         * @brief Sync a guild integration.
+         *
+         * ```cpp
+         *      guild.SyncIntegration(integration);
+         * ```
+         *
+         * @param[in] guild_integration The guild integration to sync.
+         *
+         * @return void
+         */
 		void SyncIntegration(const discpp::Integration& guild_integration);
+
+        /**
+         * @brief Get a guild embed.
+         *
+         * ```cpp
+         *      discpp::GuildEmbed guild_embed = guild.GetGuildEmbed();
+         * ```
+         *
+         * @return discpp::GuildEmbed
+         */
 		GuildEmbed GetGuildEmbed() const;
+
+        /**
+         * @brief Modify a guild embed.
+         *
+         * ```cpp
+         *      discpp::GuildEmbed modified_guild_embed = guild.ModifyGuildEmbed(381871767846780928, true);
+         * ```
+         *
+         * @return discpp::GuildEmbed
+         */
 		GuildEmbed ModifyGuildEmbed(const snowflake& channel_id, const bool& enabled);
+
+        /**
+         * @brief Returns a partial invite object for guilds with that feature enabled.
+         *
+         * Requires the MANAGE_GUILD permission. code will be null if a vanity url for the guild is not set. Only `code` and `uses` are valid
+         *
+         * ```cpp
+         *      discpp::GuildInvite vanity_url = ctx.guild->GetVanityURL();
+         * ```
+         *
+         * @return discpp::GuildInvite
+         */
 		discpp::GuildInvite GetVanityURL() const;
+
+        /**
+         * @brief Get a widget image url.
+         *
+         * ```cpp
+         *      std::string widget_image_url = guild.GetWidgetImageURL(style);
+         * ```
+         *
+         * @return std::string
+         */
 		std::string GetWidgetImageURL(const WidgetStyle& widget_style = WidgetStyle::SHIELD) const;
+
+        /**
+         * @brief Returns the requested member.
+         *
+         * If its already cached return it, else send a REST request and return the requested member.
+         *
+         * @return std::shared_ptr<discpp::Member>
+         */
         std::shared_ptr<discpp::Member> RequestMemberIfNotExist(const snowflake& member_id);
 
+        /**
+         * @brief Get all guild emojis.
+         *
+         * ```cpp
+         *      std::unordered_map<snowflake, std::shared_ptr<Emoji>> guild_emojis = guild.GetEmojis();
+         * ```
+         *
+         * @return std::unordered_map<snowflake, std::shared_ptr<Emoji>>
+         */
 		std::unordered_map<snowflake, discpp::Emoji> GetEmojis();
+
+        /**
+         * @brief Get a guild emoji.
+         *
+         * ```cpp
+         *      discpp::Emoji emoji = guild.GetEmoji(685895680115605543);
+         * ```
+         *
+         * @param[in] id The emoji's id.
+         *
+         * @return Emoji
+         */
         discpp::Emoji GetEmoji(const snowflake& id) const;
+
+        /**
+         * @brief Create a guild emoji.
+         *
+         * ```cpp
+         *      ctx.guild->CreateEmoji("test", { &std::ifstream("C:\\emoji.png", std::ios::in | std::ios::binary), "C:\\emoji.png" }, {});
+         * ```
+         *
+         * @param[in] name The emoji name.
+         * @param[in] image The image for the emoji.
+         * @param[in] roles The roles for the emoji.
+         *
+         * @return Emoji
+         */
         discpp::Emoji CreateEmoji(const std::string& name, discpp::Image& image, const std::vector<discpp::Role>& roles);
+
+        /**
+         * @brief Modify a guild emoji.
+         *
+         * ```cpp
+         *      discpp::Emoji modified_emoji = guild.ModifyEmoji(emoji, "New emoji", roles);
+         * ```
+         *
+         * @param[in] emoji The emoji to modify.
+         * @param[in] name The emoji's name.
+         * @param[in] role The emoji's roles.
+         *
+         * @return Emoji
+         */
 		discpp::Emoji ModifyEmoji(const discpp::Emoji& emoji, const std::string& name, const std::vector<discpp::Role>& roles);
+
+        /**
+         * @brief Delete a guild emoji.
+         *
+         * ```cpp
+         *      guild.DeleteEmoji(emoji);
+         * ```
+         *
+         * @return void
+         */
 		void DeleteEmoji(const discpp::Emoji& emoji);
+
+        /**
+         * @brief Retrieve guild icon url.
+         *
+         * ```cpp
+         *      std::string icon_url = guild.GetIconURL()
+         * ```
+         *
+         * @param[in] imgType Optional parameter for type of image
+         *
+         * @return std::string
+         */
 		std::string GetIconURL(const discpp::ImageType& imgType = discpp::ImageType::AUTO) const;
+
+        /**
+         * @brief Retrieve guild owner as a discpp::Member object
+         *
+         * ```cpp
+         *      std::shared_ptr<discpp::Member> owner = guild.GetOwnerObject()
+         * ```
+         *
+         * @return std::shared_ptr<discpp::Member>
+         */
         inline std::shared_ptr<discpp::Member> GetOwnerMember() const;
+
+        /**
+         * @brief Returns an audit log object.
+         *
+         * ```cpp
+         *      discpp::GetAuditLog audit_log = ctx.guild->GetAuditLog();
+         * ```
+         *
+         * @return discpp::GetAuditLog
+         */
 		discpp::AuditLog GetAuditLog() const;
 
+        /**
+         * @brief Returns if the client is the guild's owner.
+         *
+         * @return bool
+         */
 		bool IsBotOwner() const;
+
+        /**
+         * @brief Returns if the guild has embeds enabled.
+         *
+         * @return bool
+         */
 		bool IsEmbedEnabled() const;
+
+        /**
+         * @brief Returns if the guild has widgets enabled.
+         *
+         * @return bool
+         */
 		bool IsWidgetEnabled() const;
+
+        /**
+         * @brief Returns if the guild is large.
+         *
+         * @return bool
+         */
 		bool IsLarge() const;
+
+        /**
+         * @brief Returns if the guild has embeds enabled.
+         *
+         * @return bool
+         */
 		bool IsUnavailable() const;
 
 		std::string name; /**< Guild name. */
