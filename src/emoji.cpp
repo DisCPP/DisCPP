@@ -100,7 +100,7 @@ namespace discpp {
 
 #ifdef WIN32
         wchar_t thick_emoji[MAX_PATH];
-        if (!MultiByteToWideChar(CP_ACP, WC_COMPOSITECHECK, s_unicode.c_str(), -1, thick_emoji, MAX_PATH)) {
+        if (!MultiByteToWideChar(CP_UTF8, MB_COMPOSITE, s_unicode.c_str(), -1, thick_emoji, MAX_PATH)) {
             throw std::runtime_error("Failed to convert emoji to string!");
         } else {
             std::cout << "Just processed: " << thick_emoji << std::endl;

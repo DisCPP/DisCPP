@@ -43,7 +43,7 @@ namespace discpp {
             if (other.name.empty() && !name.empty() && unicode.empty()) {
 #ifdef WIN32
                 char ansi_emoji[MAX_PATH];
-                if (!WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, other.unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
+                if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, other.unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
                     throw std::runtime_error("Failed to convert emoji to string!");
                 } else {
                     std::cout << "Just processed: " << ansi_emoji << std::endl;
@@ -55,7 +55,7 @@ namespace discpp {
             } else if (!other.name.empty() && name.empty() && !unicode.empty()) {
 #ifdef WIN32
                 char ansi_emoji[MAX_PATH];
-                if (!WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
+                if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
                     throw std::runtime_error("Failed to convert emoji to string!");
                 } else {
                     std::cout << "Just processed: " << ansi_emoji << std::endl;
@@ -85,7 +85,7 @@ namespace discpp {
             if (name.empty() && id == 0) {
 #ifdef WIN32
                 char ansi_emoji[MAX_PATH];
-                if (!WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
+                if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
                     throw std::runtime_error("Failed to convert emoji to string!");
                 } else {
                     std::cout << "Just processed: " << ansi_emoji << std::endl;
@@ -124,7 +124,7 @@ namespace discpp {
 			}
 #ifdef WIN32
 			char ansi_emoji[MAX_PATH];
-			if (!WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, emoji.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
+			if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, emoji.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
 			    throw std::runtime_error("Failed to convert emoji to string!");
 			} else {
 			    std::cout << "Just processed: " << ansi_emoji << std::endl;
