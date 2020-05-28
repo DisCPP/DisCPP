@@ -23,13 +23,13 @@ namespace discpp {
 
 		AuditLogChangeKey() = default;
 
-		std::string name;
-		std::string icon_hash;
-		std::string splash_hash;
-		discpp::snowflake owner_id;
-		std::string region;
-		discpp::snowflake afk_channel_id;
-		int afk_timeout;
+		std::string name; /**< Name of the current audit log. */
+		std::string icon_hash; /**< Icon hash of the current audit log. */
+		std::string splash_hash; /**< Splash hash of the current audit log. */
+		discpp::snowflake owner_id; /**< Ownder id of current audit log. */
+		std::string region; /**< Region of current audit log. */
+		discpp::snowflake afk_channel_id; /**< AFK Channel id of current audit log. */
+		int afk_timeout; /* AFK Timeout of current audit log. */
 		int mfa_level;
 		int verification_level;
 		int explicit_content_filter;
