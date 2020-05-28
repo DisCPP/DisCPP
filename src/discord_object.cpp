@@ -1,7 +1,7 @@
 #include "discord_object.h"
 
 namespace discpp {
-	DiscordObject::DiscordObject(snowflake id) : id(id) {
+	DiscordObject::DiscordObject(const snowflake& id) : id(id) {
 
 	}
 

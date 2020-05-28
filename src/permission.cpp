@@ -2,7 +2,7 @@
 #include "utils.h"
 
 namespace discpp {
-	Permissions::Permissions(PermissionType permission_type, int byte_set) : permission_type(permission_type) {
+	Permissions::Permissions(const PermissionType& permission_type, const int& byte_set) : permission_type(permission_type) {
 		/**
 		 * @brief Constructs a discpp::Permission object with its type and byte set.
 		 *
@@ -19,7 +19,7 @@ namespace discpp {
 		allow_perms = PermissionOverwrite(byte_set);
 	}
 
-	Permissions::Permissions(nlohmann::json json) {
+	Permissions::Permissions(rapidjson::Document& json) {
 		/**
 		 * @brief Constructs a discpp::Permissions object by parsing json.
 		 *
@@ -32,32 +32,35 @@ namespace discpp {
 		 * @return discpp::Permissions, this is a constructor.
 		 */
 
-		role_user_id = json["id"].get<snowflake>();
+		role_user_id = SnowflakeFromString(json["id"].GetString());
 		permission_type = (json["type"] == "role") ? PermissionType::ROLE : PermissionType::MEMBER;
-		allow_perms = PermissionOverwrite(json["allow"].get<int>());
-		deny_perms = PermissionOverwrite(json["deny"].get<int>());
+		allow_perms = PermissionOverwrite(json["allow"].GetInt());
+		deny_perms = PermissionOverwrite(json["deny"].GetInt());
 	}
 
-	nlohmann::json Permissions::ToJson() {
+    rapidjson::Document Permissions::ToJson() {
 		/**
 		 * @brief Converts this permissions object to json.
 		 *
 		 * ```cpp
-		 *      nlohmann::json json = permissions.ToJson();
+		 *      rapidjson::Document json = permissions.ToJson();
 		 * ```
 		 *
-		 * @return nlohmann::json
+		 * @return rapidjson::Document
 		 */
 
-		return nlohmann::json({
-			{"id", role_user_id},
-			{"type", (permission_type == PermissionType::ROLE) ? "role" : "member"},
-			{"allow", allow_perms.value},
-			{"deny", deny_perms.value}
-		});
+		std::string str_type = (permission_type == PermissionType::ROLE) ? "role" : "member";
+
+        rapidjson::Document json;
+        json.AddMember("id", role_user_id, json.GetAllocator());
+        json.AddMember("type", str_type, json.GetAllocator());
+        json.AddMember("allow", allow_perms.value, json.GetAllocator());
+        json.AddMember("deny", deny_perms.value, json.GetAllocator());
+
+		return json;
 	}
 
-	PermissionOverwrite::PermissionOverwrite(int value) : value(value) { 
+	PermissionOverwrite::PermissionOverwrite(const int& value) : value(value) {
 		/**
 		 * @brief Constructs a discpp::PermissionOverwrite object with its permission value.
 		 *
@@ -71,7 +74,7 @@ namespace discpp {
 		 */
 	}
 
-	bool PermissionOverwrite::HasPermission(Permission permission) {
+	bool PermissionOverwrite::HasPermission(const Permission& permission) {
 		/**
 		 * @brief Checks if the permission overwrites has a permission.
 		 *
@@ -87,7 +90,7 @@ namespace discpp {
 		return (value & permission) == permission;
 	}
 
-	void PermissionOverwrite::AddPermission(Permission permission) {
+	void PermissionOverwrite::AddPermission(const Permission& permission) {
 		/**
 		 * @brief Add a permission.
 		 *

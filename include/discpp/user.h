@@ -3,59 +3,58 @@
 
 #include "discord_object.h"
 #include "utils.h"
-#include "activity.h"
-#include <nlohmann/json.hpp>
 
 namespace discpp {
 	enum ImageType : int { AUTO, WEBP, PNG, JPEG, GIF };
 	class Channel;
-	class GuildIntegration;
-
-	enum class ConnectionVisibility : int {
-		NONE = 0,
-		EVERYONE = 1
-	};
-
-	class Connection {
-	public:
-		std::string id;
-		std::string name;
-		std::string type;
-		bool revoked;
-		std::vector<GuildIntegration> integrations;
-		bool verified;
-		bool friend_sync;
-		bool show_activity;
-		ConnectionVisibility visibility;
-
-		Connection() = default;
-		Connection(nlohmann::json json);
-	};
+	class Integration;
 
 	class User : public DiscordObject {
+	private:
+        char flags;
+        unsigned short discriminator;
 	public:
+        enum class ConnectionVisibility : int {
+            NONE = 0,
+            EVERYONE = 1
+        };
+
+        class Connection {
+        public:
+            std::string id;
+            std::string name;
+            std::string type;
+            bool revoked;
+            std::vector<Integration> integrations;
+            bool verified;
+            bool friend_sync;
+            bool show_activity;
+            ConnectionVisibility visibility;
+
+            Connection() = default;
+            Connection(rapidjson::Document& json);
+        };
+
 		User() = default;
-		User(snowflake id);
-		User(nlohmann::json json);
+		User(const snowflake& id);
+		User(rapidjson::Document& json);
 
 		discpp::Channel CreateDM();
-		std::vector<Connection> GetUserConnections();
-		std::string GetAvatarURL(ImageType imgType = ImageType::AUTO);
+		std::string GetAvatarURL(const ImageType& imgType = ImageType::AUTO) const;
+		std::string CreatedAt();
+		std::string CreateMention();
+		std::string GetDiscriminator() const;
+
+		bool IsBot();
+		bool IsSystemUser();
 
 		std::string username; /**< The user's username, not unique across the platform. */
-		std::string discriminator; /**< The user's 4-digit discord-tag. */
 		std::string avatar; /**< The user's avatar hash. */
-		bool bot; /**< Whether the user belongs to an OAuth2 application. */
-		bool system; /**< Whether the user is an Official Discord System user (part of the urgent message system). */
-		bool mfa_enabled; /**< Whether the user has two factor enabled on their account.*/
 		std::string locale; /**< The user's chosen language option. */
 		bool verified; /**< Whether the email on this account has been verified. */
 		std::string email; /**< The user's email. */
-		int flags; /**< The flags on a user's account. */
 		discpp::specials::NitroSubscription premium_type; /**< The type of Nitro subscription on a user's account. */
 		int public_flags;
-		std::string created_at; /**< The creation date of the current user's account. */
-		std::string mention; /**< The @ mention of the current user Ex: <@150312037426135041>. */
 	};
 }
 

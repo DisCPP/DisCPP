@@ -2,7 +2,7 @@
 	Basic bot showing off commands
 */
 
-#include <discpp/bot.h>
+#include <discpp/client.h>
 #include <discpp/context.h>
 #include <discpp/command_handler.h>
 
@@ -11,6 +11,7 @@
 #include <discpp/events/ready_event.h>
 #include <discpp/events/guild_member_add_event.h>
 #include <discpp/events/channel_pins_update_event.h>
+#include <discpp/client_config.h>
 
 #include "ping_command.h"
 
@@ -19,8 +20,8 @@ int main(int argc, const char* argv[]) {
 	std::string token;
 	std::getline(token_file, token);
 
-	discpp::BotConfig config{ {"!"} };
-	discpp::Bot bot{ token, config }; // Token, config 
+	discpp::ClientConfig* config = new discpp::ClientConfig({"!"});
+	discpp::Client bot{ token, config }; // Token, config 
 
 	PingCommand(); // This runs the constructor which will register the command.
 
@@ -33,18 +34,18 @@ int main(int argc, const char* argv[]) {
 	// New event system
 	discpp::EventHandler<discpp::ReadyEvent>::RegisterListener([&bot](discpp::ReadyEvent event) {
 		std::cout << "Ready!" << std::endl
-			<< "Logged in as: " << bot.bot_user.username << "#" << bot.bot_user.discriminator << std::endl
-			<< "ID: " << bot.bot_user.id << std::endl << "-----------------------------" << std::endl;
+			<< "Logged in as: " << bot.client_user.username << "#" << bot.client_user.GetDiscriminator() << std::endl
+			<< "ID: " << bot.client_user.id << std::endl << "-----------------------------" << std::endl;
 
 		// Will show "Playing With Crashes!"
-		discpp::Activity activity = discpp::Activity("With Crashes!", discpp::presence::ActivityType::GAME, discpp::presence::Status::idle);
+		discpp::Presences activity("With Crashes!", discpp::presence::ActivityType::GAME, discpp::presence::Status::idle);
 		bot.UpdatePresence(activity);
 	});
 
 	discpp::EventHandler<discpp::GuildMemberAddEvent>::RegisterListener([](discpp::GuildMemberAddEvent event) {
 		discpp::Channel channel((discpp::snowflake) "638156895953223714");
 
-		channel.Send("Welcome <@" + event.member.user.id + ">, hope you enjoy!");
+		channel.Send("Welcome <@" + std::to_string(event.member->user.id) + ">, hope you enjoy!");
 	});
 
 	discpp::EventHandler<discpp::ChannelPinsUpdateEvent>::RegisterListener([](discpp::ChannelPinsUpdateEvent event)->bool {

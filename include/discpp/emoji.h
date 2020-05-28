@@ -1,36 +1,110 @@
 #ifndef DISCPP_EMOJI_H
 #define DISCPP_EMOJI_H
 
+#ifdef WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <winsock2.h>
+#undef WIN32_LEAN_AND_MEAN
+#elif __linux__
 #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+#include <codecvt>
+#else
+#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+#include <codecvt>
+#endif
 
 #include "discord_object.h"
 #include "user.h"
 #include "role.h"
-
-#include <nlohmann/json.hpp>
-
-#include <cpprest/uri.h>
+#include "utils.h"
 
 #include <locale>
-#include <codecvt>
 #include <string>
 
 namespace discpp {
 	class Guild;
-	class User;
 
-	class Emoji : public DiscordObject {
+	class Emoji {
 	public:
 		Emoji() = default;
-		Emoji(std::string name, snowflake id);
-		Emoji(discpp::Guild guild, snowflake id);
-		Emoji(nlohmann::json json);
-		Emoji(std::wstring w_unicode);
-		Emoji(std::string s_unicode);
+		Emoji(const std::string& name, const snowflake& id);
+		Emoji(const discpp::Guild& guild, const snowflake& id);
+		Emoji(rapidjson::Document& json);
+		Emoji(const std::wstring& w_unicode);
+		Emoji(const std::string& s_unicode);
 
-		std::string ToString() {
+        bool operator==(Emoji& other) const {
+#ifndef WIN32
+            auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
+#endif
+
+            // If the other's name is empty but mine is not then it must have unicode.
+            if (other.name.empty() && !name.empty() && unicode.empty()) {
+#ifdef WIN32
+                char ansi_emoji[MAX_PATH];
+                if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, other.unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
+                    throw std::runtime_error("Failed to convert emoji to string!");
+                } else {
+                    std::cout << "Just processed: " << ansi_emoji << std::endl;
+                    return std::string(ansi_emoji) == name;
+                }
+#else
+                return wstr_converter.to_bytes(other.unicode) == name;
+#endif
+            } else if (!other.name.empty() && name.empty() && !unicode.empty()) {
+#ifdef WIN32
+                char ansi_emoji[MAX_PATH];
+                if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
+                    throw std::runtime_error("Failed to convert emoji to string!");
+                } else {
+                    std::cout << "Just processed: " << ansi_emoji << std::endl;
+                    return std::string(ansi_emoji) == other.name;
+                }
+#else
+                return wstr_converter.to_bytes(unicode) == other.name;
+#endif
+            } else if (other.id != 0 && id != 0 && !other.name.empty() && !name.empty()) {
+                return other.id == id && other.name == name;
+            }
+
+            return false; // Hopefully this never runs.
+        }
+
+        std::string ToString() {
+            /**
+			 * @brief Gets a string representation of this emoji for sending through messages.
+			 *
+			 * ```cpp
+			 *      ctx.Send(emoji.ToString() + " Failed to make request!");
+			 * ```
+			 *
+			 * @return std::string
+			 */
+
+            if (name.empty() && id == 0) {
+#ifdef WIN32
+                char ansi_emoji[MAX_PATH];
+                if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
+                    throw std::runtime_error("Failed to convert emoji to string!");
+                } else {
+                    std::cout << "Just processed: " << ansi_emoji << std::endl;
+                    return ansi_emoji;
+                }
+#else
+                auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
+                return wstr_converter.to_bytes(unicode);
+#endif
+            } else {
+                return name;
+            }
+        }
+
+		std::string ToURL() {
 			/**
-			 * @brief Gets a string representation of this emoji, if its for messages or reactions.
+			 * @brief Gets a URL representation of this emoji for adding reactions.
+			 *
+			 * This URI encodes the emoji and returns the string result.
 			 *
 			 * ```cpp
 			 *      std::string endpoint = Endpoint("/channels/%/messages/%/reactions/%/@me", channel.id, id, emoji);
@@ -39,29 +113,33 @@ namespace discpp {
 			 * @return std::string
 			 */
 
-			auto converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
-
+#ifndef WIN32
+            auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
+#endif
 			std::wstring emoji;
 			if (name.empty()) {
 				emoji = unicode;
 			} else {
-				emoji = converter.from_bytes(name) + L":" + converter.from_bytes(id);
+                return URIEncode(name + ":" + std::to_string(id));
 			}
-
-#ifdef _WIN32
-			emoji = web::uri::encode_uri(emoji);
-			return converter.to_bytes(emoji);
+#ifdef WIN32
+			char ansi_emoji[MAX_PATH];
+			if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, emoji.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
+			    throw std::runtime_error("Failed to convert emoji to string!");
+			} else {
+			    std::cout << "Just processed: " << ansi_emoji << std::endl;
+                return URIEncode(ansi_emoji);
+			}
 #else
-            std::string emoji_str = converter.to_bytes(emoji);
-            emoji_str = web::uri::encode_uri(emoji_str);
-            return emoji_str;
+			return URIEncode(wstr_converter.to_bytes(emoji));
 #endif
 		}
 
+		discpp::snowflake id; /**< ID of the current emoji */
 		std::string name; /**< Name of the current emoji */
 		std::wstring unicode; /**< Unicode representation of the current emoji */
-		std::vector<discpp::Role> roles; /**< Roles */
-		discpp::User user;
+		std::vector<discpp::snowflake> roles; /**< Roles */
+		discpp::User creator;
 		bool require_colons;
 		bool managed;
 		bool animated; /**< Whether or not the current emoji is animated */

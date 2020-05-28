@@ -6,7 +6,7 @@
 #include "../emoji.h"
 #include "../user.h"
 
-#include <nlohmann/json.hpp>
+
 
 namespace discpp {
 	class MessageReactionRemoveEvent : public Event {

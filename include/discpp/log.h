@@ -3,7 +3,12 @@
 
 #include <fstream>
 #include <utility>
-#include <time.h>
+
+#ifndef __STDC_WANT_LIB_EXT1__
+#define __STDC_WANT_LIB_EXT1__ 1
+#endif
+
+#include <ctime>
 
 #include "utils.h"
 
@@ -77,35 +82,23 @@ namespace discpp {
 		inline static std::string OVERLINED = "\033[53m";
 	};
 
-	enum class LogSeverity : int {
-		SEV_INFO = 0,
-		SEV_WARNING = 1,
-		SEV_ERROR = 2,
-		SEV_DEBUG = 3
-	};
-
 	class Logger {
 	private:
 		std::ofstream log_file;
 		std::string file_path;
 		int flags;
 
-		std::string LogSeverityToString(LogSeverity sev) {
-			switch (sev) {
-			case LogSeverity::SEV_INFO:
-				return "INFO";
-			case LogSeverity::SEV_WARNING:
-				return "WARNING";
-			case LogSeverity::SEV_ERROR:
-				return "ERROR";
-			case LogSeverity::SEV_DEBUG:
-				return "DEBUG";
-			default:
-				return "UNKNOWN";
-			}
-		}
+		std::mutex file_mutex;
+		std::mutex console_mutex;
 
-		bool CanLog(LogSeverity sev) {
+        enum class LogSeverity : int {
+            SEV_INFO = 0,
+            SEV_WARN = 1,
+            SEV_ERROR = 2,
+            SEV_DEBUG = 3
+        };
+
+		bool CanLog(const LogSeverity& sev) {
 			if ((flags & logger_flags::DISABLE) == logger_flags::DISABLE) {
 				return false; // Just return false if they disabled logger.
 			} else if ((flags & logger_flags::ALL_SEVERITY) == logger_flags::ALL_SEVERITY && sev != LogSeverity::SEV_DEBUG) {
@@ -117,7 +110,7 @@ namespace discpp {
 			switch (sev) {
 			case LogSeverity::SEV_INFO:
 				return (flags & logger_flags::INFO_SEVERITY) == logger_flags::INFO_SEVERITY;
-			case LogSeverity::SEV_WARNING:
+			case LogSeverity::SEV_WARN:
 				return (flags & logger_flags::WARNING_SEVERITY) == logger_flags::WARNING_SEVERITY;
 			case LogSeverity::SEV_ERROR:
 				return (flags & logger_flags::ERROR_SEVERITY) == logger_flags::ERROR_SEVERITY;
@@ -126,8 +119,62 @@ namespace discpp {
 			}
 		}
 
+		std::string SeverityToString(const LogSeverity& sev) {
+            switch (sev) {
+                case LogSeverity::SEV_INFO:
+                    return "INFO";
+                case LogSeverity::SEV_WARN:
+                    return "WARN";
+                case LogSeverity::SEV_ERROR:
+                    return "ERROR";
+                case LogSeverity::SEV_DEBUG:
+                    return "DEBUG";
+                default:
+                    return "NUL";
+            }
+		}
+
+		// Logs the text if it can be logged and prefix the text with the log time and the severity.
+		void AutoLog(const LogSeverity& sev, const std::string& text) {
+            if (!CanLog(sev)) return;
+
+            time_t now_time_t = std::time(0);
+            std::tm now{};
+            char st[80];
+
+#ifdef __STDC_LIB_EXT1__
+            localtime_s(&now, &now_time_t);
+#else
+            now = *localtime(&now_time_t);
+#endif
+
+            strftime(st, 80, "[%H:%M:%S]", &now);
+
+            std::string time(st), tmp;
+            tmp = time + " [" + SeverityToString(sev) + "] " + text + LogTextEffect::RESET;
+
+
+            if ((flags & logger_flags::FILE_ONLY) == logger_flags::FILE_ONLY) {
+                std::lock_guard<std::mutex> lock_guard(file_mutex);
+                // Log to file
+                log_file << tmp << std::endl;
+
+                return;
+            }
+
+            { // Log to console
+                std::lock_guard<std::mutex> lock_guard(console_mutex);
+                std::cout << tmp << std::endl;
+            }
+
+            { // Log to file
+                std::lock_guard<std::mutex> lock_guard(file_mutex);
+                log_file << tmp << std::endl;
+            }
+		}
+
 	public:
-		inline Logger(std::string file_path, int logger_flags = logger_flags::ALL_SEVERITY) : flags(logger_flags) {
+		inline Logger(const std::string& file_path, const int& logger_flags = logger_flags::ALL_SEVERITY) : flags(logger_flags) {
 			/**
 			 * @brief Constructs a logger.
 			 *
@@ -149,7 +196,7 @@ namespace discpp {
 			}
 		}
 
-		inline Logger(int logger_flags = logger_flags::ALL_SEVERITY) : flags(logger_flags) {
+		inline Logger(const int& logger_flags = logger_flags::ALL_SEVERITY) : flags(logger_flags) {
 			/**
 			 * @brief Constructs a logger.
 			 *
@@ -168,103 +215,92 @@ namespace discpp {
 			 * @brief Close the logger.
 			 *
 			 * ```cpp
-			 *      bot->logger.Close();
+			 *      bot->logger->Close();
 			 * ```
 			 *
 			 * @return void
 			 */
 
 			if (log_file.is_open()) {
-				LogToFile(LogSeverity::SEV_INFO, "Logger \"" + file_path + "\" is closing");
+				Info("Logger \"" + file_path + "\" is closing");
 				log_file.close();
 			} else {
-				LogToConsole(LogSeverity::SEV_INFO, "Logger \"" + file_path + "\" is closing");
+				Info("Logger \"" + file_path + "\" is closing");
 			}
 		}
 
-		inline void LogToConsole(LogSeverity sev, std::string text) {
-			/**
-			 * @brief Logs to console.
-			 *
-			 * ```cpp
-			 *      bot->logger.LogToConsole(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Got response from gateway: %", response.text);
-			 * ```
-			 *
-			 * @param sev The severity of the log.
-			 * @param text The text to log to console.
-			 * @param args The text to replace the "%"s from text.
-			 *
-			 * @return void
-			 */
 
-			if (CanLog(sev)) {
-				time_t rawtime;
-				struct tm* timeinfo;
-				char st[80];
+		inline void Debug(const std::string& text) {
+            /**
+             * @brief Logs to console or file, maybe even both in the debug severity.
+             *
+             * ```cpp
+             *      bot->logger->Debug(LogTextColor::GREEN + "Got response from gateway: " + response.text);
+             *      // Output:
+             *      // [19:23:08] [DEBUG] Got response from gateway: {"d":null,"op":11,"s":null,"t":null}
+             * ```
+             *
+             * @param text The text to log.
+             *
+             * @return void
+             */
 
-				time(&rawtime);
-				timeinfo = localtime(&rawtime);
-
-				strftime(st, 80, "[%H:%M:%S]", timeinfo);
-
-				std::string time(st);
-				std::cout << time << " [" << LogSeverityToString(sev) << "] " << text << LogTextEffect::RESET << std::endl;
-			}
+            AutoLog(LogSeverity::SEV_DEBUG, text);
 		}
 
-		inline void LogToFile(LogSeverity sev, std::string text) {
-			/**
-			 * @brief Logs to file.
-			 *
-			 * ```cpp
-			 *      bot->logger.LogToFile(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Got response from gateway: %", response.text);
-			 * ```
-			 *
-			 * @param sev The severity of the log.
-			 * @param text The text to log to console.
-			 * @param args The text to replace the "%"s from text.
-			 *
-			 * @return void
-			 */
+        inline void Warn(const std::string& text) {
+            /**
+             * @brief Logs to console or file, maybe even both in the warn severity.
+             *
+             * ```cpp
+             *      bot->logger->Warn(LogTextColor::YELLOW + "Bot has no permission to ban user");
+             *      // Output:
+             *      // [19:23:08] [WARN] Bot has no permission to ban user
+             * ```
+             *
+             * @param text The text to log.
+             *
+             * @return void
+             */
 
-			if (CanLog(sev) && log_file.is_open()) {
-				time_t rawtime;
-				struct tm* timeinfo;
-				char st[80];
+            AutoLog(LogSeverity::SEV_WARN, text);
+        }
 
-				time(&rawtime);
-				timeinfo = localtime(&rawtime);
+        inline void Error(const std::string& text) {
+            /**
+             * @brief Logs to console or file, maybe even both in the error severity.
+             *
+             * ```cpp
+             *      bot->logger->Error(LogTextColor::RED + "Got non-json response from gateway!");
+             *      // Output:
+             *      // [19:23:08] [ERROR] Got non-json response from gateway!
+             * ```
+             *
+             * @param text The text to log.
+             *
+             * @return void
+             */
 
-				strftime(st, 80, "[%H:%M:%S]", timeinfo);
+            AutoLog(LogSeverity::SEV_ERROR, text);
+        }
 
-				std::string time(st);
-				log_file << time << " [" << LogSeverityToString(sev) << "] " << text << LogTextEffect::RESET << std::endl;
-			}
-		}
+        inline void Info(const std::string& text) {
+            /**
+             * @brief Logs to console or file, maybe even both in the error severity.
+             *
+             * ```cpp
+             *      bot->logger->Info(LogTextColor::GREEN + "Reconnected to gateway!");
+             *      // Output:
+             *      // [19:23:08] [INFO] Reconnected to gateway!
+             * ```
+             *
+             * @param text The text to log.
+             *
+             * @return void
+             */
 
-		inline void Log(LogSeverity sev, std::string text) {
-			/**
-			 * @brief Logs to console or file, maybe even both.
-			 *
-			 * ```cpp
-			 *      bot->logger.Log(LogSeverity::SEV_INFO, LogTextColor::GREEN + "Got response from gateway: %", response.text);
-			 * ```
-			 *
-			 * @param sev The severity of the log.
-			 * @param text The text to log to console.
-			 * @param args The text to replace the "%"s from text.
-			 *
-			 * @return void
-			 */
-
-			if ((flags & logger_flags::FILE_ONLY) == logger_flags::FILE_ONLY) {
-				LogToFile(sev, text);
-				return;
-			} 
-
-			LogToConsole(sev, text);
-			LogToFile(sev, text);
-		}
+            AutoLog(LogSeverity::SEV_INFO, text);
+        }
 	};
 }
 

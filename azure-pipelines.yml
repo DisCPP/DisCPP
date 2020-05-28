@@ -6,7 +6,7 @@
 variables:
   #2020.1
   vcpkgGitRef: 7aebb481085de7387f8a9975652c26f9053f66df
-  vcpkgArgs: nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization
+  vcpkgArgs: rapidjson cpr openssl
   vcpkgLocation: '$(Build.SourcesDirectory)/vcpkg'
 
 trigger:
@@ -14,10 +14,12 @@ trigger:
 - development
 
 jobs:
-  - job: Windows_VS2019_x86
+  - job: Windows_VS2019_x64
     pool:
       vmImage: 'windows-latest'
     steps:
+    - script: git submodule update --init
+      displayName: Checkout IXWebsocket submodule.
     - task: Cache@2
       displayName: Cache vcpkg
       inputs:
@@ -27,9 +29,9 @@ jobs:
       displayName: 'Run vcpkg'
       inputs:
         vcpkgDirectory: '$(vcpkgLocation)'
-        vcpkgArguments: $(vcpkgArgs) --triplet x86-windows
+        vcpkgArguments: $(vcpkgArgs) --triplet x64-windows
         vcpkgGitCommitId: $(vcpkgGitRef)
-        vcpkgTriplet: 'x86-windows'
+        vcpkgTriplet: 'x64-windows'
         vcpkgGitURL: https://github.com/microsoft/vcpkg.git
     - task: run-cmake@0
       displayName: 'Run CMake with Ninja'
@@ -38,13 +40,15 @@ jobs:
         cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
         cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
         useVcpkgToolchainFile: true
-        vcpkgTriplet: 'x86-windows'
+        vcpkgTriplet: 'x64-windows'
         buildDirectory: '$(Build.ArtifactStagingDirectory)'
         buildWithCMakeArgs: '-- -v'
   - job: Linux_Latest
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+    - script: git submodule update --init
+      displayName: Checkout IXWebsocket submodule.
     - task: Cache@2
       displayName: Cache vcpkg
       inputs:

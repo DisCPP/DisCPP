@@ -1,21 +1,25 @@
 #ifndef DISCPP_UTILS_H
 #define DISCPP_UTILS_H
 
+#ifndef RAPIDJSON_HAS_STDSTRING
+#define RAPIDJSON_HAS_STDSTRING 1
+#endif
+
 #include "discord_object.h"
 
-#include <nlohmann/json.hpp>
+#include <rapidjson/document.h>
 
 #include <cpr/cpr.h>
 
-#include <boost/date_time.hpp>
-
 #include <unordered_map>
+#include <climits>
 
 namespace discpp {
-	class Bot;
+	class Client;
+	class Role;
 
 	namespace globals {
-		inline discpp::Bot* bot_instance;
+		inline discpp::Client* client_instance;
 	}
 
 	namespace specials {
@@ -59,33 +63,85 @@ namespace discpp {
 
 	std::string GetOsName();
 
-	inline std::string Endpoint(std::string endpoint_format) {
-		endpoint_format = endpoint_format[0] == '/' ? endpoint_format : '/' + endpoint_format;
-		return "https://discordapp.com/api/v6" + endpoint_format;
+	inline std::string Endpoint(const std::string& endpoint_format) {
+		std::string tmp = endpoint_format[0] == '/' ? endpoint_format : '/' + endpoint_format;
+		return "https://discordapp.com/api/v6" + tmp;
 	}
 
 	template <typename type>
-	inline type GetFromVector(std::vector<type> vector, type item) {
+	inline type GetFromVector(const std::vector<type>& vector, const type& item) {
 		auto new_item = std::find_if(vector.begin(), vector.end(), [](type a, type b) { return a == b; });
 
 		if (new_item != vector.end()) return new_item;
 		return nullptr;
 	}
 
-	template<typename T>
-	inline T GetDataSafely(nlohmann::json json, std::string value_name) {
-		return (json.contains(value_name) && json[value_name] != nullptr) ? json[value_name].get<T>() : T();
+    discpp::snowflake SnowflakeFromString(const std::string& str);
+
+	inline discpp::snowflake GetIDSafely(rapidjson::Document& json, const char* value_name) {
+        rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
+        if (itr != json.MemberEnd()) {
+            if (!json[value_name].IsNull()) {
+                rapidjson::Document t_doc;
+                t_doc.CopyFrom(json[value_name], t_doc.GetAllocator());
+
+                return SnowflakeFromString(std::string(t_doc.GetString()));
+            }
+        }
+
+        return 0;
 	}
 
-	template<typename type, typename func>
-	inline type GetIf(std::vector<type>& items, func const& predicate) {
-		auto item = std::find_if(items.begin(), items.end(), predicate);
+    template<typename T>
+    inline T GetDataSafely(rapidjson::Document & json, const char* value_name) {
+        rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
+        if (itr != json.MemberEnd()) {
+            if (!json[value_name].IsNull()) {
+                rapidjson::Document t_doc;
+                t_doc.CopyFrom(json[value_name], t_doc.GetAllocator());
 
-		if (item != items.end()) {
-			return *item;
-		}
-		return type();
+                return t_doc.Get<T>();
+            }
+        }
+
+        return T();
+    }
+
+    template<class T>
+    inline T ConstructDiscppObjectFromID(rapidjson::Document& doc, const char* value_name, T default_val) {
+        rapidjson::Value::ConstMemberIterator itr = doc.FindMember(value_name);
+        if (itr != doc.MemberEnd()) {
+            if (!doc[value_name].IsNull()) {
+                rapidjson::Document t_doc;
+                t_doc.CopyFrom(doc[value_name], t_doc.GetAllocator());
+
+                return T(SnowflakeFromString(t_doc.GetString()));
+            }
+        }
+
+        return default_val;
+    }
+
+	template<class T>
+	inline T ConstructDiscppObjectFromJson(rapidjson::Document& doc, const char* value_name, T default_val) {
+        rapidjson::Value::ConstMemberIterator itr = doc.FindMember(value_name);
+        if (itr != doc.MemberEnd()) {
+            if (!doc[value_name].IsNull()) {
+                rapidjson::Document t_doc;
+                t_doc.CopyFrom(doc[value_name], t_doc.GetAllocator());
+
+                return T(t_doc);
+            }
+        }
+
+        return default_val;
 	}
+
+	void IterateThroughNotNullJson(rapidjson::Document& json, const std::function<void(rapidjson::Document&)>& func);
+    bool ContainsNotNull(rapidjson::Document& json, const char * value_name);
+    std::string DumpJson(rapidjson::Document& json);
+    std::string DumpJson(rapidjson::Value& json);
+    rapidjson::Document GetDocumentInsideJson(rapidjson::Document &json, const char* value_name);
 
 	// Rate limits
 	struct RateLimit {
@@ -106,26 +162,28 @@ namespace discpp {
 	inline std::unordered_map<snowflake, RateLimit> webhook_ratelimit;
 	inline RateLimit global_ratelimit;
 
-	inline int WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bucket);
-	inline void HandleRateLimits(cpr::Header header, snowflake object, RateLimitBucketType ratelimit_bucket);
+	int WaitForRateLimits(const snowflake& object, const RateLimitBucketType& ratelimit_bucket);
+	void HandleRateLimits(cpr::Header& header, const snowflake& object, const RateLimitBucketType& ratelimit_bucket);
 	// End of rate limits
 
-	extern nlohmann::json HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket);
-	extern nlohmann::json SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern nlohmann::json SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern nlohmann::json SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern nlohmann::json SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body = {});
-	extern nlohmann::json SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket);
-	cpr::Header DefaultHeaders(cpr::Header add = {});
-	bool StartsWith(std::string string, std::string prefix);
-	std::vector<std::string> SplitString(std::string str, std::string delimter);
-	std::string CombineStringVector(std::vector<std::string> v, std::string delimiter = " ", int offset = 0);
+	extern rapidjson::Document HandleResponse(cpr::Response& response, const snowflake& object, const RateLimitBucketType& ratelimit_bucket);
+	extern rapidjson::Document SendGetRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+	extern rapidjson::Document SendPostRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+	extern rapidjson::Document SendPutRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+	extern rapidjson::Document SendPatchRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+	extern rapidjson::Document SendDeleteRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket);
+
+	cpr::Header DefaultHeaders(const cpr::Header& add = {});
+	bool StartsWith(const std::string& string, const std::string& prefix);
+	std::vector<std::string> SplitString(const std::string& str, const std::string& delimter);
+	std::string CombineStringVector(const std::vector<std::string>& v, const std::string& delimiter = " ", const int& offset = 0);
 	std::string ReadEntireFile(std::ifstream& file);
-	std::string Base64Encode(std::string text);
-	std::string ReplaceAll(std::string data, std::string toSearch, std::string replaceStr);
-	std::string EscapeString(std::string string);
-	time_t TimeFromSnowflake(snowflake snow);
-	std::string FormatTimeFromSnowflake(snowflake snow);
+	std::string Base64Encode(const std::string& text);
+	std::string ReplaceAll(const std::string& data, const std::string& to_search, const std::string& replace_str);
+	std::string EscapeString(const std::string& string);
+	time_t TimeFromSnowflake(const snowflake& snow);
+	std::string FormatTimeFromSnowflake(const snowflake& snow);
+	std::string URIEncode(const std::string& str);
 }
 
 #endif

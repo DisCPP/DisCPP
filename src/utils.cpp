@@ -1,8 +1,10 @@
 #include "utils.h"
-#include "bot.h"
+#include "client.h"
+#include "client_config.h"
+#include "exceptions.h"
 
-#include <boost/archive/iterators/base64_from_binary.hpp>
-#include <boost/archive/iterators/transform_width.hpp>
+#include <stdlib.h>
+#include <numeric>
 
 std::string discpp::GetOsName() {
 	/**
@@ -19,40 +21,61 @@ std::string discpp::GetOsName() {
 		return "Windows 32-bit";
 	#elif _WIN64
 		return "Windows 64-bit";
-	#elif __APPLE__ || __MACH__
-		return "Mac OSX";
-	#elif __linux__
-		return "Linux";
-	#elif __FreeBSD__
-		return "FreeBSD";
-	#elif __unix || __unix__
-		return "Unix";
-	#else
-		return "Other";
+        #elif __APPLE__ || __MACH__
+                return "Mac OSX";
+        #elif __linux__
+            return "Linux";
+        #elif __FreeBSD__
+            return "FreeBSD";
+        #elif __unix || __unix__
+            return "Unix";
+        #else
+            return "Other";
 	#endif
 }
 
-nlohmann::json discpp::HandleResponse(cpr::Response response, snowflake object, RateLimitBucketType ratelimit_bucket) {
+// @TODO: Test if the json document type returned is what its supposed to be, like an array or object.
+rapidjson::Document discpp::HandleResponse(cpr::Response& response, const snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
 	/**
 	 * @brief Handles a response from the discpp servers.
 	 *
 	 * ```cpp
-	 *      nlohmann::json response = discpp::HandleResponse(cpr_response, object, discpp::RateLimitBucketType::CHANNEL);
+	 *      rapidjson::Document response = discpp::HandleResponse(cpr_response, object, discpp::RateLimitBucketType::CHANNEL);
 	 * ```
 	 *
 	 * @param[in] reponse The cpr response from the servers.
 	 * @param[in] object The object id to handle the ratelimits for.
 	 * @param[in] ratelimit_bucket The rate limit bucket.
 	 *
-	 * @return nlohmann::json
+	 * @return rapidjson::Document
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Received requested payload: " + response.text);
+    if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("Received requested payload: " + response.text);
+    }
+
+    rapidjson::Document tmp;
+    if (!response.text.empty() && response.text[0] == '[' && response.text[response.text.size() - 1] == ']') {
+        tmp.SetArray();
+    } else {
+        tmp.SetObject();
+    }
+
 	HandleRateLimits(response.header, object, ratelimit_bucket);
-	return nlohmann::json::parse((!response.text.empty()) ? response.text : "{}");
+	tmp.Parse((!response.text.empty() ? response.text.c_str() : "{}"));
+
+	// Check if we were returned an error and throw an exception if so.
+	if (!tmp.IsNull() && tmp.IsObject() && ContainsNotNull(tmp, "code")) {
+        throw discpp::GetException(tmp);
+    }
+
+    // This shows an error in inteliisense for some reason but compiles fine.
+#ifndef __INTELLISENSE__
+    return std::move(tmp);
+#endif
 }
 
-std::string CprBodyToString(cpr::Body body) {
+std::string CprBodyToString(const cpr::Body& body) {
 	if (body.empty()) {
 		return "Empty";
 	}
@@ -60,12 +83,12 @@ std::string CprBodyToString(cpr::Body body) {
 	return body;
 }
 
-nlohmann::json discpp::SendGetRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendGetRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
 	/**
 	 * @brief Sends a get request to a url.
 	 *
 	 * ```cpp
-	 *      nlohmann::json response = discpp::SendGetRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+	 *      rapidjson::Document response = discpp::SendGetRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
 	 * ```
 	 *
 	 * @param[in] url The url to create a request to.
@@ -74,21 +97,29 @@ nlohmann::json discpp::SendGetRequest(std::string url, cpr::Header headers, snow
 	 * @param[in] ratelimit_bucket The rate limit bucket.
 	 * @param[in] The cpr response body.
 	 *
-	 * @return nlohmann::json
+	 * @return rapidjson::Document
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
+    if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
+    }
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
-	return HandleResponse(result, object, ratelimit_bucket);
+
+	rapidjson::Document doc = HandleResponse(result, object, ratelimit_bucket);
+
+    // This shows an error in inteliisense for some reason but compiles fine.
+#ifndef __INTELLISENSE__
+    return std::move(doc);
+#endif
 }
 
-nlohmann::json discpp::SendPostRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendPostRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
 	/**
 	 * @brief Sends a post request to a url.
 	 *
 	 * ```cpp
-	 *      nlohmann::json response = discpp::SendPostRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+	 *      rapidjson::Document response = discpp::SendPostRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
 	 * ```
 	 *
 	 * @param[in] url The url to create a request to.
@@ -97,21 +128,23 @@ nlohmann::json discpp::SendPostRequest(std::string url, cpr::Header headers, sno
 	 * @param[in] ratelimit_bucket The rate limit bucket.
 	 * @param[in] The cpr response body.
 	 *
-	 * @return nlohmann::json
+	 * @return rapidjson::Document
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending post request, URL: " + url + ", body: " + CprBodyToString(body));
+    if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + CprBodyToString(body));
+    }
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Post(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-nlohmann::json discpp::SendPutRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendPutRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
 	/**
 	 * @brief Sends a put request to a url.
 	 *
 	 * ```cpp
-	 *      nlohmann::Json response = discpp::SendPutRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+	 *      rapidjson::Document response = discpp::SendPutRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
 	 * ```
 	 *
 	 * @param[in] url The url to create a request to.
@@ -120,21 +153,23 @@ nlohmann::json discpp::SendPutRequest(std::string url, cpr::Header headers, snow
 	 * @param[in] ratelimit_bucket The rate limit bucket.
 	 * @param[in] The cpr response body.
 	 *
-	 * @return nlohmann::json
+	 * @return rapidjson::Document
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending put request, URL: " + url + ", body: " + CprBodyToString(body));
+    if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("put patch request, URL: " + url + ", body: " + CprBodyToString(body));
+    }
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Put(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-nlohmann::json discpp::SendPatchRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket, cpr::Body body) {
+rapidjson::Document discpp::SendPatchRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
 	/**
 	 * @brief Sends a patch request to a url.
 	 *
 	 * ```cpp
-	 *      nlohmann::json response = discpp::SendPatchRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+	 *      rapidjson::Document response = discpp::SendPatchRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
 	 * ```
 	 *
 	 * @param[in] url The url to create a request to.
@@ -143,21 +178,23 @@ nlohmann::json discpp::SendPatchRequest(std::string url, cpr::Header headers, sn
 	 * @param[in] ratelimit_bucket The rate limit bucket.
 	 * @param[in] The cpr response body.
 	 *
-	 * @return nlohmann::json
+	 * @return rapidjson::Document
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending patch request, URL: " + url + ", body: " + CprBodyToString(body));
+	if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + CprBodyToString(body));
+    }
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Patch(cpr::Url{ url }, headers, body);
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-nlohmann::json discpp::SendDeleteRequest(std::string url, cpr::Header headers, snowflake object, RateLimitBucketType ratelimit_bucket) {
+rapidjson::Document discpp::SendDeleteRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
 	/**
 	 * @brief Sends a delete request to a url.
 	 *
 	 * ```cpp
-	 *      nlohmann::json response = discpp::SendDeleteRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL);
+	 *      rapidjson::Document response = discpp::SendDeleteRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL);
 	 * ```
 	 *
 	 * @param[in] url The url to create a request to.
@@ -165,16 +202,18 @@ nlohmann::json discpp::SendDeleteRequest(std::string url, cpr::Header headers, s
 	 * @param[in] object The object id to handle the ratelimits for.
 	 * @param[in] ratelimit_bucket The rate limit bucket.
 	 *
-	 * @return nlohmann::json
+	 * @return rapidjson::Document
 	 */
 
-	globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Sending delete request, URL: " + url);
+    if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("Sending delete request, URL: " + url);
+    }
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Delete(cpr::Url{ url }, headers);
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-cpr::Header discpp::DefaultHeaders(cpr::Header add) {
+cpr::Header discpp::DefaultHeaders(const cpr::Header& add) {
 	/**
 	 * @brief Gets the default headers to communicate with the discpp servers.
 	 *
@@ -184,12 +223,19 @@ cpr::Header discpp::DefaultHeaders(cpr::Header add) {
 	 *
 	 * @param[in] add The headers to add to the default ones.
 	 *
-	 * @return nlohmann::json
+	 * @return rapidjson::Document
 	 */
 
-	cpr::Header headers = { { "Authorization", "Bot " + discpp::globals::bot_instance->token },
-							{ "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" },
-							{ "X-RateLimit-Precision", "millisecond"} };
+
+    cpr::Header headers = { { "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" },
+                            { "X-RateLimit-Precision", "millisecond"} };
+    // Add the correct authorization header depending on the token type.
+	if (globals::client_instance->config->type == TokenType::USER) {
+	    headers.insert({ "Authorization", discpp::globals::client_instance->token });
+	} else {
+        headers.insert({ "Authorization", "Bot " + discpp::globals::client_instance->token });
+	}
+
 	for (auto head : add) {
 		headers.insert(headers.end(), head);
 	}
@@ -197,7 +243,7 @@ cpr::Header discpp::DefaultHeaders(cpr::Header add) {
 	return headers;
 }
 
-bool discpp::StartsWith(std::string string, std::string prefix) {
+bool discpp::StartsWith(const std::string& string, const std::string& prefix) {
 	/**
 	 * @brief Check if a string starts with another string.
 	 *
@@ -214,12 +260,12 @@ bool discpp::StartsWith(std::string string, std::string prefix) {
 	return string.substr(0, prefix.size()) == prefix;
 }
 
-std::vector<std::string> discpp::SplitString(std::string str, std::string delimiter) {
+std::vector<std::string> discpp::SplitString(const std::string& str, const std::string& delimiter) {
 	/**
 	 * @brief Split a string into a vector.
 	 *
 	 * ```cpp
-	 *      std::vector<std::string> argument_vec = discpp::SplitString(message.content, ' ');
+	 *      std::vector<std::string> argument_vec = discpp::SplitString(message.content, " ");
 	 * ```
 	 *
 	 * @param[in] str The string to split
@@ -228,13 +274,33 @@ std::vector<std::string> discpp::SplitString(std::string str, std::string delimi
 	 * @return std::vector<std::string>
 	 */
 
-	std::vector<std::string> out;
-	boost::split(out, str, boost::is_any_of(delimiter), boost::token_compress_on);
+    size_t pos = 0;
+    std::vector<std::string> tokens;
+    std::string token, tmp = str;
+    while ((pos = tmp.find(delimiter)) != std::string::npos) {
+        token = tmp.substr(0, pos);
 
-	return out;
+        // If the string is not empty then add it to the vector.
+        if (!token.empty()) {
+            tokens.push_back(token);
+        }
+
+        tmp.erase(0, pos + delimiter.length());
+    }
+
+    // Push back the last token from the string.
+    size_t last_token = tmp.find_last_of(delimiter);
+    tokens.push_back(tmp.substr(last_token + 1));
+
+    // If the vector is empty, then just return a vector filled with the given string.
+    if (tokens.empty()) {
+        return { tmp };
+    }
+
+	return tokens;
 }
 
-std::string discpp::CombineStringVector(std::vector<std::string> vector, std::string delimiter, int offset) {
+std::string discpp::CombineStringVector(const std::vector<std::string>& vector, const std::string& delimiter, const int& offset) {
 	/**
 	 * @brief Combine a vector into a string with spaces between each element.
 	 *
@@ -270,7 +336,12 @@ std::string discpp::ReadEntireFile(std::ifstream& file) {
 	return std::string((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
 }
 
-std::string discpp::Base64Encode(std::string text) {
+static const std::string base64_chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz"
+        "0123456789+/";
+
+std::string discpp::Base64Encode(const std::string& text) {
 	/**
 	 * @brief Encode Base64.
 	 *
@@ -283,13 +354,51 @@ std::string discpp::Base64Encode(std::string text) {
 	 * @return std::string
 	 */
 
-	using namespace boost::archive::iterators;
-	using It = base64_from_binary<transform_width<std::string::const_iterator, 6, 8>>;
-	auto tmp = std::string(It(std::begin(text)), It(std::end(text)));
-	return tmp.append((3 - text.size() % 3) % 3, '=');
+    unsigned char* buf = (unsigned char *) text.c_str();
+    size_t buf_len = text.size();
+    std::string ret;
+    int i = 0;
+    int j = 0;
+    unsigned char char_array_3[3];
+    unsigned char char_array_4[4];
+
+    while (buf_len--) {
+        char_array_3[i++] = *(buf++);
+        if (i == 3) {
+            char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+            char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+            char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+            char_array_4[3] = char_array_3[2] & 0x3f;
+
+            for (i = 0; (i < 4); i++)
+                ret += base64_chars[char_array_4[i]];
+            i = 0;
+        }
+    }
+
+    if (i) {
+        for (j = i; j < 3; j++) {
+            char_array_3[j] = '\0';
+        }
+
+        char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+        char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+        char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+        char_array_4[3] = char_array_3[2] & 0x3f;
+
+        for (j = 0; (j < i + 1); j++) {
+            ret += base64_chars[char_array_4[j]];
+        }
+
+        while ((i++ < 3)) {
+            ret += '=';
+        }
+    }
+
+    return ret;
 }
 
-std::string discpp::ReplaceAll(std::string data, std::string toSearch, std::string replaceStr) {
+std::string discpp::ReplaceAll(const std::string& data, const std::string& to_search, const std::string& replace_str) {
 	/**
 	 * @brief Replace all occurences of sub strings
 	 *
@@ -301,40 +410,49 @@ std::string discpp::ReplaceAll(std::string data, std::string toSearch, std::stri
 	 *
 	 * @return std::string
 	 */
+	std::string tmp = data;
+    // Get the first occurrence
+    size_t pos = tmp.find(to_search);
 
-	boost::replace_all(data, toSearch, replaceStr);
+    // Repeat till end is reached
+    while(pos != std::string::npos) {
+        // Replace this occurrence of Sub String
+        tmp.replace(pos, to_search.size(), replace_str);
+        // Get the next occurrence from the current position
+        pos = tmp.find(to_search, pos + replace_str.size());
+    }
 
-	return data;
+	return tmp;
 }
 
-std::string discpp::EscapeString(std::string string) {
+std::string discpp::EscapeString(const std::string& string) {
 	/**
 	 * @brief Escape strings for discpp json endpoints and cpr body
 	 *
 	 * ```cpp
 	 *      std::string raw_text = "{\"content\":\"" + EscapeString(text) + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
 	 *		cpr::Body body = cpr::Body(raw_text);
-	 *		nlohmann::json result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+	 *		rapidjson::Document result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 	 * ```
 	 *
 	 * @param[in] string The string to escape.
 	 *
 	 * @return std::string
 	 */
-
-	string = ReplaceAll(string, "\\", "\\\\");
-	string = ReplaceAll(string, "\"", "\\\"");
-	string = ReplaceAll(string, "\a", "\\a");
-	string = ReplaceAll(string, "\b", "\\b");
-	string = ReplaceAll(string, "\f", "\\f");
-	string = ReplaceAll(string, "\r", "\\r");
-	string = ReplaceAll(string, "\t", "\\t");
+    std::string tmp = string;
+	tmp = ReplaceAll(string, "\\", "\\\\");
+	tmp = ReplaceAll(string, "\"", "\\\"");
+	tmp = ReplaceAll(string, "\a", "\\a");
+	tmp = ReplaceAll(string, "\b", "\\b");
+	tmp = ReplaceAll(string, "\f", "\\f");
+	tmp = ReplaceAll(string, "\r", "\\r");
+	tmp = ReplaceAll(string, "\t", "\\t");
 	// \u + four-hex-digits
 
-	return string;
+	return tmp;
 }
 
-int discpp::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bucket) {
+int discpp::WaitForRateLimits(const snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
 	/**
 	 * @brief Wait for rate limits.
 	 *
@@ -368,24 +486,24 @@ int discpp::WaitForRateLimits(snowflake object, RateLimitBucketType ratelimit_bu
 			rlmt = &global_ratelimit;
 			break;
 		default:
-			globals::bot_instance->logger.Log(LogSeverity::SEV_ERROR, LogTextColor::RED + "RateLimitBucketType is invalid!");
+			globals::client_instance->logger->Error(LogTextColor::RED + "RateLimitBucketType is invalid!");
 			throw std::runtime_error("RateLimitBucketType is invalid!");
 			break;
 		}
 	}
 
 	if (rlmt->remaining_limit == 0) {
-		double milisecond_time = rlmt->ratelimit_reset * 1000 - time(NULL) * 1000 + 15;
+		double milisecond_time = rlmt->ratelimit_reset * 1000 - time(NULL) * 1000;
 
 		if (milisecond_time > 0) {
-			globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Rate limit wait time: " + std::to_string(milisecond_time) + " miliseconds");
+			globals::client_instance->logger->Debug("Rate limit wait time: " + std::to_string(milisecond_time) + " miliseconds");
 			std::this_thread::sleep_for(std::chrono::milliseconds((int)milisecond_time));
 		}
 	}
 	return 0;
 }
 
-bool HeaderContains(cpr::Header header, std::string key) {
+bool HeaderContains(const cpr::Header& header, const std::string& key) {
 	/**
 	 * @brief Check if a cpr::Header contains a specific key.
 	 *
@@ -405,7 +523,7 @@ bool HeaderContains(cpr::Header header, std::string key) {
 	return false;
 }
 
-void discpp::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBucketType ratelimit_bucket) {
+void discpp::HandleRateLimits(cpr::Header& header, const snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
 	/**
 	 * @brief Handle rate limites
 	 *
@@ -424,16 +542,22 @@ void discpp::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBuc
 	if (HeaderContains(header, "x-ratelimit-global")) {
 		obj = &global_ratelimit;
 	} else if (HeaderContains(header, "x-ratelimit-limit")) {
-		if (ratelimit_bucket == RateLimitBucketType::CHANNEL) {
-			obj = &channel_ratelimit[object];
-		} else if (ratelimit_bucket == RateLimitBucketType::GUILD) {
-			obj = &guild_ratelimit[object];
-		} else if (ratelimit_bucket == RateLimitBucketType::WEBHOOK) {
-			obj = &webhook_ratelimit[object];
-		} else if (ratelimit_bucket == RateLimitBucketType::GLOBAL) {
-			obj = &global_ratelimit;
-		} else {
-			throw std::runtime_error("RateLimitBucketType is invalid!");
+		switch (ratelimit_bucket) {
+		    case RateLimitBucketType::CHANNEL:
+		        obj = &channel_ratelimit[object];
+		        break;
+		    case RateLimitBucketType::GUILD:
+		        obj = &guild_ratelimit[object];
+		        break;
+		    case RateLimitBucketType::WEBHOOK:
+		        obj = &webhook_ratelimit[object];
+		        break;
+		    case RateLimitBucketType::GLOBAL:
+		        obj = &global_ratelimit;
+		        break;
+		    default:
+		        throw std::runtime_error("Invalid RateLimitBucketType!");
+		        break;
 		}
 	} else {
 		return;
@@ -444,14 +568,12 @@ void discpp::HandleRateLimits(cpr::Header header, snowflake object, RateLimitBuc
 	obj->ratelimit_reset = std::stod(header["x-ratelimit-reset"]);
 }
 
-time_t discpp::TimeFromSnowflake(snowflake snow) {
-	int64_t unix = ((std::strtoll(snow.c_str(), NULL, 10) >> 22) + 1420070400000) / 1000;
-	time_t unix_time = unix;
-
-	return unix_time;
+time_t discpp::TimeFromSnowflake(const snowflake& snow) {
+    constexpr static uint64_t discord_epoch = 1420070400000;
+    return ((snow >> 22) + discord_epoch) / 1000;
 }
 
-std::string discpp::FormatTimeFromSnowflake(snowflake snow) {
+std::string discpp::FormatTimeFromSnowflake(const snowflake& snow) {
 	time_t unix_time = TimeFromSnowflake(snow);
 
 	tm* n = std::gmtime(&unix_time);
@@ -460,4 +582,104 @@ std::string discpp::FormatTimeFromSnowflake(snowflake snow) {
 	strftime(buffer, sizeof(buffer), "%Y-%m-%d @ %H:%M:%S GMT", &now);
 
 	return buffer;
+}
+
+bool discpp::ContainsNotNull(rapidjson::Document &json, const char *value_name) {
+    rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
+    if (itr != json.MemberEnd()) {
+        return !json[value_name].IsNull();
+    }
+
+    return false;
+}
+
+void discpp::IterateThroughNotNullJson(rapidjson::Document &json, const std::function<void(rapidjson::Document&)>& func) {
+    for (auto const& object : json.GetArray()) {
+        if (!object.IsNull()) {
+            rapidjson::Document object_json;
+            object_json.CopyFrom(object, object_json.GetAllocator());
+
+            func(object_json);
+        }
+    }
+}
+
+rapidjson::Document discpp::GetDocumentInsideJson(rapidjson::Document &json, const char* value_name) {
+    rapidjson::Document inside_json;
+    inside_json.CopyFrom(json[value_name], inside_json.GetAllocator());
+
+    // This shows an error in inteliisense for some reason but compiles fine.
+#ifndef __INTELLISENSE__
+    return std::move(inside_json);
+#endif
+}
+
+std::string discpp::DumpJson(rapidjson::Document &json) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    json.Accept(writer);
+	std::string tmp = buffer.GetString();
+
+    return tmp;
+}
+
+std::string discpp::DumpJson(rapidjson::Value &json) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    json.Accept(writer);
+    std::string tmp = buffer.GetString();
+
+    return tmp;
+}
+
+// Safe characters for URIEncode
+char SAFE[256] = {
+        /*      0 1 2 3  4 5 6 7  8 9 A B  C D E F */
+        /* 0 */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* 1 */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* 2 */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* 3 */ 1,1,1,1, 1,1,1,1, 1,1,0,0, 0,0,0,0,
+
+        /* 4 */ 0,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1,
+        /* 5 */ 1,1,1,1, 1,1,1,1, 1,1,1,0, 0,0,0,0,
+        /* 6 */ 0,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1,
+        /* 7 */ 1,1,1,1, 1,1,1,1, 1,1,1,0, 0,0,0,0,
+
+        /* 8 */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* 9 */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* A */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* B */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+
+        /* C */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* D */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* E */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0,
+        /* F */ 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0
+};
+
+std::string discpp::URIEncode(const std::string& str) {
+    const char DEC2HEX[16 + 1] = "0123456789ABCDEF";
+    const unsigned char * pSrc = (const unsigned char *) str.c_str();
+    const size_t SRC_LEN = str.length();
+    unsigned char * const pStart = new unsigned char[SRC_LEN * 3];
+    unsigned char * pEnd = pStart;
+    const unsigned char * const SRC_END = pSrc + SRC_LEN;
+
+    for (; pSrc < SRC_END; ++pSrc) {
+        if (SAFE[*pSrc]) {
+            *pEnd++ = *pSrc;
+        } else {
+            // escape this char
+            *pEnd++ = '%';
+            *pEnd++ = DEC2HEX[*pSrc >> 4];
+            *pEnd++ = DEC2HEX[*pSrc & 0x0F];
+        }
+    }
+
+    std::string sResult((char *)pStart, (char *)pEnd);
+    delete [] pStart;
+    return sResult;
+}
+
+discpp::snowflake discpp::SnowflakeFromString(const std::string& str) {
+    return strtoll(str.c_str(), NULL, 10);
 }

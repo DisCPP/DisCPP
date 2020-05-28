@@ -1,31 +1,11 @@
 #include "command.h"
 #include "command_handler.h"
 
-discpp::Command::Command(std::string name) : name(name) {
+discpp::Command::Command(const std::string& name) : name(name) {
 	discpp::registered_commands.insert(std::make_pair(name, this));
 }
 
-discpp::Command::Command(std::string name, std::string desc, std::vector<std::string> hint_args, std::function<void(discpp::Context)> function, std::vector<std::function<bool(discpp::Context)>> requirements) : Command() {
-	/**
-	 * @brief Constructs a discpp::Command
-	 *
-	 * ```cpp
-	 *      discpp::Command("test", "Quick example of a quick command", {}, [](discpp::Context ctx) {
-	 *			ctx.Send("Quick new command handler test");
-	 *		}, {
-	 *			// Preconditions
-	 *		});
-	 * ```
-	 *
-	 * @param[in] name Command name 
-	 * @param[in] desc The command description
-	 * @param[in] hint_args Command argument hints
-	 * @param[in] function The function that is executed when the command is triggered
-	 * @param[in] requirements A list of preconditions for the command.
-	 *
-	 * @return discpp::Command, this is a constructor.
-	 */
-
+discpp::Command::Command(const std::string& name, const std::string& desc, const std::vector<std::string>& hint_args, const std::function<void(discpp::Context)>& function, const std::vector<std::function<bool(discpp::Context)>>& requirements) : Command() {
 	this->name = name;
 	this->description = desc;
 	this->hint_args = hint_args;
@@ -35,15 +15,7 @@ discpp::Command::Command(std::string name, std::string desc, std::vector<std::st
 	discpp::registered_commands.insert(std::make_pair(name, this));
 }
 
-void discpp::Command::CommandBody(discpp::Context ctx) {
-	/**
-	 * @brief The method that is executed when the command is triggered if overrided.
-	 *
-	 * @param[in] ctx The command context filled with information about where this command is being executed.
-	 *
-	 * @return void
-	 */
-
+void discpp::Command::CommandBody(const discpp::Context& ctx) {
 	if (function == nullptr) {
 		std::cout << "Make sure to override the \"CommandBody(discpp::Context)\" method to get an actual command body for: \"" + name + "\"" << std::endl;
 	} else {
@@ -51,17 +23,7 @@ void discpp::Command::CommandBody(discpp::Context ctx) {
 	}
 }
 
-bool discpp::Command::CanRun(discpp::Context ctx) {
-	/**
-	 * @brief This method checks if the requirements of the command allowes it to run.
-	 *
-	 * This can be overrided if you extend from this class.
-	 *
-	 * @param[in] ctx The command context filled with information about where this command is being executed.
-	 *
-	 * @return void
-	 */
-
+bool discpp::Command::CanRun(const discpp::Context& ctx) {
 	bool requires = true;
 	for (auto req_function : requirements) {
 		requires = requires && req_function(ctx);

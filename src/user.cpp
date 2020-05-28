@@ -1,8 +1,9 @@
+#include <iomanip>
 #include "user.h"
-#include "bot.h"
+#include "client.h"
 
 namespace discpp {
-	User::User(snowflake id) : discpp::DiscordObject(id) {
+	User::User(const snowflake& id) : discpp::DiscordObject(id) {
 		/**
 		 * @brief Constructs a discpp::User object from an id.
 		 *
@@ -17,13 +18,13 @@ namespace discpp {
 		 * @return discpp::User, this is a constructor.
 		 */
 
-		std::unordered_map<snowflake, Member>::iterator it = discpp::globals::bot_instance->members.find(id);
-		if (it != discpp::globals::bot_instance->members.end()) {
-			*this = it->second.user;
+		auto it = discpp::globals::client_instance->members.find(id);
+		if (it != discpp::globals::client_instance->members.end()) {
+			*this = it->second->user;
 		}
 	}
 
-	User::User(nlohmann::json json) {
+	User::User(rapidjson::Document& json) {
 		/**
 		 * @brief Constructs a discpp::User object by parsing json.
 		 *
@@ -36,48 +37,54 @@ namespace discpp {
 		 * @return discpp::User, this is a constructor.
 		 */
 
-		id = GetDataSafely<snowflake>(json, "id");
+		id = GetIDSafely(json, "id");
 		username = GetDataSafely<std::string>(json, "username");
-		discriminator = GetDataSafely<std::string>(json, "discriminator");
+		discriminator = (unsigned short) strtoul(GetDataSafely<std::string>(json, "discriminator").c_str(), nullptr, 10);
 		avatar = GetDataSafely<std::string>(json, "avatar");
-		bot = GetDataSafely<bool>(json, "bot");
-		system = GetDataSafely<bool>(json, "system");
-		mfa_enabled = GetDataSafely<bool>(json, "mfa_enabled");
-		locale = GetDataSafely<std::string>(json, "locale");
-		verified = GetDataSafely<bool>(json, "verified");
+		if (GetDataSafely<bool>(json, "bot")) flags |= 0b1;
+        if (GetDataSafely<bool>(json, "system")) flags |= 0b10;
 		flags = GetDataSafely<int>(json, "flags");
-		premium_type = (json.contains("premium_type")) ? static_cast<discpp::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type")) : discpp::specials::NitroSubscription::NO_NITRO;
+		premium_type = static_cast<discpp::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type"));
 		public_flags = GetDataSafely<int>(json, "public_flags");
-		created_at = FormatTimeFromSnowflake(id);
-		mention = "<@" + id + ">";
 	}
 
-	Connection::Connection(nlohmann::json json) {
+	User::Connection::Connection(rapidjson::Document& json) {
 		/**
-		 * @brief Constructs a discpp::Connection object by parsing json.
+		 * @brief Constructs a discpp::User::Connection object by parsing json.
 		 *
 		 * ```cpp
-		 *      discpp::Connection connection(json);
+		 *      discpp::User::Connection connection(json);
 		 * ```
 		 *
 		 * @param[in] json The json that makes up the connection object.
 		 *
-		 * @return discpp::Connection, this is a constructor.
+		 * @return discpp::User::Connection, this is a constructor.
 		 */
 
-		id = GetDataSafely<snowflake>(json, "id");
-		name = GetDataSafely<std::string>(json, "name");
-		type = GetDataSafely<std::string>(json, "type");
-		revoked = GetDataSafely<bool>(json, "revoked");
-		if (json.contains("integrations")) {
-			for (auto& integration : json["integrations"]) {
-				integrations.push_back(discpp::GuildIntegration(integration));
+		id = json["id"].GetString();
+		name = json["name"].GetString();
+		type = json["type"].GetString();
+		revoked = json["revoked"].GetBool();
+
+		rapidjson::Value::ConstMemberIterator itr = json.FindMember("integrations");
+
+		if (itr != json.MemberEnd()) {
+			for (auto& integration : json["integrations"].GetArray()) {
+				rapidjson::Document integration_json;
+				integration_json.CopyFrom(integration, integration_json.GetAllocator());
+				integrations.push_back(discpp::Integration(integration_json));
 			}
 		}
-		verified = GetDataSafely<bool>(json, "verified");
-		friend_sync = GetDataSafely<bool>(json, "friend_sync");
-		show_activity = GetDataSafely<bool>(json, "show_activity");
-		visibility = (json.contains("visibility")) ? static_cast<ConnectionVisibility>(GetDataSafely<int>(json, "visibility")) : ConnectionVisibility::NONE;
+		verified = json["verified"].GetBool();
+		friend_sync = json["friend_sync"].GetBool();
+		show_activity = json["show_activity"].GetBool();
+		
+		itr = json.FindMember("visibility");
+		if (itr != json.MemberEnd()){
+			visibility = static_cast<ConnectionVisibility>(json["visibility"].GetInt());
+		} else {
+			visibility = ConnectionVisibility::NONE;
+		}
 	}
 
 	discpp::Channel User::CreateDM() {
@@ -91,32 +98,13 @@ namespace discpp {
 		 * @return discpp::Channel
 		 */
 
-		cpr::Body body("{\"recipient_id\": \"" + id + "\"}");
-		nlohmann::json result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders(), id, RateLimitBucketType::CHANNEL, body);
+		cpr::Body body("{\"recipient_id\": \"" + std::to_string(id) + "\"}");
+		rapidjson::Document result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders({ {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
+
 		return discpp::Channel(result);
 	}
-
-	std::vector<Connection> User::GetUserConnections() {
-		/**
-		 * @brief Create all connections of this user.
-		 *
-		 * ```cpp
-		 *      std::vector<discpp::Connection> conntections = user.GetUserConnections();
-		 * ```
-		 *
-		 * @return std::vector<discpp::Connection>
-		 */
-
-		nlohmann::json result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
-
-		std::vector<Connection> connections;
-		for (auto& connection : result) {
-			connections.push_back(discpp::Connection(connection));
-		}
-		return connections;
-	}
 	
-	std::string User::GetAvatarURL(ImageType imgType) {
+	std::string User::GetAvatarURL(const ImageType& imgType) const {
 		/**
 		 * @brief Retrieve user avatar url.
 		 *
@@ -129,13 +117,12 @@ namespace discpp {
 		 * @return std::string
 		 */
 
-		std::string idString = this->id.c_str();
 		if (this->avatar == "") {
-			return cpr::Url("https://cdn.discppapp.com/embed/avatars/" + std::to_string(std::stoi(this->discriminator) % 5) + ".png");
-		}
-		else {
-			std::string url = "https://cdn.discppapp.com/avatars/" + idString + "/" + this->avatar;
-			if (imgType == ImageType::AUTO) imgType = StartsWith(this->avatar, "a_") ? ImageType::GIF : ImageType::PNG;
+			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(this->discriminator % 5) + ".png");
+		} else {
+			std::string url = "https://cdn.discordapp.com/avatars/" + std::to_string(id) + "/" + this->avatar;
+			ImageType tmp = imgType;
+			if (tmp == ImageType::AUTO) tmp = StartsWith(this->avatar, "a_") ? ImageType::GIF : ImageType::PNG;
 			switch (imgType) {
 			case ImageType::GIF:
 				return cpr::Url(url + ".gif");
@@ -150,4 +137,60 @@ namespace discpp {
 			}
 		}
 	}
+
+    std::string User::CreatedAt() {
+        /**
+         * @brief Gets the created at time and date for this user.
+         *
+         * ```cpp
+         *      std::string created_at = user.CreatedAt();
+         * ```
+         *
+         * @return std::string
+         */
+        return FormatTimeFromSnowflake(id);
+    }
+
+    std::string User::CreateMention() {
+        /**
+         * @brief Creates a mention string for this user.
+         *
+         * ```cpp
+         *      std::string mention = user.CreateMention();
+         * ```
+         *
+         * @return std::string
+         */
+        return "<@" + std::to_string(id) + ">";
+    }
+
+    bool User::IsBot() {
+        /**
+         * @brief Checks if the user is a bot
+         *
+         * @return bool
+         */
+	    return (flags & 0b1) == 0b1;
+    }
+
+    bool User::IsSystemUser() {
+        /**
+         * @brief Checks if the user is a discord staff user.
+         *
+         * @return bool
+         */
+        return (flags & 0b10) == 0b10;
+    }
+
+    std::string User::GetDiscriminator() const {
+        /**
+         * @brief Gets the users discriminator as a string.
+         *
+         * @return std::string
+         */
+        std::stringstream stream;
+        stream << std::setfill('0') << std::setw(4) << discriminator;
+
+        return stream.str();
+    }
 }

@@ -1,11 +1,11 @@
 <h1 align="center">DisC++</h1>
 
 <p align="center">
-Discord API Wrapper Written in Modern C++ aimed towards ease of use.
+Simplified, but feature rich Discord API wrapper written in modern C++.
 </p>
 
 ## DisC++
-DisC++ is a Discord API wrapper written in modern C++ aimed towards ease of use. This is one of the few that can compile on Windows and Linux. Its also focused on being multi threaded so commands and event listeners are ran on seperate threads, this means you dont have to worry about slowing the bot down with a certain command.
+DisC++ is a simplified, but feature rich Discord API wrapper written in modern C++. It can run on Linux and Windows. Its also focused on being multi threaded so commands and event listeners are ran on seperate threads, this means you dont have to worry about slowing the bot down with a certain command.
 
 ## State
 This library is ready to use but is still in development so you may encounter a few issues, if you do, please submit an issue!
@@ -26,21 +26,23 @@ This library is ready to use but is still in development so you may encounter a 
 </table>
 
 ## Dependencies
-- [Nlohmann JSON](https://github.com/nlohmann/json)
+- [RapidJSON](https://github.com/Tencent/rapidjson)
 - [cpr](https://github.com/whoshuu/cpr)
-- [cpprestsdk](https://github.com/microsoft/cpprestsdk.git)
-- [Boost Serialization](https://www.boost.org/doc/libs/1_72_0/libs/serialization/doc/index.html)
+- [IXWebSocket](https://github.com/machinezone/IXWebSocket)
 
 ## Contributing
 Please follow [Google's styling guide](https://google.github.io/styleguide/cppguide.html#Naming) for naming convention.
 
 ## Building
 1. Install vcpkg onto the root of your C drive.
-2. Install dependencies by running command: `vcpkg install nlohmann-json cpr cpprestsdk cpprestsdk[websockets] boost-serialization`.
+2. Install dependencies by running command: `vcpkg install rapidjson cpr openssl --triplet x64-[windows/linux]`.
+    * Replace [windows/linux] with your operating system.
 3. Then run `vcpkg integrate install`.
     * Should get an output similar to: `"-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"`.
     * Save the directory that was given (Ex. `C:/vcpkg/scripts/buildsystems/vcpkg.cmake`).
 4. Clone this repository.
+    * `git clone https://github.com/DisCPP/DisCPP.git`
+    * `git submodule update --init`
 5. Open the CMake project in Visual Studio.
     * On the welcome screen under the create a project or open project buttons, click `Continue without code`
     * Open the CMakeLists.txt by `File > Open > Cmake`
@@ -48,8 +50,8 @@ Please follow [Google's styling guide](https://google.github.io/styleguide/cppgu
 6. Go into CMake settings and set the CMake toolchain to the directory you saved above.
     * Click on `Project > CMake Settings`
     * Scroll to the CMake toolchain file text box and enter the directory you saved.
-7. While inside CMake settings, make sure your compiling in x86-Debug.
-	* Scroll to `Toolset` and set it to a x86 compiler of your choosing (ex: msvc_x86)
+7. While inside CMake settings, make sure your compiling in x64-Debug.
+	* Scroll to `Toolset` and set it to a x64 compiler of your choosing (ex: msvc_x64)
 ## Setting up a Bot Project
 First follow the [building](#Building) steps above to make sure Disc++ will compile.
 1. Currently you need to create a thirdparty folder in the root of your bot project directory.
@@ -80,21 +82,24 @@ target_link_libraries(main PRIVATE discpp)
 - [x] Finish tons of unimplemented methods in certain classes.
 - [x] Convert the default command handler to use command classes.
 - [x] Convert the event system to use a more object oriented system, similar to the new command handler.
+- [ ] Make sure all endpoints are implemented and add them if they aren't.
 - [ ] Voice websocket connection.
 - [ ] Sending audio through a voice connection.
+- [ ] Make the audit log cleaner and easier to use.
 
 ## Documentation
-Currently the only documentation is from Doxygen; its currently completely up to date. You can view it [here](https://discpp.github.io/). If you want to generate documentation you need to install Doxygen and run doxygen in the root DisCPP directory. ```doxygen Doxyfile```
+Currently the only documentation is from Doxygen; its currently completely up to date. You can view it [here](https://discpp.github.io/). If you want to generate documentation you need to install Doxygen and run doxygen in the root DisCPP directory and run the terminal command: ```doxygen Doxyfile```
 
 ## Examples
 There may be more inside the [Examples](examples) folder.
 ```cpp
+/*
+	Basic bot showing off commands
+*/
+
 #include <discpp/bot.h>
 #include <discpp/context.h>
 #include <discpp/command_handler.h>
-#include <discpp/channel.h>
-#include <discpp/activity.h>
-#include <discpp/command.h>
 
 // Events
 #include <discpp/event_handler.h>
@@ -102,18 +107,15 @@ There may be more inside the [Examples](examples) folder.
 #include <discpp/events/guild_member_add_event.h>
 #include <discpp/events/channel_pins_update_event.h>
 
-#include <iostream>
-#include <fstream>
-
 #include "ping_command.h"
 
 int main(int argc, const char* argv[]) {
 	std::ifstream token_file("token.txt", std::ios::out);
 	std::string token;
 	std::getline(token_file, token);
-	
-	discpp::BotConfig config {{"!"}};
-	discpp::Bot bot{ token, config }; // Token, config.
+
+	discpp::BotConfig config{ {"!"} };
+	discpp::Bot bot{ token, config }; // Token, config 
 
 	PingCommand(); // This runs the constructor which will register the command.
 
@@ -130,8 +132,8 @@ int main(int argc, const char* argv[]) {
 			<< "ID: " << bot.bot_user.id << std::endl << "-----------------------------" << std::endl;
 
 		// Will show "Playing With Crashes!"
-		discpp::Activity activity = discpp::Activity("With Crashes!", discpp::presence::ActivityType::GAME, discpp::presence::Status::idle);
-		bot.UpdatePresence(activity);
+		discpp::Presence presence("With Crashes!", discpp::presence::ActivityType::GAME, discpp::presence::Status::idle);
+		bot.UpdatePresence(presence);
 	});
 
 	discpp::EventHandler<discpp::GuildMemberAddEvent>::RegisterListener([](discpp::GuildMemberAddEvent event) {

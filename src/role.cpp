@@ -1,7 +1,7 @@
 #include "guild.h"
 
 namespace discpp {
-	Role::Role(snowflake role_id, discpp::Guild& guild) : DiscordObject(role_id) {
+	Role::Role(const snowflake& role_id, const discpp::Guild& guild) : DiscordObject(role_id) {
 		/**
 		 * @brief Constructs a discpp::Role object using a role id and a guild.
 		 *
@@ -17,13 +17,13 @@ namespace discpp {
 		 * @return discpp::Role, this is a constructor.
 		 */
 
-		std::unordered_map<snowflake, Role>::iterator it = guild.roles.find(role_id); 
+		auto it = guild.roles.find(role_id);
 		if (it != guild.roles.end()) {
-			*this = it->second;
+			*this = *it->second;
 		}
 	}
 
-	Role::Role(nlohmann::json json) {
+	Role::Role(rapidjson::Document& json) {
 		/**
 		 * @brief Constructs a discpp::Role object by parsing json.
 		 *
@@ -36,13 +36,13 @@ namespace discpp {
 		 * @return discpp::Role, this is a constructor.
 		 */
 
-		id = GetDataSafely<snowflake>(json, "id");
-		name = GetDataSafely<std::string>(json, "name");
-		color = GetDataSafely<int>(json, "color");
-		hoist = GetDataSafely<bool>(json, "hoist");
-		position = GetDataSafely<int>(json, "position");
-		permissions = (json.contains("permissions")) ? Permissions(PermissionType::ROLE, json["permissions"].get<int>()) : Permissions();
-		managed = GetDataSafely<bool>(json, "manages");
-		mentionable = GetDataSafely<bool>(json, "mentionable");
+		id = SnowflakeFromString(json["id"].GetString());
+		name = json["name"].GetString();
+		color = json["color"].GetInt();
+		hoist = json["hoist"].GetBool();
+		position = json["position"].GetInt();
+        permissions = Permissions(PermissionType::ROLE, json["permissions"].GetInt());
+		managed = json["managed"].GetBool();
+		mentionable = json["mentionable"].GetBool();
 	}
 }

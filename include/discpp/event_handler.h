@@ -3,7 +3,7 @@
 
 #include "event.h"
 #include "utils.h"
-#include "bot.h"
+#include "client.h"
 
 #include <climits>
 
@@ -17,7 +17,7 @@ namespace discpp {
 	public:
 		using IdType = unsigned int;
 
-		static EventListenerHandle RegisterListener(std::function<void(const T&)> listener) {
+		static EventListenerHandle RegisterListener(const std::function<void(const T&)>& listener) {
 			/**
 			 * @brief Registers an event listener.
 			 *
@@ -38,14 +38,14 @@ namespace discpp {
 			// Make sure that the given event class derives from discpp::Event
 			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
-			discpp::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, LogTextColor::GREEN + "Event listener registered: " + typeid(T).name());
+			discpp::globals::client_instance->logger->Debug(LogTextColor::GREEN + "Event listener registered: " + typeid(T).name());
 
 			auto id = GetNextId();
 			GetHandlers()[id] = listener;
 			return EventListenerHandle{ id };
 		}
 
-		static void RemoveListener(EventListenerHandle handle) {
+		static void RemoveListener(const EventListenerHandle& handle) {
 			/**
 			 * @brief Removes an event listener.
 			 *
@@ -67,12 +67,12 @@ namespace discpp {
 
 			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
-			discpp::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Event listener removed: " + std::string(typeid(T).name()));
+			discpp::globals::client_instance->logger->Debug("Event listener removed: " + std::string(typeid(T).name()));
 
 			GetHandlers().erase(handle.id);
 		}
 
-		static void TriggerEvent(T e) {
+		static void TriggerEvent(const T& e) {
 			/**
 			 * @brief Triggers an event.
 			 *
@@ -89,10 +89,10 @@ namespace discpp {
 
 			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
-			discpp::globals::bot_instance->logger.Log(LogSeverity::SEV_DEBUG, "Event listener triggered: " + std::string(typeid(T).name()));
+			discpp::globals::client_instance->logger->Debug("Event listener triggered: " + std::string(typeid(T).name()));
 
 			for (std::pair<IdType, std::function<void(const T&)>> handler : GetHandlers()) {
-				discpp::globals::bot_instance->futures.push_back(std::async(std::launch::async, handler.second, e));
+                discpp::globals::client_instance->DoFunctionLater(handler.second, e);
 			}
 		}
 
