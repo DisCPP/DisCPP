@@ -12,8 +12,35 @@ namespace discpp {
 	class Role : public DiscordObject {
 	public:
 		Role() = default;
+
+        /**
+         * @brief Constructs a discpp::Role object using a role id and a guild.
+         *
+         * This constructor searches the roles cache in the guild object to get the role object from.
+         *
+         * ```cpp
+         *      discpp::Role role(657246994997444614, guild);
+         * ```
+         *
+         * @param[in] role_id The role id.
+         * @param[in] guild The guild that has this role.
+         *
+         * @return discpp::Role, this is a constructor.
+         */
 		Role(const snowflake& role_id, const discpp::Guild& guild);
-		Role(rapidjson::Document& json);
+
+        /**
+         * @brief Constructs a discpp::Role object by parsing json.
+         *
+         * ```cpp
+         *      discpp::Role role(json);
+         * ```
+         *
+         * @param[in] json The json that makes up of role object.
+         *
+         * @return discpp::Role, this is a constructor.
+         */
+        Role(rapidjson::Document& json);
 
 		//snowflake id;  /**< Id of the current role */
 		std::string name; /**< Name of the current role */
