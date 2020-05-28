@@ -90,7 +90,7 @@ namespace discpp {
 		void RemoveRole(const discpp::Role& role);
 
         /**
-         * @brief Check if this member is a role.
+         * @brief Check if this member has a role.
          *
          * ```cpp
          *      bool has_role = member.HasRole(role);
