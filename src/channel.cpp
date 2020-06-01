@@ -81,28 +81,14 @@ namespace discpp {
 	}
 
 	std::string ChannelPropertyToString(ChannelProperty prop) {
-        switch (prop) {
-            case ChannelProperty::NAME:
-                return "name";
-            case ChannelProperty::POSITION:
-                return "position";
-            case ChannelProperty::TOPIC:
-                return "topic";
-            case ChannelProperty::NSFW:
-                return "nsfw";
-            case ChannelProperty::RATE_LIMIT:
-                return "rate_limit_per_user";
-            case ChannelProperty::BITRATE:
-                return "bitrate";
-            case ChannelProperty::USER_LIMIT:
-                return "user_limit";
-            case ChannelProperty::PERMISSION_OVERWRITES:
-                return "permission_overwrites";
-            case ChannelProperty::PARENT_ID:
-                return "parent_id";
-            default:
-                return "";
-        }
+        std::unordered_map<ChannelProperty, std::string> prop_str_map = {
+                {ChannelProperty::NAME, "name"}, {ChannelProperty::POSITION, "position"},
+                {ChannelProperty::TOPIC, "topic"}, {ChannelProperty::NSFW, "nsfw"},
+                {ChannelProperty::RATE_LIMIT, "rate_limit_per_user"}, {ChannelProperty::BITRATE, "bitrate"},
+                {ChannelProperty::USER_LIMIT, "user_limit"}, {ChannelProperty::PERMISSION_OVERWRITES, "permission_overwrites"},
+                {ChannelProperty::PARENT_ID, "parent_id"}
+        };
+        return prop_str_map[prop];
 	}
 
     // Helper type for the visitor
