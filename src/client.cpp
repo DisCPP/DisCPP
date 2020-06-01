@@ -65,7 +65,6 @@ namespace discpp {
     }
 
     void Client::DisconnectWebsocket() {
-        logger->Debug(LogTextColor::YELLOW + "Locking Mutex before disconnect...");
         std::lock_guard<std::mutex> lock(websocket_client_mutex);
         logger->Debug(LogTextColor::YELLOW + "Closing websocket connection...");
 
@@ -145,6 +144,7 @@ namespace discpp {
         // if we're reconnecting this just stop here.
         if (reconnecting) {
             logger->Debug("Websocket was closed for reconnecting...");
+            return;
         } else if (stay_disconnected) {
             logger->Warn(LogTextColor::YELLOW + "Websocket was closed.");
         } else {
@@ -155,7 +155,7 @@ namespace discpp {
         disconnected = true;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-        if (disconnected && !reconnecting) {
+        if (disconnected) {
             reconnecting = true;
             ReconnectToWebsocket();
         }
@@ -168,7 +168,9 @@ namespace discpp {
             disconnected = false;
             reconnecting = false;
         } else if (msg->type == ix::WebSocketMessageType::Close) {
-            HandleDiscordDisconnect(msg);
+            if (!reconnecting) {
+                HandleDiscordDisconnect(msg);
+            }
         } else if (msg->type == ix::WebSocketMessageType::Error) {
             logger->Info(LogTextColor::RED + "Error: " + msg->errorInfo.reason);
         } else if (msg->type == ix::WebSocketMessageType::Message) {
@@ -231,7 +233,7 @@ namespace discpp {
             heartbeat_acked = true;
             break;
         case reconnect:
-            DoFunctionLater([&] {ReconnectToWebsocket();});
+            ReconnectToWebsocket();
             break;
         case invalid_session:
             // Check if the session is resumable
@@ -347,9 +349,7 @@ namespace discpp {
             reconnecting = true;
 
             DisconnectWebsocket();
-            // Connect with a 20 second timeout.
-            websocket.connect(20);
-            //WebSocketStart();
+            WebSocketStart();
         }
     }
 
