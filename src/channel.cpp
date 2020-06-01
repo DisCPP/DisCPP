@@ -18,15 +18,12 @@ namespace discpp {
 
 	discpp::Message Channel::Send(const std::string& text, const bool& tts, discpp::EmbedBuilder* embed, std::vector<File> files) {
 		std::string escaped_text = EscapeString(text);
-		rapidjson::Document message_json;
-		std::string message_json_str = "{\"content\":\"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
-		message_json.Parse(message_json_str);
 
 		// Send a file filled with message contents if the message is more than 2000 characters.
 		if (escaped_text.size() >= 2000) {
 			// Write message to file
 			std::ofstream message("message.txt", std::ios::out | std::ios::binary);
-			message << message_json["content"].GetString();
+			message << escaped_text;
 			message.close();
 
 			// Ensure the file will be deleted even if it runs into an exception sending the file.
@@ -48,6 +45,10 @@ namespace discpp {
 
 			return sent_message;
 		}
+
+        rapidjson::Document message_json;
+        std::string message_json_str = "{\"content\":\"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
+        message_json.Parse(message_json_str);
 
 		cpr::Body body;
 		if (embed != nullptr) { // Set the HTTP payload to an embed.
