@@ -87,7 +87,6 @@ namespace discpp {
             break;
         }
 
-
         rapidjson::Value::ConstMemberIterator itr = gateway_request.FindMember("url");
 
         if (itr != gateway_request.MemberEnd()) {

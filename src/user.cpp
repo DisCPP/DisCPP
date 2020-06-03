@@ -9,7 +9,6 @@ namespace discpp {
 			*this = it->second->user;
 		}
 	}
-
 	User::User(rapidjson::Document& json) {
 		id = GetIDSafely(json, "id");
 		username = GetDataSafely<std::string>(json, "username");
@@ -17,7 +16,7 @@ namespace discpp {
 		avatar = GetDataSafely<std::string>(json, "avatar");
 		if (GetDataSafely<bool>(json, "bot")) flags |= 0b1;
         if (GetDataSafely<bool>(json, "system")) flags |= 0b10;
-		flags = GetDataSafely<int>(json, "flags");
+		public_flags = GetDataSafely<int>(json, "flags");
 		premium_type = static_cast<discpp::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type"));
 		public_flags = GetDataSafely<int>(json, "public_flags");
 	}
@@ -87,7 +86,7 @@ namespace discpp {
         return "<@" + std::to_string(id) + ">";
     }
 
-    bool User::IsBot() {
+    bool User::IsBot() const {
 	    return (flags & 0b1) == 0b1;
     }
 

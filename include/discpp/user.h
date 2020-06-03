@@ -135,7 +135,7 @@ namespace discpp {
          *
          * @return bool
          */
-		bool IsBot();
+		bool IsBot() const;
 
         /**
          * @brief Checks if the user is a discord staff user.
