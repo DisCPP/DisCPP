@@ -302,13 +302,14 @@ namespace discpp {
     }
 
     void EventDispatcher::MessageCreateEvent(rapidjson::Document& result) {
-        if (discpp::globals::client_instance->messages.size() == 0) return;
-
         std::shared_ptr<discpp::Message> message = std::make_shared<discpp::Message>(result);
-        if (discpp::globals::client_instance->messages.size() >= discpp::globals::client_instance->message_cache_count) {
-            discpp::globals::client_instance->messages.erase(discpp::globals::client_instance->messages.begin());
+        if (!discpp::globals::client_instance->messages.empty()) {
+            if (discpp::globals::client_instance->messages.size() >= discpp::globals::client_instance->message_cache_count) {
+                discpp::globals::client_instance->messages.erase(discpp::globals::client_instance->messages.begin());
+            }
+
+            discpp::globals::client_instance->messages.insert({message->id, message});
         }
-        discpp::globals::client_instance->messages.insert({ message->id, message });
 
         if (discpp::globals::client_instance->config->type == discpp::TokenType::BOT) {
             discpp::globals::client_instance->DoFunctionLater(discpp::globals::client_instance->fire_command_method, discpp::globals::client_instance, *message);
