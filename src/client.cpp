@@ -376,28 +376,28 @@ namespace discpp {
         return channel;
     }
 
-    discpp::DMChannel Client::GetDMChannel(const discpp::snowflake& id) {
+    discpp::Channel Client::GetDMChannel(const discpp::snowflake& id) {
         auto it = private_channels.find(id);
         if (it != private_channels.end()) {
             return it->second;
         }
 
-        return discpp::DMChannel();
+        return discpp::Channel();
     }
 
-    std::unordered_map<discpp::snowflake, discpp::DMChannel> Client::GetUserDMs() {
+    std::unordered_map<discpp::snowflake, discpp::Channel> Client::GetUserDMs() {
 
         if (!discpp::globals::client_instance->client_user.IsBot()) {
             throw new ProhibitedEndpointException("/users/@me/channels is a user only endpoint");
         } else {
-            std::unordered_map<discpp::snowflake, discpp::DMChannel> dm_channels;
+            std::unordered_map<discpp::snowflake, discpp::Channel> dm_channels;
 
             rapidjson::Document result = SendGetRequest(Endpoint("users/@me/channels"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
             for (auto const& channel : result.GetArray()) {
                 rapidjson::Document channel_json(rapidjson::kObjectType);
                 channel_json.CopyFrom(channel, channel_json.GetAllocator());
 
-                discpp::DMChannel tmp(channel_json);
+                discpp::Channel tmp(channel_json);
                 dm_channels.emplace(tmp.id, tmp);
             }
 

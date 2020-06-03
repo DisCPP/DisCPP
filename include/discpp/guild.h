@@ -71,7 +71,7 @@ namespace discpp {
             if (itr != json.MemberEnd()) {
                 rapidjson::Document channel_json;
                 channel_json.CopyFrom(json["channel"], channel_json.GetAllocator());
-                channel = discpp::GuildChannel(channel_json);
+                channel = discpp::Channel(channel_json);
             }
             itr = json.FindMember("inviter");
             if (itr != json.MemberEnd()) {
@@ -94,7 +94,7 @@ namespace discpp {
         }
         std::string code; /**< The invite code (unique ID). */
         snowflake guild_id; /**< GThe guild this invite is for. */
-        discpp::GuildChannel channel; /**< The channel this invite is for. */
+        discpp::Channel channel; /**< The channel this invite is for. */
         discpp::User inviter; /**< he user who created the invite. */
         discpp::User target_user; /**< The target user for this invite. */
         TargetUserType target_user_type; /**< The type of user target for this invite. */
@@ -308,12 +308,12 @@ namespace discpp {
          * This makes it easy to find a channel in the array by using the `std::unordered_map::find()` method.
          *
          * ```cpp
-         *      std::unordered_map<discpp::snowflake, discpp::GuildChannel> guild.GetChannels();
+         *      std::unordered_map<discpp::snowflake, discpp::Channel> guild.GetChannels();
          * ```
          *
-         * @return std::unordered_map<discpp::snowflake, discpp::GuildChannel>
+         * @return std::unordered_map<discpp::snowflake, discpp::Channel>
          */
-		std::unordered_map<discpp::snowflake, discpp::GuildChannel> GetChannels();
+		std::unordered_map<discpp::snowflake, discpp::Channel> GetChannels();
 
         /**
          * @brief Gets a list of channel categories in this guild.
@@ -322,31 +322,31 @@ namespace discpp {
          * This makes it easy to find a channel in the array by using the `std::unordered_map::find()` method.
          *
          * ```cpp
-         *      std::unordered_map<discpp::snowflake, discpp::CategoryChannel> guild.GetCategories();
+         *      std::unordered_map<discpp::snowflake, discpp::Channel> guild.GetCategories();
          * ```
          *
-         * @return std::unordered_map<discpp::snowflake, discpp::CategoryChannel>
+         * @return std::unordered_map<discpp::snowflake, discpp::Channel>
          */
-		std::unordered_map<discpp::snowflake, discpp::CategoryChannel> GetCategories();
+		std::unordered_map<discpp::snowflake, discpp::Channel> GetCategories();
 
         /**
          * @brief Gets a channel in this guild.
          *
          * ```cpp
-         *      discpp::GuildChannel chnl = guild.GetChannel(snowflake);
+         *      discpp::Channel chnl = guild.GetChannel(snowflake);
          * ```
          *
          * @param[in] id The id of the channel you want to retrieve
          *
-         * @return discpp::GuildChannel
+         * @return discpp::Channel
          */
-        discpp::GuildChannel GetChannel(const snowflake& id) const;
+        discpp::Channel GetChannel(const snowflake& id) const;
 
         /**
          * @brief Creates a channel for this Guild.
          *
          * ```cpp
-         *      discpp::Channel channel = guild.CreateChannel("Test", discpp::GuildChannelType::GUILD_TEXT, "Just a test channel", 0, 0, 0, 0, overwrites, category_channel, false);
+         *      discpp::Channel channel = guild.CreateChannel("Test", discpp::ChannelType::GUILD_TEXT, "Just a test channel", 0, 0, 0, 0, overwrites, category_channel, false);
          * ```
          *
          * @param[in] name The name of the new channel.
@@ -360,9 +360,9 @@ namespace discpp {
          * @param[in] parent_id The parent id of the new channel.
          * @param[in] nsfw Whether the new channel is marked as nsfw.
          *
-         * @return std::shared_ptr<discpp::GuildChannel>
+         * @return std::shared_ptr<discpp::Channel>
          */
-        discpp::GuildChannel CreateChannel(const std::string& name, const std::string& topic = "", const ChannelType& type = ChannelType::GUILD_TEXT, const int& bitrate = 0, const int& user_limit = 0, const int& rate_limit_per_user = 0, const int& position = 0, const std::vector<discpp::Permissions>& permission_overwrites = {}, const discpp::CategoryChannel& category = {}, const bool& nsfw = false);
+        discpp::Channel CreateChannel(const std::string& name, const std::string& topic = "", const ChannelType& type = ChannelType::GUILD_TEXT, const int& bitrate = 0, const int& user_limit = 0, const int& rate_limit_per_user = 0, const int& position = 0, const std::vector<discpp::Permissions>& permission_overwrites = {}, const discpp::Channel& category = {}, const bool& nsfw = false);
 
         /**
          * @brief Modifies channel's positions in order to vector elements.
@@ -938,7 +938,7 @@ namespace discpp {
 		int member_count; /**< Total number of members in this guild. */
 		std::vector<discpp::VoiceState> voice_states; /**< Array of partial voice state objects. */
 		std::unordered_map<snowflake, std::shared_ptr<Member>> members; /**< Users in the guild. */
-		std::unordered_map<snowflake, GuildChannel> channels; /**< Channels in the guild. */
+		std::unordered_map<snowflake, Channel> channels; /**< Channels in the guild. */
 		int max_presences; /**< The maximum amount of presences for the guild (the default value, currently 25000, is in effect when null is returned). */
 		int max_members; /**< The maximum amount of members for the guild. */
 		std::string vanity_url_code; /**< The vanity url code for the guild. */
@@ -947,7 +947,7 @@ namespace discpp {
 		discpp::specials::NitroTier premium_tier; /**< Premium tier (Server Boost level). */
 		int premium_subscription_count; /**< The number of boosts this server currently has. */
 		std::string preferred_locale; /**< The preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults to "en-US". */
-        std::shared_ptr<discpp::GuildChannel> public_updates_channel; /**< The channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */
+        std::shared_ptr<discpp::Channel> public_updates_channel; /**< The channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */
 		int approximate_member_count; /**< Approximate number of members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
 		int approximate_presence_count; /**< Approximate number of online members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
 		std::string created_at; /**< The id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */
