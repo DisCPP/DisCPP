@@ -32,7 +32,7 @@ namespace discpp {
                 rapidjson::Document private_channel_json(rapidjson::kObjectType);
                 private_channel_json.CopyFrom(private_channel, private_channel_json.GetAllocator());
 
-                discpp::DMChannel dm_channel(private_channel_json);
+                discpp::Channel dm_channel(private_channel_json);
 
                 discpp::globals::client_instance->private_channels.insert({ dm_channel.id, dm_channel });
             }
@@ -60,22 +60,22 @@ namespace discpp {
 
     void EventDispatcher::ChannelCreateEvent(rapidjson::Document& result) {
         if (ContainsNotNull(result, "guild_id")) {
-            discpp::GuildChannel new_channel = result;
+            discpp::Channel new_channel = result;
             std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
             guild->channels.insert({ guild->id, new_channel });
-            discpp::DispatchEvent(discpp::GuildChannelCreateEvent(new_channel));
+            discpp::DispatchEvent(discpp::ChannelCreateEvent(new_channel));
         } else {
-            discpp::DMChannel new_channel = discpp::DMChannel(result);
+            discpp::Channel new_channel = discpp::Channel(result);
 
             globals::client_instance->private_channels.insert({ new_channel.id, new_channel });
-            discpp::DispatchEvent(discpp::DMChannelCreateEvent(new_channel));
+            discpp::DispatchEvent(discpp::ChannelCreateEvent(new_channel));
         }
     }
 
     void EventDispatcher::ChannelUpdateEvent(rapidjson::Document& result) {
         if (ContainsNotNull(result, "guild_id")) {
-            discpp::GuildChannel updated_channel = result;
+            discpp::Channel updated_channel = result;
             std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
             auto guild_chan_it = guild->channels.find(updated_channel.id);
@@ -83,37 +83,37 @@ namespace discpp {
                 guild_chan_it->second = updated_channel;
             }
 
-            discpp::DispatchEvent(discpp::GuildChannelUpdateEvent(updated_channel));
+            discpp::DispatchEvent(discpp::ChannelUpdateEvent(updated_channel));
         } else {
-            discpp::DMChannel updated_channel = discpp::DMChannel(result);
+            discpp::Channel updated_channel = discpp::Channel(result);
 
             auto client_chan_it = discpp::globals::client_instance->private_channels.find(updated_channel.id);
             client_chan_it->second = updated_channel;
 
-            discpp::DispatchEvent(discpp::DMChannelUpdateEvent(updated_channel));
+            discpp::DispatchEvent(discpp::ChannelUpdateEvent(updated_channel));
         }
     }
 
     void EventDispatcher::ChannelDeleteEvent(rapidjson::Document& result) {
         if (ContainsNotNull(result, "guild_id")) {
-            discpp::GuildChannel updated_channel = result;
+            discpp::Channel updated_channel = result;
             std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
             auto guild_chan_it = guild->channels.erase(updated_channel.id);
 
-            discpp::DispatchEvent(discpp::GuildChannelUpdateEvent(updated_channel));
+            discpp::DispatchEvent(discpp::ChannelUpdateEvent(updated_channel));
         } else {
-            discpp::DMChannel updated_channel = discpp::DMChannel(result);
+            discpp::Channel updated_channel = discpp::Channel(result);
 
             auto client_chan_it = discpp::globals::client_instance->private_channels.erase(updated_channel.id);
 
-            discpp::DispatchEvent(discpp::DMChannelUpdateEvent(updated_channel));
+            discpp::DispatchEvent(discpp::ChannelUpdateEvent(updated_channel));
         }
     }
 
     void EventDispatcher::ChannelPinsUpdateEvent(rapidjson::Document& result) {
         if (ContainsNotNull(result, "guild_id")) {
-            discpp::GuildChannel pin_update_channel = discpp::GuildChannel(SnowflakeFromString(result["channel_id"].GetString()), SnowflakeFromString(result["guild_id"].GetString()));
+            discpp::Channel pin_update_channel = discpp::Channel(SnowflakeFromString(result["channel_id"].GetString()));
             discpp::Guild guild(pin_update_channel.guild_id);
 
             auto it = guild.channels.find(pin_update_channel.id);
@@ -123,7 +123,7 @@ namespace discpp {
 
             discpp::DispatchEvent(discpp::ChannelPinsUpdateEvent(pin_update_channel));
         } else {
-            discpp::DMChannel pin_update_channel = discpp::DMChannel(SnowflakeFromString(result["channel_id"].GetString()));
+            discpp::Channel pin_update_channel = discpp::Channel(SnowflakeFromString(result["channel_id"].GetString()));
 
             auto it = globals::client_instance->private_channels.find(pin_update_channel.id);
             if (it != globals::client_instance->private_channels.end()) {
@@ -303,10 +303,13 @@ namespace discpp {
 
     void EventDispatcher::MessageCreateEvent(rapidjson::Document& result) {
         std::shared_ptr<discpp::Message> message = std::make_shared<discpp::Message>(result);
-        if (discpp::globals::client_instance->messages.size() >= discpp::globals::client_instance->message_cache_count) {
-            discpp::globals::client_instance->messages.erase(discpp::globals::client_instance->messages.begin());
+        if (!discpp::globals::client_instance->messages.empty()) {
+            if (discpp::globals::client_instance->messages.size() >= discpp::globals::client_instance->message_cache_count) {
+                discpp::globals::client_instance->messages.erase(discpp::globals::client_instance->messages.begin());
+            }
+
+            discpp::globals::client_instance->messages.insert({message->id, message});
         }
-        discpp::globals::client_instance->messages.insert({ message->id, message });
 
         if (discpp::globals::client_instance->config->type == discpp::TokenType::BOT) {
             discpp::globals::client_instance->DoFunctionLater(discpp::globals::client_instance->fire_command_method, discpp::globals::client_instance, *message);
@@ -507,7 +510,7 @@ namespace discpp {
             discpp::Guild guild(SnowflakeFromString(result["guild_id"].GetString()));
             channel = guild.GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
         } else {
-            channel = discpp::DMChannel(SnowflakeFromString(result["channel_id"].GetString()));
+            channel = discpp::Channel(SnowflakeFromString(result["channel_id"].GetString()));
         }
 
         int timestamp = result["timestamp"].GetInt();
@@ -530,7 +533,7 @@ namespace discpp {
     }
 
     void EventDispatcher::WebhooksUpdateEvent(rapidjson::Document& result) {
-        discpp::GuildChannel channel(SnowflakeFromString(result["channel_id"].GetString()), static_cast<snowflake>(result["guild_id"].GetInt64()));
+        discpp::Channel channel(SnowflakeFromString(result["channel_id"].GetString()));
         channel.guild_id = SnowflakeFromString(result["guild_id"].GetString());
 
         discpp::DispatchEvent(discpp::WebhooksUpdateEvent(channel));

@@ -85,7 +85,7 @@ namespace discpp {
                 rapidjson::Document channel_json;
                 channel_json.CopyFrom(channel, channel_json.GetAllocator());
 
-                discpp::GuildChannel tmp = discpp::GuildChannel(channel_json);
+                discpp::Channel tmp = discpp::Channel(channel_json);
                 channels.insert({ tmp.id, tmp });
             }
         }
@@ -100,7 +100,7 @@ namespace discpp {
 		preferred_locale = json["preferred_locale"].GetString();
 
 		if (ContainsNotNull(json, "public_updates_channel_id")) {
-            public_updates_channel = std::make_shared<discpp::GuildChannel>(discpp::GuildChannel(SnowflakeFromString(json["public_updates_channel_id"].GetString()), this->id));
+            public_updates_channel = std::make_shared<discpp::Channel>(discpp::Channel(SnowflakeFromString(json["public_updates_channel_id"].GetString())));
         }
 
 		created_at = FormatTimeFromSnowflake(id);
@@ -144,15 +144,15 @@ namespace discpp {
 		SendDeleteRequest(Endpoint("/guilds/" + std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-    std::unordered_map<discpp::snowflake, discpp::GuildChannel> Guild::GetChannels() {
+    std::unordered_map<discpp::snowflake, discpp::Channel> Guild::GetChannels() {
 		rapidjson::Document json = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/channels"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
-        std::unordered_map<discpp::snowflake, discpp::GuildChannel> channels;
+        std::unordered_map<discpp::snowflake, discpp::Channel> channels;
         for (auto const& channel : json.GetArray()) {
             if (!channel.IsNull()) {
                 rapidjson::Document channel_json;
                 channel_json.CopyFrom(channel, channel_json.GetAllocator());
 
-                discpp::GuildChannel guild_channel = discpp::GuildChannel(channel_json);
+                discpp::Channel guild_channel = discpp::Channel(channel_json);
                 channels.insert({ guild_channel.id, guild_channel });
             }
         }
@@ -161,28 +161,26 @@ namespace discpp {
 		return channels;
 	}
 
-    std::unordered_map<discpp::snowflake, discpp::CategoryChannel> Guild::GetCategories() {
-	    std::unordered_map<discpp::snowflake, discpp::CategoryChannel> tmp;
+    std::unordered_map<discpp::snowflake, discpp::Channel> Guild::GetCategories() {
+	    std::unordered_map<discpp::snowflake, discpp::Channel> tmp;
 	    for (auto& chnl : this->GetChannels()) {
 	        if (chnl.second.type == discpp::ChannelType::GROUP_CATEGORY) {
-	            tmp.insert({chnl.first, CategoryChannel(chnl.first, chnl.second.guild_id)});
-	        } else {
-	            continue;
-	        }
+	            tmp.emplace(chnl.first, chnl.second);
+	        } else continue;
 	    }
 	    return tmp;
 	}
 
-    discpp::GuildChannel Guild::GetChannel(const snowflake& id) const {
+    discpp::Channel Guild::GetChannel(const snowflake& id) const {
 	    auto it = channels.find(id);
 	    if (it != channels.end()) {
 	        return it->second;
 	    }
 
-		return discpp::GuildChannel();
+		return discpp::Channel();
 	}
 
-    discpp::GuildChannel Guild::CreateChannel(const std::string& name, const std::string& topic, const ChannelType& type, const int& bitrate, const int& user_limit, const int& rate_limit_per_user, const int& position, const std::vector<discpp::Permissions>& permission_overwrites, const discpp::CategoryChannel& category, const bool& nsfw) {
+    discpp::Channel Guild::CreateChannel(const std::string& name, const std::string& topic, const ChannelType& type, const int& bitrate, const int& user_limit, const int& rate_limit_per_user, const int& position, const std::vector<discpp::Permissions>& permission_overwrites, const discpp::Channel& category, const bool& nsfw) {
 		Guild::EnsureBotPermission(Permission::MANAGE_CHANNELS);
         int tmp = bitrate;
 		if (tmp < 8000) tmp = 8000;
@@ -193,7 +191,8 @@ namespace discpp {
 		rapidjson::Value permission_json_array(rapidjson::kArrayType);
 
 		for (auto permission : permission_overwrites) {
-			permission_json_array.PushBack(std::move(permission.ToJson()), allocator);
+			rapidjson::Document doc = permission.ToJson();
+			permission_json_array.PushBack(doc, allocator);
 		}
 
 		channel_json.AddMember("name", name, allocator);
@@ -220,7 +219,7 @@ namespace discpp {
 		cpr::Body body(DumpJson(channel_json));
 		rapidjson::Document result = SendPostRequest(Endpoint("/guilds/" + std::to_string(id) + "/channels"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::CHANNEL, body);
 
-		discpp::GuildChannel channel(result);
+		discpp::Channel channel(result);
         channels.insert({ channel.id, channel });
 
 		return channel;

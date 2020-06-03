@@ -86,6 +86,7 @@ namespace discpp {
          */
 
 		Channel(const snowflake& id);
+
         /**
          * @brief Constructs a discpp::Channel object from json.
          *
@@ -99,7 +100,18 @@ namespace discpp {
          */
 		Channel(rapidjson::Document& json);
 
-		static discpp::Channel RequestChannel(discpp::snowflake);
+        /**
+         * @brief Requests a channel from discords servers.
+         *
+         * ```cpp
+         *      discpp::Channel channel = discpp::Channel::RequestChannel(channel_id);
+         * ```
+         *
+         * @param[in] id The channel id.
+         *
+         * @return discpp::Channel
+         */
+		static discpp::Channel RequestChannel(discpp::snowflake id);
 
         /**
          * @brief Send a message in this channel.
@@ -196,45 +208,6 @@ namespace discpp {
          */
 		std::vector<discpp::Message> GetPinnedMessages();
 
-        ChannelType type; /**< The type of channel. */
-		std::string name; /**< The name of the channel. */
-		std::string topic; /**< The channel topic. */
-		snowflake last_message_id; /**< The ID of the last message sent in this channel. */
-        // TODO: Convert to iso8601Time
-		std::string last_pin_timestamp; /**< When the last pinned message was pinned. */
-	};
-
-	class GuildChannel : public Channel {
-	public:
-		GuildChannel() = default;
-
-        /**
-         * @brief Constructs a discpp::GuildChannel object from json.
-         *
-         * ```cpp
-         *      discpp::GuildChannel GuildChannel(json);
-         * ```
-         *
-         * @param[in] json The json data for the guild channel.
-         *
-         * @return discpp::GuildChannel, this is a constructor.
-         */
-		GuildChannel(rapidjson::Document& json);
-
-        /**
-         * @brief Constructs a discpp::GuildChannel from id and guild's id.
-         *
-         * ```cpp
-         *      discpp::GuildChannel GuildChannel(channel_id, guild_id);
-         * ```
-         *
-         * @param[in] id the id of the channel
-         * @param[in] guild_id the guild id
-         *
-         * @return discpp::GuildChannel, this is a constructor.
-         */
-		GuildChannel(const snowflake& id, const snowflake& guild_id);
-
         /**
          * @brief Delete several messages (2-100).
          *
@@ -246,7 +219,7 @@ namespace discpp {
          *
          * @return void
          */
-		void BulkDeleteMessage(const std::vector<snowflake>& messages);
+        void BulkDeleteMessage(const std::vector<snowflake>& messages);
 
         /**
          * @brief Remove permission overwrites for this channel.
@@ -259,7 +232,7 @@ namespace discpp {
          *
          * @return void
          */
-		void DeletePermission(const discpp::Permissions& permissions); // TODO: https://discordapp.com/developers/docs/resources/channel#delete-channel-permission
+        void DeletePermission(const discpp::Permissions& permissions); // TODO: https://discordapp.com/developers/docs/resources/channel#delete-channel-permission
 
         /**
          * @brief Edit permission overwrites for this channel.
@@ -272,7 +245,7 @@ namespace discpp {
          *
          * @return void
          */
-		void EditPermissions(const discpp::Permissions& permissions);
+        void EditPermissions(const discpp::Permissions& permissions);
 
         /**
          * @brief Returns owning guild object
@@ -283,7 +256,7 @@ namespace discpp {
          *
          * @return discpp::Guild
          */
-		std::shared_ptr<discpp::Guild> GetGuild();
+        std::shared_ptr<discpp::Guild> GetGuild();
 
         /**
          * @brief Create an invite for the channel.
@@ -299,114 +272,32 @@ namespace discpp {
          *
          * @return discpp::GuildInvite
          */
-		GuildInvite CreateInvite(const int& max_age, const int& max_uses, const bool& temporary, const bool& unique);
-		std::vector<GuildInvite> GetInvites();
+        GuildInvite CreateInvite(const int& max_age, const int& max_uses, const bool& temporary, const bool& unique);
 
-        bool operator==(GuildChannel& other) const {
-            return this->id == other.id;
-        }
-
-        bool operator!=(GuildChannel& other) const {
-            return this->id != other.id;
-        }
-
-		bool nsfw; /**< Whether or not the current channel is not safe for work. */
-		int bitrate; /**< The bitrate (in bits) of the voice channel. */
-		int position; /**< Position of channel in guild's channel list. */
-		int rate_limit_per_user; /**< Amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected. */
-		int user_limit; /**< The user limit of the voice channel. */
-		snowflake guild_id; /**< Guild id of the current channel. */
-		snowflake category_id; /**< ID of the parent category for a channel (each parent category can contain up to 50 channels). */
-		std::vector<discpp::Permissions> permissions; /**< Explicit permission overwrites for members and roles. */
-	};
-
-    class CategoryChannel : public GuildChannel {
-    public:
-        CategoryChannel() = default;
-
-
-        /**
-         * @brief Constructs a discpp::CategoryChannel object from json.
-         *
-         * ```cpp
-         *      discpp::CategoryChannel CategoryChannel(json);
-         * ```
-         *
-         * @param[in] json The json data for the category channel.
-         *
-         * @return discpp::CategoryChannel, this is a constructor.
-         */
-        CategoryChannel(rapidjson::Document& json) : GuildChannel(json) {}
-
-        /**
-         * @brief Constructs a discpp::CategoryChannel from id and guild's id.
-         *
-         * ```cpp
-         *      discpp::CategoryChannel CategoryChannel(channel_id, guild_id);
-         * ```
-         *
-         * @param[in] id the id of the channel
-         * @param[in] guild_id the guild id
-         *
-         * @return discpp::CategoryChannel, this is a constructor.
-         */
-        CategoryChannel(const snowflake& id, const snowflake& guild_id) : GuildChannel(id, guild_id) {}
+        std::vector<GuildInvite> GetInvites();
 
         /**
          * @brief Lists children channels for this category.
          * ```cpp
-         *      std::unordered_map<discpp::snowflake, discpp::GuildChannel> children = category.GetChildren();
+         *      std::unordered_map<discpp::snowflake, discpp::Channel> children = category.GetChildren();
          * ```
          *
-         * @return std::unordered_map<discpp::snowflake, discpp::GuildChannel>
+         * @return std::unordered_map<discpp::snowflake, discpp::Channel>
          */
-        std::unordered_map<discpp::snowflake, discpp::GuildChannel> GetChildren();
-    };
-
-	class DMChannel : public Channel {
-	public: 
-		DMChannel() = default;
-
+        std::unordered_map<discpp::snowflake, discpp::Channel> GetChildren();
 
         /**
-         * @brief Constructs a discpp::DMChannel from json.
-         *
-         * ```cpp
-         *      discpp::DMChannel GuildChannel(json);
-         * ```
-         *
-         * @param[in] json The json data for the dm channel.
-         *
-         * @return discpp::DMChannel, this is a constructor.
-         */
-		DMChannel(rapidjson::Document& json);
-
-        /**
-         * @brief Constructs a discpp::DMChannel from id.
-         *
-         * ```cpp
-         *      discpp::DMChannel GuildChannel(channel_id);
-         * ```
-         *
-         * @param[in] id the id of the channel
-         *
-         * @return discpp::DMChannel, this is a constructor.
-         */
-        DMChannel(const snowflake& id);
-
-
-        /**
-         * @brief Add a recipient to the group dm.
-         *
-         * This only works if the channel is a group dm.
-         *
-         * ```cpp
-         *      channel.GroupDMAddRecipient(user);
-         * ```
-         *
-         * @return void
-         */
-		void GroupDMAddRecipient(const discpp::User& user);
+        * @brief Add a recipient to the group dm.
+        *
+        * This only works if the channel is a group dm.
+        *
+        * ```cpp
+        *      channel.GroupDMAddRecipient(user);
+        * ```
+        *
+        * @return void
+        */
+        void GroupDMAddRecipient(const discpp::User& user);
 
         /**
          * @brief Remove a recipient from the group dm.
@@ -421,18 +312,24 @@ namespace discpp {
          */
         void GroupDMRemoveRecipient(const discpp::User& user);
 
-        bool operator==(GuildChannel& other) const {
-            return this->id == other.id;
-        }
-
-        bool operator!=(GuildChannel& other) const {
-            return this->id != other.id;
-        }
-
-		std::string icon; /**< Hashed icon for this channel. */
-		snowflake owner_id; /**< ID of the DM creator. */
-		snowflake application_id; /**< Application ID of the group DM creator if it is bot-created. */
-		std::vector<discpp::User> recipients; /**< The recipients of the DM. */
+        ChannelType type; /**< The type of channel. */
+		std::string name; /**< The name of the channel. */
+		std::string topic; /**< The channel topic. */
+		snowflake last_message_id; /**< The ID of the last message sent in this channel. */
+        // TODO: Convert to iso8601Time
+		std::string last_pin_timestamp; /**< When the last pinned message was pinned. */
+        bool nsfw; /**< Whether or not the current channel is not safe for work. */
+        int bitrate; /**< The bitrate (in bits) of the voice channel. */
+        int position; /**< Position of channel in guild's channel list. */
+        int rate_limit_per_user; /**< Amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected. */
+        int user_limit; /**< The user limit of the voice channel. */
+        snowflake guild_id; /**< Guild id of the current channel. */
+        snowflake category_id; /**< ID of the parent category for a channel (each parent category can contain up to 50 channels). */
+        std::vector<discpp::Permissions> permissions; /**< Explicit permission overwrites for members and roles. */
+        std::string icon; /**< Hashed icon for this channel. */
+        snowflake owner_id; /**< ID of the DM creator. */
+        snowflake application_id; /**< Application ID of the group DM creator if it is bot-created. */
+        std::vector<discpp::User> recipients; /**< The recipients of the DM. */
 	};
 }
 

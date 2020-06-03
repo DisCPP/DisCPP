@@ -7,11 +7,11 @@
 
 
 namespace discpp {
-	class DMChannelUpdateEvent : public Event {
+	class ChannelUpdateEvent : public Event {
 	public:
-		inline DMChannelUpdateEvent(discpp::DMChannel channel) : channel(channel) {}
+		inline ChannelUpdateEvent(discpp::Channel channel) : channel(channel) {}
 
-		discpp::DMChannel channel;
+		discpp::Channel channel;
 	};
 }
 
