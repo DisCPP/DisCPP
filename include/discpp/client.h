@@ -267,7 +267,7 @@ namespace discpp {
 		discpp::User ReqestUserIfNotCached(const discpp::snowflake& id);
 
         /**
-         * @brief Get the bot user connections.
+         * @brief Get the bot's user connections.
          *
          * ```cpp
          *      bot.GetBotUserConnections();
@@ -278,21 +278,22 @@ namespace discpp {
         std::vector<discpp::User::Connection> GetBotUserConnections();
 
         /**
-         * @brief Contructs a UserRelationship from json
+         * @brief Gets a channel with id.
          *
-         * @return discpp::UserRelationship
+         * @return discpp::Channel
          */
         discpp::Channel GetChannel(const discpp::snowflake& id);
 
 
+        /**
+         * @brief Get a DM channel with id
+         *
+         * @return discpp::DMChannel
+         */
         discpp::DMChannel GetDMChannel(const discpp::snowflake& id);
 
         /**
          * @brief Get all DM's for this user. Only supports user tokens!
-         *
-         * ```cpp
-         *      std::vector<discpp::User::Connection> conntections = client->GetUserConnections();
-         * ```
          *
          * @return std::vector<discpp::User::Connection>
          */
