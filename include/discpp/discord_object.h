@@ -1,7 +1,7 @@
 #ifndef DISCPP_OBJECT_H
 #define DISCPP_OBJECT_H
 
-#include "Snowflake.h"
+#include "snowflake.h"
 
 #include <cstdint>
 #include <iostream>
