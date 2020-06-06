@@ -426,7 +426,7 @@ namespace discpp {
             discpp::DispatchEvent(discpp::MessageReactionAddEvent(*message->second, emoji, user));
         } else {
             discpp::Channel channel = globals::client_instance->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
-            discpp::Message message = channel.GetChannelMessage(SnowflakeFromString(result["message_id"].GetString()));
+            discpp::Message message = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
 
             rapidjson::Document emoji_json;
             emoji_json.CopyFrom(result["emoji"], emoji_json.GetAllocator());
@@ -481,7 +481,7 @@ namespace discpp {
             discpp::DispatchEvent(discpp::MessageReactionRemoveEvent(*message->second, emoji, user));
         } else {
             discpp::Channel channel = globals::client_instance->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
-            discpp::Message message = channel.GetChannelMessage(SnowflakeFromString(result["message_id"].GetString()));
+            discpp::Message message = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
 
             rapidjson::Document emoji_json;
             emoji_json.CopyFrom(result["emoji"], emoji_json.GetAllocator());
@@ -515,7 +515,7 @@ namespace discpp {
             discpp::DispatchEvent(discpp::MessageReactionRemoveAllEvent(*message->second));
         } else {
             discpp::Channel channel = globals::client_instance->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
-            discpp::Message message = channel.GetChannelMessage(SnowflakeFromString(result["message_id"].GetString()));
+            discpp::Message message = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
             discpp::DispatchEvent(discpp::MessageReactionRemoveAllEvent(message));
         }
     }
