@@ -181,7 +181,7 @@ namespace discpp {
          *
          * @return discpp::Message
          */
-        discpp::Message GetChannelMessage(discpp::snowflake id);
+        discpp::Message RequestMessage(discpp::snowflake id);
 
         /**
          * @brief Get a message from the channel from the id.

@@ -319,7 +319,7 @@ namespace discpp {
         }
 	}
 
-    discpp::Message Channel::GetChannelMessage(discpp::snowflake id) {
+    discpp::Message Channel::RequestMessage(discpp::snowflake id) {
         rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + std::to_string(this->id) + "/messages/" + std::to_string(id)), DefaultHeaders(), {}, {});
 
         return discpp::Message(result);
