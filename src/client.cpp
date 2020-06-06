@@ -56,7 +56,7 @@ namespace discpp {
 
         WaitForRateLimits(client_user.id, RateLimitBucketType::GLOBAL);
 
-        std::lock_guard<std::mutex> lock = std::lock_guard(this->websocket_client_mutex);
+        //std::lock_guard<std::mutex> lock = std::lock_guard(websocket_client_mutex);
         websocket.sendText(json_payload);
     }
 
@@ -65,8 +65,7 @@ namespace discpp {
     }
 
     void Client::DisconnectWebsocket() {
-        std::scoped_lock scope_lock(this->websocket_client_mutex);
-        std::lock_guard<std::mutex> lock(websocket_client_mutex);
+        //std::lock_guard<std::mutex> lock(websocket_client_mutex);
         logger->Debug(LogTextColor::YELLOW + "Closing websocket connection...");
 
         websocket.close(ix::WebSocketCloseConstants::kNormalClosureCode);
@@ -112,10 +111,7 @@ namespace discpp {
 #endif
 
             {
-                std::lock_guard<std::mutex> lock(this->websocket_client_mutex);
-                if (reconnecting) {
-
-                }
+                //std::lock_guard<std::mutex> lock(websocket_client_mutex);
 
                 websocket.setUrl(gateway_endpoint);
                 websocket.disableAutomaticReconnection();
