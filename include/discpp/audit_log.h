@@ -2,8 +2,8 @@
 // Created by SeanOMik on 5/3/2020.
 //
 
-#ifndef DEXUN_AUDIT_LOG_H
-#define DEXUN_AUDIT_LOG_H
+#ifndef DISCPP_AUDIT_LOG_H
+#define DISCPP_AUDIT_LOG_H
 
 #include "webhook.h"
 #include "user.h"
@@ -161,4 +161,4 @@ namespace discpp {
     };
 }
 
-#endif //DEXUN_AUDIT_LOG_H
+#endif //DISCPP_AUDIT_LOG_H
