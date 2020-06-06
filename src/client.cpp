@@ -11,6 +11,7 @@
 #include "client_config.h"
 #include "exceptions.h"
 #include "settings.h"
+#include "events/reconnect_event.h"
 
 #include <ixwebsocket/IXNetSystem.h>
 
@@ -217,6 +218,8 @@ namespace discpp {
 
                 heartbeat_acked = true;
                 reconnecting = false;
+
+                discpp::EventHandler<discpp::ReconnectEvent>::TriggerEvent(discpp::ReconnectEvent());
             } else {
                 hello_packet = std::move(result);
 
