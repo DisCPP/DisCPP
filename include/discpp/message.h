@@ -37,7 +37,7 @@ namespace discpp {
 	};
 
 	struct MessageApplication : public DiscordObject {
-		//snowflake id;
+		//Snowflake id;
 		std::string cover_image;
 		std::string description;
 		std::string icon;
@@ -54,9 +54,9 @@ namespace discpp {
 	};
 
 	struct MessageReference {
-		snowflake message_id;
-		snowflake channel_id;
-		snowflake guild_id;
+		Snowflake message_id;
+		Snowflake channel_id;
+		Snowflake guild_id;
 
 		MessageReference() = default;
 		MessageReference(rapidjson::Document& json) {
@@ -77,7 +77,7 @@ namespace discpp {
                 name = json["name"].GetString();
             }
 
-            discpp::snowflake guild_id;
+            discpp::Snowflake guild_id;
             discpp::ChannelType type;
             std::string name;
 	    };
@@ -95,7 +95,7 @@ namespace discpp {
          *
          * @return discpp::Message, this is a constructor.
          */
-		Message(const snowflake& id);
+		Message(const Snowflake& id);
 
         /**
 		 * @brief Sends a REST request to get the message, use this if the message isn't cached.
@@ -109,7 +109,7 @@ namespace discpp {
 		 *
 		 * @return discpp::Message, this is a constructor.
 		 */
-		Message(const snowflake& message_id, const snowflake& channel_id);
+		Message(const Snowflake& message_id, const Snowflake& channel_id);
 
         /**
          * @brief Constructs a discpp::Message object by parsing json
@@ -171,7 +171,7 @@ namespace discpp {
          * You can use `std::unordered_map::find` to check if a user is contained in it with the users id.
          *
          * ```cpp
-         *      std::unordered_map<discpp::snowflake, discpp::User> reactors = message.GetReactorOfEmoji(emoji, 50);
+         *      std::unordered_map<discpp::Snowflake, discpp::User> reactors = message.GetReactorOfEmoji(emoji, 50);
          * ```
          *
          * @param[in] emoji The emoji to get reactors of.
@@ -179,7 +179,7 @@ namespace discpp {
          *
          * @return std::vector<discpp::User>
          */
-        std::unordered_map<discpp::snowflake, discpp::User> GetReactorsOfEmoji(const discpp::Emoji& emoji, const int& amount);
+        std::unordered_map<discpp::Snowflake, discpp::User> GetReactorsOfEmoji(const discpp::Emoji& emoji, const int& amount);
 
         /**
          * @brief Get reactors of a specific emoji of the specific method.
@@ -187,7 +187,7 @@ namespace discpp {
          * You can use `std::unordered_map::find` to check if a user is contained in it with the users id.
          *
          * ```cpp
-         *      std::unordered_map<discpp::snowflake, discpp::User> reactors = message.GetReactorOfEmoji(emoji, 50, reaction_method);
+         *      std::unordered_map<discpp::Snowflake, discpp::User> reactors = message.GetReactorOfEmoji(emoji, 50, reaction_method);
          * ```
          *
          * @param[in] emoji The emoji to get reactors of.
@@ -196,7 +196,7 @@ namespace discpp {
          *
          * @return std::vector<discpp::User>
          */
-		std::unordered_map<discpp::snowflake, discpp::User> GetReactorsOfEmoji(const discpp::Emoji& emoji, const discpp::User& user, const GetReactionsMethod& method);
+		std::unordered_map<discpp::Snowflake, discpp::User> GetReactorsOfEmoji(const discpp::Emoji& emoji, const discpp::User& user, const GetReactionsMethod& method);
 
         /**
          * @brief Clear message reactions.
@@ -330,13 +330,13 @@ namespace discpp {
 		    return FormatTime(this->edited_timestamp);
 		}
 
-		std::unordered_map<discpp::snowflake, discpp::User> mentions;
-		std::vector<discpp::snowflake> mentioned_roles;
-        std::unordered_map<discpp::snowflake, ChannelMention> mention_channels;
+		std::unordered_map<discpp::Snowflake, discpp::User> mentions;
+		std::vector<discpp::Snowflake> mentioned_roles;
+        std::unordered_map<discpp::Snowflake, ChannelMention> mention_channels;
 		std::vector<discpp::Attachment> attachments;
 		std::vector<discpp::EmbedBuilder> embeds;
 		std::vector<discpp::Reaction> reactions;
-		snowflake webhook_id;
+		Snowflake webhook_id;
 		int type;
 		discpp::MessageActivity activity;
 		discpp::MessageApplication application;

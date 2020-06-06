@@ -20,7 +20,7 @@ namespace discpp {
 	public:
 	    Webhook() = default;
 	    Webhook(rapidjson::Document& json);
-		Webhook(const snowflake& id, const std::string& token);
+		Webhook(const Snowflake& id, const std::string& token);
 
 		discpp::Message Send(const std::string& text, const bool& tts = false, discpp::EmbedBuilder* embed = nullptr, const std::vector<discpp::File>& files = {});
 		void EditName(std::string& name);

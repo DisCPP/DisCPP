@@ -137,7 +137,7 @@ int main(int argc, const char* argv[]) {
 	});
 
 	discpp::EventHandler<discpp::GuildMemberAddEvent>::RegisterListener([](discpp::GuildMemberAddEvent event) {
-		discpp::Channel channel((discpp::snowflake) "638156895953223714");
+		discpp::Channel channel((discpp::Snowflake) "638156895953223714");
 
 		channel.Send("Welcome <@" + event.member.user.id + ">, hope you enjoy!");
 	});

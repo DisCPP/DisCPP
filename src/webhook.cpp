@@ -17,7 +17,7 @@ namespace discpp {
         token = GetDataSafely<std::string>(json, "token");
     }
 
-	Webhook::Webhook(const discpp::snowflake& id, const std::string& token) : DiscordObject(id) {
+	Webhook::Webhook(const discpp::Snowflake& id, const std::string& token) : DiscordObject(id) {
 		this->token = token;
 		this->id = id;
 	};
