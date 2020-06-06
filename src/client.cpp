@@ -34,7 +34,7 @@ namespace discpp {
 
         while (run) {
             {
-                std::lock_guard<std::mutex> futures_guard(futures_mutex);
+                std::lock_guard<std::mutex> futures_guard(this->futures_mutex);
                 futures.erase(std::remove_if(futures.begin(), futures.end(), [](const std::future<void>& future) {
                     return future.valid() && future.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
                 }), futures.end());
@@ -56,7 +56,7 @@ namespace discpp {
 
         WaitForRateLimits(client_user.id, RateLimitBucketType::GLOBAL);
 
-        std::lock_guard<std::mutex> lock = std::lock_guard(websocket_client_mutex);
+        std::lock_guard<std::mutex> lock = std::lock_guard(this->websocket_client_mutex);
         websocket.sendText(json_payload);
     }
 
@@ -65,6 +65,7 @@ namespace discpp {
     }
 
     void Client::DisconnectWebsocket() {
+        std::scoped_lock scope_lock(this->websocket_client_mutex);
         std::lock_guard<std::mutex> lock(websocket_client_mutex);
         logger->Debug(LogTextColor::YELLOW + "Closing websocket connection...");
 
@@ -111,7 +112,7 @@ namespace discpp {
 #endif
 
             {
-                std::lock_guard<std::mutex> lock(websocket_client_mutex);
+                std::lock_guard<std::mutex> lock(this->websocket_client_mutex);
                 if (reconnecting) {
 
                 }
