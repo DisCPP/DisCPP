@@ -148,22 +148,31 @@ namespace discpp {
          */
 		bool IsMuted();
 
+        /**
+         * @brief Formats the joined at time to text.
+         *
+         * @return std::string
+         */
+        inline std::string GetFormattedJoinedAt() const {
+            return FormatTime(this->joined_at);
+        }
+
+        /**
+         * @brief Formats the premium since time to text.
+         *
+         * @return std::string
+         */
+        inline std::string GetFormattedPremiumSince() const {
+            if (premium_since == 0) return "";
+            return FormatTime(this->premium_since);
+        }
+
 		discpp::User user; /**< The user this guild member represents. */
 		Snowflake guild_id; /**< ID of the guild the current member is in. */
 		std::string nick; /**< This users guild nickname. */
 		std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>> roles; /**< Roles the current member has. */
-
 		time_t joined_at; /**< When the user joined the guild. */
-        [[nodiscard]] inline std::string GetFormattedJoinedAt() const {
-            return FormatTime(this->joined_at);
-        }
-
-		time_t premium_since; /**< When the user started boosting the guild. */
-		[[nodiscard]] inline std::string GetFormattedPremiumSince() const {
-		    if (premium_since == NULL) return "";
-		    return FormatTime(this->premium_since);
-		}
-
+        time_t premium_since; /**< When the user started boosting the guild. */
 		discpp::Permissions permissions; /**< Guild permissions for the current member. */
 		discpp::Presence presence; /**< Presence for the current member. */
 		int hierarchy; /**< Role hierarchy for the current member. */
