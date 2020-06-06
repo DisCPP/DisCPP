@@ -101,7 +101,7 @@ namespace discpp {
 		Channel(rapidjson::Document& json);
 
         /**
-         * @brief Requests a channel from discords servers.
+         * @brief Requests a channel from discord's api.
          *
          * ```cpp
          *      discpp::Channel channel = discpp::Channel::RequestChannel(channel_id);
