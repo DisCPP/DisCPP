@@ -164,7 +164,7 @@ namespace discpp {
          * @brief Get channel's messages depending on the given method.
          *
          * ```cpp
-         *      std::vector<discpp::Message> messages = channel.GetChannelMessages(50);
+         *      std::vector<discpp::Message> messages = channel.RequestMessages(50);
          * ```
          *
          * @param[in] amount The amount of the messages to get unless the method is not "limit".
@@ -172,7 +172,7 @@ namespace discpp {
          *
          * @return std::vector<discpp::Message>
          */
-        std::vector<discpp::Message> GetChannelMessages(int amount, GetChannelsMessagesMethod get_method = GetChannelsMessagesMethod::LIMIT);
+        std::vector<discpp::Message> RequestMessages(int amount, GetChannelsMessagesMethod get_method = GetChannelsMessagesMethod::LIMIT);
 
         /**
          * @brief Requests the channel's message from the discord api.
