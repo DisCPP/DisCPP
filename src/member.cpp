@@ -4,38 +4,10 @@
 
 namespace discpp {
 	Member::Member(const snowflake& id, const discpp::Guild& guild) : discpp::DiscordObject(id) {
-		/**
-		 * @brief Constructs a discpp::Member object using its id and the guild that it is in.
-		 *
-		 * This constructor searches the guild's member cache to get a member object.
-		 *
-		 * ```cpp
-		 *      discpp::Member member("222189653795667968", guild);
-		 * ```
-		 *
-		 * @param[in] id The id of the member.
-		 * @param[in] guild The guild containing the member.
-		 *
-		 * @return discpp::Member, this is a constructor.
-		 */
-
 		*this = *guild.GetMember(id);
 	}
 
 	Member::Member(rapidjson::Document& json, const discpp::Guild& guild) : guild_id(guild.id) {
-		/**
-		 * @brief Constructs a discpp::Member object by parsing json and stores the guild_id.
-		 *
-		 * ```cpp
-		 *      discpp::Member member(json, 657246994997444614);
-		 * ```
-		 *
-		 * @param[in] json The json that makes up of member object.
-		 * @param[in] json guild_id The guild id.
-		 *
-		 * @return discpp::Member, this is a constructor.
-		 */
-
 		user = ConstructDiscppObjectFromJson(json, "user", discpp::User());
 		if (user.id != 0) id = user.id;
 		nick = GetDataSafely<std::string>(json, "nick");
@@ -70,8 +42,10 @@ namespace discpp {
 		} else {
             hierarchy = highest_hiearchy;
         }
-		joined_at = GetDataSafely<std::string>(json, "joined_at");
-		premium_since = GetDataSafely<std::string>(json, "premium_since");
+
+		joined_at = TimeFromDiscord(GetDataSafely<std::string>(json, "joined_at"));
+		std::string prm_since = GetDataSafely<std::string>(json, "premium_since");
+		if (prm_since != "") premium_since = TimeFromDiscord(prm_since);
 		if (GetDataSafely<bool>(json, "deaf")) {
 		    flags |= 0b1;
 		}
@@ -90,22 +64,6 @@ namespace discpp {
 	}
 
 	void Member::ModifyMember(const std::string& nick, std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf, const snowflake& channel_id) {
-		/**
-		 * @brief Modifies this guild member.
-		 *
-		 * ```cpp
-		 *      member.ModifyMember("Member nick", roles, true, false, 657246994997444614);
-		 * ```
-		 *
-		 * @param[in] nick The new member nickname.
-		 * @param[in] roles The new member role.
-		 * @param[in] mute Whether or not the member is muted in voice channels.
-		 * @param[in] deaf Whether or not the member is deafened in voice channels.
-		 * @param[in] channel_id The voice channel to move them to if they're connected to one.
-		 *
-		 * @return void
-		 */
-
 		std::string json_roles = "[";
 		for (discpp::Role role : roles) {
 			if (&role == &roles.front()) {
@@ -135,47 +93,14 @@ namespace discpp {
 	}
 
 	void Member::AddRole(const discpp::Role& role) {
-		/**
-		 * @brief Adds a role to a guild member.
-		 *
-		 * ```cpp
-		 *      guild.AddRole(role);
-		 * ```
-		 *
-		 * @param[in] role The role to add.
-		 *
-		 * @return void
-		 */
-
 		SendPutRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 	}
 
 	void Member::RemoveRole(const discpp::Role& role) {
-		/**
-		 * @brief Removes a role to a guild member.
-		 *
-		 * ```cpp
-		 *      guild.RemoveRole(role);
-		 * ```
-		 *
-		 * @param[in] role The role to remove.
-		 *
-		 * @return void
-		 */
-
 		SendDeleteRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 	}
 
 	bool Member::IsBanned() {
-		/**
-		 * @brief Check if a member is banned.
-		 *
-		 * ```cpp
-		 *      bool is_banned = guild.IsBanned(member);
-		 * ```
-		 *
-		 * @return bool
-		 */
 
 		rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/bans/" + std::to_string(id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 		rapidjson::Value::ConstMemberIterator itr = result.FindMember("reason");
@@ -183,34 +108,10 @@ namespace discpp {
 	}
 
 	bool Member::HasRole(const discpp::Role& role) {
-		/**
-		 * @brief Check if this member is a role.
-		 *
-		 * ```cpp
-		 *      bool has_role = member.HasRole(role);
-		 * ```
-		 *
-		 * @param[in] role The role to check if the member has it.
-		 *
-		 * @return bool
-		 */
-
 		return count_if(roles.begin(), roles.end(), [role](std::pair<discpp::snowflake, std::shared_ptr<discpp::Role>> pair) { return role.id == pair.second->id; }) != 0;
 	}
 
 	bool Member::HasPermission(const discpp::Permission& perm) {
-		/**
-		 * @brief Check if this member has a permission. It will also check if it has the Administrator permission or is guild owner.
-		 *
-		 * ```cpp
-		 *      bool has_perm = member.HasPermission(discpp::Permission::MANAGE_CHANNELS);
-		 * ```
-		 *
-		 * @param[in] perm The permission to check that the member has.
-		 *
-		 * @return bool
-		 */
-
 		// Check if the member has the permission, has the admin permission, or is the guild owner.
 		bool has_perm = permissions.allow_perms.HasPermission(perm) && !permissions.deny_perms.HasPermission(perm);
 		has_perm = has_perm || (permissions.allow_perms.HasPermission(Permission::ADMINISTRATOR) && !permissions.deny_perms.HasPermission(Permission::ADMINISTRATOR));

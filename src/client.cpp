@@ -34,7 +34,7 @@ namespace discpp {
 
         while (run) {
             {
-                std::lock_guard<std::mutex> futures_guard(futures_mutex);
+                std::lock_guard<std::mutex> futures_guard(this->futures_mutex);
                 futures.erase(std::remove_if(futures.begin(), futures.end(), [](const std::future<void>& future) {
                     return future.valid() && future.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
                 }), futures.end());
@@ -56,7 +56,7 @@ namespace discpp {
 
         WaitForRateLimits(client_user.id, RateLimitBucketType::GLOBAL);
 
-        std::lock_guard<std::mutex> lock = std::lock_guard(websocket_client_mutex);
+        std::lock_guard<std::mutex> lock = std::lock_guard(this->websocket_client_mutex);
         websocket.sendText(json_payload);
     }
 
@@ -65,7 +65,7 @@ namespace discpp {
     }
 
     void Client::DisconnectWebsocket() {
-        logger->Debug(LogTextColor::YELLOW + "Locking Mutex before disconnect...");
+        std::scoped_lock scope_lock(this->websocket_client_mutex);
         std::lock_guard<std::mutex> lock(websocket_client_mutex);
         logger->Debug(LogTextColor::YELLOW + "Closing websocket connection...");
 
@@ -87,7 +87,6 @@ namespace discpp {
 
             break;
         }
-
 
         rapidjson::Value::ConstMemberIterator itr = gateway_request.FindMember("url");
 
@@ -113,7 +112,7 @@ namespace discpp {
 #endif
 
             {
-                std::lock_guard<std::mutex> lock(websocket_client_mutex);
+                std::lock_guard<std::mutex> lock(this->websocket_client_mutex);
                 if (reconnecting) {
 
                 }
@@ -145,6 +144,7 @@ namespace discpp {
         // if we're reconnecting this just stop here.
         if (reconnecting) {
             logger->Debug("Websocket was closed for reconnecting...");
+            return;
         } else if (stay_disconnected) {
             logger->Warn(LogTextColor::YELLOW + "Websocket was closed.");
         } else {
@@ -155,7 +155,7 @@ namespace discpp {
         disconnected = true;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-        if (disconnected && !reconnecting) {
+        if (disconnected) {
             reconnecting = true;
             ReconnectToWebsocket();
         }
@@ -168,7 +168,9 @@ namespace discpp {
             disconnected = false;
             reconnecting = false;
         } else if (msg->type == ix::WebSocketMessageType::Close) {
-            HandleDiscordDisconnect(msg);
+            if (!reconnecting) {
+                HandleDiscordDisconnect(msg);
+            }
         } else if (msg->type == ix::WebSocketMessageType::Error) {
             logger->Info(LogTextColor::RED + "Error: " + msg->errorInfo.reason);
         } else if (msg->type == ix::WebSocketMessageType::Message) {
@@ -231,7 +233,7 @@ namespace discpp {
             heartbeat_acked = true;
             break;
         case reconnect:
-            DoFunctionLater([&] {ReconnectToWebsocket();});
+            ReconnectToWebsocket();
             break;
         case invalid_session:
             // Check if the session is resumable
@@ -347,9 +349,7 @@ namespace discpp {
             reconnecting = true;
 
             DisconnectWebsocket();
-            // Connect with a 20 second timeout.
-            websocket.connect(20);
-            //WebSocketStart();
+            WebSocketStart();
         }
     }
 
@@ -376,28 +376,28 @@ namespace discpp {
         return channel;
     }
 
-    discpp::DMChannel Client::GetDMChannel(const discpp::snowflake& id) {
+    discpp::Channel Client::GetDMChannel(const discpp::snowflake& id) {
         auto it = private_channels.find(id);
         if (it != private_channels.end()) {
             return it->second;
         }
 
-        return discpp::DMChannel();
+        return discpp::Channel();
     }
 
-    std::unordered_map<discpp::snowflake, discpp::DMChannel> Client::GetUserDMs() {
+    std::unordered_map<discpp::snowflake, discpp::Channel> Client::GetUserDMs() {
 
         if (!discpp::globals::client_instance->client_user.IsBot()) {
             throw new ProhibitedEndpointException("/users/@me/channels is a user only endpoint");
         } else {
-            std::unordered_map<discpp::snowflake, discpp::DMChannel> dm_channels;
+            std::unordered_map<discpp::snowflake, discpp::Channel> dm_channels;
 
             rapidjson::Document result = SendGetRequest(Endpoint("users/@me/channels"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
             for (auto const& channel : result.GetArray()) {
                 rapidjson::Document channel_json(rapidjson::kObjectType);
                 channel_json.CopyFrom(channel, channel_json.GetAllocator());
 
-                discpp::DMChannel tmp(channel_json);
+                discpp::Channel tmp(channel_json);
                 dm_channels.emplace(tmp.id, tmp);
             }
 

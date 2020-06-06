@@ -32,20 +32,116 @@ namespace discpp {
             ConnectionVisibility visibility;
 
             Connection() = default;
+
+            /**
+             * @brief Constructs a discpp::User::Connection object by parsing json.
+             *
+             * ```cpp
+             *      discpp::User::Connection connection(json);
+             * ```
+             *
+             * @param[in] json The json that makes up the connection object.
+             *
+             * @return discpp::User::Connection, this is a constructor.
+             */
             Connection(rapidjson::Document& json);
         };
 
 		User() = default;
+
+        /**
+         * @brief Constructs a discpp::User object from an id.
+         *
+         * This constructor searches the user cache to get a user object.
+         *
+         * ```cpp
+         *      discpp::User user(583251190591258624);
+         * ```
+         *
+         * @param[in] id The id of the user.
+         *
+         * @return discpp::User, this is a constructor.
+         */
 		User(const snowflake& id);
+
+        /**
+         * @brief Constructs a discpp::User object by parsing json.
+         *
+         * ```cpp
+         *      discpp::User user(json);
+         * ```
+         *
+         * @param[in] json The json that makes up of user object.
+         *
+         * @return discpp::User, this is a constructor.
+         */
 		User(rapidjson::Document& json);
 
+        /**
+         * @brief Create a DM channel with this user.
+         *
+         * ```cpp
+         *      discpp::Channel channel = user.CreateDM();
+         * ```
+         *
+         * @return discpp::Channel
+         */
 		discpp::Channel CreateDM();
-		std::string GetAvatarURL(const ImageType& imgType = ImageType::AUTO) const;
+
+        /**
+         * @brief Retrieve user avatar url.
+         *
+         * ```cpp
+         *      std::string avatar_url = user.GetAvatarURL()
+         * ```
+         *
+         * @param[in] imgType Optional parameter for type of image
+         *
+         * @return std::string
+         */
+        std::string GetAvatarURL(const ImageType& imgType = ImageType::AUTO) const;
+
+        /**
+         * @brief Gets the created at time and date for this user.
+         *
+         * ```cpp
+         *      std::string created_at = user.CreatedAt();
+         * ```
+         *
+         * @return std::string
+         */
 		std::string CreatedAt();
+
+        /**
+         * @brief Creates a mention string for this user.
+         *
+         * ```cpp
+         *      std::string mention = user.CreateMention();
+         * ```
+         *
+         * @return std::string
+         */
 		std::string CreateMention();
+
+        /**
+         * @brief Gets the users discriminator as a string.
+         *
+         * @return std::string
+         */
 		std::string GetDiscriminator() const;
 
-		bool IsBot();
+        /**
+         * @brief Checks if the user is a bot
+         *
+         * @return bool
+         */
+		bool IsBot() const;
+
+        /**
+         * @brief Checks if the user is a discord staff user.
+         *
+         * @return bool
+         */
 		bool IsSystemUser();
 
 		std::string username; /**< The user's username, not unique across the platform. */

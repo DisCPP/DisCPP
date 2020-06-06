@@ -95,7 +95,7 @@ namespace discpp {
 		std::unordered_map<snowflake, std::shared_ptr<Member>> members; /**< List of members the current bot can access. */
 		std::unordered_map<snowflake, std::shared_ptr<Guild>> guilds; /**< List of guilds the current bot can access. */
 		std::unordered_map<snowflake, std::shared_ptr<Message>> messages; /**< List of messages the current bot can access. */
-        std::unordered_map<discpp::snowflake, discpp::DMChannel> private_channels; /**< List of dm channels the current client can access. */
+        std::unordered_map<discpp::snowflake, discpp::Channel> private_channels; /**< List of dm channels the current client can access. */
 
 		enum packet_opcode : int {
 			dispatch = 0,				// Receive
@@ -267,7 +267,7 @@ namespace discpp {
 		discpp::User ReqestUserIfNotCached(const discpp::snowflake& id);
 
         /**
-         * @brief Get the bot user connections.
+         * @brief Get the bot's user connections.
          *
          * ```cpp
          *      bot.GetBotUserConnections();
@@ -278,25 +278,26 @@ namespace discpp {
         std::vector<discpp::User::Connection> GetBotUserConnections();
 
         /**
-         * @brief Contructs a UserRelationship from json
+         * @brief Gets a channel from guild cache and private caches.
          *
-         * @return discpp::UserRelationship
+         * @return discpp::Channel
          */
         discpp::Channel GetChannel(const discpp::snowflake& id);
 
-
-        discpp::DMChannel GetDMChannel(const discpp::snowflake& id);
+        /**
+         * @brief Get a DM channel with id
+         *
+         * @return discpp::Channel
+         */
+        discpp::Channel GetDMChannel(const discpp::snowflake& id);
 
         /**
          * @brief Get all DM's for this user. Only supports user tokens!
          *
-         * ```cpp
-         *      std::vector<discpp::User::Connection> conntections = client->GetUserConnections();
-         * ```
-         *
          * @return std::vector<discpp::User::Connection>
          */
-        std::unordered_map<discpp::snowflake, discpp::DMChannel> GetUserDMs();
+        std::unordered_map<discpp::snowflake, discpp::Channel> GetUserDMs();
+
         // discpp::Channel CreateGroupDM(std::vector<discpp::User> users); // Deprecated and will not be shown in the discord client.
 
 		bool user_mfa_enabled;

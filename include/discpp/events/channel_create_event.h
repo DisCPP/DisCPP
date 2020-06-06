@@ -7,11 +7,11 @@
 
 
 namespace discpp {
-	class DMChannelCreateEvent : public Event {
+	class ChannelCreateEvent : public Event {
 	public:
-		inline DMChannelCreateEvent(discpp::DMChannel dm_channel) : dm_channel(dm_channel) {}
+		inline ChannelCreateEvent(discpp::Channel channel) : channel(channel) {}
 
-		discpp::DMChannel dm_channel;
+		discpp::Channel channel;
 	};
 }
 

@@ -61,6 +61,15 @@ namespace discpp {
 		};
 	}
 
+    /**
+     * @brief Get the OS name this application is running on.
+     *
+     * ```cpp
+     *      std::string os_name = discpp::GetOSName();
+     * ```
+     *
+     * @return std::string
+     */
 	std::string GetOsName();
 
 	inline std::string Endpoint(const std::string& endpoint_format) {
@@ -162,27 +171,248 @@ namespace discpp {
 	inline std::unordered_map<snowflake, RateLimit> webhook_ratelimit;
 	inline RateLimit global_ratelimit;
 
+    /**
+     * @brief Wait for rate limits.
+     *
+     * ```cpp
+     *      discpp::WaitForRateLimits(message.id, discpp::RateLimitBucketType::CHANNEL);
+     * ```
+     *
+     * @param[in] object The object id.
+     * @param[in] ratelimit_bucket The rate limit bucket.
+     *
+     * @return int
+     */
 	int WaitForRateLimits(const snowflake& object, const RateLimitBucketType& ratelimit_bucket);
+
+    /**
+     * @brief Handle rate limites
+     *
+     * ```cpp
+     *      discpp::HandleRateLimits(header, id, bucket);
+     * ```
+     *
+     * @param[in] header The headers to get the wait rate limit from.
+     * @param[in] object The object id.
+     * @param[in] ratelimit_bucket The rate limit bucket.
+     *
+     * @return int
+     */
 	void HandleRateLimits(cpr::Header& header, const snowflake& object, const RateLimitBucketType& ratelimit_bucket);
 	// End of rate limits
 
+    /**
+     * @brief Handles a response from the discpp servers.
+     *
+     * ```cpp
+     *      rapidjson::Document response = discpp::HandleResponse(cpr_response, object, discpp::RateLimitBucketType::CHANNEL);
+     * ```
+     *
+     * @param[in] reponse The cpr response from the servers.
+     * @param[in] object The object id to handle the ratelimits for.
+     * @param[in] ratelimit_bucket The rate limit bucket.
+     *
+     * @return rapidjson::Document
+     */
 	extern rapidjson::Document HandleResponse(cpr::Response& response, const snowflake& object, const RateLimitBucketType& ratelimit_bucket);
+
+    /**
+     * @brief Sends a get request to a url.
+     *
+     * ```cpp
+     *      rapidjson::Document response = discpp::SendGetRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+     * ```
+     *
+     * @param[in] url The url to create a request to.
+     * @param[in] headers The http header.
+     * @param[in] object The object id to handle the ratelimits for.
+     * @param[in] ratelimit_bucket The rate limit bucket.
+     * @param[in] The cpr response body.
+     *
+     * @return rapidjson::Document
+     */
 	extern rapidjson::Document SendGetRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+
+    /**
+     * @brief Sends a post request to a url.
+     *
+     * ```cpp
+     *      rapidjson::Document response = discpp::SendPostRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+     * ```
+     *
+     * @param[in] url The url to create a request to.
+     * @param[in] headers The http header.
+     * @param[in] object The object id to handle the ratelimits for.
+     * @param[in] ratelimit_bucket The rate limit bucket.
+     * @param[in] The cpr response body.
+     *
+     * @return rapidjson::Document
+     */
 	extern rapidjson::Document SendPostRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+
+    /**
+     * @brief Sends a put request to a url.
+     *
+     * ```cpp
+     *      rapidjson::Document response = discpp::SendPutRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+     * ```
+     *
+     * @param[in] url The url to create a request to.
+     * @param[in] headers The http header.
+     * @param[in] object The object id to handle the ratelimits for.
+     * @param[in] ratelimit_bucket The rate limit bucket.
+     * @param[in] The cpr response body.
+     *
+     * @return rapidjson::Document
+     */
 	extern rapidjson::Document SendPutRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+
+    /**
+     * @brief Sends a patch request to a url.
+     *
+     * ```cpp
+     *      rapidjson::Document response = discpp::SendPatchRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+     * ```
+     *
+     * @param[in] url The url to create a request to.
+     * @param[in] headers The http header.
+     * @param[in] object The object id to handle the ratelimits for.
+     * @param[in] ratelimit_bucket The rate limit bucket.
+     * @param[in] The cpr response body.
+     *
+     * @return rapidjson::Document
+     */
 	extern rapidjson::Document SendPatchRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+
+    /**
+     * @brief Sends a delete request to a url.
+     *
+     * ```cpp
+     *      rapidjson::Document response = discpp::SendDeleteRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL);
+     * ```
+     *
+     * @param[in] url The url to create a request to.
+     * @param[in] headers The http header.
+     * @param[in] object The object id to handle the ratelimits for.
+     * @param[in] ratelimit_bucket The rate limit bucket.
+     *
+     * @return rapidjson::Document
+     */
 	extern rapidjson::Document SendDeleteRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket);
 
-	cpr::Header DefaultHeaders(const cpr::Header& add = {});
+    /**
+     * @brief Gets the default headers to communicate with the discpp servers.
+     *
+     * ```cpp
+     *      cpr::Header default_headers = discpp::DefaultHeaders({});
+     * ```
+     *
+     * @param[in] add The headers to add to the default ones.
+     *
+     * @return rapidjson::Document
+     */
+    cpr::Header DefaultHeaders(const cpr::Header& add = {});
+
+    /**
+     * @brief Check if a string starts with another string.
+     *
+     * ```cpp
+     *      bool does_start_with = discpp::StartsWith("$test_command", "$");
+     * ```
+     *
+     * @param[in] string The string to check if it starts with.
+     * @param[in] prefix The prefix to check if the string starts with it.
+     *
+     * @return bool
+     */
 	bool StartsWith(const std::string& string, const std::string& prefix);
+
+    /**
+     * @brief Split a string into a vector.
+     *
+     * ```cpp
+     *      std::vector<std::string> argument_vec = discpp::SplitString(message.content, " ");
+     * ```
+     *
+     * @param[in] str The string to split
+     * @param[in] delimiter The delimiter to split the string at.
+     *
+     * @return std::vector<std::string>
+     */
 	std::vector<std::string> SplitString(const std::string& str, const std::string& delimter);
-	std::string CombineStringVector(const std::vector<std::string>& v, const std::string& delimiter = " ", const int& offset = 0);
+
+    /**
+     * @brief Combine a vector into a string with spaces between each element.
+     *
+     * ```cpp
+     *      std::string combined = discpp::CombineVectorWithSpaces(arguments, 1);
+     * ```
+     *
+     * @param[in] vector The vector to combine.
+     * @param[in] delmiter The delimiter to combine the vector by.
+     * @param[in] offset The vector element offset to start at (if you wanted to skip the first 2 elements, set this offset to "2").
+     *
+     * @return std::string
+     */
+    std::string CombineStringVector(const std::vector<std::string>& v, const std::string& delimiter = " ", const int& offset = 0);
+
+    /**
+     * @brief Reads an entire file.
+     *
+     * ```cpp
+     *      std::string file_contents = discpp::ReadEntireFile(file);
+     * ```
+     *
+     * @param[in] file The file to read.
+     *
+     * @return std::string
+     */
 	std::string ReadEntireFile(std::ifstream& file);
+
+    /**
+     * @brief Encode Base64.
+     *
+     * ```cpp
+     *		std::string encodedStuff = Base64Encode("text");
+     * ```
+     *
+     * @param[in] text The text to encode.
+     *
+     * @return std::string
+     */
 	std::string Base64Encode(const std::string& text);
+
+    /**
+     * @brief Replace all occurences of sub strings
+     *
+     * ```cpp
+     *      std::string raw_text = ReplaceAll("discpp text", " ", "_");
+     * ```
+     *
+     * @param[in] string The string to escape.
+     *
+     * @return std::string
+     */
 	std::string ReplaceAll(const std::string& data, const std::string& to_search, const std::string& replace_str);
+
+    /**
+     * @brief Escape strings for discpp json endpoints and cpr body
+     *
+     * ```cpp
+     *      std::string raw_text = "{\"content\":\"" + EscapeString(text) + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
+     *		cpr::Body body = cpr::Body(raw_text);
+     *		rapidjson::Document result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+     * ```
+     *
+     * @param[in] string The string to escape.
+     *
+     * @return std::string
+     */
 	std::string EscapeString(const std::string& string);
+
+	time_t TimeFromDiscord(const std::string& time);
 	time_t TimeFromSnowflake(const snowflake& snow);
-	std::string FormatTimeFromSnowflake(const snowflake& snow);
+    std::string FormatTime(const time_t& time, const std::string& format = "%Y-%m-%d @ %H:%M:%S GMT");
 	std::string URIEncode(const std::string& str);
 }
 

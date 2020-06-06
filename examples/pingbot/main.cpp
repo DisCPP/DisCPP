@@ -38,7 +38,7 @@ int main(int argc, const char* argv[]) {
 			<< "ID: " << bot.client_user.id << std::endl << "-----------------------------" << std::endl;
 
 		// Will show "Playing With Crashes!"
-		discpp::Presences activity("With Crashes!", discpp::presence::ActivityType::GAME, discpp::presence::Status::idle);
+		discpp::Presence activity("With Crashes!", discpp::Activity::ActivityType::GAME, "online");
 		bot.UpdatePresence(activity);
 	});
 
