@@ -342,7 +342,7 @@ namespace discpp {
 		std::thread heartbeat_thread;
 		std::thread future_loop_thread;
 
-		std::mutex websocket_client_mutex;
+		//std::mutex websocket_client_mutex;
 		std::mutex futures_mutex;
 
 		ix::WebSocket websocket;
