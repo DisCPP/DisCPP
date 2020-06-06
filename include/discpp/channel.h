@@ -159,6 +159,7 @@ namespace discpp {
          */
 
         discpp::Channel Delete();
+
         /**
          * @brief Get channel's messages depending on the given method.
          *
@@ -172,6 +173,15 @@ namespace discpp {
          * @return std::vector<discpp::Message>
          */
         std::vector<discpp::Message> GetChannelMessages(int amount, GetChannelsMessagesMethod get_method = GetChannelsMessagesMethod::LIMIT);
+
+        /**
+         * @brief Requests the channel's message from the discord api.
+         *
+         * @param[in] id The message id
+         *
+         * @return discpp::Message
+         */
+        discpp::Message GetChannelMessage(discpp::snowflake id);
 
         /**
          * @brief Get a message from the channel from the id.

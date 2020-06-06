@@ -318,4 +318,10 @@ namespace discpp {
             throw std::runtime_error("discpp::Channel::GroupDMRemoveRecipient only available for DM/Group DM channels!");
         }
 	}
+
+    discpp::Message Channel::GetChannelMessage(discpp::snowflake id) {
+        rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + std::to_string(this->id) + "/messages/" + std::to_string(id)), DefaultHeaders(), {}, {});
+
+        return discpp::Message(result);
+    }
 }
