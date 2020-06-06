@@ -171,7 +171,6 @@ namespace discpp {
 		Snowflake guild_id; /**< ID of the guild the current member is in. */
 		std::string nick; /**< This users guild nickname. */
 		std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>> roles; /**< Roles the current member has. */
-
 		time_t joined_at; /**< When the user joined the guild. */
         time_t premium_since; /**< When the user started boosting the guild. */
 		discpp::Permissions permissions; /**< Guild permissions for the current member. */
