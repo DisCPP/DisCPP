@@ -79,7 +79,7 @@ namespace discpp {
 	}
 
     std::string User::CreatedAt() {
-        return FormatTimeFromSnowflake(id);
+        return FormatTime(TimeFromSnowflake(id));
     }
 
     std::string User::CreateMention() {

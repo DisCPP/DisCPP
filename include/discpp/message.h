@@ -318,8 +318,18 @@ namespace discpp {
         std::shared_ptr<discpp::Guild> guild;
         std::shared_ptr<discpp::User> author;
 		std::string content;
-		std::string timestamp; // TODO: Convert to iso8601Time
-		std::string edited_timestamp; // TODO: Convert to iso8601Time
+
+		time_t timestamp;
+		[[nodiscard]] inline std::string GetFormattedTimestamp() const {
+		    return FormatTime(this->timestamp);
+		}
+
+		time_t edited_timestamp;
+		[[nodiscard]] inline std::string GetFormattedEditedTimestamp() const {
+		    if (edited_timestamp == NULL) return "";
+		    return FormatTime(this->edited_timestamp);
+		}
+
 		std::unordered_map<discpp::snowflake, discpp::User> mentions;
 		std::vector<discpp::snowflake> mentioned_roles;
         std::unordered_map<discpp::snowflake, ChannelMention> mention_channels;

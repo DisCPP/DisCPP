@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 #include <numeric>
+#include <iomanip>
 
 std::string discpp::GetOsName() {
 	#ifdef _WIN32
@@ -338,20 +339,29 @@ void discpp::HandleRateLimits(cpr::Header& header, const snowflake& object, cons
 	obj->ratelimit_reset = std::stod(header["x-ratelimit-reset"]);
 }
 
+time_t discpp::TimeFromDiscord(const std::string &time) {
+    std::tm t{};
+    std::istringstream ss(time);
+    ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S");
+    if (ss.fail()) {
+        throw std::runtime_error("failed to parse time");
+    }
+
+    return mktime(&t);
+}
+
 time_t discpp::TimeFromSnowflake(const snowflake& snow) {
     constexpr static uint64_t discord_epoch = 1420070400000;
     return ((snow >> 22) + discord_epoch) / 1000;
 }
 
-std::string discpp::FormatTimeFromSnowflake(const snowflake& snow) {
-	time_t unix_time = TimeFromSnowflake(snow);
+std::string discpp::FormatTime(const time_t& time, const std::string& format) {
+    tm* n = std::gmtime(&time);
+    tm now = *n;
+    char buffer[256];
+    strftime(buffer, sizeof(buffer), format.c_str(), &now);
 
-	tm* n = std::gmtime(&unix_time);
-	tm now = *n;
-	char buffer[256];
-	strftime(buffer, sizeof(buffer), "%Y-%m-%d @ %H:%M:%S GMT", &now);
-
-	return buffer;
+    return buffer;
 }
 
 bool discpp::ContainsNotNull(rapidjson::Document &json, const char *value_name) {

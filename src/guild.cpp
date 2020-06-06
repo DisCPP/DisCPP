@@ -65,7 +65,7 @@ namespace discpp {
 		system_channel_id = GetIDSafely(json, "system_channel_id");
 		system_channel_flags = json["system_channel_flags"].GetInt();
         rules_channel_id = GetIDSafely(json, "rules_channel_id");
-		joined_at = GetDataSafely<std::string>(json, "joined_at");
+		joined_at = TimeFromDiscord(GetDataSafely<std::string>(json, "joined_at"));
         if (GetDataSafely<bool>(json, "large")) flags |= 0b1000;
         if (GetDataSafely<bool>(json, "unavailable")) flags |= 0b10000;
 		member_count = GetDataSafely<int>(json, "member_count");
@@ -103,7 +103,7 @@ namespace discpp {
             public_updates_channel = std::make_shared<discpp::Channel>(discpp::Channel(SnowflakeFromString(json["public_updates_channel_id"].GetString())));
         }
 
-		created_at = FormatTimeFromSnowflake(id);
+		created_at = FormatTime(TimeFromSnowflake(id));
 
         if (ContainsNotNull(json, "members")) {
             for (auto const& member : json["members"].GetArray()) {

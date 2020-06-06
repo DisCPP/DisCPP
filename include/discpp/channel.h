@@ -8,6 +8,7 @@
 #include "discord_object.h"
 #include "permission.h"
 #include "embed_builder.h"
+#include "utils.h"
 
 #include <variant>
 #include <vector>
@@ -326,8 +327,12 @@ namespace discpp {
 		std::string name; /**< The name of the channel. */
 		std::string topic; /**< The channel topic. */
 		snowflake last_message_id; /**< The ID of the last message sent in this channel. */
-        // TODO: Convert to iso8601Time
-		std::string last_pin_timestamp; /**< When the last pinned message was pinned. */
+        
+		time_t last_pin_timestamp; /**< When the last pinned message was pinned. */
+		[[nodiscard]] inline std::string GetFormattedLastPinTimestamp() const {
+		    return FormatTime(this->last_pin_timestamp);
+		}
+
         bool nsfw; /**< Whether or not the current channel is not safe for work. */
         int bitrate; /**< The bitrate (in bits) of the voice channel. */
         int position; /**< Position of channel in guild's channel list. */

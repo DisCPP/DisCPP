@@ -410,8 +410,9 @@ namespace discpp {
      */
 	std::string EscapeString(const std::string& string);
 
+	time_t TimeFromDiscord(const std::string& time);
 	time_t TimeFromSnowflake(const snowflake& snow);
-	std::string FormatTimeFromSnowflake(const snowflake& snow);
+    std::string FormatTime(const time_t& time, const std::string& format = "%Y-%m-%d @ %H:%M:%S GMT");
 	std::string URIEncode(const std::string& str);
 }
 

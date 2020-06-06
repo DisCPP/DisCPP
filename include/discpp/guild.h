@@ -931,8 +931,10 @@ namespace discpp {
 		snowflake system_channel_id; /**< The id of the channel where guild notices such as welcome messages and boost events are posted. */
         int system_channel_flags; /**< System channel flags. */
         snowflake rules_channel_id; /**< The id of the channel where "PUBLIC" guilds display rules and/or guidelines. */
-		// @TODO: Convert to iso8601Time
-		std::string joined_at; /**< When this guild was joined at. */
+		time_t joined_at; /**< When this guild was joined at. */
+		[[nodiscard]] inline std::string GetFormattedJoinedAt() const {
+		    return FormatTime(this->joined_at);
+		}
 		//bool large; /**< Whether this is considered a large guild. */
 		//bool unavailable; /**< Whether this guild is unavailable. */
 		int member_count; /**< Total number of members in this guild. */

@@ -42,8 +42,10 @@ namespace discpp {
 		} else {
             hierarchy = highest_hiearchy;
         }
-		joined_at = GetDataSafely<std::string>(json, "joined_at");
-		premium_since = GetDataSafely<std::string>(json, "premium_since");
+
+		joined_at = TimeFromDiscord(GetDataSafely<std::string>(json, "joined_at"));
+		std::string prm_since = GetDataSafely<std::string>(json, "premium_since");
+		if (prm_since != "") premium_since = TimeFromDiscord(prm_since);
 		if (GetDataSafely<bool>(json, "deaf")) {
 		    flags |= 0b1;
 		}

@@ -118,7 +118,7 @@ namespace discpp {
 
             auto it = guild.channels.find(pin_update_channel.id);
             if (it != guild.channels.end()) {
-                it->second.last_pin_timestamp = result["last_pin_timestamp"].GetString();
+                it->second.last_pin_timestamp = TimeFromDiscord(result["last_pin_timestamp"].GetString());
             }
 
             discpp::DispatchEvent(discpp::ChannelPinsUpdateEvent(pin_update_channel));
@@ -127,7 +127,7 @@ namespace discpp {
 
             auto it = globals::client_instance->private_channels.find(pin_update_channel.id);
             if (it != globals::client_instance->private_channels.end()) {
-                it->second.last_pin_timestamp = result["last_pin_timestamp"].GetString();
+                it->second.last_pin_timestamp = TimeFromDiscord(result["last_pin_timestamp"].GetString());
             }
 
             discpp::DispatchEvent(discpp::ChannelPinsUpdateEvent(pin_update_channel));

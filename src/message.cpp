@@ -20,8 +20,9 @@ namespace discpp {
         guild = std::make_shared<discpp::Guild>(ConstructDiscppObjectFromID(json, "guild_id", discpp::Guild()));
 		author = std::make_shared<discpp::User>(ConstructDiscppObjectFromJson(json, "author", discpp::User()));
 		content = GetDataSafely<std::string>(json, "content");
-		timestamp = GetDataSafely<std::string>(json, "timestamp");
-		edited_timestamp = GetDataSafely<std::string>(json, "edited_timestamp");
+		timestamp = TimeFromDiscord(GetDataSafely<std::string>(json, "timestamp"));
+		std::string tmstamp = GetDataSafely<std::string>(json, "edited_timestamp");
+		if (tmstamp != "") edited_timestamp = TimeFromDiscord(tmstamp);
 		if (GetDataSafely<bool>(json, "tts")) {
 		    bit_flags |= 0b1;
 		}

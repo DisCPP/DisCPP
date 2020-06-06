@@ -13,7 +13,8 @@ namespace discpp {
 		name = GetDataSafely<std::string>(json, "name");
 		topic = GetDataSafely<std::string>(json, "topic");
 		last_message_id = GetIDSafely(json, "last_message_id");
-		last_pin_timestamp = GetDataSafely<std::string>(json, "last_pin_timestamp");
+		std::string lstpintmstmp = GetDataSafely<std::string>(json, "last_pin_timestamp");
+		if (lstpintmstmp != "") last_pin_timestamp = TimeFromDiscord(lstpintmstmp);
         guild_id = GetIDSafely(json, "guild_id");
         position = GetDataSafely<int>(json, "position");
         if (ContainsNotNull(json, "permission_overwrites")) {
