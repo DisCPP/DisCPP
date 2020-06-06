@@ -135,7 +135,7 @@ namespace discpp {
     }
 
     void EventDispatcher::GuildCreateEvent(rapidjson::Document& result) {
-        snowflake guild_id = SnowflakeFromString(result["id"].GetString());
+        Snowflake guild_id = SnowflakeFromString(result["id"].GetString());
 
         std::shared_ptr<discpp::Guild> guild = std::make_shared<discpp::Guild>(result);
         discpp::globals::client_instance->guilds.insert({ guild->id, guild });
@@ -183,7 +183,7 @@ namespace discpp {
     void EventDispatcher::GuildEmojisUpdateEvent(rapidjson::Document& result) {
         std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
-        std::unordered_map<snowflake, Emoji> emojis;
+        std::unordered_map<Snowflake, Emoji> emojis;
         for (auto& emoji : result["emojis"].GetArray()) {
             rapidjson::Document emoji_json;
             emoji_json.CopyFrom(emoji, emoji_json.GetAllocator());
@@ -223,7 +223,7 @@ namespace discpp {
 
     void EventDispatcher::GuildMemberUpdateEvent(rapidjson::Document& result) {
         std::shared_ptr<discpp::Guild> guild = std::make_shared<discpp::Guild>(SnowflakeFromString(result["guild_id"].GetString()));
-        auto it = guild->members.find(static_cast<snowflake>(SnowflakeFromString(result["user"]["id"].GetString())));
+        auto it = guild->members.find(static_cast<Snowflake>(SnowflakeFromString(result["user"]["id"].GetString())));
 
         std::shared_ptr<discpp::Member> member;
         if (it != guild->members.end()) {
@@ -251,7 +251,7 @@ namespace discpp {
 
     void EventDispatcher::GuildMembersChunkEvent(rapidjson::Document& result) {
         std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
-        std::unordered_map<discpp::snowflake, discpp::Member> members;
+        std::unordered_map<discpp::Snowflake, discpp::Member> members;
         for (auto const& member : result["members"].GetArray()) {
             rapidjson::Document member_json(rapidjson::kObjectType);
             member_json.CopyFrom(member, member_json.GetAllocator());

@@ -5,13 +5,13 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #endif
 
+#include "snowflake.h"
 #include <unordered_map>
 #include <stdexcept>
 
 #include <rapidjson/document.h>
 
 namespace discpp {
-	typedef uint64_t snowflake;
 
 	enum class PermissionType : int {
 		ROLE,
@@ -185,7 +185,7 @@ namespace discpp {
          */
         rapidjson::Document ToJson();
 
-		snowflake role_user_id;
+		Snowflake role_user_id;
 		PermissionOverwrite allow_perms;
 		PermissionOverwrite deny_perms;
 		PermissionType permission_type;

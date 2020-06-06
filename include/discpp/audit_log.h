@@ -26,9 +26,9 @@ namespace discpp {
 		std::string name; /**< Name of the current audit log. */
 		std::string icon_hash; /**< Icon hash of the current audit log. */
 		std::string splash_hash; /**< Splash hash of the current audit log. */
-		discpp::snowflake owner_id; /**< Ownder id of current audit log. */
+		discpp::Snowflake owner_id; /**< Ownder id of current audit log. */
 		std::string region; /**< Region of current audit log. */
-		discpp::snowflake afk_channel_id; /**< AFK Channel id of current audit log. */
+		discpp::Snowflake afk_channel_id; /**< AFK Channel id of current audit log. */
 		int afk_timeout; /* AFK Timeout of current audit log. */
 		int mfa_level;
 		int verification_level;
@@ -39,14 +39,14 @@ namespace discpp {
 		std::vector<discpp::Role> roles_remove;
 		int prune_delete_days;
 		bool widget_enabled;
-		discpp::snowflake widget_channel_id;
-		discpp::snowflake system_channel_id;
+		discpp::Snowflake widget_channel_id;
+		discpp::Snowflake system_channel_id;
 		int position;
 		std::string topic;
 		int bitrate;
 		std::vector<discpp::Permissions> permission_overwrites;
 		bool nsfw;
-		discpp::snowflake application_id;
+		discpp::Snowflake application_id;
 		int rate_limit_per_user;
 		int permissions;
 		int color;
@@ -55,8 +55,8 @@ namespace discpp {
 		int allow;
 		int deny;
 		std::string code;
-		discpp::snowflake channel_id;
-		discpp::snowflake inviter_id;
+		discpp::Snowflake channel_id;
+		discpp::Snowflake inviter_id;
 		int max_uses;
 		int uses;
 		int max_age;
@@ -65,7 +65,7 @@ namespace discpp {
 		bool mute;
 		std::string nick;
 		std::string avatar_hash;
-		discpp::snowflake id;
+		discpp::Snowflake id;
 		std::string type;
 		bool enable_emoticons;
 		int expire_behavior;
@@ -131,7 +131,7 @@ namespace discpp {
         std::shared_ptr<discpp::Channel> channel;
 		std::shared_ptr<discpp::Message> message;
         std::string count;
-        discpp::snowflake id;
+        discpp::Snowflake id;
         std::string type;
         std::string role_name;
     };

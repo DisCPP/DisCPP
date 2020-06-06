@@ -44,7 +44,7 @@ namespace discpp {
          *
          * @return discpp::Emoji, this is a constructor.
          */
-		Emoji(const std::string& name, const snowflake& id) : name(EscapeString(name)), id(id) {}
+		Emoji(const std::string& name, const Snowflake& id) : name(EscapeString(name)), id(id) {}
 
         /**
          * @brief Constructs a discpp::Emoji object using a guild object and id.
@@ -60,7 +60,7 @@ namespace discpp {
          *
          * @return discpp::Emoji, this is a constructor.
          */
-        Emoji(const discpp::Guild& guild, const snowflake& id);
+        Emoji(const discpp::Guild& guild, const Snowflake& id);
 
         /**
          * @brief Constructs a discpp::Emoji object by parsing json.
@@ -202,10 +202,10 @@ namespace discpp {
 #endif
 		}
 
-		discpp::snowflake id; /**< ID of the current emoji */
+		discpp::Snowflake id; /**< ID of the current emoji */
 		std::string name; /**< Name of the current emoji */
 		std::wstring unicode; /**< Unicode representation of the current emoji */
-		std::vector<discpp::snowflake> roles; /**< Roles */
+		std::vector<discpp::Snowflake> roles; /**< Roles */
 		discpp::User creator;
 		bool require_colons;
 		bool managed;

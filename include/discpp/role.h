@@ -27,7 +27,7 @@ namespace discpp {
          *
          * @return discpp::Role, this is a constructor.
          */
-		Role(const snowflake& role_id, const discpp::Guild& guild);
+		Role(const Snowflake& role_id, const discpp::Guild& guild);
 
         /**
          * @brief Constructs a discpp::Role object by parsing json.
@@ -42,7 +42,7 @@ namespace discpp {
          */
         Role(rapidjson::Document& json);
 
-		//snowflake id;  /**< Id of the current role */
+		//Snowflake id;  /**< Id of the current role */
 		std::string name; /**< Name of the current role */
 		int color; /**< Color of the current role */
 		bool hoist; /**< Whether or not the role displays in member list */
