@@ -163,7 +163,7 @@ namespace discpp {
          * @return std::string
          */
         inline std::string GetFormattedPremiumSince() const {
-            if (premium_since == NULL) return "";
+            if (premium_since == 0) return "";
             return FormatTime(this->premium_since);
         }
 
