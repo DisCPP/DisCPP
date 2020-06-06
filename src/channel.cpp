@@ -149,7 +149,7 @@ namespace discpp {
 		return *this;
 	}
 
-	std::vector<discpp::Message> Channel::GetChannelMessages(int amount, GetChannelsMessagesMethod get_method) {
+	std::vector<discpp::Message> Channel::RequestMessages(int amount, GetChannelsMessagesMethod get_method) {
 		rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/messages"), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 
 		std::vector<discpp::Message> messages;
@@ -318,4 +318,10 @@ namespace discpp {
             throw std::runtime_error("discpp::Channel::GroupDMRemoveRecipient only available for DM/Group DM channels!");
         }
 	}
+
+    discpp::Message Channel::RequestMessage(discpp::snowflake id) {
+        rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + std::to_string(this->id) + "/messages/" + std::to_string(id)), DefaultHeaders(), {}, {});
+
+        return discpp::Message(result);
+    }
 }
