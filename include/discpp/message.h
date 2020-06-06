@@ -314,22 +314,32 @@ namespace discpp {
          */
         inline bool IsPinned();
 
+        /**
+         * @brief Formats the edited timestamp in text.
+         *
+         * @return std::string
+         */
+        inline std::string GetFormattedEditedTimestamp() const {
+            if (edited_timestamp == 0) return "";
+            return FormatTime(this->edited_timestamp);
+        }
+
+        /**
+         * @brief Formats the timestamp in text.
+         *
+         * @return std::string
+         */
+        inline std::string GetFormattedTimestamp() const {
+            return FormatTime(this->timestamp);
+        }
+
         discpp::Channel channel;
         std::shared_ptr<discpp::Guild> guild;
         std::shared_ptr<discpp::User> author;
 		std::string content;
 
 		time_t timestamp;
-		[[nodiscard]] inline std::string GetFormattedTimestamp() const {
-		    return FormatTime(this->timestamp);
-		}
-
 		time_t edited_timestamp;
-		[[nodiscard]] inline std::string GetFormattedEditedTimestamp() const {
-		    if (edited_timestamp == NULL) return "";
-		    return FormatTime(this->edited_timestamp);
-		}
-
 		std::unordered_map<discpp::snowflake, discpp::User> mentions;
 		std::vector<discpp::snowflake> mentioned_roles;
         std::unordered_map<discpp::snowflake, ChannelMention> mention_channels;
