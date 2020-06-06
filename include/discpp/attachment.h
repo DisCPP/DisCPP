@@ -23,7 +23,7 @@ namespace discpp {
          */
 		Attachment(rapidjson::Document& json);
 
-		snowflake id; /**< id for the current attachment. */
+		Snowflake id; /**< id for the current attachment. */
 		std::string filename; /**< filename for the current attachment. */
 		int size; /**< size of the current attachment. */
 		std::string url; /**< url of the current attachment. */

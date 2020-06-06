@@ -3,7 +3,7 @@
 #include "client.h"
 
 namespace discpp {
-	User::User(const snowflake& id) : discpp::DiscordObject(id) {
+	User::User(const Snowflake& id) : discpp::DiscordObject(id) {
 		auto it = discpp::globals::client_instance->members.find(id);
 		if (it != discpp::globals::client_instance->members.end()) {
 			*this = it->second->user;

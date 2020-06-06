@@ -10,11 +10,11 @@
 #include <string>
 #include <ctime>
 
+#include "snowflake.h"
 #include "utils.h"
 #include "emoji.h"
 
 namespace discpp {
-	typedef uint64_t snowflake;
 
     class Activity {
     public:
