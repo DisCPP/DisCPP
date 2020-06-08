@@ -1,7 +1,7 @@
 #include "guild.h"
 
 namespace discpp {
-	Role::Role(const snowflake& role_id, const discpp::Guild& guild) : DiscordObject(role_id) {
+	Role::Role(const Snowflake& role_id, const discpp::Guild& guild) : DiscordObject(role_id) {
 		auto it = guild.roles.find(role_id);
 		if (it != guild.roles.end()) {
 			*this = *it->second;

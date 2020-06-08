@@ -62,7 +62,7 @@ namespace discpp {
          *
          * @return discpp::User, this is a constructor.
          */
-		User(const snowflake& id);
+		User(const Snowflake& id);
 
         /**
          * @brief Constructs a discpp::User object by parsing json.

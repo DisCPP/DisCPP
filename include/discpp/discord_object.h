@@ -1,24 +1,26 @@
 #ifndef DISCPP_OBJECT_H
 #define DISCPP_OBJECT_H
 
+#include "snowflake.h"
+
 #include <cstdint>
 #include <iostream>
 
+
 namespace discpp {
-	typedef uint64_t snowflake;
 
 	class DiscordObject {
 	public:
 		DiscordObject() = default;
-		DiscordObject(const snowflake& id);
+		DiscordObject(const discpp::Snowflake& id);
 
-		snowflake id = 0;
+		discpp::Snowflake id = 0;
 
 		bool operator==(DiscordObject& other) const;
-		bool operator==(snowflake& other) const;
+		bool operator==(discpp::Snowflake& other) const;
 
 		bool operator!=(DiscordObject& other) const;
-		bool operator!=(snowflake& other) const;
+		bool operator!=(discpp::Snowflake& other) const;
 	};
 }
 

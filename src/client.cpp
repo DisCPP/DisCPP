@@ -360,7 +360,7 @@ namespace discpp {
         if (heartbeat_thread.joinable()) heartbeat_thread.join();
     }
 
-    discpp::Channel Client::GetChannel(const discpp::snowflake& id) {
+    discpp::Channel Client::GetChannel(const discpp::Snowflake& id) {
         discpp::Channel channel = GetDMChannel(id);
 
         if (channel.id == 0) {
@@ -374,7 +374,7 @@ namespace discpp {
         return channel;
     }
 
-    discpp::Channel Client::GetDMChannel(const discpp::snowflake& id) {
+    discpp::Channel Client::GetDMChannel(const discpp::Snowflake& id) {
         auto it = private_channels.find(id);
         if (it != private_channels.end()) {
             return it->second;
@@ -383,12 +383,12 @@ namespace discpp {
         return discpp::Channel();
     }
 
-    std::unordered_map<discpp::snowflake, discpp::Channel> Client::GetUserDMs() {
+    std::unordered_map<discpp::Snowflake, discpp::Channel> Client::GetUserDMs() {
 
         if (!discpp::globals::client_instance->client_user.IsBot()) {
             throw new ProhibitedEndpointException("/users/@me/channels is a user only endpoint");
         } else {
-            std::unordered_map<discpp::snowflake, discpp::Channel> dm_channels;
+            std::unordered_map<discpp::Snowflake, discpp::Channel> dm_channels;
 
             rapidjson::Document result = SendGetRequest(Endpoint("users/@me/channels"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
             for (auto const& channel : result.GetArray()) {
@@ -502,12 +502,12 @@ namespace discpp {
         }
     }
 
-    std::unordered_map<discpp::snowflake, discpp::UserRelationship> Client::GetRelationships() {
+    std::unordered_map<discpp::Snowflake, discpp::UserRelationship> Client::GetRelationships() {
         //todo implement this endpoint
         if(discpp::globals::client_instance->client_user.IsBot()) {
             throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            std::unordered_map<discpp::snowflake, discpp::UserRelationship> relationships;
+            std::unordered_map<discpp::Snowflake, discpp::UserRelationship> relationships;
 
             rapidjson::Document result = SendGetRequest(Endpoint("users/@me/relationships/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
             for (auto const& relationship : result.GetArray()) {
@@ -521,7 +521,7 @@ namespace discpp {
         }
     }
 
-    std::shared_ptr<discpp::Guild> Client::GetGuild(const snowflake& guild_id) {
+    std::shared_ptr<discpp::Guild> Client::GetGuild(const Snowflake& guild_id) {
 
         auto it = discpp::globals::client_instance->guilds.find(guild_id);
         if (it != discpp::globals::client_instance->guilds.end()) {
@@ -555,7 +555,7 @@ namespace discpp {
         CreateWebsocketRequest(payload);
     }
 
-    discpp::User Client::ReqestUserIfNotCached(const discpp::snowflake& id) {
+    discpp::User Client::ReqestUserIfNotCached(const discpp::Snowflake& id) {
         discpp::User user(id);
         if (user.username.empty()) {
             rapidjson::Document result = SendGetRequest(Endpoint("/users/" + std::to_string(id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);

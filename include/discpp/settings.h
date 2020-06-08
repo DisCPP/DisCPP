@@ -653,7 +653,7 @@ namespace discpp {
 
 		std::string status;
 		std::string custom_status;
-		std::vector<snowflake> guild_positions;
+		std::vector<Snowflake> guild_positions;
 		ExplicitContentFilter explicit_content_filter;
 		FriendSource friend_source_flags;
         Locale locale;

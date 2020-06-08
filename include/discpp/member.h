@@ -30,7 +30,7 @@ namespace discpp {
          *
          * @return discpp::Member, this is a constructor.
          */
-		Member(const snowflake& id, const discpp::Guild& guild);
+		Member(const Snowflake& id, const discpp::Guild& guild);
 
         /**
          * @brief Constructs a discpp::Member object by parsing json and stores the guild_id.
@@ -61,7 +61,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyMember(const std::string& nick, std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf, const snowflake& channel_id);
+		void ModifyMember(const std::string& nick, std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf, const Snowflake& channel_id);
 
         /**
          * @brief Adds a role to a guild member.
@@ -168,9 +168,9 @@ namespace discpp {
         }
 
 		discpp::User user; /**< The user this guild member represents. */
-		snowflake guild_id; /**< ID of the guild the current member is in. */
+		Snowflake guild_id; /**< ID of the guild the current member is in. */
 		std::string nick; /**< This users guild nickname. */
-		std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::Role>> roles; /**< Roles the current member has. */
+		std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>> roles; /**< Roles the current member has. */
 		time_t joined_at; /**< When the user joined the guild. */
         time_t premium_since; /**< When the user started boosting the guild. */
 		discpp::Permissions permissions; /**< Guild permissions for the current member. */
