@@ -2,7 +2,7 @@
 #include "guild.h"
 
 namespace discpp {
-	Emoji::Emoji(const discpp::Guild& guild, const snowflake& id) : id(id) {
+	Emoji::Emoji(const discpp::Guild& guild, const Snowflake& id) : id(id) {
 		auto it = guild.emojis.find(id);
 		if (it != guild.emojis.end()) {
 			*this = it->second;

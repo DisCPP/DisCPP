@@ -3,7 +3,7 @@
 #include <climits>
 
 namespace discpp {
-	Member::Member(const snowflake& id, const discpp::Guild& guild) : discpp::DiscordObject(id) {
+	Member::Member(const Snowflake& id, const discpp::Guild& guild) : discpp::DiscordObject(id) {
 		*this = *guild.GetMember(id);
 	}
 
@@ -42,8 +42,10 @@ namespace discpp {
 		} else {
             hierarchy = highest_hiearchy;
         }
-		joined_at = GetDataSafely<std::string>(json, "joined_at");
-		premium_since = GetDataSafely<std::string>(json, "premium_since");
+
+		joined_at = TimeFromDiscord(GetDataSafely<std::string>(json, "joined_at"));
+		std::string prm_since = GetDataSafely<std::string>(json, "premium_since");
+		if (prm_since != "") premium_since = TimeFromDiscord(prm_since);
 		if (GetDataSafely<bool>(json, "deaf")) {
 		    flags |= 0b1;
 		}
@@ -61,7 +63,7 @@ namespace discpp {
         return (flags & 0b10) == 0b10;
 	}
 
-	void Member::ModifyMember(const std::string& nick, std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf, const snowflake& channel_id) {
+	void Member::ModifyMember(const std::string& nick, std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf, const Snowflake& channel_id) {
 		std::string json_roles = "[";
 		for (discpp::Role role : roles) {
 			if (&role == &roles.front()) {
@@ -106,7 +108,7 @@ namespace discpp {
 	}
 
 	bool Member::HasRole(const discpp::Role& role) {
-		return count_if(roles.begin(), roles.end(), [role](std::pair<discpp::snowflake, std::shared_ptr<discpp::Role>> pair) { return role.id == pair.second->id; }) != 0;
+		return count_if(roles.begin(), roles.end(), [role](std::pair<discpp::Snowflake, std::shared_ptr<discpp::Role>> pair) { return role.id == pair.second->id; }) != 0;
 	}
 
 	bool Member::HasPermission(const discpp::Permission& perm) {

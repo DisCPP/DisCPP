@@ -30,7 +30,7 @@ namespace discpp {
          *
          * @return discpp::Member, this is a constructor.
          */
-		Member(const snowflake& id, const discpp::Guild& guild);
+		Member(const Snowflake& id, const discpp::Guild& guild);
 
         /**
          * @brief Constructs a discpp::Member object by parsing json and stores the guild_id.
@@ -61,7 +61,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyMember(const std::string& nick, std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf, const snowflake& channel_id);
+		void ModifyMember(const std::string& nick, std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf, const Snowflake& channel_id);
 
         /**
          * @brief Adds a role to a guild member.
@@ -148,14 +148,31 @@ namespace discpp {
          */
 		bool IsMuted();
 
+        /**
+         * @brief Formats the joined at time to text.
+         *
+         * @return std::string
+         */
+        inline std::string GetFormattedJoinedAt() const {
+            return FormatTime(this->joined_at);
+        }
+
+        /**
+         * @brief Formats the premium since time to text.
+         *
+         * @return std::string
+         */
+        inline std::string GetFormattedPremiumSince() const {
+            if (premium_since == 0) return "";
+            return FormatTime(this->premium_since);
+        }
+
 		discpp::User user; /**< The user this guild member represents. */
-		snowflake guild_id; /**< ID of the guild the current member is in. */
+		Snowflake guild_id; /**< ID of the guild the current member is in. */
 		std::string nick; /**< This users guild nickname. */
-		std::unordered_map<discpp::snowflake, std::shared_ptr<discpp::Role>> roles; /**< Roles the current member has. */
-        // TODO: Convert to iso8601Time
-		std::string joined_at; /**< When the user joined the guild. */
-        // TODO: Convert to iso8601Time
-		std::string premium_since; /**< When the user started boosting the guild. */
+		std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>> roles; /**< Roles the current member has. */
+		time_t joined_at; /**< When the user joined the guild. */
+        time_t premium_since; /**< When the user started boosting the guild. */
 		discpp::Permissions permissions; /**< Guild permissions for the current member. */
 		discpp::Presence presence; /**< Presence for the current member. */
 		int hierarchy; /**< Role hierarchy for the current member. */

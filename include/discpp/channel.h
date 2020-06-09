@@ -8,6 +8,7 @@
 #include "discord_object.h"
 #include "permission.h"
 #include "embed_builder.h"
+#include "utils.h"
 
 #include <variant>
 #include <vector>
@@ -85,7 +86,7 @@ namespace discpp {
          * @return discpp::Channel, this is a constructor.
          */
 
-		Channel(const snowflake& id);
+		Channel(const Snowflake& id);
 
         /**
          * @brief Constructs a discpp::Channel object from json.
@@ -111,7 +112,7 @@ namespace discpp {
          *
          * @return discpp::Channel
          */
-		static discpp::Channel RequestChannel(discpp::snowflake id);
+		static discpp::Channel RequestChannel(discpp::Snowflake id);
 
         /**
          * @brief Send a message in this channel.
@@ -181,7 +182,7 @@ namespace discpp {
          *
          * @return discpp::Message
          */
-        discpp::Message RequestMessage(discpp::snowflake id);
+        discpp::Message RequestMessage(discpp::Snowflake id);
 
         /**
          * @brief Get a message from the channel from the id.
@@ -194,7 +195,7 @@ namespace discpp {
          *
          * @return discpp::Message
          */
-        discpp::Message FindMessage(const snowflake& message_id);
+        discpp::Message FindMessage(const Snowflake& message_id);
 
         /**
          * @brief Triggers a typing indicator.
@@ -229,7 +230,7 @@ namespace discpp {
          *
          * @return void
          */
-        void BulkDeleteMessage(const std::vector<snowflake>& messages);
+        void BulkDeleteMessage(const std::vector<Snowflake>& messages);
 
         /**
          * @brief Remove permission overwrites for this channel.
@@ -289,12 +290,12 @@ namespace discpp {
         /**
          * @brief Lists children channels for this category.
          * ```cpp
-         *      std::unordered_map<discpp::snowflake, discpp::Channel> children = category.GetChildren();
+         *      std::unordered_map<discpp::Snowflake, discpp::Channel> children = category.GetChildren();
          * ```
          *
-         * @return std::unordered_map<discpp::snowflake, discpp::Channel>
+         * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
          */
-        std::unordered_map<discpp::snowflake, discpp::Channel> GetChildren();
+        std::unordered_map<discpp::Snowflake, discpp::Channel> GetChildren();
 
         /**
         * @brief Add a recipient to the group dm.
@@ -325,20 +326,24 @@ namespace discpp {
         ChannelType type; /**< The type of channel. */
 		std::string name; /**< The name of the channel. */
 		std::string topic; /**< The channel topic. */
-		snowflake last_message_id; /**< The ID of the last message sent in this channel. */
-        // TODO: Convert to iso8601Time
-		std::string last_pin_timestamp; /**< When the last pinned message was pinned. */
+		Snowflake last_message_id; /**< The ID of the last message sent in this channel. */
+        
+		time_t last_pin_timestamp; /**< When the last pinned message was pinned. */
+		[[nodiscard]] inline std::string GetFormattedLastPinTimestamp() const {
+		    return FormatTime(this->last_pin_timestamp);
+		}
+
         bool nsfw; /**< Whether or not the current channel is not safe for work. */
         int bitrate; /**< The bitrate (in bits) of the voice channel. */
         int position; /**< Position of channel in guild's channel list. */
         int rate_limit_per_user; /**< Amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected. */
         int user_limit; /**< The user limit of the voice channel. */
-        snowflake guild_id; /**< Guild id of the current channel. */
-        snowflake category_id; /**< ID of the parent category for a channel (each parent category can contain up to 50 channels). */
+        Snowflake guild_id; /**< Guild id of the current channel. */
+        Snowflake category_id; /**< ID of the parent category for a channel (each parent category can contain up to 50 channels). */
         std::vector<discpp::Permissions> permissions; /**< Explicit permission overwrites for members and roles. */
         std::string icon; /**< Hashed icon for this channel. */
-        snowflake owner_id; /**< ID of the DM creator. */
-        snowflake application_id; /**< Application ID of the group DM creator if it is bot-created. */
+        Snowflake owner_id; /**< ID of the DM creator. */
+        Snowflake application_id; /**< Application ID of the group DM creator if it is bot-created. */
         std::vector<discpp::User> recipients; /**< The recipients of the DM. */
 	};
 }

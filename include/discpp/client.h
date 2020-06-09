@@ -33,7 +33,7 @@ namespace discpp {
 	class ClientUser : public User {
 	public:
 		ClientUser() = default;
-		ClientUser(const snowflake& id) : User(id) {}
+		ClientUser(const Snowflake& id) : User(id) {}
 		ClientUser(rapidjson::Document & json);
 
 
@@ -78,7 +78,7 @@ namespace discpp {
          */
         bool IsBlocked();
 
-        discpp::snowflake id;
+        discpp::Snowflake id;
         std::string nickname;
         discpp::User user;
 	};
@@ -91,11 +91,11 @@ namespace discpp {
 		discpp::ClientUser client_user; /**< discpp::User object representing current user. */
 		discpp::Logger* logger; /**< discpp::Logger object representing current logger. */
 
-		//std::unordered_map<snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
-		std::unordered_map<snowflake, std::shared_ptr<Member>> members; /**< List of members the current bot can access. */
-		std::unordered_map<snowflake, std::shared_ptr<Guild>> guilds; /**< List of guilds the current bot can access. */
-		std::unordered_map<snowflake, std::shared_ptr<Message>> messages; /**< List of messages the current bot can access. */
-        std::unordered_map<discpp::snowflake, discpp::Channel> private_channels; /**< List of dm channels the current client can access. */
+		//std::unordered_map<Snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
+		std::unordered_map<Snowflake, std::shared_ptr<Member>> members; /**< List of members the current bot can access. */
+		std::unordered_map<Snowflake, std::shared_ptr<Guild>> guilds; /**< List of guilds the current bot can access. */
+		std::unordered_map<Snowflake, std::shared_ptr<Message>> messages; /**< List of messages the current bot can access. */
+        std::unordered_map<discpp::Snowflake, discpp::Channel> private_channels; /**< List of dm channels the current client can access. */
 
 		enum packet_opcode : int {
 			dispatch = 0,				// Receive
@@ -193,9 +193,9 @@ namespace discpp {
         /**
          * @brief Get all friends. Only supports user tokens!
          *
-         * @return std::unordered_map<discpp::snowflake, discpp::UserRelationship>
+         * @return std::unordered_map<discpp::Snowflake, discpp::UserRelationship>
          */
-        std::unordered_map<discpp::snowflake, discpp::UserRelationship> GetRelationships();
+        std::unordered_map<discpp::Snowflake, discpp::UserRelationship> GetRelationships();
 
         /**
          * @brief Gets a discpp::Guild from a guild id.
@@ -210,7 +210,7 @@ namespace discpp {
          *
          * @return std::shared_ptr<discpp::Guild>
          */
-        std::shared_ptr<discpp::Guild> GetGuild(const snowflake& guild_id);
+        std::shared_ptr<discpp::Guild> GetGuild(const Snowflake& guild_id);
 
 
         /**
@@ -264,7 +264,7 @@ namespace discpp {
          *
          * @return discpp::User
          */
-		discpp::User ReqestUserIfNotCached(const discpp::snowflake& id);
+		discpp::User ReqestUserIfNotCached(const discpp::Snowflake& id);
 
         /**
          * @brief Get the bot's user connections.
@@ -282,21 +282,21 @@ namespace discpp {
          *
          * @return discpp::Channel
          */
-        discpp::Channel GetChannel(const discpp::snowflake& id);
+        discpp::Channel GetChannel(const discpp::Snowflake& id);
 
         /**
          * @brief Get a DM channel with id
          *
          * @return discpp::Channel
          */
-        discpp::Channel GetDMChannel(const discpp::snowflake& id);
+        discpp::Channel GetDMChannel(const discpp::Snowflake& id);
 
         /**
          * @brief Get all DM's for this user. Only supports user tokens!
          *
          * @return std::vector<discpp::User::Connection>
          */
-        std::unordered_map<discpp::snowflake, discpp::Channel> GetUserDMs();
+        std::unordered_map<discpp::Snowflake, discpp::Channel> GetUserDMs();
 
         // discpp::Channel CreateGroupDM(std::vector<discpp::User> users); // Deprecated and will not be shown in the discord client.
 
@@ -342,7 +342,7 @@ namespace discpp {
 		std::thread heartbeat_thread;
 		std::thread future_loop_thread;
 
-		std::mutex websocket_client_mutex;
+		//std::mutex websocket_client_mutex;
 		std::mutex futures_mutex;
 
 		ix::WebSocket websocket;

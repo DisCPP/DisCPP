@@ -65,7 +65,7 @@ namespace discpp {
             code = json["code"].GetString();
             rapidjson::Value::ConstMemberIterator itr = json.FindMember("guild");
             if (itr != json.MemberEnd()) {
-                guild_id = SnowflakeFromString(json["guild"]["id"].GetString());
+                guild_id = discpp::Snowflake(json["guild"]["id"].GetString());
             }
             itr = json.FindMember("channel");
             if (itr != json.MemberEnd()) {
@@ -93,7 +93,7 @@ namespace discpp {
             approximate_member_count = json["approximate_member_count"].GetInt();
         }
         std::string code; /**< The invite code (unique ID). */
-        snowflake guild_id; /**< GThe guild this invite is for. */
+        discpp::Snowflake guild_id; /**< GThe guild this invite is for. */
         discpp::Channel channel; /**< The channel this invite is for. */
         discpp::User inviter; /**< he user who created the invite. */
         discpp::User target_user; /**< The target user for this invite. */
@@ -118,7 +118,7 @@ namespace discpp {
              *
              * @return discpp::IntegrationAccount, this is a constructor.
              */
-			id = SnowflakeFromString(json["id"].GetString());
+			id = Snowflake(json["id"].GetString());
 			name = json["name"].GetString();
 		}
 
@@ -145,12 +145,12 @@ namespace discpp {
              * @return discpp::Integration, this is a constructor.
              */
 
-            id = SnowflakeFromString(json["id"].GetString());
+            id = Snowflake(json["id"].GetString());
             name = json["name"].GetString();
             type = json["type"].GetString();
             enabled = json["enabled"].GetBool();
             syncing = json["syncing"].GetBool();
-            role_id = SnowflakeFromString(json["role_id"].GetString());
+            role_id = Snowflake(json["role_id"].GetString());
             enable_emoticons = GetDataSafely<bool>(json, "enable_emoticons");
             expire_behavior = static_cast<IntegrationExpireBehavior>(json["expire_behavior"].GetInt());
             expire_grace_period = json["expire_grace_period"].GetInt();
@@ -163,7 +163,7 @@ namespace discpp {
         std::string type; /**< Integration type (twitch, youtube, etc). */
         bool enabled; /**< Is this integration enabled? */
         bool syncing; /**< Is this integration syncing? */
-        discpp::snowflake role_id; /**< ID that this integration uses for "subscribers". */
+        discpp::Snowflake role_id; /**< ID that this integration uses for "subscribers". */
         bool enable_emoticons; /**< Whether emoticons should be synced for this integration (twitch only currently). */
         IntegrationExpireBehavior expire_behavior; /**< The behavior of expiring subscribers. */
         int expire_grace_period; /**< The grace period (in days) before expiring subscribers. */
@@ -195,7 +195,7 @@ namespace discpp {
 		}
 
         bool enabled; /**< Whether the embed is enabled. */
-        snowflake channel_id; /**< The embed channel id. */
+        discpp::Snowflake channel_id; /**< The embed channel id. */
 	};
 
 	enum WidgetStyle : int {
@@ -258,7 +258,7 @@ namespace discpp {
          *
          * @return discpp::Guild, this is a constructor.
          */
-		Guild(const snowflake& id);
+		Guild(const Snowflake& id);
 
         /**
          * @brief Constructs a discpp::Guild object by parsing json
@@ -308,12 +308,12 @@ namespace discpp {
          * This makes it easy to find a channel in the array by using the `std::unordered_map::find()` method.
          *
          * ```cpp
-         *      std::unordered_map<discpp::snowflake, discpp::Channel> guild.GetChannels();
+         *      std::unordered_map<discpp::Snowflake, discpp::Channel> guild.GetChannels();
          * ```
          *
-         * @return std::unordered_map<discpp::snowflake, discpp::Channel>
+         * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
          */
-		std::unordered_map<discpp::snowflake, discpp::Channel> GetChannels();
+		std::unordered_map<discpp::Snowflake, discpp::Channel> GetChannels();
 
         /**
          * @brief Gets a list of channel categories in this guild.
@@ -322,25 +322,25 @@ namespace discpp {
          * This makes it easy to find a channel in the array by using the `std::unordered_map::find()` method.
          *
          * ```cpp
-         *      std::unordered_map<discpp::snowflake, discpp::Channel> guild.GetCategories();
+         *      std::unordered_map<discpp::Snowflake, discpp::Channel> guild.GetCategories();
          * ```
          *
-         * @return std::unordered_map<discpp::snowflake, discpp::Channel>
+         * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
          */
-		std::unordered_map<discpp::snowflake, discpp::Channel> GetCategories();
+		std::unordered_map<discpp::Snowflake, discpp::Channel> GetCategories();
 
         /**
          * @brief Gets a channel in this guild.
          *
          * ```cpp
-         *      discpp::Channel chnl = guild.GetChannel(snowflake);
+         *      discpp::Channel chnl = guild.GetChannel(Snowflake);
          * ```
          *
          * @param[in] id The id of the channel you want to retrieve
          *
          * @return discpp::Channel
          */
-        discpp::Channel GetChannel(const snowflake& id) const;
+        discpp::Channel GetChannel(const Snowflake& id) const;
 
         /**
          * @brief Creates a channel for this Guild.
@@ -388,7 +388,7 @@ namespace discpp {
          *
          * @return std::shared_ptr<discpp::Member>
          */
-        std::shared_ptr<discpp::Member> GetMember(const snowflake& id) const;
+        std::shared_ptr<discpp::Member> GetMember(const Snowflake& id) const;
 
         /**
          * @brief Ensures the bot has a permission.
@@ -420,7 +420,7 @@ namespace discpp {
          *
          * @return std::shared_ptr<discpp::Member>
          */
-        std::shared_ptr<discpp::Member> AddMember(const snowflake& id, const std::string& access_token, const std::string& nick, const std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf);
+        std::shared_ptr<discpp::Member> AddMember(const Snowflake& id, const std::string& access_token, const std::string& nick, const std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf);
 
         /**
          * @brief Remove a member from the guild.
@@ -485,7 +485,7 @@ namespace discpp {
          *
          * @return void
          */
-		void BanMemberById(const snowflake& user_id, const std::string& reason = "");
+		void BanMemberById(const Snowflake& user_id, const std::string& reason = "");
 
         /**
          * @brief Unban a guild member.
@@ -511,7 +511,7 @@ namespace discpp {
          *
          * @return void
          */
-		void UnbanMemberById(const snowflake& user_id);
+		void UnbanMemberById(const Snowflake& user_id);
 
         /**
          * @brief Kick a guild member.
@@ -537,7 +537,7 @@ namespace discpp {
          *
          * @return void
          */
-        void KickMemberById(const snowflake& member_id);
+        void KickMemberById(const Snowflake& member_id);
 
         /**
          * @brief Retrieve a guild role.
@@ -550,7 +550,7 @@ namespace discpp {
          *
          * @return std::shared_ptr<discpp::Role>
          */
-        std::shared_ptr<discpp::Role> GetRole(const snowflake& id) const;
+        std::shared_ptr<discpp::Role> GetRole(const Snowflake& id) const;
 
         /**
          * @brief Create a guild role.
@@ -672,7 +672,7 @@ namespace discpp {
          *
          * @return void
          */
-		void CreateIntegration(const snowflake& id, const std::string& type);
+		void CreateIntegration(const Snowflake& id, const std::string& type);
 
         /**
          * @brief Modify a guild integration.
@@ -736,7 +736,7 @@ namespace discpp {
          *
          * @return discpp::GuildEmbed
          */
-		GuildEmbed ModifyGuildEmbed(const snowflake& channel_id, const bool& enabled);
+		GuildEmbed ModifyGuildEmbed(const Snowflake& channel_id, const bool& enabled);
 
         /**
          * @brief Returns a partial invite object for guilds with that feature enabled.
@@ -769,18 +769,18 @@ namespace discpp {
          *
          * @return std::shared_ptr<discpp::Member>
          */
-        std::shared_ptr<discpp::Member> RequestMemberIfNotExist(const snowflake& member_id);
+        std::shared_ptr<discpp::Member> RequestMemberIfNotExist(const Snowflake& member_id);
 
         /**
          * @brief Get all guild emojis.
          *
          * ```cpp
-         *      std::unordered_map<snowflake, std::shared_ptr<Emoji>> guild_emojis = guild.GetEmojis();
+         *      std::unordered_map<Snowflake, std::shared_ptr<Emoji>> guild_emojis = guild.GetEmojis();
          * ```
          *
-         * @return std::unordered_map<snowflake, std::shared_ptr<Emoji>>
+         * @return std::unordered_map<Snowflake, std::shared_ptr<Emoji>>
          */
-		std::unordered_map<snowflake, discpp::Emoji> GetEmojis();
+		std::unordered_map<Snowflake, discpp::Emoji> GetEmojis();
 
         /**
          * @brief Get a guild emoji.
@@ -793,7 +793,7 @@ namespace discpp {
          *
          * @return Emoji
          */
-        discpp::Emoji GetEmoji(const snowflake& id) const;
+        discpp::Emoji GetEmoji(const Snowflake& id) const;
 
         /**
          * @brief Create a guild emoji.
@@ -911,34 +911,36 @@ namespace discpp {
 		std::string splash; /**< Optional hashed guild splash. */
 		std::string discovery_splash; /**< Optional hashed discovery splash. */
 		//bool owner; /**< Whether or not the bot is the owner of the guild. */
-		snowflake owner_id; /**< ID of the guild owner. */
+		Snowflake owner_id; /**< ID of the guild owner. */
 		int permissions; /**< Total permissions for the bot in the guild (does not include channel overrides). */
 		std::string region; /**< Voice region id for the guild. */
-		snowflake afk_channel_id; /**< ID of afk channel. */
+		Snowflake afk_channel_id; /**< ID of afk channel. */
 		int afk_timeout; /**< AFK timeout in seconds. */
 		//bool embed_enabled;/**< Whether this guild is embeddable (e.g. widget). */
-		snowflake embed_channel_id;/**< If not null, the channel id that the widget will generate an invite to. */
+		Snowflake embed_channel_id;/**< If not null, the channel id that the widget will generate an invite to. */
 		discpp::specials::VerificationLevel verification_level; /**< Verification level required for the guild. */
 		discpp::specials::DefaultMessageNotificationLevel default_message_notifications; /**< Default message notifications level. */
 		discpp::specials::ExplicitContentFilterLevel explicit_content_filter; /**< Explicit content filter level. */
-		std::unordered_map<snowflake, std::shared_ptr<Role>> roles; /**< Roles in the guild. */
-		std::unordered_map<snowflake, Emoji> emojis; /**< Custom guild emojis. */
+		std::unordered_map<Snowflake, std::shared_ptr<Role>> roles; /**< Roles in the guild. */
+		std::unordered_map<Snowflake, Emoji> emojis; /**< Custom guild emojis. */
 		std::vector<std::string> features; /**< Enabled guild features. */
 		discpp::specials::MFALevel mfa_level; /**< Required MFA level for the guild. */
-		snowflake application_id; /**< Application id of the guild creator if it is bot-created. */
+		Snowflake application_id; /**< Application id of the guild creator if it is bot-created. */
 		//bool widget_enabled; /**< Whether or not the server widget is enabled. */
-		snowflake widget_channel_id; /**< The channel id for the server widget. */
-		snowflake system_channel_id; /**< The id of the channel where guild notices such as welcome messages and boost events are posted. */
+		Snowflake widget_channel_id; /**< The channel id for the server widget. */
+		Snowflake system_channel_id; /**< The id of the channel where guild notices such as welcome messages and boost events are posted. */
         int system_channel_flags; /**< System channel flags. */
-        snowflake rules_channel_id; /**< The id of the channel where "PUBLIC" guilds display rules and/or guidelines. */
-		// @TODO: Convert to iso8601Time
-		std::string joined_at; /**< When this guild was joined at. */
+        Snowflake rules_channel_id; /**< The id of the channel where "PUBLIC" guilds display rules and/or guidelines. */
+		time_t joined_at; /**< When this guild was joined at. */
+		[[nodiscard]] inline std::string GetFormattedJoinedAt() const {
+		    return FormatTime(this->joined_at);
+		}
 		//bool large; /**< Whether this is considered a large guild. */
 		//bool unavailable; /**< Whether this guild is unavailable. */
 		int member_count; /**< Total number of members in this guild. */
 		std::vector<discpp::VoiceState> voice_states; /**< Array of partial voice state objects. */
-		std::unordered_map<snowflake, std::shared_ptr<Member>> members; /**< Users in the guild. */
-		std::unordered_map<snowflake, Channel> channels; /**< Channels in the guild. */
+		std::unordered_map<Snowflake, std::shared_ptr<Member>> members; /**< Users in the guild. */
+		std::unordered_map<Snowflake, Channel> channels; /**< Channels in the guild. */
 		int max_presences; /**< The maximum amount of presences for the guild (the default value, currently 25000, is in effect when null is returned). */
 		int max_members; /**< The maximum amount of members for the guild. */
 		std::string vanity_url_code; /**< The vanity url code for the guild. */
@@ -987,9 +989,9 @@ namespace discpp {
             suppress = json["suppress"].GetBool();
         }
 
-        snowflake guild_id; /**< The guild id this voice state is for. */
-        snowflake channel_id; /**< The channel id this user is connected to. */
-        snowflake user_id; /**< The user id this voice state is for. */
+        Snowflake guild_id; /**< The guild id this voice state is for. */
+        Snowflake channel_id; /**< The channel id this user is connected to. */
+        Snowflake user_id; /**< The user id this voice state is for. */
         discpp::Member member; /**< The guild member this voice state is for. */
         std::string session_id; /**< The session id for this voice state. */
         bool deaf; /**< Whether this user is deafened by the server. */

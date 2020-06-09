@@ -3,7 +3,7 @@
 #include "client.h"
 
 namespace discpp {
-	Channel::Channel(const snowflake& id) : discpp::DiscordObject(id) {
+	Channel::Channel(const Snowflake& id) : discpp::DiscordObject(id) {
 		*this = globals::client_instance->GetChannel(id);
 	}
 
@@ -13,7 +13,8 @@ namespace discpp {
 		name = GetDataSafely<std::string>(json, "name");
 		topic = GetDataSafely<std::string>(json, "topic");
 		last_message_id = GetIDSafely(json, "last_message_id");
-		last_pin_timestamp = GetDataSafely<std::string>(json, "last_pin_timestamp");
+		std::string lstpintmstmp = GetDataSafely<std::string>(json, "last_pin_timestamp");
+		if (lstpintmstmp != "") last_pin_timestamp = TimeFromDiscord(lstpintmstmp);
         guild_id = GetIDSafely(json, "guild_id");
         position = GetDataSafely<int>(json, "position");
         if (ContainsNotNull(json, "permission_overwrites")) {
@@ -163,7 +164,7 @@ namespace discpp {
 		return messages;
 	}
 
-	discpp::Message Channel::FindMessage(const snowflake& message_id) {
+	discpp::Message Channel::FindMessage(const Snowflake& message_id) {
 		rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/messages/" + std::to_string(message_id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 
 		return discpp::Message(result);
@@ -186,12 +187,12 @@ namespace discpp {
         return messages;
     }
 
-    discpp::Channel Channel::RequestChannel(discpp::snowflake id) {
+    discpp::Channel Channel::RequestChannel(discpp::Snowflake id) {
         rapidjson::Document channel = SendGetRequest(Endpoint("/channels/" + std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
         return discpp::Channel(channel);
     }
 
-	void Channel::BulkDeleteMessage(const std::vector<snowflake>& messages) {
+	void Channel::BulkDeleteMessage(const std::vector<Snowflake>& messages) {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
             globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::BulkDeleteMessage only available for guild channels!");
             throw std::runtime_error("discpp::Channel::BulkDeleteMessage only available for guild channels!");
@@ -200,7 +201,7 @@ namespace discpp {
 		std::string endpoint = Endpoint("/channels/" + std::to_string(id) + "/messages/bulk-delete");
 
 		std::string combined_message = "";
-		for (snowflake message : messages) {
+		for (Snowflake message : messages) {
 			if (message == messages[0]) {
 				combined_message += "\"" + std::to_string(message) + "\"";
 			} else {
@@ -284,13 +285,13 @@ namespace discpp {
 		return invites;
 	}
 
-	std::unordered_map<discpp::snowflake, discpp::Channel> Channel::GetChildren() {
+	std::unordered_map<discpp::Snowflake, discpp::Channel> Channel::GetChildren() {
         if (type != ChannelType::GROUP_CATEGORY) {
             globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::GetChildren only available for category channels!");
             throw std::runtime_error("discpp::Channel::GetChildren only available for category channels!");
         }
 
-	    std::unordered_map<discpp::snowflake, discpp::Channel> tmp;
+	    std::unordered_map<discpp::Snowflake, discpp::Channel> tmp;
 	    for (auto const chnl : this->GetGuild()->channels) {
 	        if (chnl.second.category_id == this->id) {
                 tmp.insert({chnl.first, chnl.second});
@@ -319,7 +320,7 @@ namespace discpp {
         }
 	}
 
-    discpp::Message Channel::RequestMessage(discpp::snowflake id) {
+    discpp::Message Channel::RequestMessage(discpp::Snowflake id) {
         rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + std::to_string(this->id) + "/messages/" + std::to_string(id)), DefaultHeaders(), {}, {});
 
         return discpp::Message(result);

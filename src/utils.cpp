@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 #include <numeric>
+#include <iomanip>
 
 std::string discpp::GetOsName() {
 	#ifdef _WIN32
@@ -25,7 +26,7 @@ std::string discpp::GetOsName() {
 }
 
 // @TODO: Test if the json document type returned is what its supposed to be, like an array or object.
-rapidjson::Document discpp::HandleResponse(cpr::Response& response, const snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
+rapidjson::Document discpp::HandleResponse(cpr::Response& response, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Received requested payload: " + response.text);
     }
@@ -59,7 +60,7 @@ std::string CprBodyToString(const cpr::Body& body) {
 	return body;
 }
 
-rapidjson::Document discpp::SendGetRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+rapidjson::Document discpp::SendGetRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
     }
@@ -74,7 +75,7 @@ rapidjson::Document discpp::SendGetRequest(const std::string& url, const cpr::He
 #endif
 }
 
-rapidjson::Document discpp::SendPostRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+rapidjson::Document discpp::SendPostRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + CprBodyToString(body));
     }
@@ -83,7 +84,7 @@ rapidjson::Document discpp::SendPostRequest(const std::string& url, const cpr::H
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendPutRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+rapidjson::Document discpp::SendPutRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("put patch request, URL: " + url + ", body: " + CprBodyToString(body));
     }
@@ -92,7 +93,7 @@ rapidjson::Document discpp::SendPutRequest(const std::string& url, const cpr::He
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendPatchRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+rapidjson::Document discpp::SendPatchRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
 	if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + CprBodyToString(body));
     }
@@ -101,7 +102,7 @@ rapidjson::Document discpp::SendPatchRequest(const std::string& url, const cpr::
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendDeleteRequest(const std::string& url, const cpr::Header& headers, const snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
+rapidjson::Document discpp::SendDeleteRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending delete request, URL: " + url);
     }
@@ -248,7 +249,7 @@ std::string discpp::EscapeString(const std::string& string) {
 	return tmp;
 }
 
-int discpp::WaitForRateLimits(const snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
+int discpp::WaitForRateLimits(const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
 
 	RateLimit* rlmt = nullptr;
 
@@ -307,7 +308,7 @@ bool HeaderContains(const cpr::Header& header, const std::string& key) {
 	return false;
 }
 
-void discpp::HandleRateLimits(cpr::Header& header, const snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
+void discpp::HandleRateLimits(cpr::Header& header, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
 	RateLimit* obj = nullptr;
 	if (HeaderContains(header, "x-ratelimit-global")) {
 		obj = &global_ratelimit;
@@ -338,20 +339,29 @@ void discpp::HandleRateLimits(cpr::Header& header, const snowflake& object, cons
 	obj->ratelimit_reset = std::stod(header["x-ratelimit-reset"]);
 }
 
-time_t discpp::TimeFromSnowflake(const snowflake& snow) {
+time_t discpp::TimeFromDiscord(const std::string &time) {
+    std::tm t{};
+    std::istringstream ss(time);
+    ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S");
+    if (ss.fail()) {
+        throw std::runtime_error("failed to parse time");
+    }
+
+    return mktime(&t);
+}
+
+time_t discpp::TimeFromSnowflake(const Snowflake& snow) {
     constexpr static uint64_t discord_epoch = 1420070400000;
     return ((snow >> 22) + discord_epoch) / 1000;
 }
 
-std::string discpp::FormatTimeFromSnowflake(const snowflake& snow) {
-	time_t unix_time = TimeFromSnowflake(snow);
+std::string discpp::FormatTime(const time_t& time, const std::string& format) {
+    tm* n = std::gmtime(&time);
+    tm now = *n;
+    char buffer[256];
+    strftime(buffer, sizeof(buffer), format.c_str(), &now);
 
-	tm* n = std::gmtime(&unix_time);
-	tm now = *n;
-	char buffer[256];
-	strftime(buffer, sizeof(buffer), "%Y-%m-%d @ %H:%M:%S GMT", &now);
-
-	return buffer;
+    return buffer;
 }
 
 bool discpp::ContainsNotNull(rapidjson::Document &json, const char *value_name) {
@@ -450,6 +460,6 @@ std::string discpp::URIEncode(const std::string& str) {
     return sResult;
 }
 
-discpp::snowflake discpp::SnowflakeFromString(const std::string& str) {
+discpp::Snowflake discpp::SnowflakeFromString(const std::string& str) {
     return strtoll(str.c_str(), NULL, 10);
 }

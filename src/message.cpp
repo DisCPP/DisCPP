@@ -2,14 +2,14 @@
 #include "client.h"
 
 namespace discpp {
-	Message::Message(const snowflake& id) : discpp::DiscordObject(id) {
+	Message::Message(const Snowflake& id) : discpp::DiscordObject(id) {
 		auto message = discpp::globals::client_instance->messages.find(id);
 		if (message != discpp::globals::client_instance->messages.end()) {
 			*this = *message->second;
 		}
 	}
 
-    Message::Message(const snowflake& message_id, const snowflake& channel_id) {
+    Message::Message(const Snowflake& message_id, const Snowflake& channel_id) {
         rapidjson::Document message = SendGetRequest(Endpoint("/channels/" + std::to_string(channel_id) + "/messages/" + std::to_string(message_id)), DefaultHeaders(), channel_id, RateLimitBucketType::CHANNEL);
         *this = discpp::Message(message);
     }
@@ -20,8 +20,9 @@ namespace discpp {
         guild = std::make_shared<discpp::Guild>(ConstructDiscppObjectFromID(json, "guild_id", discpp::Guild()));
 		author = std::make_shared<discpp::User>(ConstructDiscppObjectFromJson(json, "author", discpp::User()));
 		content = GetDataSafely<std::string>(json, "content");
-		timestamp = GetDataSafely<std::string>(json, "timestamp");
-		edited_timestamp = GetDataSafely<std::string>(json, "edited_timestamp");
+		timestamp = TimeFromDiscord(GetDataSafely<std::string>(json, "timestamp"));
+		std::string tmstamp = GetDataSafely<std::string>(json, "edited_timestamp");
+		if (tmstamp != "") edited_timestamp = TimeFromDiscord(tmstamp);
 		if (GetDataSafely<bool>(json, "tts")) {
 		    bit_flags |= 0b1;
 		}
@@ -126,13 +127,13 @@ namespace discpp {
 		SendDeleteRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL);
 	}
 
-	std::unordered_map<discpp::snowflake, discpp::User> Message::GetReactorsOfEmoji(const discpp::Emoji& emoji, const int& amount) {
+	std::unordered_map<discpp::Snowflake, discpp::User> Message::GetReactorsOfEmoji(const discpp::Emoji& emoji, const int& amount) {
         discpp::Emoji tmp = emoji;
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + tmp.ToURL());
 		cpr::Body body("{\"limit\": " + std::to_string(amount) + "}");
 		rapidjson::Document result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
 		
-		std::unordered_map<discpp::snowflake, discpp::User> users;
+		std::unordered_map<discpp::Snowflake, discpp::User> users;
 		IterateThroughNotNullJson(result, [&](rapidjson::Document& user_json) {
 		    discpp::User tmp(user_json);
 		    users.insert({ tmp.id, tmp });
@@ -141,14 +142,14 @@ namespace discpp {
 		return users;
 	}
 
-	std::unordered_map<discpp::snowflake, discpp::User> Message::GetReactorsOfEmoji(const discpp::Emoji& emoji, const discpp::User& user, const GetReactionsMethod& method) {
+	std::unordered_map<discpp::Snowflake, discpp::User> Message::GetReactorsOfEmoji(const discpp::Emoji& emoji, const discpp::User& user, const GetReactionsMethod& method) {
         discpp::Emoji tmp = emoji;
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + tmp.ToURL());
 		std::string method_str = (method == GetReactionsMethod::BEFORE_USER) ? "before" : "after";
 		cpr::Body body("{\"" + method_str + "\": " + std::to_string(user.id) + "}");
 		rapidjson::Document result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
 
-        std::unordered_map<discpp::snowflake, discpp::User> users;
+        std::unordered_map<discpp::Snowflake, discpp::User> users;
         IterateThroughNotNullJson(result, [&](rapidjson::Document& user_json) {
             discpp::User tmp(user_json);
             users.insert({ tmp.id, tmp });
