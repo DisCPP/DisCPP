@@ -1,5 +1,5 @@
-#include "discpp/ratelimit.h"
-#include "discpp/utils.h"
+#include "ratelimit.h"
+#include "utils.h"
 
 namespace discpp {
     Ratelimit::Ratelimit(const rapidjson::Document& json) {
