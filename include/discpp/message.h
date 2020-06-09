@@ -337,14 +337,8 @@ namespace discpp {
         std::shared_ptr<discpp::Guild> guild;
         std::shared_ptr<discpp::User> author;
 		std::string content;
-
 		time_t timestamp;
 		time_t edited_timestamp;
-		[[nodiscard]] inline std::string GetFormattedEditedTimestamp() const {
-		    if (edited_timestamp == NULL) return "";
-		    return FormatTime(this->edited_timestamp);
-		}
-
 		std::unordered_map<discpp::Snowflake, discpp::User> mentions;
 		std::vector<discpp::Snowflake> mentioned_roles;
         std::unordered_map<discpp::Snowflake, ChannelMention> mention_channels;

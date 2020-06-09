@@ -163,7 +163,6 @@ namespace discpp {
             logger->Info(LogTextColor::GREEN + "Connected to gateway!");
 
             disconnected = false;
-            reconnecting = false;
         } else if (msg->type == ix::WebSocketMessageType::Close) {
             if (!reconnecting) {
                 HandleDiscordDisconnect(msg);

@@ -102,7 +102,7 @@ namespace discpp {
 	}
 
     template<typename T>
-    inline T GetDataSafely(rapidjson::Document & json, const char* value_name) {
+    inline T GetDataSafely(const rapidjson::Document & json, const char* value_name) {
         rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
         if (itr != json.MemberEnd()) {
             if (!json[value_name].IsNull()) {
@@ -117,7 +117,7 @@ namespace discpp {
     }
 
     template<class T>
-    inline T ConstructDiscppObjectFromID(rapidjson::Document& doc, const char* value_name, T default_val) {
+    inline T ConstructDiscppObjectFromID(const rapidjson::Document& doc, const char* value_name, T default_val) {
         rapidjson::Value::ConstMemberIterator itr = doc.FindMember(value_name);
         if (itr != doc.MemberEnd()) {
             if (!doc[value_name].IsNull()) {
@@ -132,7 +132,7 @@ namespace discpp {
     }
 
 	template<class T>
-	inline T ConstructDiscppObjectFromJson(rapidjson::Document& doc, const char* value_name, T default_val) {
+	inline T ConstructDiscppObjectFromJson(const rapidjson::Document& doc, const char* value_name, T default_val) {
         rapidjson::Value::ConstMemberIterator itr = doc.FindMember(value_name);
         if (itr != doc.MemberEnd()) {
             if (!doc[value_name].IsNull()) {
