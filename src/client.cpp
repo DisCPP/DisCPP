@@ -66,7 +66,6 @@ namespace discpp {
     }
 
     void Client::DisconnectWebsocket() {
-        //std::lock_guard<std::mutex> lock(websocket_client_mutex);
         logger->Debug(LogTextColor::YELLOW + "Closing websocket connection...");
 
         websocket.close(ix::WebSocketCloseConstants::kNormalClosureCode);
@@ -96,7 +95,7 @@ namespace discpp {
             itr = gateway_request.FindMember("session_start_limit");
             if (itr != gateway_request.MemberEnd() && gateway_request["session_start_limit"]["remaining"].GetInt() == 0) {
                 logger->Debug(LogTextColor::RED + "GATEWAY ERROR: Maximum start limit reached");
-                throw new StartLimitException();
+                throw StartLimitException();
             }
 
             // Specify version and encoding just ot be safe
@@ -112,7 +111,6 @@ namespace discpp {
 #endif
 
             {
-                //std::lock_guard<std::mutex> lock(websocket_client_mutex);
 
                 websocket.setUrl(gateway_endpoint);
                 websocket.disableAutomaticReconnection();
@@ -386,7 +384,7 @@ namespace discpp {
     std::unordered_map<discpp::Snowflake, discpp::Channel> Client::GetUserDMs() {
 
         if (!discpp::globals::client_instance->client_user.IsBot()) {
-            throw new ProhibitedEndpointException("/users/@me/channels is a user only endpoint");
+            throw ProhibitedEndpointException("/users/@me/channels is a user only endpoint");
         } else {
             std::unordered_map<discpp::Snowflake, discpp::Channel> dm_channels;
 
@@ -410,7 +408,7 @@ namespace discpp {
 		for (auto const& connection : result.GetArray()) {
 			rapidjson::Document connection_json;
 			connection_json.CopyFrom(connection, connection_json.GetAllocator());
-			connections.push_back(discpp::User::Connection(connection_json));
+			connections.emplace_back(connection_json);
 		}
 
 		return connections;
@@ -425,19 +423,19 @@ namespace discpp {
 
     ClientUserSettings ClientUser::GetSettings() {
         if (!discpp::globals::client_instance->client_user.IsBot()) {
-            throw new ProhibitedEndpointException("users/@me/settings is a user only endpoint");
+            throw ProhibitedEndpointException("users/@me/settings is a user only endpoint");
         }
         else {
             rapidjson::Document result = SendGetRequest(Endpoint("users/@me/settings/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
-            ClientUserSettings settings(result);
-            this->settings = settings;
-            return settings;
+            ClientUserSettings user_settings(result);
+            this->settings = user_settings;
+            return user_settings;
         }
     }
 
-    void ClientUser::ModifySettings(ClientUserSettings& settings) {
+    void ClientUser::ModifySettings(ClientUserSettings& user_settings) {
         if (!discpp::globals::client_instance->client_user.IsBot()) {
-            throw new ProhibitedEndpointException("users/@me/settings is a user only endpoint");
+            throw ProhibitedEndpointException("users/@me/settings is a user only endpoint");
         }
         else {
             rapidjson::Document new_settings;
@@ -445,43 +443,43 @@ namespace discpp {
 
             rapidjson::Document::AllocatorType& allocator = new_settings.GetAllocator();
             ClientUserSettings old_settings = this->settings;
-            if (settings.afk_timeout != old_settings.afk_timeout) new_settings.AddMember("afk_timeout", settings.afk_timeout, allocator);
-            if (settings.custom_status != old_settings.custom_status) new_settings.AddMember("custom_status", settings.custom_status, allocator);
-            if (settings.explicit_content_filter != old_settings.explicit_content_filter) new_settings.AddMember("explicit_content_filter", (int) settings.explicit_content_filter, allocator);
-            if (settings.theme != old_settings.theme) new_settings.AddMember("theme", ThemeToString(settings.theme), allocator);
+            if (user_settings.afk_timeout != old_settings.afk_timeout) new_settings.AddMember("afk_timeout", user_settings.afk_timeout, allocator);
+            if (user_settings.custom_status != old_settings.custom_status) new_settings.AddMember("custom_status", user_settings.custom_status, allocator);
+            if (user_settings.explicit_content_filter != old_settings.explicit_content_filter) new_settings.AddMember("explicit_content_filter", (int) user_settings.explicit_content_filter, allocator);
+            if (user_settings.theme != old_settings.theme) new_settings.AddMember("theme", ThemeToString(user_settings.theme), allocator);
             rapidjson::Value friend_source_flags(rapidjson::kObjectType);
             bool add_friend_source_flags = false;
-            if (settings.friend_source_flags.GetAll() != old_settings.friend_source_flags.GetAll()) {
-                friend_source_flags.AddMember("all", settings.friend_source_flags.GetAll(), allocator);
+            if (user_settings.friend_source_flags.GetAll() != old_settings.friend_source_flags.GetAll()) {
+                friend_source_flags.AddMember("all", user_settings.friend_source_flags.GetAll(), allocator);
                 add_friend_source_flags = true;
             }
-            if (settings.friend_source_flags.GetMutualFriends() != old_settings.friend_source_flags.GetMutualFriends()) {
-                friend_source_flags.AddMember("mutual_friends", settings.friend_source_flags.GetMutualFriends(), allocator);
+            if (user_settings.friend_source_flags.GetMutualFriends() != old_settings.friend_source_flags.GetMutualFriends()) {
+                friend_source_flags.AddMember("mutual_friends", user_settings.friend_source_flags.GetMutualFriends(), allocator);
                 add_friend_source_flags = true;
             }
-            if (settings.friend_source_flags.GetMutualGuilds() != old_settings.friend_source_flags.GetMutualGuilds()) {
-                friend_source_flags.AddMember("mutual_guilds", settings.friend_source_flags.GetMutualGuilds(), allocator);
+            if (user_settings.friend_source_flags.GetMutualGuilds() != old_settings.friend_source_flags.GetMutualGuilds()) {
+                friend_source_flags.AddMember("mutual_guilds", user_settings.friend_source_flags.GetMutualGuilds(), allocator);
                 add_friend_source_flags = true;
             }
             if (add_friend_source_flags) new_settings.AddMember("friend_source_flags", friend_source_flags, allocator);
-            if (settings.GetAllowAccessibilityDetection() != old_settings.GetAllowAccessibilityDetection()) new_settings.AddMember("allow_accessibility_detection", settings.GetAllowAccessibilityDetection(), allocator);
-            if (settings.GetAnimateEmoji() != old_settings.GetAnimateEmoji()) new_settings.AddMember("animate_emoji", settings.GetAnimateEmoji(), allocator);
-            if (settings.GetContactSyncEnabled() != old_settings.GetContactSyncEnabled()) new_settings.AddMember("contact_sync_enabled", settings.GetContactSyncEnabled(), allocator);
-            if (settings.GetConvertEmoticons() != old_settings.GetConvertEmoticons()) new_settings.AddMember("convert_emoticons", settings.GetConvertEmoticons(), allocator);
-            if (settings.GetDefaultGuildsRestricted() != old_settings.GetDefaultGuildsRestricted()) new_settings.AddMember("default_guilds_restricted", settings.GetDefaultGuildsRestricted(), allocator);
-            if (settings.GetDetectPlatformAccounts() != old_settings.GetDetectPlatformAccounts()) new_settings.AddMember("detect_platform_accounts", settings.GetDetectPlatformAccounts(), allocator);
-            if (settings.GetDeveloperMode() != old_settings.GetDeveloperMode()) new_settings.AddMember("developer_mode", settings.GetDeveloperMode(), allocator);
-            if (settings.GetDisableGamesTab() != old_settings.GetDisableGamesTab()) new_settings.AddMember("disable_games_tab", settings.GetDisableGamesTab(), allocator);
-            if (settings.GetEnableTtsCommand() != old_settings.GetEnableTtsCommand()) new_settings.AddMember("enable_tts_command", settings.GetEnableTtsCommand(), allocator);
-            if (settings.GetGifAutoPlay() != old_settings.GetGifAutoPlay()) new_settings.AddMember("gif_auto_play", settings.GetGifAutoPlay(), allocator);
-            if (settings.GetInlineAttachmentMedia() != old_settings.GetInlineAttachmentMedia()) new_settings.AddMember("inline_attachment_media", settings.GetInlineAttachmentMedia(), allocator);
-            if (settings.GetInlineEmbedMedia() != old_settings.GetInlineEmbedMedia()) new_settings.AddMember("inline_embed_media", settings.GetInlineEmbedMedia(), allocator);
-            if (settings.GetMessageDisplayCompact() != old_settings.GetMessageDisplayCompact()) new_settings.AddMember("message_display_compact", settings.GetMessageDisplayCompact(), allocator);
-            if (settings.GetNativePhoneIntegrationEnabled() != old_settings.GetNativePhoneIntegrationEnabled()) new_settings.AddMember("native_phone_integration_enabled", settings.GetNativePhoneIntegrationEnabled(), allocator);
-            if (settings.GetRenderEmbeds() != old_settings.GetRenderEmbeds()) new_settings.AddMember("render_embeds", settings.GetRenderEmbeds(), allocator);
-            if (settings.GetRenderReactions() != old_settings.GetRenderReactions()) new_settings.AddMember("render_reactions", settings.GetRenderReactions(), allocator);
-            if (settings.GetShowCurrentGame() != old_settings.GetShowCurrentGame()) new_settings.AddMember("show_current_game", settings.GetShowCurrentGame(), allocator);
-            if (settings.GetStreamNotificationsEnabled() != old_settings.GetStreamNotificationsEnabled()) new_settings.AddMember("stream_notifications_enabled", settings.GetStreamNotificationsEnabled(), allocator);
+            if (user_settings.GetAllowAccessibilityDetection() != old_settings.GetAllowAccessibilityDetection()) new_settings.AddMember("allow_accessibility_detection", user_settings.GetAllowAccessibilityDetection(), allocator);
+            if (user_settings.GetAnimateEmoji() != old_settings.GetAnimateEmoji()) new_settings.AddMember("animate_emoji", user_settings.GetAnimateEmoji(), allocator);
+            if (user_settings.GetContactSyncEnabled() != old_settings.GetContactSyncEnabled()) new_settings.AddMember("contact_sync_enabled", user_settings.GetContactSyncEnabled(), allocator);
+            if (user_settings.GetConvertEmoticons() != old_settings.GetConvertEmoticons()) new_settings.AddMember("convert_emoticons", user_settings.GetConvertEmoticons(), allocator);
+            if (user_settings.GetDefaultGuildsRestricted() != old_settings.GetDefaultGuildsRestricted()) new_settings.AddMember("default_guilds_restricted", user_settings.GetDefaultGuildsRestricted(), allocator);
+            if (user_settings.GetDetectPlatformAccounts() != old_settings.GetDetectPlatformAccounts()) new_settings.AddMember("detect_platform_accounts", user_settings.GetDetectPlatformAccounts(), allocator);
+            if (user_settings.GetDeveloperMode() != old_settings.GetDeveloperMode()) new_settings.AddMember("developer_mode", user_settings.GetDeveloperMode(), allocator);
+            if (user_settings.GetDisableGamesTab() != old_settings.GetDisableGamesTab()) new_settings.AddMember("disable_games_tab", user_settings.GetDisableGamesTab(), allocator);
+            if (user_settings.GetEnableTtsCommand() != old_settings.GetEnableTtsCommand()) new_settings.AddMember("enable_tts_command", user_settings.GetEnableTtsCommand(), allocator);
+            if (user_settings.GetGifAutoPlay() != old_settings.GetGifAutoPlay()) new_settings.AddMember("gif_auto_play", user_settings.GetGifAutoPlay(), allocator);
+            if (user_settings.GetInlineAttachmentMedia() != old_settings.GetInlineAttachmentMedia()) new_settings.AddMember("inline_attachment_media", user_settings.GetInlineAttachmentMedia(), allocator);
+            if (user_settings.GetInlineEmbedMedia() != old_settings.GetInlineEmbedMedia()) new_settings.AddMember("inline_embed_media", user_settings.GetInlineEmbedMedia(), allocator);
+            if (user_settings.GetMessageDisplayCompact() != old_settings.GetMessageDisplayCompact()) new_settings.AddMember("message_display_compact", user_settings.GetMessageDisplayCompact(), allocator);
+            if (user_settings.GetNativePhoneIntegrationEnabled() != old_settings.GetNativePhoneIntegrationEnabled()) new_settings.AddMember("native_phone_integration_enabled", user_settings.GetNativePhoneIntegrationEnabled(), allocator);
+            if (user_settings.GetRenderEmbeds() != old_settings.GetRenderEmbeds()) new_settings.AddMember("render_embeds", user_settings.GetRenderEmbeds(), allocator);
+            if (user_settings.GetRenderReactions() != old_settings.GetRenderReactions()) new_settings.AddMember("render_reactions", user_settings.GetRenderReactions(), allocator);
+            if (user_settings.GetShowCurrentGame() != old_settings.GetShowCurrentGame()) new_settings.AddMember("show_current_game", user_settings.GetShowCurrentGame(), allocator);
+            if (user_settings.GetStreamNotificationsEnabled() != old_settings.GetStreamNotificationsEnabled()) new_settings.AddMember("stream_notifications_enabled", user_settings.GetStreamNotificationsEnabled(), allocator);
 
             rapidjson::Document result = SendPatchRequest(Endpoint("users/@me/settings/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL, cpr::Body(DumpJson(new_settings)));
         }
@@ -489,7 +487,7 @@ namespace discpp {
 
     void Client::AddFriend(const discpp::User& user) {
         if (!discpp::globals::client_instance->client_user.IsBot()) {
-            throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+            throw ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
             rapidjson::Document result = SendPutRequest(Endpoint("users/@me/relationships/" + std::to_string(user.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
@@ -497,7 +495,7 @@ namespace discpp {
 
     void Client::RemoveFriend(const discpp::User& user) {
         if(discpp::globals::client_instance->client_user.IsBot()) {
-            throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+            throw ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
             rapidjson::Document result = SendDeleteRequest(Endpoint("users/@me/relationships/" + std::to_string(user.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
@@ -506,7 +504,7 @@ namespace discpp {
     std::unordered_map<discpp::Snowflake, discpp::UserRelationship> Client::GetRelationships() {
         //todo implement this endpoint
         if(discpp::globals::client_instance->client_user.IsBot()) {
-            throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+            throw ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
             std::unordered_map<discpp::Snowflake, discpp::UserRelationship> relationships;
 
@@ -529,7 +527,7 @@ namespace discpp {
             return it->second;
         }
 
-        throw new DiscordObjectNotFound("Guild not found");
+        throw DiscordObjectNotFound("Guild not found");
     }
 
     discpp::User Client::ModifyCurrentUser(const std::string& username, discpp::Image& avatar) {
@@ -542,7 +540,6 @@ namespace discpp {
     }
 
     void Client::LeaveGuild(const discpp::Guild& guild) {
-
         SendDeleteRequest(Endpoint("/users/@me/guilds/" + std::to_string(guild.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
     }
 
@@ -572,7 +569,7 @@ namespace discpp {
         for (auto const& connection : result.GetArray()) {
             rapidjson::Document connection_json;
             connection_json.CopyFrom(connection, connection_json.GetAllocator());
-            connections.push_back(discpp::User::Connection(connection_json));
+            connections.emplace_back(connection_json);
         }
 
         return connections;

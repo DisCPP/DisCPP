@@ -48,7 +48,7 @@ namespace discpp {
          */
         std::vector<Connection> GetUserConnections();
 		ClientUserSettings GetSettings();
-		void ModifySettings(ClientUserSettings& settings);
+		void ModifySettings(ClientUserSettings& user_settings);
 
 		ClientUserSettings settings;
 		bool mfa_enabled;
@@ -343,7 +343,6 @@ namespace discpp {
 		std::thread heartbeat_thread;
 		std::thread future_loop_thread;
 
-		//std::mutex websocket_client_mutex;
 		std::mutex futures_mutex;
 
 		ix::WebSocket websocket;

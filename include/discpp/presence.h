@@ -137,13 +137,19 @@ namespace discpp {
 		Presence(const discpp::Activity& activity, const bool& afk, const std::string& status) : game(activity), afk(afk), status(status) {}
 
 		rapidjson::Document ToJson() {
-            rapidjson::Document result;
+            rapidjson::Document result(rapidjson::kObjectType);
+            result.AddMember("status", status, result.GetAllocator());
+            result.AddMember("afk", afk, result.GetAllocator());
 
-            std::string str_activity = "{\"status\": \"" + status + "\", \"afk\": " + (afk ? "true" : "false") + ", \"game\": " + \
-                    "{\"name\": \"" + game.name + "\", \"type\": " + std::to_string(static_cast<int>(game.type)) + ((!game.url.empty()) ? ", \"url\": \"" + game.url + "\"" : "") + "}, \"since\": \"" + std::to_string(time(NULL) - 10) + "\"}";
-            result.Parse(str_activity.c_str());
+            rapidjson::Value game_json(rapidjson::kObjectType);
+            game_json.AddMember("name", game.name, result.GetAllocator());
+            game_json.AddMember("type", std::to_string(static_cast<int>(game.type)), result.GetAllocator());
+            game_json.AddMember("url", game.url, result.GetAllocator());
+            game_json.AddMember("since", std::to_string(time(NULL) - 10), result.GetAllocator());
 
-			return std::move(result);
+            result.AddMember("game", game_json, result.GetAllocator());
+
+            return std::move(result);
 		}
 
 		std::string status;
