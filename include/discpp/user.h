@@ -146,8 +146,7 @@ namespace discpp {
 
 		std::string username; /**< The user's username, not unique across the platform. */
 		std::string avatar; /**< The user's avatar hash. */
-        // TODO:
-		// int public_flags;
+		// int public_flags; // Is this ever needed?
 	};
 }
 

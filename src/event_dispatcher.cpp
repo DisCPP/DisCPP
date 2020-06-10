@@ -239,7 +239,7 @@ namespace discpp {
             role_json.CopyFrom(role, role_json.GetAllocator());
 
             std::shared_ptr<discpp::Role> tmp = std::make_shared<discpp::Role>(SnowflakeFromString(role_json.GetString()), *guild);
-            member->roles.insert({ tmp->id, tmp });
+            member->roles.emplace_back(tmp);
         }
         rapidjson::Value::ConstMemberIterator itr = result.FindMember("nick");
         if (itr != result.MemberEnd() && !result["nick"].IsNull()) {

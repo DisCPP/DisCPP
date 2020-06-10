@@ -167,15 +167,28 @@ namespace discpp {
             return FormatTime(this->premium_since);
         }
 
+        /**
+         * @brief Returns true if the user has this role
+         *
+         * @return bool
+         */
+        bool HasRole(discpp::Snowflake role_id);
+
+        /**
+         * @brief Gets all permissions for the user from the roles and returns them.
+         *
+         * @return discpp::Permissions
+         */
+        discpp::Permissions GetPermissions();
+
 		discpp::User user; /**< The user this guild member represents. */
-		Snowflake guild_id; /**< ID of the guild the current member is in. */
+		discpp::Snowflake guild_id; /**< ID of the guild the current member is in. */
 		std::string nick; /**< This users guild nickname. */
-		std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>> roles; /**< Roles the current member has. */
+		std::vector<std::shared_ptr<discpp::Role>> roles; /**< Roles the current member has. */
 		time_t joined_at; /**< When the user joined the guild. */
         time_t premium_since; /**< When the user started boosting the guild. */
-		discpp::Permissions permissions; /**< Guild permissions for the current member. */
 		discpp::Presence presence; /**< Presence for the current member. */
-		int hierarchy; /**< Role hierarchy for the current member. */
+		unsigned int hierarchy; /**< Role hierarchy for the current member. */
 	private:
 	    char flags; /**< Internal use only. */
 	};

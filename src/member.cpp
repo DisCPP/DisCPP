@@ -1,6 +1,8 @@
 #include "guild.h"
 #include "client.h"
 #include <climits>
+#include <discpp/member.h>
+
 
 namespace discpp {
 	Member::Member(const Snowflake& id, const discpp::Guild& guild) : discpp::DiscordObject(id) {
@@ -24,16 +26,7 @@ namespace discpp {
 					highest_hiearchy = r->position;
 				}
 
-				// Save permissions
-				if (json["roles"][0] == role) {
-					permissions.allow_perms.value = r->permissions.allow_perms.value;
-					permissions.deny_perms.value = r->permissions.deny_perms.value;
-				} else {
-					permissions.allow_perms.value |= r->permissions.allow_perms.value;
-					permissions.deny_perms.value |= r->permissions.deny_perms.value;
-				}
-
-				roles.insert({ r->id, r });
+				roles.emplace_back(r);
 			}
 		}
 
@@ -108,10 +101,12 @@ namespace discpp {
 	}
 
 	bool Member::HasRole(const discpp::Role& role) {
-		return count_if(roles.begin(), roles.end(), [role](std::pair<discpp::Snowflake, std::shared_ptr<discpp::Role>> pair) { return role.id == pair.second->id; }) != 0;
+		return std::any_of(roles.begin(), roles.end(), [role](std::shared_ptr<discpp::Role> r) { return role.id == r->id; }) != 0;
 	}
 
 	bool Member::HasPermission(const discpp::Permission& perm) {
+        discpp::Permissions permissions = GetPermissions();
+
 		// Check if the member has the permission, has the admin permission, or is the guild owner.
 		bool has_perm = permissions.allow_perms.HasPermission(perm) && !permissions.deny_perms.HasPermission(perm);
 		has_perm = has_perm || (permissions.allow_perms.HasPermission(Permission::ADMINISTRATOR) && !permissions.deny_perms.HasPermission(Permission::ADMINISTRATOR));
@@ -119,4 +114,23 @@ namespace discpp {
 
 		return has_perm;
 	}
+
+    bool Member::HasRole(discpp::Snowflake role_id) {
+	    return std::any_of(roles.begin(), roles.end(), [role_id](std::shared_ptr<discpp::Role> role) { return role->id == role_id; });
+    }
+
+    discpp::Permissions Member::GetPermissions() {
+        discpp::Permissions permissions;
+        for (auto const& role : roles) {
+            if (role == roles.front()) {
+                permissions.allow_perms.value = role->permissions.allow_perms.value;
+                permissions.deny_perms.value = role->permissions.deny_perms.value;
+            } else {
+                permissions.allow_perms.value |= role->permissions.allow_perms.value;
+                permissions.deny_perms.value |= role->permissions.deny_perms.value;
+            }
+        }
+
+        return permissions;
+    }
 }
