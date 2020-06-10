@@ -55,6 +55,7 @@ namespace discpp {
 		std::string locale;
 		bool verified;
 		std::string email;
+        discpp::specials::NitroSubscription premium_type; /**< The type of Nitro subscription on a user's account. */
 	};
 
 	class UserRelationship {

@@ -23,20 +23,20 @@ namespace discpp {
 	}
 
 	namespace specials {
-		enum class NitroSubscription : int {
+		enum class NitroSubscription : uint8_t {
 			NO_NITRO = 0,
 			NITRO_CLASSIC = 1,
 			NITRO = 2
 		};
 
-		enum class NitroTier : int {
+		enum class NitroTier : uint8_t {
 			NO_TIER = 0,
 			TIER_1 = 1,
 			TIER_2 = 2,
 			TIER_3 = 3
 		};
 
-		enum VerificationLevel : int {
+		enum VerificationLevel : uint8_t {
 			NO_VERIFICATION = 0,
 			LOW = 1,
 			MEDIUM = 2,
@@ -44,18 +44,18 @@ namespace discpp {
 			VERY_HIGH = 4
 		};
 
-		enum DefaultMessageNotificationLevel : int {
+		enum DefaultMessageNotificationLevel : uint8_t {
 			ALL_MESSAGES = 0,
 			ONLY_MENTIONS = 1
 		};
 
-		enum class ExplicitContentFilterLevel : int {
+		enum class ExplicitContentFilterLevel : uint8_t {
 			DISABLED = 0,
 			MEMBERS_WITHOUT_ROLES = 1,
 			ALL_MEMBERS = 2
 		};
 
-		enum class MFALevel : int {
+		enum class MFALevel : uint8_t {
 			NO_MFA = 0,
 			ELEVATED = 1
 		};

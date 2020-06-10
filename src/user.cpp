@@ -16,9 +16,8 @@ namespace discpp {
 		avatar = GetDataSafely<std::string>(json, "avatar");
 		if (GetDataSafely<bool>(json, "bot")) flags |= 0b1;
         if (GetDataSafely<bool>(json, "system")) flags |= 0b10;
-		public_flags = GetDataSafely<int>(json, "flags");
-		premium_type = static_cast<discpp::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type"));
-		public_flags = GetDataSafely<int>(json, "public_flags");
+//		public_flags = GetDataSafely<int>(json, "flags");
+//		public_flags = GetDataSafely<int>(json, "public_flags");
 	}
 
 	User::Connection::Connection(rapidjson::Document& json) {

@@ -420,6 +420,7 @@ namespace discpp {
 		mfa_enabled = GetDataSafely<bool>(json, "mfa_enabled");
 		locale = GetDataSafely<std::string>(json, "locale");
 		verified = GetDataSafely<bool>(json, "verified");
+        premium_type = static_cast<discpp::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type"));
 	}
 
     ClientUserSettings ClientUser::GetSettings() {
