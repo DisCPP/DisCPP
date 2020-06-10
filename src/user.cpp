@@ -17,7 +17,6 @@ namespace discpp {
 		if (GetDataSafely<bool>(json, "bot")) flags |= 0b1;
         if (GetDataSafely<bool>(json, "system")) flags |= 0b10;
 		public_flags = GetDataSafely<int>(json, "flags");
-		premium_type = static_cast<discpp::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type"));
 		public_flags = GetDataSafely<int>(json, "public_flags");
 	}
 

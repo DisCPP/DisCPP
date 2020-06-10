@@ -147,9 +147,6 @@ namespace discpp {
 		std::string username; /**< The user's username, not unique across the platform. */
 		std::string avatar; /**< The user's avatar hash. */
 		std::string locale; /**< The user's chosen language option. */
-		bool verified; /**< Whether the email on this account has been verified. */
-		std::string email; /**< The user's email. */
-		discpp::specials::NitroSubscription premium_type; /**< The type of Nitro subscription on a user's account. */
 		int public_flags;
 	};
 }
