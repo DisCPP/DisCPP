@@ -146,7 +146,6 @@ namespace discpp {
 
 		std::string username; /**< The user's username, not unique across the platform. */
 		std::string avatar; /**< The user's avatar hash. */
-		std::string locale; /**< The user's chosen language option. */
 		int public_flags;
 	};
 }
