@@ -225,12 +225,62 @@ namespace discpp {
          */
         EmbedBuilder& AddField(const std::string& name, const std::string& value, const bool& is_inline = false);
 
+        /**
+         * @brief Get description of the embed.
+         *
+         * @return std::string
+         */
 		std::string GetDescription();
+
+        /**
+         * @brief Get title of the embed.
+         *
+         * @return std::string
+         */
 		std::string GetTitle();
+
+        /**
+         * @brief Get url of the embed.
+         *
+         * @return std::string
+         */
 		std::string GetUrl();
+
+        /**
+         * @brief Get timestamp url of the embed.
+         *
+         * @return std::string
+         */
 		std::string GetTimestamp();
+
+        /**
+         * @brief Get fields of the embed.
+         *
+         * This is a vector filled with title, then value string pairs so: `std::pair<title, value>`.
+         *
+         * @return std::vector<std::pair<std::string, std::string>>. Think of it as: `std::vector<std::pair<title, value>>`.
+         */
+        std::vector<std::pair<std::string, std::string>> GetFields();
+
+        /**
+         * @brief Get color of the embed.
+         *
+         * @return discpp::Color
+         */
 		Color GetColor();
+
+        /**
+         * @brief Get footer of the embed.
+         *
+         * @return std::pair<std::string, std::string>. Think of it as: `std::pair<text, url>`.
+         */
 		std::pair<std::string, std::string> GetFooter();
+
+        /**
+         * @brief Get provider of the embed.
+         *
+         * @return std::pair<std::string, std::string>. Think of it as: `std::pair<name, url>`.
+         */
         std::pair<std::string, std::string> GetProvider();
 
 

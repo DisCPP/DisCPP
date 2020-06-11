@@ -298,4 +298,16 @@ namespace discpp {
     std::pair<std::string, std::string> EmbedBuilder::GetProvider() {
         return std::make_pair<std::string, std::string>((*embed_json)["provider"]["name"].GetString(), (*embed_json)["provider"]["url"].GetString());
     }
+
+    std::vector<std::pair<std::string, std::string>> EmbedBuilder::GetFields() {
+	    if (discpp::ContainsNotNull(*embed_json, "fields")) {
+	        std::vector<std::pair<std::string, std::string>> fields;
+	        for (auto const& field : (*embed_json)["fields"].GetArray()) {
+	            fields.emplace_back(std::make_pair(field["name"].GetString(), field["value"].GetString()));
+	        }
+	        return fields;
+	    }
+
+	    return {};
+    }
 }
