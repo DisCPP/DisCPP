@@ -271,7 +271,9 @@ namespace discpp {
 	}
 
     rapidjson::Document EmbedBuilder::ToJson() {
-		return std::move(embed_json);
+	    rapidjson::Document json_copy(rapidjson::kObjectType);
+	    json_copy.CopyFrom(embed_json, json_copy.GetAllocator());
+		return std::move(json_copy);
 	}
 
     std::string EmbedBuilder::GetDescription() {
