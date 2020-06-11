@@ -47,6 +47,10 @@ namespace discpp {
          */
         EmbedBuilder(rapidjson::Document& json);
 
+        EmbedBuilder(const discpp::EmbedBuilder& embed);
+        EmbedBuilder operator=(const EmbedBuilder embed) {
+            return embed;
+        }
 
         /**
          * @brief Set the title of the embed.
@@ -307,7 +311,7 @@ namespace discpp {
          */
         rapidjson::Document ToJson();
 	private:
-        std::shared_ptr<rapidjson::Document> embed_json;
+        rapidjson::Document embed_json;
 	};
 }
 
