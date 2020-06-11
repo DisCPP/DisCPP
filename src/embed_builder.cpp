@@ -299,15 +299,36 @@ namespace discpp {
         return std::make_pair<std::string, std::string>((*embed_json)["provider"]["name"].GetString(), (*embed_json)["provider"]["url"].GetString());
     }
 
-    std::vector<std::pair<std::string, std::string>> EmbedBuilder::GetFields() {
+    std::vector<std::tuple<std::string, std::string, bool>> EmbedBuilder::GetFields() {
 	    if (discpp::ContainsNotNull(*embed_json, "fields")) {
-	        std::vector<std::pair<std::string, std::string>> fields;
+            std::vector<std::tuple<std::string, std::string, bool>> fields;
 	        for (auto const& field : (*embed_json)["fields"].GetArray()) {
-	            fields.emplace_back(std::make_pair(field["name"].GetString(), field["value"].GetString()));
+	            fields.emplace_back(std::make_tuple(field["name"].GetString(), field["value"].GetString(), field["inline"].GetBool()));
 	        }
 	        return fields;
 	    }
 
 	    return {};
+    }
+
+    void EmbedBuilder::SetFields(std::vector<std::tuple<std::string, std::string, bool>> fields) {
+	    if (!fields.empty()) {
+            rapidjson::Value fields_json(rapidjson::kArrayType);
+
+            for (auto const &field : fields) {
+                rapidjson::Document field_json(rapidjson::kObjectType);
+                field_json.AddMember("name", EscapeString(std::get<0>(field)), embed_json->GetAllocator());
+                field_json.AddMember("value", EscapeString(std::get<1>(field)), embed_json->GetAllocator());
+                field_json.AddMember("inline", std::get<2>(field), embed_json->GetAllocator());
+
+                fields_json.PushBack(field_json, embed_json->GetAllocator());
+            }
+
+            if (discpp::ContainsNotNull(*embed_json, "fields")) {
+                (*embed_json)["fields"] = fields_json;
+            } else {
+                embed_json->AddMember("fields", fields_json, embed_json->GetAllocator());
+            }
+        }
     }
 }

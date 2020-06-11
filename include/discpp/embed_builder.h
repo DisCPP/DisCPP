@@ -6,7 +6,10 @@
 #endif
 
 #include "discord_object.h"
+
 #include <memory>
+#include <vector>
+
 #include <rapidjson/document.h>
 
 namespace discpp {
@@ -212,6 +215,15 @@ namespace discpp {
         EmbedBuilder& SetAuthor(const std::string& name, const std::string& url = "", const std::string& icon_url = "");
 
         /**
+         * @brief Set fields of the embed.
+         *
+         * @param[in] Fields Think of it as: `std::vector<std::tuple<title, value, inline>>`.
+         *
+         * @return void
+         */
+        void SetFields(std::vector<std::tuple<std::string, std::string, bool>> fields);
+
+        /**
          * @brief Add a field to the embed.
          *
          * ```cpp
@@ -258,9 +270,9 @@ namespace discpp {
          *
          * This is a vector filled with title, then value string pairs so: `std::pair<title, value>`.
          *
-         * @return std::vector<std::pair<std::string, std::string>>. Think of it as: `std::vector<std::pair<title, value>>`.
+         * @return std::vector<std::tuple<std::string, std::string, bool>>. Think of it as: `std::vector<std::tuple<title, value, inline>>`.
          */
-        std::vector<std::pair<std::string, std::string>> GetFields();
+        std::vector<std::tuple<std::string, std::string, bool>> GetFields();
 
         /**
          * @brief Get color of the embed.
