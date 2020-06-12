@@ -390,6 +390,7 @@ namespace discpp {
             if (ContainsNotNull(result, "guild_id")) {
                 std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
+                message->second->channel.guild_id = guild->id;
                 message->second->guild = guild;
                 channel = guild->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
             } else {
@@ -427,6 +428,11 @@ namespace discpp {
         } else {
             discpp::Channel channel = globals::client_instance->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
             discpp::Message message = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
+
+            if (ContainsNotNull(result, "guild_id")) {
+                channel.guild_id = Snowflake(result["guild_id"].GetString());
+                message.guild = globals::client_instance->GetGuild(Snowflake(result["guild_id"].GetString()));
+            }
 
             rapidjson::Document emoji_json;
             emoji_json.CopyFrom(result["emoji"], emoji_json.GetAllocator());
@@ -483,6 +489,11 @@ namespace discpp {
             discpp::Channel channel = globals::client_instance->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
             discpp::Message message = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
 
+            if (ContainsNotNull(result, "guild_id")) {
+                channel.guild_id = Snowflake(result["guild_id"].GetString());
+                message.guild = globals::client_instance->GetGuild(Snowflake(result["guild_id"].GetString()));
+            }
+
             rapidjson::Document emoji_json;
             emoji_json.CopyFrom(result["emoji"], emoji_json.GetAllocator());
             discpp::Emoji emoji(emoji_json);
@@ -516,6 +527,12 @@ namespace discpp {
         } else {
             discpp::Channel channel = globals::client_instance->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
             discpp::Message message = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
+
+            if (ContainsNotNull(result, "guild_id")) {
+                channel.guild_id = Snowflake(result["guild_id"].GetString());
+                message.guild = globals::client_instance->GetGuild(Snowflake(result["guild_id"].GetString()));
+            }
+
             discpp::DispatchEvent(discpp::MessageReactionRemoveAllEvent(message));
         }
     }
