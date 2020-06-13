@@ -21,8 +21,7 @@ namespace discpp {
 		author = std::make_shared<discpp::User>(ConstructDiscppObjectFromJson(json, "author", discpp::User()));
 		content = GetDataSafely<std::string>(json, "content");
 		timestamp = TimeFromDiscord(GetDataSafely<std::string>(json, "timestamp"));
-		std::string tmstamp = GetDataSafely<std::string>(json, "edited_timestamp");
-		if (tmstamp != "") edited_timestamp = TimeFromDiscord(tmstamp);
+		if (discpp::ContainsNotNull(json, "edited_timestamp")) edited_timestamp = TimeFromDiscord(json["edited_timestamp"].GetString());
 		if (GetDataSafely<bool>(json, "tts")) {
 		    bit_flags |= 0b1;
 		}
@@ -90,9 +89,9 @@ namespace discpp {
         }
 		webhook_id = GetIDSafely(json, "webhook_id");
 		type = GetDataSafely<int>(json, "type");
-		activity = ConstructDiscppObjectFromJson(json, "activity", discpp::MessageActivity());
-        application = ConstructDiscppObjectFromJson(json, "application", discpp::MessageApplication());
-        message_reference = ConstructDiscppObjectFromJson(json, "message_reference", discpp::MessageReference());
+		activity = std::make_shared<discpp::MessageActivity>(ConstructDiscppObjectFromJson(json, "activity", discpp::MessageActivity()));
+        application = std::make_shared<discpp::MessageApplication>(ConstructDiscppObjectFromJson(json, "application", discpp::MessageApplication()));
+        message_reference = std::make_shared<discpp::MessageReference>(ConstructDiscppObjectFromJson(json, "message_reference", discpp::MessageReference()));
 		flags = GetDataSafely<int>(json, "flags");
 	}
 

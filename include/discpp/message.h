@@ -66,6 +66,15 @@ namespace discpp {
 		}
 	};
 
+    template <typename T>
+    struct CopyablePointer {
+        std::unique_ptr<T> data;
+
+        CopyablePointer(T const& data) {
+            
+        }
+    };
+
 	class Message : public DiscordObject {
 	public:
 	    class ChannelMention : public DiscordObject {
@@ -347,11 +356,11 @@ namespace discpp {
 		std::vector<discpp::Reaction> reactions;
 		Snowflake webhook_id;
 		int type;
-		discpp::MessageActivity activity;
-		discpp::MessageApplication application;
-		discpp::MessageReference message_reference;
+		std::shared_ptr<discpp::MessageActivity> activity;
+        std::shared_ptr<discpp::MessageApplication> application;
+        std::shared_ptr<discpp::MessageReference> message_reference;
 		int flags;
-	private:
+    protected:
 	    char bit_flags; /**< For internal use only. */
 	};
 }
