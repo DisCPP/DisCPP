@@ -55,8 +55,10 @@ Please follow [Google's styling guide](https://google.github.io/styleguide/cppgu
 7. While inside CMake settings, make sure your compiling in x64-Debug.
 	* Scroll to `Toolset` and set it to a x64 compiler of your choosing (ex: msvc_x64)
 	* Only use MSVC on Windows!
+Note: If you get any errors during this process, join our Discord and we can help you!
 ## Setting up a Bot Project
 First follow the [building](#Building) steps above to make sure Disc++ will compile.
+Note: If you get any errors during this process, join our Discord and we can help you!
 1. Currently you need to create a thirdparty folder in the root of your bot project directory.
 2. Inside the thirdparty folder, clone this repository.
 3. Open your CMake file and add `add_subdirectory(thirdparty/discpp)` near the top.
