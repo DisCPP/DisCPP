@@ -15,7 +15,7 @@ discpp::Command::Command(const std::string& name, const std::string& desc, const
 	discpp::registered_commands.insert(std::make_pair(name, this));
 }
 
-void discpp::Command::CommandBody(const discpp::Context& ctx) {
+void discpp::Command::CommandBody(discpp::Context ctx) {
 	if (function == nullptr) {
 		std::cout << "Make sure to override the \"CommandBody(discpp::Context)\" method to get an actual command body for: \"" + name + "\"" << std::endl;
 	} else {
@@ -23,7 +23,7 @@ void discpp::Command::CommandBody(const discpp::Context& ctx) {
 	}
 }
 
-bool discpp::Command::CanRun(const discpp::Context& ctx) {
+bool discpp::Command::CanRun(discpp::Context ctx) {
 	bool requires = true;
 	for (auto req_function : requirements) {
 		requires = requires && req_function(ctx);
