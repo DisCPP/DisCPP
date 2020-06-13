@@ -181,14 +181,20 @@ namespace discpp {
          */
         discpp::Permissions GetPermissions();
 
+        /**
+         * @brief Gets role hierarchy for the member.
+         *
+         * @return int
+         */
+        int GetHierarchy();
+
 		discpp::User user; /**< The user this guild member represents. */
 		discpp::Snowflake guild_id; /**< ID of the guild the current member is in. */
-		std::string nick; /**< This users guild nickname. */
+        std::shared_ptr<std::string> nick; /**< This members guild nickname. If the member has no nickname, its a nullptr. */
 		std::vector<std::shared_ptr<discpp::Role>> roles; /**< Roles the current member has. */
 		time_t joined_at; /**< When the user joined the guild. */
         time_t premium_since; /**< When the user started boosting the guild. */
-		discpp::Presence presence; /**< Presence for the current member. */
-		unsigned int hierarchy; /**< Role hierarchy for the current member. */
+		std::shared_ptr<discpp::Presence> presence = nullptr; /**< Presence for the current member. If the member has no presence, its a nullptr. */
 	private:
 	    char flags; /**< Internal use only. */
 	};

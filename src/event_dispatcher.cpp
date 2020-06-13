@@ -242,8 +242,8 @@ namespace discpp {
             member->roles.emplace_back(tmp);
         }
         rapidjson::Value::ConstMemberIterator itr = result.FindMember("nick");
-        if (itr != result.MemberEnd() && !result["nick"].IsNull()) {
-            member->nick = result["nick"].GetString();
+        if (discpp::ContainsNotNull(result, "nick")) {
+            member->nick = std::make_shared<std::string>(result["nick"].GetString());
         }
 
         discpp::DispatchEvent(discpp::GuildMemberUpdateEvent(guild, member));

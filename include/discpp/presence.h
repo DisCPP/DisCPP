@@ -119,7 +119,7 @@ namespace discpp {
 	    Presence() = default;
 		Presence(rapidjson::Document& json) {
 		    status = json["status"].GetString();
-		    game = ConstructDiscppObjectFromJson(json, "game", discpp::Activity());
+		    game = std::make_shared<discpp::Activity>(ConstructDiscppObjectFromJson(json, "game", discpp::Activity()));
             for (auto const& activity : json["activities"].GetArray()) {
                 rapidjson::Document activity_json(rapidjson::kObjectType);
                 activity_json.CopyFrom(activity, activity_json.GetAllocator());
@@ -128,24 +128,26 @@ namespace discpp {
             }
 		}
 
-		Presence(const std::string& text, const discpp::Activity::ActivityType& type, const std::string& status = "online", const bool& afk = false, const std::string& url = "") : status(status), afk(afk) {
-		    game.name = text;
-		    game.type = type;
-		    game.url = url;
+		Presence(const std::string& text, const discpp::Activity::ActivityType& type, const std::string& status = "online", const bool& afk = false,
+		        const std::string& url = "") : status(status), afk(afk) {
+            game = std::make_shared<discpp::Activity>();
+		    game->name = text;
+		    game->type = type;
+		    game->url = url;
 		}
 
-		Presence(const discpp::Activity& activity, const bool& afk, const std::string& status) : game(activity), afk(afk), status(status) {}
+		Presence(std::shared_ptr<discpp::Activity> activity, const bool& afk, const std::string& status) : game(activity), afk(afk), status(status) {}
 
 		rapidjson::Document ToJson() {
             rapidjson::Document result(rapidjson::kObjectType);
             result.AddMember("status", status, result.GetAllocator());
             result.AddMember("afk", afk, result.GetAllocator());
+            result.AddMember("since", std::to_string(time(NULL) - 10), result.GetAllocator());
 
             rapidjson::Value game_json(rapidjson::kObjectType);
-            game_json.AddMember("name", game.name, result.GetAllocator());
-            game_json.AddMember("type", std::to_string(static_cast<int>(game.type)), result.GetAllocator());
-            game_json.AddMember("url", game.url, result.GetAllocator());
-            game_json.AddMember("since", std::to_string(time(NULL) - 10), result.GetAllocator());
+            game_json.AddMember("name", game->name, result.GetAllocator());
+            game_json.AddMember("type", std::to_string(static_cast<int>(game->type)), result.GetAllocator());
+            game_json.AddMember("url", game->url, result.GetAllocator());
 
             result.AddMember("game", game_json, result.GetAllocator());
 
@@ -153,7 +155,7 @@ namespace discpp {
 		}
 
 		std::string status;
-		discpp::Activity game;
+		std::shared_ptr<discpp::Activity> game;
 		std::vector<discpp::Activity> activities;
 		bool afk;
 	};

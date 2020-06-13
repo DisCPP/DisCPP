@@ -128,9 +128,7 @@ namespace discpp {
                         activity_json.CopyFrom(json["game"], activity_json.GetAllocator());
                     }
 
-                    discpp::Presence presence(presence_json);
-
-                    it->second->presence = presence;
+                    it->second->presence = std::make_shared<discpp::Presence>(presence_json);
                 }
             }
 		}

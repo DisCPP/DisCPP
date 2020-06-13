@@ -1,8 +1,8 @@
+#include "member.h"
 #include "guild.h"
 #include "client.h"
-#include <climits>
-#include <discpp/member.h>
 
+#include <climits>
 
 namespace discpp {
 	Member::Member(const Snowflake& id, const discpp::Guild& guild) : discpp::DiscordObject(id) {
@@ -12,7 +12,9 @@ namespace discpp {
 	Member::Member(rapidjson::Document& json, const discpp::Guild& guild) : guild_id(guild.id) {
 		user = ConstructDiscppObjectFromJson(json, "user", discpp::User());
 		if (user.id != 0) id = user.id;
-		nick = GetDataSafely<std::string>(json, "nick");
+		if (ContainsNotNull(json, "nick")) {
+		    nick = std::make_shared<std::string>(json["nick"].GetString());
+		}
 
         int highest_hiearchy = 0;
 		if (ContainsNotNull(json, "roles")) {
@@ -30,12 +32,6 @@ namespace discpp {
 			}
 		}
 
-		if (guild.owner_id == this->id) {
-            hierarchy = INT_MAX;
-		} else {
-            hierarchy = highest_hiearchy;
-        }
-
 		joined_at = TimeFromDiscord(GetDataSafely<std::string>(json, "joined_at"));
 		std::string prm_since = GetDataSafely<std::string>(json, "premium_since");
 		if (prm_since != "") premium_since = TimeFromDiscord(prm_since);
@@ -45,7 +41,12 @@ namespace discpp {
 		if (GetDataSafely<bool>(json, "mute")) {
 		    flags |= 0b10;
 		}
-		presence = ConstructDiscppObjectFromJson(json, "presence", discpp::Presence());
+		if (discpp::ContainsNotNull(json, "presence")) {
+            rapidjson::Document json_presence;
+            json_presence.CopyFrom(json["presence"], json_presence.GetAllocator());
+
+            presence = std::make_shared<discpp::Presence>(json_presence);
+		}
 	}
 
 	bool Member::IsDeafened() {
@@ -132,5 +133,21 @@ namespace discpp {
         }
 
         return permissions;
+    }
+
+    int Member::GetHierarchy() {
+	    std::shared_ptr<discpp::Guild> guild = discpp::globals::client_instance->GetGuild(guild_id);
+        if (guild->owner_id == this->id) {
+            return INT_MAX;
+        } else {
+            int highest_hiearchy = 0;
+            for (auto& role : roles) {
+                if (role->position > highest_hiearchy) {
+                    highest_hiearchy = role->position;
+                }
+            }
+
+            return highest_hiearchy;
+        }
     }
 }
