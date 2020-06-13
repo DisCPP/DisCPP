@@ -8,8 +8,8 @@
 class ServerinfoCommand : public discpp::Command {
 public:
 	ServerinfoCommand();
-	virtual bool CanRun(discpp::Context ctx) override;
-	virtual void CommandBody(discpp::Context ctx) override;
+	bool CanRun(discpp::Context ctx);
+	void CommandBody(discpp::Context ctx);
 };
 
 #endif
