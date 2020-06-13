@@ -157,28 +157,28 @@ namespace discpp {
     }
 
     void Client::OnWebSocketListen(const ix::WebSocketMessagePtr& msg) {
-        if (msg->type == ix::WebSocketMessageType::Open) {
-            logger->Info(LogTextColor::GREEN + "Connected to gateway!");
-
-            disconnected = false;
-        } else if (msg->type == ix::WebSocketMessageType::Close) {
-            if (!reconnecting) {
-                HandleDiscordDisconnect(msg);
-            }
-        } else if (msg->type == ix::WebSocketMessageType::Error) {
-            logger->Info(LogTextColor::RED + "Error: " + msg->errorInfo.reason);
-        } else if (msg->type == ix::WebSocketMessageType::Message) {
-            rapidjson::Document result;
-            result.Parse(msg->str);
-            if (result.HasParseError()) {
-                logger->Debug(LogTextColor::YELLOW + "A non-json payload was received and ignored: \"" + msg->str);
-            }
-
-            if (!result.IsNull()) {
-                OnWebSocketPacket(result);
-            }
-        } else {
-            logger->Warn(LogTextColor::YELLOW + "Unknown message sent");
+        switch(msg->type) {
+            case ix::WebSocketMessageType::Open:
+                logger->Info(LogTextColor::GREEN + "Connected to gateway!");
+                disconnected = false;
+                break;
+            case ix::WebSocketMessageType::Close:
+                if (!reconnecting) HandleDiscordDisconnect(msg);
+                break;
+            case ix::WebSocketMessageType::Error:
+                logger->Info(LogTextColor::RED + "Error: " + msg->errorInfo.reason);
+                break;
+            case ix::WebSocketMessageType::Message:
+                {
+                    rapidjson::Document result;
+                    result.Parse(msg->str);
+                    if (result.HasParseError()) logger->Debug(LogTextColor::YELLOW + "A non-json payload was received and ignored: \"" + msg->str);
+                    if (!result.IsNull()) OnWebSocketPacket(result);
+                }
+                break;
+            default:
+                logger->Warn(LogTextColor::YELLOW + "Unknown message sent");
+                break;
         }
     }
 
