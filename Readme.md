@@ -1,6 +1,8 @@
 <h1 align="center">DisC++</h1>
 
 <p align="center">
+<a href="https://discord.gg/reQbbtc"><img src="https://discord.com/api/guilds/699405108982579300/widget.png?style=shield"></a>
+<br>
 Simplified, but feature rich Discord API wrapper written in modern C++.
 </p>
 
