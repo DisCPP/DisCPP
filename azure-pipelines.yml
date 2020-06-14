@@ -12,21 +12,7 @@ variables:
 trigger:
 - master
 - development
-- task: ado-discord-webhook@1
-  inputs:
-    channelId: '699412008956854312'
-    webhookKey: 'N28_xkOdpdNDN8o9S_eD1ha1FAa5yK1JAXEIxJgbvxXdaue4pdFZwWVyMxXXSxTaWSsy'
-    name: 'Azure Pipeline'
-    avatar: 'https://avatars3.githubusercontent.com/u/39924718?s=400&v=4'
-    messageType: 'embeds'
-    embeds: |
-      [{
-          "title": "Azure Pipeline Build Completed.",
-          "description": "test",
-          "author": {
-              "name": "Azure DevOps"
-          }
-      }]
+
 jobs:
   - job: Windows_VS2019_x64
     pool:
@@ -86,3 +72,18 @@ jobs:
         vcpkgTriplet: 'x64-linux'
         buildDirectory: '$(Build.ArtifactStagingDirectory)'
         buildWithCMakeArgs: '-- -v'
+    - task: ado-discord-webhook@1
+      inputs:
+        channelId: '699412008956854312'
+        webhookKey: 'N28_xkOdpdNDN8o9S_eD1ha1FAa5yK1JAXEIxJgbvxXdaue4pdFZwWVyMxXXSxTaWSsy'
+        name: 'Azure Pipeline'
+        avatar: 'https://avatars3.githubusercontent.com/u/39924718?s=400&v=4'
+        messageType: 'embeds'
+        embeds: |
+          [{
+              "title": "Azure Pipeline Build Completed.",
+              "description": "test",
+              "author": {
+                  "name": "Azure DevOps"
+              }
+          }]
