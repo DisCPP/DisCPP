@@ -1,12 +1,12 @@
 #include "embed_builder.h"
 #include "color.h"
 #include "utils.h"
+#include "log.h"
 
 #include <discpp/client.h>
 
 namespace discpp {
 	EmbedBuilder::EmbedBuilder() {
-	    //embed_json = std::move(rapidjson::Document(rapidjson::kObjectType));
 	    embed_json.SetObject();
 	}
 
@@ -273,7 +273,10 @@ namespace discpp {
     rapidjson::Document EmbedBuilder::ToJson() {
 	    rapidjson::Document json_copy(rapidjson::kObjectType);
 	    json_copy.CopyFrom(embed_json, json_copy.GetAllocator());
+
+#ifndef __INTELLISENSE__
 		return std::move(json_copy);
+#endif
 	}
 
     std::string EmbedBuilder::GetDescription() {

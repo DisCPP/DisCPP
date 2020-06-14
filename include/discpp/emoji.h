@@ -4,11 +4,7 @@
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-//#include <winsock2.h>
 #undef WIN32_LEAN_AND_MEAN
-#elif __linux__
-#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-#include <codecvt>
 #else
 #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
 #include <codecvt>
@@ -17,8 +13,6 @@
 #include <codecvt>
 
 #include "discord_object.h"
-#include "user.h"
-#include "role.h"
 #include "utils.h"
 
 #include <locale>
@@ -27,6 +21,7 @@
 
 namespace discpp {
 	class Guild;
+	class User;
 
 	class Emoji {
 	public:
@@ -206,7 +201,7 @@ namespace discpp {
 		std::string name; /**< Name of the current emoji */
 		std::wstring unicode; /**< Unicode representation of the current emoji */
 		std::vector<discpp::Snowflake> roles; /**< Roles */
-		discpp::User creator;
+		std::shared_ptr<discpp::User> creator;
 		bool require_colons;
 		bool managed;
 		bool animated; /**< Whether or not the current emoji is animated */

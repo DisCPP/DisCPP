@@ -218,8 +218,9 @@ namespace discpp {
 
                 discpp::EventHandler<discpp::ReconnectEvent>::TriggerEvent(discpp::ReconnectEvent());
             } else {
+#ifndef __INTELLISENSE__
                 hello_packet = std::move(result);
-
+#endif
                 rapidjson::Document identify = GetIdentifyPacket();
                 CreateWebsocketRequest(identify);
             }
@@ -270,17 +271,13 @@ namespace discpp {
                 while (reconnecting && !run) {}
 
                 rapidjson::Document data(rapidjson::kObjectType);
-                rapidjson::Document::AllocatorType& data_allocator = data.GetAllocator();
-                data.AddMember("op", packet_opcode::heartbeat, data_allocator);
-                data.AddMember("d", NULL, data_allocator);
+                data.AddMember("op", packet_opcode::heartbeat, data.GetAllocator());
+                data.AddMember("d", NULL, data.GetAllocator());
                 if (last_sequence_number != -1) {
                     data["d"] = last_sequence_number;
                 }
 
-                rapidjson::StringBuffer buffer;
-                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-                data.Accept(writer);
-                std::string json_payload = buffer.GetString();
+                std::string json_payload = DumpJson(data);
                 CreateWebsocketRequest(data, "Sending heartbeat payload: " + json_payload);
 
                 heartbeat_acked = false;
@@ -335,7 +332,9 @@ namespace discpp {
 
         document.AddMember("d", d, allocator);
 
+#ifndef __INTELLISENSE__
         return std::move(document);
+#endif
     }
 
     void Client::ReconnectToWebsocket() {

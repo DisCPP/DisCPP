@@ -1,6 +1,7 @@
 #include "member.h"
 #include "guild.h"
 #include "client.h"
+#include "role.h"
 
 #include <climits>
 

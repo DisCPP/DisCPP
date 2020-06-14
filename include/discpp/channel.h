@@ -61,16 +61,6 @@ namespace discpp {
 		std::string file_path;
 	};
 
-    enum ChannelType : int {
-        GUILD_TEXT,
-        DM,
-        GUILD_VOICE,
-        GROUP_DM,
-        GROUP_CATEGORY,
-        GROUP_NEWS,
-        GROUP_STORE
-    };
-
 	class Channel : public DiscordObject {
 	public:
 		Channel() = default;
@@ -323,16 +313,24 @@ namespace discpp {
          */
         void GroupDMRemoveRecipient(const discpp::User& user);
 
+        /**
+         * @brief Retrieve channel icon url.
+         *
+         * @param[in] img_type Optional parameter for type of image
+         *
+         * @return std::string
+         */
+        std::string GetIconURL(const ImageType& img_type = ImageType::AUTO) const;
+
+        inline std::string GetFormattedLastPinTimestamp() const {
+            return FormatTime(this->last_pin_timestamp);
+        }
+
         ChannelType type; /**< The type of channel. */
 		std::string name; /**< The name of the channel. */
 		std::string topic; /**< The channel topic. */
 		Snowflake last_message_id; /**< The ID of the last message sent in this channel. */
-        
 		time_t last_pin_timestamp; /**< When the last pinned message was pinned. */
-		[[nodiscard]] inline std::string GetFormattedLastPinTimestamp() const {
-		    return FormatTime(this->last_pin_timestamp);
-		}
-
         bool nsfw; /**< Whether or not the current channel is not safe for work. */
         int bitrate; /**< The bitrate (in bits) of the voice channel. */
         int position; /**< Position of channel in guild's channel list. */
@@ -341,10 +339,12 @@ namespace discpp {
         Snowflake guild_id; /**< Guild id of the current channel. */
         Snowflake category_id; /**< ID of the parent category for a channel (each parent category can contain up to 50 channels). */
         std::vector<discpp::Permissions> permissions; /**< Explicit permission overwrites for members and roles. */
-        std::string icon; /**< Hashed icon for this channel. */
         Snowflake owner_id; /**< ID of the DM creator. */
         Snowflake application_id; /**< Application ID of the group DM creator if it is bot-created. */
         std::vector<discpp::User> recipients; /**< The recipients of the DM. */
+	private:
+        uint64_t icon_hex[2] = {0, 0};
+        bool is_icon_gif = false;
 	};
 }
 

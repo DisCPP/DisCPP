@@ -5,14 +5,10 @@
 #include "utils.h"
 
 namespace discpp {
-	enum ImageType : int { AUTO, WEBP, PNG, JPEG, GIF };
 	class Channel;
 	class Integration;
 
 	class User : public DiscordObject {
-	private:
-        char flags;
-        unsigned short discriminator;
 	public:
         enum class ConnectionVisibility : int {
             NONE = 0,
@@ -95,11 +91,11 @@ namespace discpp {
          *      std::string avatar_url = user.GetAvatarURL()
          * ```
          *
-         * @param[in] imgType Optional parameter for type of image
+         * @param[in] img_type Optional parameter for type of image
          *
          * @return std::string
          */
-        std::string GetAvatarURL(const ImageType& imgType = ImageType::AUTO) const;
+        std::string GetAvatarURL(const ImageType& img_type = ImageType::AUTO) const;
 
         /**
          * @brief Gets the created at time and date for this user.
@@ -145,8 +141,13 @@ namespace discpp {
 		bool IsSystemUser();
 
 		std::string username; /**< The user's username, not unique across the platform. */
-		std::string avatar; /**< The user's avatar hash. */
 		// int public_flags; // Is this ever needed?
+    private:
+        char flags;
+        unsigned short discriminator;
+
+        uint64_t avatar_hex[2] = {0, 0};
+        bool is_avatar_gif = false;
 	};
 }
 

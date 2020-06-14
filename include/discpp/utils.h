@@ -61,6 +61,13 @@ namespace discpp {
 		};
 	}
 
+    enum ImageType : int { AUTO, WEBP, PNG, JPEG, GIF };
+
+    enum ChannelType : int {
+        GUILD_TEXT, DM, GUILD_VOICE, GROUP_DM,
+        GROUP_CATEGORY, GROUP_NEWS, GROUP_STORE
+    };
+
     /**
      * @brief Get the OS name this application is running on.
      *
@@ -414,6 +421,8 @@ namespace discpp {
 	time_t TimeFromSnowflake(const Snowflake& snow);
     std::string FormatTime(const time_t& time, const std::string& format = "%Y-%m-%d @ %H:%M:%S GMT");
 	std::string URIEncode(const std::string& str);
+    void SplitAvatarHash(const std::string& hash, uint64_t out[2]);
+    std::string CombineAvatarHash(const uint64_t in[2]);
 }
 
 #endif

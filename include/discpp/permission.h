@@ -6,6 +6,7 @@
 #endif
 
 #include "snowflake.h"
+
 #include <unordered_map>
 #include <stdexcept>
 

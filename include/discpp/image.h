@@ -5,8 +5,6 @@
 
 #include "discord_object.h"
 
-
-
 namespace discpp {
 	class Image : public DiscordObject {
 	public:

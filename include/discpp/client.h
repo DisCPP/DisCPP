@@ -8,27 +8,25 @@
 #include <string>
 #include <future>
 #include <string_view>
-#include <optional>
 #include <vector>
 
 #include <rapidjson/document.h>
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/writer.h>
 
 #include <ixwebsocket/IXWebSocket.h>
 
-#include "channel.h"
-#include "message.h"
-#include "member.h"
-#include "guild.h"
-#include "log.h"
+#include "user.h"
 #include "settings.h"
 
 namespace discpp {
 	class Role;
-	class User;
 	class Presence;
 	class ClientConfig;
+	class Member;
+	class Guild;
+	class Channel;
+	class Message;
+	class Logger;
+	class Image;
 
 	class ClientUser : public User {
 	public:

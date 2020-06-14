@@ -1,3 +1,4 @@
+#include "role.h"
 #include "guild.h"
 
 namespace discpp {

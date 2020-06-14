@@ -13,7 +13,7 @@ namespace discpp {
 		inline TypingStartEvent(discpp::User user, discpp::Channel channel, int timestamp) : user(user), channel(channel), timestamp(timestamp) {}
 
 		discpp::User user;
-		discpp::Channel channel;
+        discpp::Channel channel;
 		int timestamp;
 	};
 }

@@ -16,17 +16,13 @@ namespace discpp {
     };
 }
 
-namespace std
-{
+namespace std {
     template <>
-    struct hash<discpp::Snowflake>
-    {
-        std::size_t operator()(const discpp::Snowflake& k) const
-        {
+    struct hash<discpp::Snowflake> {
+        std::size_t operator()(const discpp::Snowflake& k) const {
             return hash<uint64_t>()(k);
         }
     };
-
 }
 
 #endif

@@ -4,6 +4,7 @@
 #include "event.h"
 #include "utils.h"
 #include "client.h"
+#include "log.h"
 
 #include <climits>
 

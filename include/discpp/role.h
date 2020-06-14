@@ -4,8 +4,6 @@
 #include "discord_object.h"
 #include "permission.h"
 
-
-
 namespace discpp {
 	class Guild;
 

@@ -1,6 +1,8 @@
 #include "channel.h"
 #include "utils.h"
 #include "client.h"
+#include "message.h"
+#include "log.h"
 
 namespace discpp {
 	Channel::Channel(const Snowflake& id) : discpp::DiscordObject(id) {
@@ -13,10 +15,10 @@ namespace discpp {
 		name = GetDataSafely<std::string>(json, "name");
 		topic = GetDataSafely<std::string>(json, "topic");
 		last_message_id = GetIDSafely(json, "last_message_id");
-		std::string lstpintmstmp = GetDataSafely<std::string>(json, "last_pin_timestamp");
-		if (lstpintmstmp != "") last_pin_timestamp = TimeFromDiscord(lstpintmstmp);
+		if (ContainsNotNull(json, "last_pin_timestamp")) last_pin_timestamp = TimeFromDiscord(json["last_pin_timestamp"].GetString());
         guild_id = GetIDSafely(json, "guild_id");
         position = GetDataSafely<int>(json, "position");
+
         if (ContainsNotNull(json, "permission_overwrites")) {
             for (auto& permission_overwrite : json["permission_overwrites"].GetArray()) {
                 rapidjson::Document permission_json;
@@ -25,11 +27,13 @@ namespace discpp {
                 permissions.push_back(discpp::Permissions(permission_json));
             }
         }
+
         nsfw = GetDataSafely<bool>(json, "nsfw");
         bitrate = GetDataSafely<int>(json, "bitrate");
         user_limit = GetDataSafely<int>(json, "user_limit");
         rate_limit_per_user = GetDataSafely<int>(json, "rate_limit_per_user");
         category_id = GetIDSafely(json, "parent_id");
+
         if (ContainsNotNull(json, "recipients")) {
             for (auto& recipient : json["recipients"].GetArray()) {
                 rapidjson::Document user_json;
@@ -38,7 +42,18 @@ namespace discpp {
                 recipients.emplace_back(user_json);
             }
         }
-        icon = GetDataSafely<std::string>(json, "icon");
+
+        if (ContainsNotNull(json, "icon")) {
+            std::string icon_str = json["icon"].GetString();
+
+            if (StartsWith(icon_str, "a_")) {
+                is_icon_gif = true;
+                SplitAvatarHash(icon_str.substr(2), icon_hex);
+            } else {
+                SplitAvatarHash(icon_str, icon_hex);
+            }
+        }
+
         owner_id = GetIDSafely(json, "owner_id");
         application_id = GetIDSafely(json, "application_id");
 	}
@@ -237,10 +252,7 @@ namespace discpp {
         permission_json.AddMember("deny", permissions.deny_perms.value, permission_allocator);
         permission_json.AddMember("type", s_type, permission_allocator);
 
-        rapidjson::StringBuffer buffer;
-        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-        permission_json.Accept(writer);
-        std::string json_payload = buffer.GetString();
+        std::string json_payload = DumpJson(permission_json);
 
         SendPutRequest(Endpoint("/channels/" + std::to_string(id) + "/permissions/" + std::to_string(permissions.role_user_id)), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(json_payload));
     }
@@ -294,11 +306,12 @@ namespace discpp {
 	    std::unordered_map<discpp::Snowflake, discpp::Channel> tmp;
 	    for (auto const chnl : this->GetGuild()->channels) {
 	        if (chnl.second.category_id == this->id) {
-                tmp.insert({chnl.first, chnl.second});
+                tmp.insert({ chnl.first, chnl.second });
 	        } else {
 	            continue;
 	        }
 	    }
+
 	    return tmp;
 	}
 
@@ -324,5 +337,25 @@ namespace discpp {
         rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + std::to_string(this->id) + "/messages/" + std::to_string(id)), DefaultHeaders(), {}, {});
 
         return discpp::Message(result);
+    }
+
+    std::string Channel::GetIconURL(const ImageType &img_type) const {
+        std::string icon_str = CombineAvatarHash(icon_hex);
+
+        std::string url = "https://cdn.discordapp.com/channel-icons/" + std::to_string(id) + "/" + icon_str;
+        ImageType tmp = img_type;
+        if (tmp == ImageType::AUTO) tmp = is_icon_gif ? ImageType::GIF : ImageType::PNG;
+        switch (img_type) {
+            case ImageType::GIF:
+                return cpr::Url(url + ".gif");
+            case ImageType::JPEG:
+                return cpr::Url(url + ".jpeg");
+            case ImageType::PNG:
+                return cpr::Url(url + ".png");
+            case ImageType::WEBP:
+                return cpr::Url(url + ".webp");
+            default:
+                return cpr::Url(url);
+        }
     }
 }

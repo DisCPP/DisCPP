@@ -13,7 +13,9 @@ namespace discpp {
         channel = std::make_shared<discpp::Channel>(globals::client_instance->GetChannel(SnowflakeFromString(json["guild_id"].GetString())));
 		user = std::make_shared<discpp::User>(ConstructDiscppObjectFromJson(json, "user", discpp::User()));
         name = GetDataSafely<std::string>(json, "name");
-        avatar = GetDataSafely<std::string>(json, "avatar");
+        if (ContainsNotNull(json, "avatar")) {
+            SplitAvatarHash(json["avatar"].GetString(), avatar_hex);
+        }
         token = GetDataSafely<std::string>(json, "token");
     }
 
