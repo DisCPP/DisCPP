@@ -74,7 +74,7 @@ jobs:
         buildWithCMakeArgs: '-- -v'
     - task: ado-discord-webhook@1
       inputs:
-        channelId: '699412008956854312'
+        channelId: '721579199743131708'
         webhookKey: 'N28_xkOdpdNDN8o9S_eD1ha1FAa5yK1JAXEIxJgbvxXdaue4pdFZwWVyMxXXSxTaWSsy'
         name: 'Azure Pipeline'
         avatar: 'https://avatars3.githubusercontent.com/u/39924718?s=400&v=4'
