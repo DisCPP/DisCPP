@@ -3,6 +3,7 @@
 #include "client.h"
 #include "message.h"
 #include "log.h"
+#include "guild.h"
 
 namespace discpp {
 	Channel::Channel(const Snowflake& id) : discpp::DiscordObject(id) {

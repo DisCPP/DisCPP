@@ -4,8 +4,6 @@
 #include "discord_object.h"
 #include "emoji.h"
 
-
-
 namespace discpp {
 
 	class Reaction : public DiscordObject {

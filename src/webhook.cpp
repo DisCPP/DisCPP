@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "message.h"
 #include "client.h"
+#include "guild.h"
 
 #include <fstream>
 

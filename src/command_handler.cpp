@@ -7,7 +7,7 @@ void discpp::FireCommand(discpp::Client* bot, const discpp::Message& message) {
     bool trigger = false;
     for (std::string const& prefix : bot->config->prefixes) {
         prefixSize = prefix.size();
-        if (message.author->IsBot()) {
+        if (message.author.IsBot()) {
             return;
         }
         if (StartsWith(message.content, prefix)) {
@@ -32,7 +32,7 @@ void discpp::FireCommand(discpp::Client* bot, const discpp::Message& message) {
 
     std::shared_ptr<discpp::Member> member = nullptr;
     if (message.channel.type != discpp::ChannelType::DM) {
-        member = message.guild->GetMember(message.author->id);
+        member = message.guild->GetMember(message.author.id);
     }
 
     std::string remainder = "d";

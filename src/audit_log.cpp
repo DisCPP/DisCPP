@@ -8,6 +8,7 @@
 #include "guild.h"
 #include "message.h"
 #include "client.h"
+#include "role.h"
 
 // This is extremely ugly and probably slow, maybe theres a way we could trim this down?
 discpp::AuditLogChangeKey GetKey(const std::string& key, rapidjson::Document& j) {

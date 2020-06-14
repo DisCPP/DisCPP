@@ -20,7 +20,7 @@ namespace discpp {
 		discpp::Client* client;
 		std::shared_ptr<discpp::Guild> guild;
         discpp::Channel channel;
-        std::shared_ptr<discpp::User> user;
+        discpp::User user;
         std::shared_ptr<discpp::Member> author;
 		discpp::Message message;
 		std::string remainder;

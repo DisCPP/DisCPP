@@ -1,5 +1,9 @@
 #include "message.h"
 #include "client.h"
+#include "channel.h"
+#include "guild.h"
+#include "member.h"
+#include "embed_builder.h"
 
 namespace discpp {
 	Message::Message(const Snowflake& id) : discpp::DiscordObject(id) {
@@ -18,7 +22,7 @@ namespace discpp {
 		id = GetIDSafely(json, "id");
 		channel = globals::client_instance->GetChannel(SnowflakeFromString(json["channel_id"].GetString()));
         guild = std::make_shared<discpp::Guild>(ConstructDiscppObjectFromID(json, "guild_id", discpp::Guild()));
-		author = std::make_shared<discpp::User>(ConstructDiscppObjectFromJson(json, "author", discpp::User()));
+		author = ConstructDiscppObjectFromJson(json, "author", discpp::User());
 		content = GetDataSafely<std::string>(json, "content");
 		timestamp = TimeFromDiscord(GetDataSafely<std::string>(json, "timestamp"));
 		if (discpp::ContainsNotNull(json, "edited_timestamp")) edited_timestamp = TimeFromDiscord(json["edited_timestamp"].GetString());
@@ -171,7 +175,7 @@ namespace discpp {
 		return *this;
 	}
 
-	discpp::Message Message::EditMessage(discpp::EmbedBuilder& embed) {
+	discpp::Message Message::EditMessage(const discpp::EmbedBuilder& embed) {
 
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id));
 		rapidjson::Document json = embed.ToJson();

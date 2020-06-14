@@ -270,7 +270,7 @@ namespace discpp {
 		return *this;
 	}
 
-    rapidjson::Document EmbedBuilder::ToJson() {
+    rapidjson::Document EmbedBuilder::ToJson() const {
 	    rapidjson::Document json_copy(rapidjson::kObjectType);
 	    json_copy.CopyFrom(embed_json, json_copy.GetAllocator());
 
@@ -279,36 +279,37 @@ namespace discpp {
 #endif
 	}
 
-    std::string EmbedBuilder::GetDescription() {
+    std::string EmbedBuilder::GetDescription() const {
         return embed_json["description"].GetString();
     }
 
-    std::string EmbedBuilder::GetTitle() {
+    std::string EmbedBuilder::GetTitle() const {
         return embed_json["title"].GetString();
     }
 
-    std::string EmbedBuilder::GetUrl() {
+    std::string EmbedBuilder::GetUrl() const {
         return embed_json["url"].GetString();
     }
 
-    std::string EmbedBuilder::GetTimestamp() {
+    std::string EmbedBuilder::GetTimestamp() const {
         return embed_json["timestamp"].GetString();
     }
 
-    Color EmbedBuilder::GetColor() {
+    Color EmbedBuilder::GetColor() const {
         return Color(embed_json["color"].GetInt());
     }
 
-    std::pair<std::string, std::string> EmbedBuilder::GetFooter() {
+    std::pair<std::string, std::string> EmbedBuilder::GetFooter() const {
         return std::make_pair<std::string, std::string>(embed_json["footer"]["text"].GetString(), embed_json["footer"]["icon_url"].GetString());
     }
 
-    std::pair<std::string, std::string> EmbedBuilder::GetProvider() {
+    std::pair<std::string, std::string> EmbedBuilder::GetProvider() const {
         return std::make_pair<std::string, std::string>(embed_json["provider"]["name"].GetString(), embed_json["provider"]["url"].GetString());
     }
 
-    std::vector<std::tuple<std::string, std::string, bool>> EmbedBuilder::GetFields() {
-	    if (discpp::ContainsNotNull(embed_json, "fields")) {
+    std::vector<std::tuple<std::string, std::string, bool>> EmbedBuilder::GetFields() const {
+        rapidjson::Value::ConstMemberIterator itr = embed_json.FindMember("fields");
+        if (itr != embed_json.MemberEnd() && !embed_json["fields"].IsNull()) {
             std::vector<std::tuple<std::string, std::string, bool>> fields;
 	        for (auto const& field : embed_json["fields"].GetArray()) {
 	            fields.emplace_back(std::make_tuple(field["name"].GetString(), field["value"].GetString(), field["inline"].GetBool()));

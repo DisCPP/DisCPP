@@ -12,6 +12,7 @@
 #include "image.h"
 #include "permission.h"
 #include "channel.h"
+#include "emoji.h"
 
 #include <utility>
 #include <variant>
@@ -19,7 +20,6 @@
 namespace discpp {
 	class Guild;
     class VoiceState;
-    class Emoji;
     class Member;
     class Role;
     class AuditLog;

@@ -2,16 +2,15 @@
 #define DISCPP_MESSAGE_H
 
 #include "discord_object.h"
-#include "channel.h"
 #include "user.h"
-#include "member.h"
-#include "guild.h"
 #include "reaction.h"
-#include "role.h"
-#include "embed_builder.h"
 #include "attachment.h"
+#include "channel.h"
 
 namespace discpp {
+    class Guild;
+    class EmbedBuilder;
+
 	enum class GetReactionsMethod : int {
 		BEFORE_USER,
 		AFTER_USER
@@ -242,7 +241,7 @@ namespace discpp {
          *
          * @return discpp::Message
          */
-		discpp::Message EditMessage(discpp::EmbedBuilder& embed);
+		discpp::Message EditMessage(const discpp::EmbedBuilder& embed);
 
         /**
          * @brief Edit the message's embed.
@@ -344,7 +343,7 @@ namespace discpp {
 
         discpp::Channel channel;
         std::shared_ptr<discpp::Guild> guild;
-        std::shared_ptr<discpp::User> author;
+        discpp::User author;
 		std::string content;
 		time_t timestamp;
 		time_t edited_timestamp;

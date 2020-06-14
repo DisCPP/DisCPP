@@ -16,6 +16,7 @@
 
 #include "user.h"
 #include "settings.h"
+#include "channel.h"
 
 namespace discpp {
 	class Role;
@@ -23,7 +24,6 @@ namespace discpp {
 	class ClientConfig;
 	class Member;
 	class Guild;
-	class Channel;
 	class Message;
 	class Logger;
 	class Image;
@@ -33,7 +33,6 @@ namespace discpp {
 		ClientUser() = default;
 		ClientUser(const Snowflake& id) : User(id) {}
 		ClientUser(rapidjson::Document & json);
-
 
         /**
          * @brief Get all connections of this user.
@@ -109,7 +108,6 @@ namespace discpp {
 			hello = 10,					// Receive
 			heartbeat_ack = 11			// Receive
 		};
-
 
         /**
          * @brief Constructs a discpp::Bot object.
