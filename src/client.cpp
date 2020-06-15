@@ -230,7 +230,7 @@ namespace discpp {
             heartbeat_acked = true;
             break;
         case reconnect:
-            ReconnectToWebsocket();
+            DoFunctionLater(&Client::ReconnectToWebsocket, this);
             break;
         case invalid_session:
             // Check if the session is resumable
