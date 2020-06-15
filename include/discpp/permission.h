@@ -14,7 +14,7 @@
 
 namespace discpp {
 
-	enum class PermissionType : int {
+	enum class PermissionType : unsigned char {
 		ROLE,
 		MEMBER
 	};
@@ -131,7 +131,7 @@ namespace discpp {
          */
 		void AddPermission(const Permission& permission);
 
-		int value = 0;
+		unsigned int value = 0;
 	};
 
 	class NoPermissionException : public std::runtime_error {

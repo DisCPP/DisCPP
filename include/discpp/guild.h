@@ -896,7 +896,6 @@ namespace discpp {
         }
 
 		std::string name; /**< Guild name. */
-		bool owner; /**< Whether or not the bot is the owner of the guild. */
 		Snowflake owner_id; /**< ID of the guild owner. */
 		int permissions; /**< Total permissions for the bot in the guild (does not include channel overrides). */
 		std::string region; /**< Voice region id for the guild. */
@@ -916,8 +915,6 @@ namespace discpp {
         int system_channel_flags; /**< System channel flags. */
         Snowflake rules_channel_id; /**< The id of the channel where "PUBLIC" guilds display rules and/or guidelines. */
 		time_t joined_at; /**< When this guild was joined at. */
-		bool large; /**< Whether this is considered a large guild. */
-		bool unavailable; /**< Whether this guild is unavailable. */
 		int member_count; /**< Total number of members in this guild. */
 		std::vector<discpp::VoiceState> voice_states; /**< Array of partial voice state objects. */
 		std::unordered_map<Snowflake, std::shared_ptr<Member>> members; /**< Users in the guild. */
@@ -934,7 +931,7 @@ namespace discpp {
 		int approximate_presence_count; /**< Approximate number of online members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
 		std::string created_at; /**< The id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */
 	private:
-        char flags;
+        unsigned char flags;
         uint64_t icon_hex[2] = {0, 0};
         uint64_t splash_hex[2] = {0, 0};
         uint64_t discovery_hex[2] = {0, 0};

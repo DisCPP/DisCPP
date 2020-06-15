@@ -43,7 +43,6 @@ namespace discpp {
         }
 
 		if (GetDataSafely<bool>(json, "owner")) flags |= 0b1;
-		owner = GetDataSafely<bool>(json, "owner");
 		owner_id = GetIDSafely(json, "owner_id");
 		permissions = GetDataSafely<int>(json, "permissions");
 		region = json["region"].GetString();
@@ -90,11 +89,11 @@ namespace discpp {
 		system_channel_id = GetIDSafely(json, "system_channel_id");
 		system_channel_flags = json["system_channel_flags"].GetInt();
         rules_channel_id = GetIDSafely(json, "rules_channel_id");
+
         if (ContainsNotNull(json, "joined_at")) {
             joined_at = TimeFromDiscord(json["joined_at"].GetString());
         }
-		large = GetDataSafely<bool>(json, "large");
-        unavailable = GetDataSafely<bool>(json, "unavailable");
+
         if (GetDataSafely<bool>(json, "large")) flags |= 0b1000;
         if (GetDataSafely<bool>(json, "unavailable")) flags |= 0b10000;
 		member_count = GetDataSafely<int>(json, "member_count");
@@ -115,6 +114,7 @@ namespace discpp {
                 channel_json.CopyFrom(channel, channel_json.GetAllocator());
 
                 discpp::Channel tmp(channel_json);
+                tmp.guild_id = id;
                 channels.insert({ tmp.id, tmp });
             }
         }
@@ -149,7 +149,7 @@ namespace discpp {
                 rapidjson::Document member_json;
                 member_json.CopyFrom(member, member_json.GetAllocator());
 
-                discpp::Member tmp = discpp::Member(member_json, *this);
+                discpp::Member tmp(member_json, *this);
                 members.insert({ tmp.id, std::make_shared<discpp::Member>(tmp)});
             }
         }
@@ -167,7 +167,7 @@ namespace discpp {
                         activity_json.CopyFrom(json["game"], activity_json.GetAllocator());
                     }
 
-                    it->second->presence = std::make_shared<discpp::Presence>(presence_json);
+                    it->second->presence = std::make_unique<discpp::Presence>(presence_json);
                 }
             }
 		}

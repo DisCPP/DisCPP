@@ -166,7 +166,7 @@ namespace discpp {
                 if (!reconnecting) HandleDiscordDisconnect(msg);
                 break;
             case ix::WebSocketMessageType::Error:
-                logger->Info(LogTextColor::RED + "Error: " + msg->errorInfo.reason);
+                logger->Error(LogTextColor::RED + "Error: " + msg->errorInfo.reason);
                 break;
             case ix::WebSocketMessageType::Message:
                 {
@@ -520,9 +520,8 @@ namespace discpp {
     }
 
     std::shared_ptr<discpp::Guild> Client::GetGuild(const Snowflake& guild_id) {
-
-        auto it = discpp::globals::client_instance->guilds.find(guild_id);
-        if (it != discpp::globals::client_instance->guilds.end()) {
+        auto it = guilds.find(guild_id);
+        if (it != guilds.end()) {
             return it->second;
         }
 

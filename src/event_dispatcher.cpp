@@ -134,7 +134,7 @@ namespace discpp {
         Snowflake guild_id = SnowflakeFromString(result["id"].GetString());
 
         std::shared_ptr<discpp::Guild> guild = std::make_shared<discpp::Guild>(result);
-        discpp::globals::client_instance->guilds.insert({ guild->id, guild });
+        discpp::globals::client_instance->guilds.emplace(guild_id, guild);
         discpp::globals::client_instance->members.insert(guild->members.begin(), guild->members.end());
 
         discpp::DispatchEvent(discpp::GuildCreateEvent(guild));
@@ -234,12 +234,11 @@ namespace discpp {
             rapidjson::Document role_json;
             role_json.CopyFrom(role, role_json.GetAllocator());
 
-            std::shared_ptr<discpp::Role> tmp = std::make_shared<discpp::Role>(SnowflakeFromString(role_json.GetString()), *guild);
-            member->roles.emplace_back(tmp);
+            member->roles.emplace_back(SnowflakeFromString(role_json.GetString()));
         }
         rapidjson::Value::ConstMemberIterator itr = result.FindMember("nick");
         if (discpp::ContainsNotNull(result, "nick")) {
-            member->nick = std::make_shared<std::string>(result["nick"].GetString());
+            member->nick = result["nick"].GetString();
         }
 
         discpp::DispatchEvent(discpp::GuildMemberUpdateEvent(guild, member));

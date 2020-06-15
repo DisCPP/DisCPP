@@ -10,6 +10,7 @@
 namespace discpp {
     class Guild;
     class EmbedBuilder;
+    class Member;
 
 	enum class GetReactionsMethod : int {
 		BEFORE_USER,
@@ -344,6 +345,7 @@ namespace discpp {
         discpp::Channel channel;
         std::shared_ptr<discpp::Guild> guild;
         discpp::User author;
+        std::shared_ptr<discpp::Member> member;
 		std::string content;
 		time_t timestamp;
 		time_t edited_timestamp;

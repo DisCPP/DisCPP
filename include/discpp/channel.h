@@ -81,10 +81,6 @@ namespace discpp {
         /**
          * @brief Constructs a discpp::Channel object from json.
          *
-         * ```cpp
-         *      discpp::channel channel(json);
-         * ```
-         *
          * @param[in] json The json data for the channel.
          *
          * @return discpp::Channel, this is a constructor.
@@ -257,7 +253,7 @@ namespace discpp {
          *
          * @return discpp::Guild
          */
-        std::shared_ptr<discpp::Guild> GetGuild();
+        std::shared_ptr<discpp::Guild> GetGuild() const;
 
         /**
          * @brief Create an invite for the channel.

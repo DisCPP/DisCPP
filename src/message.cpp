@@ -4,6 +4,7 @@
 #include "guild.h"
 #include "member.h"
 #include "embed_builder.h"
+#include "exceptions.h"
 
 namespace discpp {
 	Message::Message(const Snowflake& id) : discpp::DiscordObject(id) {
@@ -21,8 +22,27 @@ namespace discpp {
 	Message::Message(rapidjson::Document& json) {
 		id = GetIDSafely(json, "id");
 		channel = globals::client_instance->GetChannel(SnowflakeFromString(json["channel_id"].GetString()));
-        guild = std::make_shared<discpp::Guild>(ConstructDiscppObjectFromID(json, "guild_id", discpp::Guild()));
+		try {
+            guild = channel.GetGuild();
+        } catch (const DiscordObjectNotFound& e) {}
 		author = ConstructDiscppObjectFromJson(json, "author", discpp::User());
+        if (ContainsNotNull(json, "member")) {
+            try {
+                auto mbr = guild->GetMember(id);
+                member = mbr;
+            } catch (const std::runtime_error& error) {
+                rapidjson::Document doc(rapidjson::kObjectType);
+                doc.CopyFrom(json["member"], doc.GetAllocator());
+
+                // Since the member isn't cached, create it.
+                auto mbr = std::make_shared<discpp::Member>(discpp::Member(doc, *guild));
+                mbr->user = author;
+                member = mbr;
+
+                // Add the new member into cache since it isn't already.
+                guild->members.emplace(id, mbr);
+            }
+        }
 		content = GetDataSafely<std::string>(json, "content");
 		timestamp = TimeFromDiscord(GetDataSafely<std::string>(json, "timestamp"));
 		if (discpp::ContainsNotNull(json, "edited_timestamp")) edited_timestamp = TimeFromDiscord(json["edited_timestamp"].GetString());

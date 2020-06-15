@@ -40,14 +40,33 @@ namespace discpp {
          */
         Role(rapidjson::Document& json);
 
-		//Snowflake id;  /**< Id of the current role */
-		std::string name; /**< Name of the current role */
-		int color; /**< Color of the current role */
-		bool hoist; /**< Whether or not the role displays in member list */
-		int position; /**< Position of the current role */
-		Permissions permissions; /**< PermissionOverwrites for the current role */
-		bool managed;
-		bool mentionable; /**< Whether or not you can @ mention the current role */
+        /**
+         * @brief Returns if the role is hoist-able or not. Which means the role displays in member list.
+         *
+         * @return bool
+         */
+        bool IsHoistable();
+
+        /**
+         * @brief Returns if the role is manged by an integration.
+         *
+         * @return bool
+         */
+        bool IsManaged();
+
+        /**
+         * @brief Returns if the role is mentionable.
+         *
+         * @return bool
+         */
+        bool IsMentionable();
+
+		std::string name; /**< Name of the current role. */
+		int color; /**< Color of the current role. */
+		int position; /**< Position of the current role. */
+		Permissions permissions; /**< PermissionOverwrites for the current role. */
+	private:
+	    unsigned char flags;
 	};
 }
 

@@ -11,7 +11,7 @@ namespace discpp {
 	}
 
 	Channel::Channel(rapidjson::Document& json) {
-		id = SnowflakeFromString(json["id"].GetString());
+	    id = SnowflakeFromString(json["id"].GetString());
 		type = static_cast<ChannelType>(json["type"].GetInt());
 		name = GetDataSafely<std::string>(json, "name");
 		topic = GetDataSafely<std::string>(json, "topic");
@@ -258,7 +258,7 @@ namespace discpp {
         SendPutRequest(Endpoint("/channels/" + std::to_string(id) + "/permissions/" + std::to_string(permissions.role_user_id)), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(json_payload));
     }
 
-    std::shared_ptr<discpp::Guild> Channel::GetGuild() {
+    std::shared_ptr<discpp::Guild> Channel::GetGuild() const {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
             globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::GetGuild only available for guild channels!");
             throw std::runtime_error("discpp::Channel::GetGuild only available for guild channels!");
