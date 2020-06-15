@@ -847,9 +847,7 @@ namespace discpp {
         if (ContainsNotNull(json, "guild")) {
             guild = discpp::globals::client_instance->GetGuild(discpp::Snowflake(json["guild"]["id"].GetString()));
         }
-        if (ContainsNotNull(json, "channel")) {
-            channel = discpp::Channel(guild->GetChannel(Snowflake(json["channel"]["id"].GetString())));
-        }
+        channel = discpp::Channel(guild->GetChannel(Snowflake(json["channel"]["id"].GetString())));
         if (ContainsNotNull(json, "inviter")) {
             rapidjson::Document inviter_json;
             inviter_json.CopyFrom(json["inviter"], inviter_json.GetAllocator());
@@ -861,8 +859,8 @@ namespace discpp {
             target_user = std::make_shared<discpp::User>(target_json);
         }
         target_user_type = static_cast<TargetUserType>(GetDataSafely<int>(json, "target_user_type"));
-        approximate_presence_count = json["approximate_presence_count"].GetInt();
-        approximate_member_count = json["approximate_member_count"].GetInt();
+        approximate_presence_count = GetDataSafely<int>(json, "approximate_presence_count");
+        approximate_member_count = GetDataSafely<int>(json, "approximate_member_count");
     }
 
     VoiceState::VoiceState(rapidjson::Document &json) {
