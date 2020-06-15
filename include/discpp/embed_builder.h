@@ -14,6 +14,7 @@ namespace discpp {
 	class Color;
 
 	class EmbedBuilder {
+    friend class Channel;
 	public:
 		EmbedBuilder();
 

@@ -60,37 +60,68 @@ namespace discpp {
 	}
 
 	discpp::Message Channel::Send(const std::string& text, const bool& tts, discpp::EmbedBuilder* embed, std::vector<File> files) {
-		std::string escaped_text = EscapeString(text);
+        //std::string escaped_text = EscapeString(text);
 
-		// Send a file filled with message contents if the message is more than 2000 characters.
-		if (escaped_text.size() >= 2000) {
-			// Write message to file
-			std::ofstream message("message.txt", std::ios::out | std::ios::binary);
-			message << escaped_text;
-			message.close();
+        // Send a file filled with message contents if the message is more than 2000 characters.
+        if (text.size() >= 2000) {
+            // Write message to file
+            std::ofstream message("message.txt", std::ios::out | std::ios::binary);
+            message << text;
+            message.close();
 
-			// Ensure the file will be deleted even if it runs into an exception sending the file.
-			discpp::Message sent_message;
-			try {
-				// Send the message
-				std::vector<discpp::File> files;
-				files.push_back({ "message.txt", "message.txt" });
-				sent_message = Send("Message was too large to fit in 2000 characters", tts, nullptr, files);
+            // Ensure the file will be deleted even if it runs into an exception sending the file.
+            discpp::Message sent_message;
+            try {
+                // Send the message
+                std::vector<discpp::File> files;
+                files.push_back({ "message.txt", "message.txt" });
+                sent_message = Send("Message was too large to fit in 2000 characters", tts, nullptr, files);
 
-				// Delete the temporary message file
-				remove("message.txt");
-			} catch (std::exception e) {
-				// Delete the temporary message file
-				remove("message.txt");
+                // Delete the temporary message file
+                remove("message.txt");
+            } catch (std::exception e) {
+                // Delete the temporary message file
+                remove("message.txt");
 
-				throw std::exception(e);
-			}
+                throw std::exception(e);
+            }
 
-			return sent_message;
-		}
+            return sent_message;
+        }
 
-        rapidjson::Document message_json;
-        std::string message_json_str = "{\"content\":\"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
+        rapidjson::Document message_json(rapidjson::kObjectType);
+        message_json.AddMember("content", text, message_json.GetAllocator());
+        message_json.AddMember("tts", tts, message_json.GetAllocator());
+
+        if (embed != nullptr) {
+            rapidjson::Value embed_value(rapidjson::kObjectType);
+            embed_value.CopyFrom(embed->embed_json, message_json.GetAllocator());
+
+            message_json.AddMember("embed", embed_value, message_json.GetAllocator());
+        }
+
+        if (!files.empty()) {
+            /*rapidjson::Document json_payload(rapidjson::kObjectType);
+            json_payload.AddMember("payload_json", message_json, json_payload.GetAllocator());*/
+
+            cpr::Multipart multipart_data{};
+
+            for (int i = 0; i < files.size(); i++) {
+                multipart_data.parts.emplace_back("file" + std::to_string(i), cpr::File(files[i].file_path), "application/octet-stream");
+            }
+
+            multipart_data.parts.emplace_back("payload_json", DumpJson(message_json));
+
+            WaitForRateLimits(id, RateLimitBucketType::CHANNEL);
+            cpr::Response response = cpr::Post(cpr::Url{ Endpoint("/channels/" + std::to_string(id) + "/messages") }, DefaultHeaders({ {"Content-Type", "multipart/form-data"} }), multipart_data);
+            HandleRateLimits(response.header, id, RateLimitBucketType::CHANNEL);
+
+            rapidjson::Document result_json(rapidjson::kObjectType);
+            result_json.Parse(response.text);
+
+            return discpp::Message(result_json);
+        }
+        /*std::string message_json_str = "{\"content\":\"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
         message_json.Parse(message_json_str);
 
 		cpr::Body body;
@@ -98,29 +129,15 @@ namespace discpp {
 		    rapidjson::Document embed_json = embed->ToJson();
 			body = cpr::Body("{\"embed\": " + DumpJson(embed_json) + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
 		} else if (!files.empty()) { // Send files.
-			cpr::Multipart multipart_data{};
 
-			for (int i = 0; i < files.size(); i++) {
-				multipart_data.parts.emplace_back("file" + std::to_string(i), cpr::File(files[i].file_path), "application/octet-stream");
-			}
-
-			multipart_data.parts.emplace_back("payload_json", "{\"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "\"}");
-
-			WaitForRateLimits(id, RateLimitBucketType::CHANNEL);
-			cpr::Response response = cpr::Post(cpr::Url{ Endpoint("/channels/" + std::to_string(id) + "/messages") }, DefaultHeaders({ {"Content-Type", "multipart/form-data"} }), multipart_data);
-			HandleRateLimits(response.header, id, RateLimitBucketType::CHANNEL);
-
-			rapidjson::Document result_json(rapidjson::kObjectType);
-			result_json.Parse(response.text);
-
-			return discpp::Message(result_json);
 		} else {
-			body = cpr::Body(DumpJson(message_json));
-		}
+			body = cpr::Body(message_json_str);
+		}*/
 
-		rapidjson::Document result = SendPostRequest(Endpoint("/channels/" + std::to_string(id) + "/messages"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+        cpr::Body body(DumpJson(message_json));
+        rapidjson::Document result = SendPostRequest(Endpoint("/channels/" + std::to_string(id) + "/messages"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
-		return discpp::Message(result);
+        return discpp::Message(result);
 	}
 
 	std::string ChannelPropertyToString(ChannelProperty prop) {
