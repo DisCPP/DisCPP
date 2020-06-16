@@ -75,16 +75,16 @@ namespace discpp {
     void Client::WebSocketStart() {
         rapidjson::Document gateway_request(rapidjson::kObjectType);
         switch (config->type) {
-        case TokenType::USER: {
-            rapidjson::Document user_doc = SendGetRequest(Endpoint("/gateway"), {{"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"}}, {}, {});
-            gateway_request.CopyFrom(user_doc, gateway_request.GetAllocator());
+            case TokenType::USER: {
+                rapidjson::Document user_doc = SendGetRequest(Endpoint("/gateway"), {{"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"}}, {}, {});
+                gateway_request.CopyFrom(user_doc, gateway_request.GetAllocator());
 
-            break;
-        } case TokenType::BOT:
-            rapidjson::Document bot_doc = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
-            gateway_request.CopyFrom(bot_doc, gateway_request.GetAllocator());
+                break;
+            } case TokenType::BOT:
+                rapidjson::Document bot_doc = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
+                gateway_request.CopyFrom(bot_doc, gateway_request.GetAllocator());
 
-            break;
+                break;
         }
 
         rapidjson::Value::ConstMemberIterator itr = gateway_request.FindMember("url");
@@ -116,7 +116,7 @@ namespace discpp {
                 websocket.disableAutomaticReconnection();
 
                 websocket.setOnMessageCallback([this](const ix::WebSocketMessagePtr& msg) {
-                    OnWebSocketListen(msg);
+                    OnWebSocketListen(const_cast<ix::WebSocketMessagePtr&>(msg));
                 });
 
                 /*ix::SocketTLSOptions tls_options;
@@ -152,31 +152,30 @@ namespace discpp {
         std::this_thread::sleep_for(std::chrono::milliseconds(10000));
         if (disconnected) {
             reconnecting = true;
-            DoFunctionLater(&Client::ReconnectToWebsocket, this);
+            ReconnectToWebsocket();
         }
     }
 
-    void Client::OnWebSocketListen(const ix::WebSocketMessagePtr& msg) {
+    void Client::OnWebSocketListen(ix::WebSocketMessagePtr& msg) {
         switch(msg->type) {
             case ix::WebSocketMessageType::Open:
                 logger->Info(LogTextColor::GREEN + "Connected to gateway!");
                 disconnected = false;
                 break;
-            case ix::WebSocketMessageType::Close:
-                if (!reconnecting) HandleDiscordDisconnect(msg);
+            case ix::WebSocketMessageType::Close: {
+                std::lock_guard<std::mutex> futures_guard(futures_mutex);
+                futures.push_back(std::async(std::launch::async, &Client::HandleDiscordDisconnect, this, std::move(msg)));
                 break;
-            case ix::WebSocketMessageType::Error:
+            } case ix::WebSocketMessageType::Error:
                 logger->Error(LogTextColor::RED + "Error: " + msg->errorInfo.reason);
                 break;
-            case ix::WebSocketMessageType::Message:
-                {
-                    rapidjson::Document result;
-                    result.Parse(msg->str);
-                    if (result.HasParseError()) logger->Debug(LogTextColor::YELLOW + "A non-json payload was received and ignored: \"" + msg->str);
-                    if (!result.IsNull()) OnWebSocketPacket(result);
-                }
+            case ix::WebSocketMessageType::Message:{
+                rapidjson::Document result;
+                result.Parse(msg->str);
+                if (result.HasParseError()) logger->Debug(LogTextColor::YELLOW + "A non-json payload was received and ignored: \"" + msg->str);
+                if (!result.IsNull()) OnWebSocketPacket(result);
                 break;
-            default:
+            } default:
                 logger->Warn(LogTextColor::YELLOW + "Unknown message sent");
                 break;
         }
@@ -186,79 +185,82 @@ namespace discpp {
         logger->Debug("Received payload: " + DumpJson(result));
 
         switch (result["op"].GetInt()) {
-        case (hello): {
-            if (reconnecting) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(1200));
-                logger->Info(LogTextColor::GREEN + "Reconnected!");
+            case (hello): {
+                if (reconnecting) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1200));
+                    logger->Info(LogTextColor::GREEN + "Reconnected!");
 
-                rapidjson::Document resume(rapidjson::kObjectType);
-                resume.AddMember("op", 6, resume.GetAllocator());
+                    // Send the resume payload
+                    rapidjson::Document resume(rapidjson::kObjectType);
+                    resume.AddMember("op", 6, resume.GetAllocator());
 
-                rapidjson::Value resume_d(rapidjson::kObjectType);
-                resume_d.AddMember("token", token, resume.GetAllocator());
-                resume_d.AddMember("session_id", session_id, resume.GetAllocator());
-                resume_d.AddMember("seq", std::to_string(last_sequence_number), resume.GetAllocator());
+                    rapidjson::Value resume_d(rapidjson::kObjectType);
+                    resume_d.AddMember("token", token, resume.GetAllocator());
+                    resume_d.AddMember("session_id", session_id, resume.GetAllocator());
+                    resume_d.AddMember("seq", std::to_string(last_sequence_number), resume.GetAllocator());
 
-                resume.AddMember("d", resume_d, resume.GetAllocator());
+                    resume.AddMember("d", resume_d, resume.GetAllocator());
 
-                CreateWebsocketRequest(resume);
+                    CreateWebsocketRequest(resume);
 
-                // Heartbeat just to be safe
-                rapidjson::Document data;
-                data.SetObject();
-                rapidjson::Document::AllocatorType& data_allocator = data.GetAllocator();
-                data.AddMember("op", packet_opcode::heartbeat, data_allocator);
-                data.AddMember("d", NULL, data_allocator);
-                if (last_sequence_number != -1) {
-                    data["d"] = last_sequence_number;
+                    // Heartbeat just to be safe
+                    rapidjson::Document data;
+                    data.SetObject();
+                    rapidjson::Document::AllocatorType& data_allocator = data.GetAllocator();
+                    data.AddMember("op", packet_opcode::heartbeat, data_allocator);
+                    data.AddMember("d", NULL, data_allocator);
+                    if (last_sequence_number != -1) {
+                        data["d"] = last_sequence_number;
+                    }
+
+                    heartbeat_acked = true;
+                    reconnecting = false;
+
+                    discpp::EventHandler<discpp::ReconnectEvent>::TriggerEvent(discpp::ReconnectEvent());
+                } else {
+#ifndef __INTELLISENSE__
+                    hello_packet = std::move(result);
+#endif
+                    rapidjson::Document identify = GetIdentifyPacket();
+                    CreateWebsocketRequest(identify);
+                }
+                break;
+            }
+            case heartbeat_ack:
+                heartbeat_acked = true;
+                break;
+            case reconnect:
+                DoFunctionLater(&Client::ReconnectToWebsocket, this);
+                break;
+            case invalid_session:
+                // Check if the session is resumable
+                if (result["d"].GetBool()) {
+                    // Send resume payload
+                    rapidjson::Document resume(rapidjson::kObjectType);
+
+                    rapidjson::Document::AllocatorType& allocator = resume.GetAllocator();
+                    resume.AddMember("op", 6, allocator);
+
+                    rapidjson::Value d(rapidjson::kObjectType);
+                    d.AddMember("token", token, allocator);
+                    d.AddMember("session_id", session_id, allocator);
+                    d.AddMember("seq", std::to_string(last_sequence_number), allocator);
+
+                    resume.AddMember("d", d, allocator);
+
+                    CreateWebsocketRequest(resume);
+                } else {
+                    logger->Debug("Waiting 2 seconds before sending an identify packet for invalid session.");
+                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+                    rapidjson::Document identify = GetIdentifyPacket();
+                    CreateWebsocketRequest(identify);
                 }
 
-                heartbeat_acked = true;
-                reconnecting = false;
-
-                discpp::EventHandler<discpp::ReconnectEvent>::TriggerEvent(discpp::ReconnectEvent());
-            } else {
-#ifndef __INTELLISENSE__
-                hello_packet = std::move(result);
-#endif
-                rapidjson::Document identify = GetIdentifyPacket();
-                CreateWebsocketRequest(identify);
-            }
-            break;
-        }
-        case heartbeat_ack:
-            heartbeat_acked = true;
-            break;
-        case reconnect:
-            DoFunctionLater(&Client::ReconnectToWebsocket, this);
-            break;
-        case invalid_session:
-            // Check if the session is resumable
-            if (result["d"].GetBool()) {
-                rapidjson::Document resume(rapidjson::kObjectType);
-
-                rapidjson::Document::AllocatorType& allocator = resume.GetAllocator();
-                resume.AddMember("op", 6, allocator);
-
-                rapidjson::Value d(rapidjson::kObjectType);
-                d.AddMember("token", token, allocator);
-                d.AddMember("session_id", session_id, allocator);
-                d.AddMember("seq", std::to_string(last_sequence_number), allocator);
-
-                resume.AddMember("d", d, allocator);
-
-                CreateWebsocketRequest(resume);
-            } else {
-                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-                rapidjson::Document identify = GetIdentifyPacket();
-                CreateWebsocketRequest(identify);
-            }
-
-            break;
-        default:
-            EventDispatcher::HandleDiscordEvent(result, result["t"].GetString());
-            break;
+                break;
+            default:
+                EventDispatcher::HandleDiscordEvent(result, result["t"].GetString());
+                break;
         }
 
         packet_counter++;
@@ -401,24 +403,24 @@ namespace discpp {
     }
 
     std::vector<discpp::User::Connection> ClientUser::GetUserConnections() {
-		rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
+        rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
 
-		std::vector<Connection> connections;
-		for (auto const& connection : result.GetArray()) {
-			rapidjson::Document connection_json;
-			connection_json.CopyFrom(connection, connection_json.GetAllocator());
-			connections.emplace_back(connection_json);
-		}
+        std::vector<Connection> connections;
+        for (auto const& connection : result.GetArray()) {
+            rapidjson::Document connection_json;
+            connection_json.CopyFrom(connection, connection_json.GetAllocator());
+            connections.emplace_back(connection_json);
+        }
 
-		return connections;
-	}
+        return connections;
+    }
 
-	ClientUser::ClientUser(rapidjson::Document& json) : User(json) {
-		mfa_enabled = GetDataSafely<bool>(json, "mfa_enabled");
-		locale = GetDataSafely<std::string>(json, "locale");
-		verified = GetDataSafely<bool>(json, "verified");
+    ClientUser::ClientUser(rapidjson::Document& json) : User(json) {
+        mfa_enabled = GetDataSafely<bool>(json, "mfa_enabled");
+        locale = GetDataSafely<std::string>(json, "locale");
+        verified = GetDataSafely<bool>(json, "verified");
         premium_type = static_cast<discpp::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type"));
-	}
+    }
 
     ClientUserSettings ClientUser::GetSettings() {
         if (!discpp::globals::client_instance->client_user.IsBot()) {

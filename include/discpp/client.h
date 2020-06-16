@@ -351,7 +351,7 @@ namespace discpp {
 
 		// Websocket Methods
 		void WebSocketStart();
-		void OnWebSocketListen(const ix::WebSocketMessagePtr& msg);
+		void OnWebSocketListen(ix::WebSocketMessagePtr& msg);
 		void OnWebSocketPacket(rapidjson::Document& result);
 		void HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg);
 		void HandleHeartbeat();
