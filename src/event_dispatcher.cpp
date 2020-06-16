@@ -37,10 +37,12 @@ namespace discpp {
                 discpp::globals::client_instance->private_channels.insert({ dm_channel.id, dm_channel });
             }
         } else {
-            // Get the bot user
-            rapidjson::Document user_json = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
+            if (globals::client_instance->client_user.id == 0) {
+                // Get the bot user
+                rapidjson::Document user_json = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
 
-            discpp::globals::client_instance->client_user = discpp::ClientUser(user_json);
+                discpp::globals::client_instance->client_user = discpp::ClientUser(user_json);
+            }
         }
 
         discpp::DispatchEvent(discpp::ReadyEvent(result));
@@ -576,7 +578,7 @@ namespace discpp {
 
     void EventDispatcher::BindEvents() {
         internal_event_map["READY"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::ReadyEvent(result); };
-        internal_event_map["RESUMED"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::ChannelCreateEvent(result); };
+        internal_event_map["RESUMED"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::ResumedEvent(result); };
         internal_event_map["INVALID_SESSION"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::InvalidSessionEvent(result); };
         internal_event_map["CHANNEL_CREATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::ChannelCreateEvent(result); };
         internal_event_map["CHANNEL_UPDATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::ChannelUpdateEvent(result); };
