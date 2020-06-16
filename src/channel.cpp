@@ -110,10 +110,15 @@ namespace discpp {
                 multipart_data.parts.emplace_back("file" + std::to_string(i), cpr::File(files[i].file_path), "application/octet-stream");
             }
 
+            globals::client_instance->logger->Debug("Sending payload_json inside multipart data for files: " + DumpJson(message_json));
+
             multipart_data.parts.emplace_back("payload_json", DumpJson(message_json));
 
             WaitForRateLimits(id, RateLimitBucketType::CHANNEL);
+
             cpr::Response response = cpr::Post(cpr::Url{ Endpoint("/channels/" + std::to_string(id) + "/messages") }, DefaultHeaders({ {"Content-Type", "multipart/form-data"} }), multipart_data);
+            globals::client_instance->logger->Debug("Received requested payload: " + response.text);
+
             HandleRateLimits(response.header, id, RateLimitBucketType::CHANNEL);
 
             rapidjson::Document result_json(rapidjson::kObjectType);
