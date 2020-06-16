@@ -630,11 +630,10 @@ namespace discpp {
         data_ptr = std::make_shared<rapidjson::Document>(std::move(data));
 #endif
 
-        rapidjson::Value::ConstMemberIterator itr = j.FindMember("s");
-        if (itr != j.MemberEnd() && j["s"].IsNumber()) {
+        if (ContainsNotNull(j, "s")) {
             discpp::globals::client_instance->last_sequence_number = j["s"].GetInt();
         } else {
-            discpp::globals::client_instance->last_sequence_number = -1;
+            discpp::globals::client_instance->last_sequence_number = NULL;
         }
 
         if (internal_event_map.find(event_name) != internal_event_map.end()) {

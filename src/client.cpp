@@ -197,7 +197,7 @@ namespace discpp {
                     rapidjson::Value resume_d(rapidjson::kObjectType);
                     resume_d.AddMember("token", token, resume.GetAllocator());
                     resume_d.AddMember("session_id", session_id, resume.GetAllocator());
-                    resume_d.AddMember("seq", std::to_string(last_sequence_number), resume.GetAllocator());
+                    resume_d.AddMember("seq", last_sequence_number, resume.GetAllocator());
 
                     resume.AddMember("d", resume_d, resume.GetAllocator());
 
@@ -244,7 +244,7 @@ namespace discpp {
                     rapidjson::Value d(rapidjson::kObjectType);
                     d.AddMember("token", token, allocator);
                     d.AddMember("session_id", session_id, allocator);
-                    d.AddMember("seq", std::to_string(last_sequence_number), allocator);
+                    d.AddMember("seq", last_sequence_number, resume.GetAllocator());
 
                     resume.AddMember("d", d, allocator);
 
