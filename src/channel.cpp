@@ -101,9 +101,6 @@ namespace discpp {
         }
 
         if (!files.empty()) {
-            /*rapidjson::Document json_payload(rapidjson::kObjectType);
-            json_payload.AddMember("payload_json", message_json, json_payload.GetAllocator());*/
-
             cpr::Multipart multipart_data{};
 
             for (int i = 0; i < files.size(); i++) {
@@ -121,18 +118,6 @@ namespace discpp {
 
             return discpp::Message(result_json);
         }
-        /*std::string message_json_str = "{\"content\":\"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
-        message_json.Parse(message_json_str);
-
-		cpr::Body body;
-		if (embed != nullptr) { // Set the HTTP payload to an embed.
-		    rapidjson::Document embed_json = embed->ToJson();
-			body = cpr::Body("{\"embed\": " + DumpJson(embed_json) + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
-		} else if (!files.empty()) { // Send files.
-
-		} else {
-			body = cpr::Body(message_json_str);
-		}*/
 
         cpr::Body body(DumpJson(message_json));
         rapidjson::Document result = SendPostRequest(Endpoint("/channels/" + std::to_string(id) + "/messages"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
@@ -227,7 +212,6 @@ namespace discpp {
 
 	void Channel::BulkDeleteMessage(const std::vector<Snowflake>& messages) {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::BulkDeleteMessage only available for guild channels!");
             throw std::runtime_error("discpp::Channel::BulkDeleteMessage only available for guild channels!");
         }
 
@@ -248,7 +232,6 @@ namespace discpp {
 
     void Channel::DeletePermission(const discpp::Permissions& permissions) {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::DeletePermission only available for guild channels!");
             throw std::runtime_error("discpp::Channel::DeletePermission only available for guild channels!");
         }
 
@@ -257,7 +240,6 @@ namespace discpp {
 
     void Channel::EditPermissions(const discpp::Permissions& permissions) {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::EditPermissions only available for guild channels!");
             throw std::runtime_error("discpp::Channel::EditPermissions only available for guild channels!");
         }
 
@@ -277,7 +259,6 @@ namespace discpp {
 
     std::shared_ptr<discpp::Guild> Channel::GetGuild() const {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::GetGuild only available for guild channels!");
             throw std::runtime_error("discpp::Channel::GetGuild only available for guild channels!");
         }
 
@@ -287,7 +268,6 @@ namespace discpp {
 
     discpp::GuildInvite Channel::CreateInvite(const int& max_age, const int& max_uses, const bool& temporary, const bool& unique) {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::CreateInvite only available for guild channels!");
             throw std::runtime_error("discpp::Channel::CreateInvite only available for guild channels!");
         }
 
@@ -300,7 +280,6 @@ namespace discpp {
 
 	std::vector<discpp::GuildInvite> Channel::GetInvites() {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::GetInvites only available for guild channels!");
             throw std::runtime_error("discpp::Channel::GetInvites only available for guild channels!");
         }
 
@@ -317,7 +296,7 @@ namespace discpp {
 
 	std::unordered_map<discpp::Snowflake, discpp::Channel> Channel::GetChildren() {
         if (type != ChannelType::GROUP_CATEGORY) {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::GetChildren only available for category channels!");
+            globals::client_instance->logger->Debug(LogTextColor::RED + "discpp::Channel::GetChildren only available for category channels!");
             throw std::runtime_error("discpp::Channel::GetChildren only available for category channels!");
         }
 
@@ -337,7 +316,7 @@ namespace discpp {
 	    if (type == ChannelType::DM || type == ChannelType::GROUP_DM) {
 		    SendPutRequest(Endpoint("/channels/" + std::to_string(id) + "/recipients/" + std::to_string(user.id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 		} else {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::GroupDMAddRecipient only available for DM/Group DM channels!");
+            globals::client_instance->logger->Debug(LogTextColor::RED + "discpp::Channel::GroupDMAddRecipient only available for DM/Group DM channels!");
 	        throw std::runtime_error("discpp::Channel::GroupDMAddRecipient only available for DM/Group DM channels!");
 	    }
 	}
@@ -346,7 +325,7 @@ namespace discpp {
         if (type == ChannelType::DM || type == ChannelType::GROUP_DM) {
             SendDeleteRequest(Endpoint("/channels/" + std::to_string(id) + "/recipients/" + std::to_string(user.id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
         } else {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::GroupDMRemoveRecipient only available for DM/Group DM channels!");
+            globals::client_instance->logger->Debug(LogTextColor::RED + "discpp::Channel::GroupDMRemoveRecipient only available for DM/Group DM channels!");
             throw std::runtime_error("discpp::Channel::GroupDMRemoveRecipient only available for DM/Group DM channels!");
         }
 	}
@@ -376,4 +355,4 @@ namespace discpp {
                 return cpr::Url(url);
         }
     }
-}
+}                                                               
