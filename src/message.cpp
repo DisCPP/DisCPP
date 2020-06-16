@@ -24,7 +24,8 @@ namespace discpp {
 		channel = globals::client_instance->GetChannel(SnowflakeFromString(json["channel_id"].GetString()));
 		try {
             guild = channel.GetGuild();
-        } catch (const DiscordObjectNotFound& e) {}
+        } catch (const DiscordObjectNotFound& e) {
+		} catch (const std::runtime_error& e) {}
 		author = ConstructDiscppObjectFromJson(json, "author", discpp::User());
         if (ContainsNotNull(json, "member")) {
             try {
