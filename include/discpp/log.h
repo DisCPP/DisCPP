@@ -9,11 +9,8 @@
 #endif
 
 #include <ctime>
-#include <filesystem>
 
 #include "utils.h"
-
-namespace fs = std::filesystem;
 
 namespace discpp {
 	namespace logger_flags {
