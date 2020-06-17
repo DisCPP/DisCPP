@@ -83,6 +83,44 @@ namespace discpp {
 		AuditLogChangeKey old_value;
     };
 
+    enum class AuditLogKey : int {
+        NAME, ICON_HASH, SPLASH_HASH,
+        OWNER_ID, REGION, AFK_CHANNEL_ID,
+        AFK_TIMEOUT, MFA_LEVEL, VERIFICATION_LEVEL,
+        EXPLICIT_CONTENT_FILTER, DEFAULT_MESSAGE_NOTIFICATIONS,
+        VANITY_URL_CODE, ADD, REMOVE, PRUNE_DELETE_DAYS,
+        WIDGET_ENABLED, WIDGET_CHANNEL_ID, SYSTEM_CHANNEL_ID,
+        POSITION, TOPIC, BITRATE, PERMISSION_OVERWRITES,
+        NSFW, APPLICATION_ID, RATE_LIMIT_PER_USER,
+        PERMISSIONS, COLOR, HOIST, MENTIONABLE, ALLOW,
+        DENY, CODE, CHANNEL_ID, INVITER_ID, MAX_USES,
+        USES, MAX_AGE, TEMPORARY, DEAF, MUTE, NICK,
+        AVATAR_HASH, ID, TYPE, ENABLE_EMOTICONS,
+        EXPIRE_BEHAVIOR, EXPIRE_GRACE_PERIOD
+    };
+
+    AuditLogKey StrToKey(const std::string& key) {
+        std::unordered_map<std::string, AuditLogKey> tmp = {
+                {"name", AuditLogKey::NAME}, {"icon_hash", AuditLogKey::ICON_HASH}, {"splash_hash", AuditLogKey::SPLASH_HASH},
+                {"owner_id", AuditLogKey::OWNER_ID}, {"region", AuditLogKey::REGION}, {"afk_channel_id", AuditLogKey::AFK_CHANNEL_ID},
+                {"afk_timeout", AuditLogKey::AFK_TIMEOUT}, {"mfa_level", AuditLogKey::MFA_LEVEL}, {"verification_level", AuditLogKey::VERIFICATION_LEVEL},
+                {"explicit_content_filter", AuditLogKey::EXPLICIT_CONTENT_FILTER}, {"default_message_notifications", AuditLogKey::DEFAULT_MESSAGE_NOTIFICATIONS}, {"vanity_url_code", AuditLogKey::VANITY_URL_CODE},
+                {"$add", AuditLogKey::ADD}, {"$remove", AuditLogKey::REMOVE}, {"prune_delete_days", AuditLogKey::PRUNE_DELETE_DAYS},
+                {"widget_enabled", AuditLogKey::WIDGET_ENABLED}, {"widget_channel_id", AuditLogKey::WIDGET_CHANNEL_ID}, {"system_channel_id", AuditLogKey::SYSTEM_CHANNEL_ID},
+                {"position", AuditLogKey::POSITION}, {"topic", AuditLogKey::TOPIC}, {"bitrate", AuditLogKey::BITRATE},
+                {"permission_overwrites", AuditLogKey::PERMISSION_OVERWRITES}, {"nsfw", AuditLogKey::NSFW}, {"application_id", AuditLogKey::APPLICATION_ID},
+                {"rate_limit_per_user", AuditLogKey::RATE_LIMIT_PER_USER}, {"permissions", AuditLogKey::PERMISSIONS}, {"color", AuditLogKey::COLOR},
+                {"hoist", AuditLogKey::HOIST}, {"mentionable", AuditLogKey::MENTIONABLE}, {"allow", AuditLogKey::ALLOW},
+                {"deny", AuditLogKey::DENY}, {"code", AuditLogKey::CODE}, {"channel_id", AuditLogKey::CHANNEL_ID},
+                {"inviter_id", AuditLogKey::INVITER_ID}, {"max_uses", AuditLogKey::MAX_USES}, {"uses", AuditLogKey::USES},
+                {"max_age", AuditLogKey::MAX_AGE}, {"temporary", AuditLogKey::TEMPORARY}, {"deaf", AuditLogKey::DEAF},
+                {"mute", AuditLogKey::MUTE}, {"nick", AuditLogKey::NICK}, {"avatar_hash", AuditLogKey::AVATAR_HASH},
+                {"id", AuditLogKey::ID}, {"type", AuditLogKey::TYPE}, {"enable_emoticons", AuditLogKey::ENABLE_EMOTICONS},
+                {"expire_behavior", AuditLogKey::EXPIRE_BEHAVIOR}, {"expire_grace_period", AuditLogKey::EXPIRE_GRACE_PERIOD}
+        };
+        return tmp[key];
+    }
+
     enum AuditLogEvent : int {
         GUILD_UPDATE = 1,
         CHANNEL_CREATE = 10,

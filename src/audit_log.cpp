@@ -14,116 +14,165 @@
 discpp::AuditLogChangeKey GetKey(const std::string& key, rapidjson::Document& j) {
 	discpp::AuditLogChangeKey a_key;
 
-	if (key == "name") {
-		a_key.name = j.GetString();
-	} else if (key == "icon_hash") {
-		a_key.icon_hash = j.GetString();
-	} else if (key == "splash_hash") {
-		a_key.splash_hash = j.GetString();
-	} else if (key == "owner_id") {
-		a_key.owner_id = discpp::SnowflakeFromString(j.GetString());
-	} else if (key == "region") {
-		a_key.region = j.GetString();
-	} else if (key == "afk_channel_id") {
-		a_key.afk_channel_id = discpp::SnowflakeFromString(j.GetString());
-	} else if (key == "afk_timeout") {
-		a_key.afk_timeout = j.GetInt();
-	} else if (key == "mfa_level") {
-		a_key.mfa_level = j.GetInt();
-	} else if (key == "verification_level") {
-		a_key.verification_level = j.GetInt();
-	} else if (key == "explicit_content_filter") {
-		a_key.explicit_content_filter = j.GetInt();
-	} else if (key == "default_message_notifications") {
-		a_key.default_message_notifications = j.GetInt();
-	} else if (key == "vanity_url_code") {
-		a_key.vanity_url_code = j.GetString();
-	} else if (key == "$add") {
-		for (auto const& role : j.GetArray()) {
-		    rapidjson::Document role_json(rapidjson::kObjectType);
-		    role_json.CopyFrom(role, role_json.GetAllocator());
+	discpp::AuditLogKey keyval = discpp::StrToKey(key);
 
-			a_key.roles_add.push_back(discpp::Role(role_json));
-		}
-	} else if (key == "$remove") {
-		for (auto const& role : j.GetArray()) {
-            rapidjson::Document role_json(rapidjson::kObjectType);
-            role_json.CopyFrom(role, role_json.GetAllocator());
+	switch(keyval) {
+	    case discpp::AuditLogKey::NAME:
+	        a_key.name = j.GetString();
+	        break;
+	    case discpp::AuditLogKey::ICON_HASH:
+	        a_key.icon_hash = j.GetString();
+	        break;
+	    case discpp::AuditLogKey::SPLASH_HASH:
+	        a_key.splash_hash = j.GetString();
+	        break;
+	    case discpp::AuditLogKey::OWNER_ID:
+            a_key.owner_id = discpp::SnowflakeFromString(j.GetString());
+	        break;
+	    case discpp::AuditLogKey::REGION:
+            a_key.region = j.GetString();
+	        break;
+	    case discpp::AuditLogKey::AFK_CHANNEL_ID:
+            a_key.afk_channel_id = discpp::SnowflakeFromString(j.GetString());
+	        break;
+	    case discpp::AuditLogKey::AFK_TIMEOUT:
+            a_key.afk_timeout = j.GetInt();
+	        break;
+	    case discpp::AuditLogKey::MFA_LEVEL:
+            a_key.mfa_level = j.GetInt();
+	        break;
+	    case discpp::AuditLogKey::VERIFICATION_LEVEL:
+            a_key.verification_level = j.GetInt();
+	        break;
+	    case discpp::AuditLogKey::EXPLICIT_CONTENT_FILTER:
+            a_key.explicit_content_filter = j.GetInt();
+	        break;
+	    case discpp::AuditLogKey::DEFAULT_MESSAGE_NOTIFICATIONS:
+            a_key.default_message_notifications = j.GetInt();
+	        break;
+	    case discpp::AuditLogKey::VANITY_URL_CODE:
+            a_key.vanity_url_code = j.GetString();
+	        break;
+	    case discpp::AuditLogKey::ADD:
+            for (auto const& role : j.GetArray()) {
+                rapidjson::Document role_json(rapidjson::kObjectType);
+                role_json.CopyFrom(role, role_json.GetAllocator());
 
-			a_key.roles_remove.push_back(discpp::Role(role_json));
-		}
-	} else if (key == "prune_delete_days") {
-		a_key.prune_delete_days = j.GetInt();
-	} else if (key == "widget_enabled") {
-		a_key.widget_enabled = j.GetBool();
-	} else if (key == "widget_channel_id") {
-		a_key.widget_channel_id = discpp::SnowflakeFromString(j.GetString());
-	} else if (key == "system_channel_id") {
-		a_key.system_channel_id = discpp::SnowflakeFromString(j.GetString());
-	} else if (key == "position") {
-		a_key.position = j.GetInt();
-	} else if (key == "topic") {
-		a_key.topic = j.GetString();
-	} else if (key == "bitrate") {
-		a_key.bitrate = j.GetInt();
-	} else if (key == "permission_overwrites") {
-		for (auto const& perm : j.GetArray()) {
-            rapidjson::Document perm_json(rapidjson::kObjectType);
-            perm_json.CopyFrom(perm, perm_json.GetAllocator());
+                a_key.roles_add.push_back(discpp::Role(role_json));
+            }
+	        break;
+	    case discpp::AuditLogKey::REMOVE:
+            for (auto const& role : j.GetArray()) {
+                rapidjson::Document role_json(rapidjson::kObjectType);
+                role_json.CopyFrom(role, role_json.GetAllocator());
 
-			a_key.permission_overwrites.push_back(discpp::Permissions(perm_json));
-		}
-	} else if (key == "nsfw") {
-		a_key.nsfw = j.GetBool();
-	} else if (key == "application_id") {
-		a_key.application_id = discpp::SnowflakeFromString(j.GetString());
-	} else if (key == "rate_limit_per_user") {
-		a_key.rate_limit_per_user = j.GetInt();
-	} else if (key == "permissions") {
-		a_key.permissions = j.GetInt();
-	} else if (key == "color") {
-		a_key.color = j.GetInt();
-	} else if (key == "hoist") {
-		a_key.hoist = j.GetBool();
-	} else if (key == "mentionable") {
-		a_key.mentionable = j.GetBool();
-	} else if (key == "allow") {
-		a_key.allow = j.GetBool();
-	} else if (key == "deny") {
-		a_key.deny = j.GetBool();
-	} else if (key == "code") {
-		a_key.code = j.GetString();
-	} else if (key == "channel_id") {
-		a_key.channel_id = discpp::SnowflakeFromString(j.GetString());
-	} else if (key == "inviter_id") {
-		a_key.inviter_id = discpp::SnowflakeFromString(j.GetString());
-	} else if (key == "max_uses") {
-		a_key.max_uses = j.GetInt();
-	} else if (key == "uses") {
-		a_key.uses = j.GetInt();
-	} else if (key == "max_age") {
-		a_key.max_age = j.GetInt();
-	} else if (key == "temporary") {
-		a_key.temporary = j.GetBool();
-	} else if (key == "deaf") {
-		a_key.deaf = j.GetBool();
-	} else if (key == "mute") {
-		a_key.mute = j.GetBool();
-	} else if (key == "nick") {
-		a_key.nick = j.GetString();
-	} else if (key == "avatar_hash") {
-		a_key.avatar_hash = j.GetString();
-	} else if (key == "id") {
-		a_key.id = discpp::SnowflakeFromString(j.GetString());
-	} else if (key == "type") {
-		a_key.type = j.GetString();
-	} else if (key == "enable_emoticons") {
-		a_key.enable_emoticons = j.GetBool();
-	} else if (key == "expire_behavior") {
-		a_key.expire_behavior = j.GetInt();
-	} else if (key == "expire_grace_period") {
-		a_key.expire_grace_period = j.GetInt();
-	}
+                a_key.roles_remove.push_back(discpp::Role(role_json));
+            }
+	        break;
+	    case discpp::AuditLogKey::PRUNE_DELETE_DAYS:
+            a_key.prune_delete_days = j.GetInt();
+	        break;
+	    case discpp::AuditLogKey::WIDGET_ENABLED:
+            a_key.widget_enabled = j.GetBool();
+	        break;
+	    case discpp::AuditLogKey::WIDGET_CHANNEL_ID:
+            a_key.widget_channel_id = discpp::SnowflakeFromString(j.GetString());
+	        break;
+	    case discpp::AuditLogKey::SYSTEM_CHANNEL_ID:
+            a_key.system_channel_id = discpp::SnowflakeFromString(j.GetString());
+	        break;
+	    case discpp::AuditLogKey::POSITION:
+            a_key.position = j.GetInt();
+	        break;
+	    case discpp::AuditLogKey::TOPIC:
+            a_key.topic = j.GetString();
+	        break;
+	    case discpp::AuditLogKey::BITRATE:
+            a_key.bitrate = j.GetInt();
+	        break;
+	    case discpp::AuditLogKey::PERMISSION_OVERWRITES:
+            for (auto const& perm : j.GetArray()) {
+                rapidjson::Document perm_json(rapidjson::kObjectType);
+                perm_json.CopyFrom(perm, perm_json.GetAllocator());
+
+                a_key.permission_overwrites.push_back(discpp::Permissions(perm_json));
+            }
+	        break;
+	    case discpp::AuditLogKey::NSFW:
+            a_key.nsfw = j.GetBool();
+	        break;
+	    case discpp::AuditLogKey::APPLICATION_ID:
+            a_key.application_id = discpp::SnowflakeFromString(j.GetString());
+	        break;
+	    case discpp::AuditLogKey::RATE_LIMIT_PER_USER:
+            a_key.rate_limit_per_user = j.GetInt();
+	        break;
+	    case discpp::AuditLogKey::PERMISSIONS:
+            a_key.permissions = j.GetInt();
+	        break;
+	    case discpp::AuditLogKey::COLOR:
+            a_key.color = j.GetInt();
+	        break;
+	    case discpp::AuditLogKey::HOIST:
+            a_key.hoist = j.GetBool();
+	        break;
+	    case discpp::AuditLogKey::MENTIONABLE:
+            a_key.mentionable = j.GetBool();
+	        break;
+	    case discpp::AuditLogKey::ALLOW:
+            a_key.allow = j.GetBool();
+	        break;
+	    case discpp::AuditLogKey::DENY:
+            a_key.deny = j.GetBool();
+	        break;
+	    case discpp::AuditLogKey::CODE:
+            a_key.code = j.GetString();
+	        break;
+	    case discpp::AuditLogKey::CHANNEL_ID:
+            a_key.channel_id = discpp::SnowflakeFromString(j.GetString());
+	        break;
+	    case discpp::AuditLogKey::INVITER_ID:
+            a_key.inviter_id = discpp::SnowflakeFromString(j.GetString());
+	        break;
+	    case discpp::AuditLogKey::MAX_USES:
+            a_key.max_uses = j.GetInt();
+	        break;
+	    case discpp::AuditLogKey::USES:
+            a_key.uses = j.GetInt();
+	        break;
+	    case discpp::AuditLogKey::MAX_AGE:
+            a_key.max_age = j.GetInt();
+	        break;
+        case discpp::AuditLogKey::TEMPORARY:
+            a_key.temporary = j.GetBool();
+            break;
+        case discpp::AuditLogKey::DEAF:
+            a_key.deaf = j.GetBool();
+            break;
+        case discpp::AuditLogKey::MUTE:
+            a_key.mute = j.GetBool();
+            break;
+        case discpp::AuditLogKey::NICK:
+            a_key.nick = j.GetString();
+            break;
+        case discpp::AuditLogKey::AVATAR_HASH:
+            break;
+        case discpp::AuditLogKey::ID:
+            a_key.id = discpp::SnowflakeFromString(j.GetString());
+            break;
+        case discpp::AuditLogKey::TYPE:
+            a_key.type = j.GetString();
+            break;
+        case discpp::AuditLogKey::ENABLE_EMOTICONS:
+            a_key.enable_emoticons = j.GetBool();
+            break;
+        case discpp::AuditLogKey::EXPIRE_BEHAVIOR:
+            a_key.expire_behavior = j.GetInt();
+            break;
+        case discpp::AuditLogKey::EXPIRE_GRACE_PERIOD:
+            a_key.expire_grace_period = j.GetInt();
+            break;
+    }
 
 	return a_key;
 }
