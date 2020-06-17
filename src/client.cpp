@@ -143,17 +143,17 @@ namespace discpp {
         } else if (stay_disconnected) {
             logger->Warn(LogTextColor::YELLOW + "Websocket was closed.");
         } else {
-            logger->Error(LogTextColor::RED + "Websocket was closed with error: " + std::to_string(msg->closeInfo.code) + ", " + msg->closeInfo.reason + "! Attempting reconnect in 10 seconds...");
+            logger->Error(LogTextColor::RED + "Websocket was closed with error: " + std::to_string(msg->closeInfo.code) + ", " + msg->closeInfo.reason + "! Attempting reconnect...");
         }
 
         heartbeat_acked = false;
         disconnected = true;
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-        if (disconnected) {
+        //std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+        //if (disconnected) {
             reconnecting = true;
             ReconnectToWebsocket();
-        }
+        //}
     }
 
     void Client::OnWebSocketListen(ix::WebSocketMessagePtr& msg) {
