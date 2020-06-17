@@ -8,6 +8,7 @@
 #include <rapidjson/document.h>
 
 #include <string>
+#include <vector>
 
 namespace discpp {
     class Ratelimit {
