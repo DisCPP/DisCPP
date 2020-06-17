@@ -99,7 +99,7 @@ namespace discpp {
         EXPIRE_BEHAVIOR, EXPIRE_GRACE_PERIOD
     };
 
-    AuditLogKey StrToKey(const std::string& key) {
+    inline AuditLogKey StrToKey(const std::string& key) {
         std::unordered_map<std::string, AuditLogKey> tmp = {
                 {"name", AuditLogKey::NAME}, {"icon_hash", AuditLogKey::ICON_HASH}, {"splash_hash", AuditLogKey::SPLASH_HASH},
                 {"owner_id", AuditLogKey::OWNER_ID}, {"region", AuditLogKey::REGION}, {"afk_channel_id", AuditLogKey::AFK_CHANNEL_ID},
