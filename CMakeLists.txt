@@ -129,7 +129,6 @@ elseif(USE_SIMD)
 	target_link_libraries(discpp PUBLIC simdjson)
 endif()
 
-
 target_link_libraries(discpp PUBLIC ZLIB::ZLIB)
 target_link_libraries(discpp PUBLIC CURL::libcurl)
 target_link_libraries(discpp PUBLIC OpenSSL::SSL OpenSSL::Crypto)
