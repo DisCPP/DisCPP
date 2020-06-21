@@ -151,8 +151,10 @@ namespace discpp {
 
         //std::this_thread::sleep_for(std::chrono::milliseconds(10000));
         //if (disconnected) {
+            logger->Debug("About to start reconnecting after a disconnect");
             reconnecting = true;
-            ReconnectToWebsocket();
+            DoFunctionLater(&Client::ReconnectToWebsocket, this);
+            //ReconnectToWebsocket();
         //}
     }
 
@@ -340,14 +342,14 @@ namespace discpp {
     }
 
     void Client::ReconnectToWebsocket() {
-        if (!reconnecting) {
+//        if (!reconnecting) {
             logger->Info(LogTextColor::YELLOW + "Reconnecting to Discord gateway!");
 
             reconnecting = true;
 
             DisconnectWebsocket();
             WebSocketStart();
-        }
+//        }
     }
 
     void Client::StopClient() {
