@@ -35,11 +35,17 @@ This library is ready to use but is still in development so you may encounter a 
 ## Contributing
 Please follow [Google's styling guide](https://google.github.io/styleguide/cppguide.html#Naming) for naming convention.
 
+## [Wiki](https://github.com/DisCPP/DisCPP/wiki#getting-started)
+Information on how to setup a project and how to compile this application will be found in the wiki.
+
+## Examples
+There may be more inside the [Examples](examples) folder.
+
 ## Todo:
 - [x] Finish tons of unimplemented methods in certain classes.
 - [x] Convert the default command handler to use command classes.
 - [x] Convert the event system to use a more object oriented system, similar to the new command handler.
-- [X] Make sure all endpoints are implemented and add them if they aren't.
+- [x] Make sure all endpoints are implemented and add them if they aren't.
 - [ ] Voice websocket connection.
 - [ ] Sending audio through a voice connection.
 - [ ] Make the audit log cleaner and easier to use.
