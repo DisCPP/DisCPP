@@ -142,6 +142,7 @@ namespace discpp {
             return;
         } else if (stay_disconnected) {
             logger->Warn(LogTextColor::YELLOW + "Websocket was closed.");
+            return;
         } else {
             logger->Error(LogTextColor::RED + "Websocket was closed with error: " + std::to_string(msg->closeInfo.code) + ", " + msg->closeInfo.reason + "! Attempting reconnect...");
         }
@@ -149,13 +150,8 @@ namespace discpp {
         heartbeat_acked = false;
         disconnected = true;
 
-        //std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-        //if (disconnected) {
-            logger->Debug("About to start reconnecting after a disconnect");
-            reconnecting = true;
-            DoFunctionLater(&Client::ReconnectToWebsocket, this);
-            //ReconnectToWebsocket();
-        //}
+        reconnecting = true;
+        DoFunctionLater(&Client::ReconnectToWebsocket, this);
     }
 
     void Client::OnWebSocketListen(ix::WebSocketMessagePtr& msg) {
@@ -342,14 +338,12 @@ namespace discpp {
     }
 
     void Client::ReconnectToWebsocket() {
-//        if (!reconnecting) {
-            logger->Info(LogTextColor::YELLOW + "Reconnecting to Discord gateway!");
+        logger->Info(LogTextColor::YELLOW + "Reconnecting to Discord gateway!");
 
-            reconnecting = true;
+        reconnecting = true;
 
-            DisconnectWebsocket();
-            WebSocketStart();
-//        }
+        DisconnectWebsocket();
+        WebSocketStart();
     }
 
     void Client::StopClient() {
