@@ -1,9 +1,13 @@
 #ifndef DISCPP_ATTACHMENT_H
 #define DISCPP_ATTACHMENT_H
 
-#include "discord_object.h"
+#ifndef RAPIDJSON_HAS_STDSTRING
+#define RAPIDJSON_HAS_STDSTRING 1
+#endif
 
 #include <rapidjson/document.h>
+
+#include "discord_object.h"
 
 namespace discpp {
 	class Attachment : DiscordObject {

@@ -1,22 +1,17 @@
 #ifndef DISCPP_BOT_H
 #define DISCPP_BOT_H
 
-#ifndef RAPIDJSON_HAS_STDSTRING
-#define RAPIDJSON_HAS_STDSTRING 1
-#endif
-
 #include <string>
 #include <future>
 #include <string_view>
 #include <vector>
-
-#include <rapidjson/document.h>
 
 #include <ixwebsocket/IXWebSocket.h>
 
 #include "user.h"
 #include "settings.h"
 #include "channel.h"
+#include "cache.h"
 
 namespace discpp {
 	class Role;
@@ -90,10 +85,7 @@ namespace discpp {
 		discpp::Logger* logger; /**< discpp::Logger object representing current logger. */
 
 		//std::unordered_map<Snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
-		std::unordered_map<Snowflake, std::shared_ptr<Member>> members; /**< List of members the current bot can access. */
-		std::unordered_map<Snowflake, std::shared_ptr<Guild>> guilds; /**< List of guilds the current bot can access. */
-		std::unordered_map<Snowflake, std::shared_ptr<Message>> messages; /**< List of messages the current bot can access. */
-        std::unordered_map<discpp::Snowflake, discpp::Channel> private_channels; /**< List of dm channels the current client can access. */
+        discpp::Cache cache; /**< Bot cache. Stores members, channels, guilds, etc. */
 
 		enum packet_opcode : int {
 			dispatch = 0,				// Receive
@@ -301,6 +293,8 @@ namespace discpp {
 		std::string user_locale;
 		bool user_verified;
 
+        void OnWebSocketPacket(rapidjson::Document& result);
+
 		template <typename FType, typename... T>
 		void DoFunctionLater(FType&& func, T&&... args) {
 			/**
@@ -323,8 +317,8 @@ namespace discpp {
 		}
 	private:
 		friend class EventDispatcher;
-		bool ready = false;
-		bool disconnected = true;
+        bool ready = false;
+        bool disconnected = true;
 		bool reconnecting = false;
 		bool stay_disconnected = false;
 		bool run = true;
@@ -352,7 +346,7 @@ namespace discpp {
 		// Websocket Methods
 		void WebSocketStart();
 		void OnWebSocketListen(ix::WebSocketMessagePtr& msg);
-		void OnWebSocketPacket(rapidjson::Document& result);
+		//void OnWebSocketPacket(rapidjson::Document& result);
 		void HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg);
 		void HandleHeartbeat();
 		rapidjson::Document GetIdentifyPacket();

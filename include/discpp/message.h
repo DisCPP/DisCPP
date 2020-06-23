@@ -37,7 +37,6 @@ namespace discpp {
 	};
 
 	struct MessageApplication : public DiscordObject {
-		//Snowflake id;
 		std::string cover_image;
 		std::string description;
 		std::string icon;
@@ -65,15 +64,6 @@ namespace discpp {
 			guild_id = GetIDSafely(json, "guild_id");
 		}
 	};
-
-    template <typename T>
-    struct CopyablePointer {
-        std::unique_ptr<T> data;
-
-        CopyablePointer(T const& data) {
-            
-        }
-    };
 
 	class Message : public DiscordObject {
 	public:

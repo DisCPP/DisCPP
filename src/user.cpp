@@ -7,8 +7,8 @@
 
 namespace discpp {
 	User::User(const Snowflake& id) : discpp::DiscordObject(id) {
-		auto it = discpp::globals::client_instance->members.find(id);
-		if (it != discpp::globals::client_instance->members.end()) {
+		auto it = discpp::globals::client_instance->cache.members.find(id);
+		if (it != discpp::globals::client_instance->cache.members.end()) {
 			*this = it->second->user;
 		}
 	}

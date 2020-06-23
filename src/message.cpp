@@ -8,8 +8,8 @@
 
 namespace discpp {
 	Message::Message(const Snowflake& id) : discpp::DiscordObject(id) {
-		auto message = discpp::globals::client_instance->messages.find(id);
-		if (message != discpp::globals::client_instance->messages.end()) {
+		auto message = discpp::globals::client_instance->cache.messages.find(id);
+		if (message != discpp::globals::client_instance->cache.messages.end()) {
 			*this = *message->second;
 		}
 	}

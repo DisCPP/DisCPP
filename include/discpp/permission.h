@@ -5,12 +5,12 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #endif
 
+#include <rapidjson/document.h>
+
 #include "snowflake.h"
 
 #include <unordered_map>
 #include <stdexcept>
-
-#include <rapidjson/document.h>
 
 namespace discpp {
 

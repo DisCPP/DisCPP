@@ -12,9 +12,9 @@
 
 namespace discpp {
 	Guild::Guild(const Snowflake& id) : DiscordObject(id) {
-		auto it = discpp::globals::client_instance->guilds.find(id);
+		auto it = discpp::globals::client_instance->cache.guilds.find(id);
 
-		if (it != discpp::globals::client_instance->guilds.end()) {
+		if (it != discpp::globals::client_instance->cache.guilds.end()) {
 			*this = *it->second;
 		}
 	}

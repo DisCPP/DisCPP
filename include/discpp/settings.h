@@ -1,14 +1,9 @@
 #ifndef DISCPP_SETTINGS_H
 #define DISCPP_SETTINGS_H
 
-#ifndef RAPIDJSON_HAS_STDSTRING
-#define RAPIDJSON_HAS_STDSTRING 1
-#endif
-
 #include "utils.h"
 #include <string>
 #include <vector>
-#include <rapidjson/document.h>
 
 namespace discpp {
 	enum class Locale : int {

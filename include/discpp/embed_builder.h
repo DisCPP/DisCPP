@@ -5,10 +5,11 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #endif
 
+#include <rapidjson/document.h>
+
 #include <memory>
 #include <vector>
-
-#include <rapidjson/document.h>
+#include <string>
 
 namespace discpp {
 	class Color;

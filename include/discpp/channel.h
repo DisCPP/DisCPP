@@ -1,10 +1,6 @@
 #ifndef DISCPP_CHANNEL_H
 #define DISCPP_CHANNEL_H
 
-#ifndef RAPIDJSON_HAS_STDSTRING
-#define RAPIDJSON_HAS_STDSTRING 1
-#endif
-
 #include "discord_object.h"
 #include "permission.h"
 #include "embed_builder.h"
@@ -12,8 +8,6 @@
 
 #include <variant>
 #include <vector>
-
-#include <rapidjson/document.h>
 
 namespace discpp {
 	class Message;

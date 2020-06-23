@@ -5,9 +5,9 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #endif
 
-#include "discord_object.h"
-
 #include <rapidjson/document.h>
+
+#include "discord_object.h"
 
 #include <cpr/cpr.h>
 
