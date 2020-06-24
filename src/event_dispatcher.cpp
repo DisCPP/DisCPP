@@ -209,7 +209,7 @@ namespace discpp {
     void EventDispatcher::GuildMemberAddEvent(Shard& shard, rapidjson::Document& result) {
         std::shared_ptr<discpp::Guild> guild = globals::client_instance->cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
         std::shared_ptr<discpp::Member> member = std::make_shared<discpp::Member>(result, *guild);
-        globals::client_instance->cache.members.insert({ member->id, member });
+        globals::client_instance->cache.members.insert({ member->user.id, member });
 
         discpp::DispatchEvent(discpp::GuildMemberAddEvent(guild, member));
     }
@@ -217,7 +217,7 @@ namespace discpp {
     void EventDispatcher::GuildMemberRemoveEvent(Shard& shard, rapidjson::Document& result) {
         std::shared_ptr<discpp::Guild> guild = globals::client_instance->cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
         std::shared_ptr<discpp::Member> member = std::make_shared<discpp::Member>(SnowflakeFromString(result["user"]["id"].GetString()), *guild);
-        globals::client_instance->cache.members.erase(member->id);
+        globals::client_instance->cache.members.erase(member->user.id);
 
         discpp::DispatchEvent(discpp::GuildMemberRemoveEvent(guild, member));
     }
@@ -231,7 +231,7 @@ namespace discpp {
             member = it->second;
         } else {
             member = std::make_shared<discpp::Member>(SnowflakeFromString(result["user"]["id"].GetString()), *guild);
-            guild->members.insert({ member->id, member });
+            guild->members.insert({ member->user.id, member });
         }
 
         member->roles.clear();
@@ -257,7 +257,7 @@ namespace discpp {
             member_json.CopyFrom(member, member_json.GetAllocator());
 
             discpp::Member tmp(member_json, *guild);
-            members.emplace(tmp.id, tmp);
+            members.emplace(tmp.user.id, tmp);
         }
 
         int chunk_index = result["chunk_index"].GetInt();

@@ -12,7 +12,7 @@ namespace discpp {
 	class Role;
 	class Guild;
 
-	class Member : public DiscordObject {
+	class Member {
 	public:
 		Member() = default;
 
@@ -30,7 +30,7 @@ namespace discpp {
          *
          * @return discpp::Member, this is a constructor.
          */
-		Member(const Snowflake& id, const discpp::Guild& guild);
+		Member(const Snowflake& id, discpp::Guild& guild);
 
         /**
          * @brief Constructs a discpp::Member object by parsing json and stores the guild_id.

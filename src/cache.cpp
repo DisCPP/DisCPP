@@ -69,7 +69,7 @@ std::shared_ptr<discpp::Member> discpp::Cache::GetMember(const discpp::Snowflake
     if (can_request) {
         rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
         auto member = std::make_shared<discpp::Member>(result, guild_id);
-        members.emplace(member->id, member);
+        members.emplace(member->user.id, member);
         return member;
     } else {
         throw DiscordObjectNotFound("Member not found of id: " + std::to_string(guild_id) + ", in guild of id: " + std::to_string(guild_id));

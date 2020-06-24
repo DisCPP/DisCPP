@@ -153,7 +153,7 @@ namespace discpp {
                 member_json.CopyFrom(member, member_json.GetAllocator());
 
                 discpp::Member tmp(member_json, *this);
-                members.insert({ tmp.id, std::make_shared<discpp::Member>(tmp)});
+                members.insert({ tmp.user.id, std::make_shared<discpp::Member>(tmp)});
             }
         }
 
@@ -286,7 +286,7 @@ namespace discpp {
 		SendPatchRequest(Endpoint("/guilds/" + std::to_string(id) + "/channels"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::CHANNEL, body);
 	}
 
-	std::shared_ptr<discpp::Member> Guild::GetMember(const Snowflake& id) const {
+	std::shared_ptr<discpp::Member> Guild::GetMember(const Snowflake& id, bool can_request) {
 		if (id == 0) {
 			throw DiscordObjectNotFound("Member id: " + std::to_string(id) + " is not valid!");
 		}
@@ -297,30 +297,20 @@ namespace discpp {
             return it->second;
         }
 
-        throw DiscordObjectNotFound("Member not found of id: " + std::to_string(id));
+        if (can_request) {
+            rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/"+ std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+
+            auto member = std::make_shared<discpp::Member>(result, this->id);
+            members.emplace(member->user.id, member);
+            return member;
+        } else {
+            throw DiscordObjectNotFound("Member not found of id: " + std::to_string(id));
+        }
 	}
 
-	std::shared_ptr<discpp::Member> Guild::GetMember(const Snowflake& id) {
-        if (id == 0) {
-            throw DiscordObjectNotFound("Member id: " + std::to_string(id) + " is not valid!");
-        }
-
-        auto it = members.find(id);
-
-        if (it != members.end()) {
-            return it->second;
-        }
-
-        rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/"+ std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
-
-        auto member = std::make_shared<discpp::Member>(result, this->id);
-        members.emplace(member->id, member);
-        return member;
-	}
-
-	void Guild::EnsureBotPermission(const Permission& req_perm) const {
+	void Guild::EnsureBotPermission(const Permission& req_perm) {
 		std::shared_ptr<Member> tmp = GetMember(discpp::globals::client_instance->client_user.id);
-		if (this->owner_id != tmp->id && !tmp->HasPermission(req_perm) && !tmp->HasPermission(Permission::ADMINISTRATOR)) {
+		if (this->owner_id != tmp->user.id && !tmp->HasPermission(req_perm) && !tmp->HasPermission(Permission::ADMINISTRATOR)) {
 			globals::client_instance->logger->Error(LogTextColor::RED + "The bot does not have permission: " + PermissionToString(req_perm) + " (Exceptions like these should be handled)!");
 
 			throw NoPermissionException(req_perm);
@@ -714,7 +704,7 @@ namespace discpp {
         return !discovery_splash_str.empty();
     }
 
-	inline std::shared_ptr<discpp::Member> Guild::GetOwnerMember() const {
+	inline std::shared_ptr<discpp::Member> Guild::GetOwnerMember() {
 		return this->GetMember(this->owner_id);
 	}
 

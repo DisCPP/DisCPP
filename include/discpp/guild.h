@@ -332,25 +332,15 @@ namespace discpp {
         /**
          * @brief Gets a discpp::Member from this guild.
          *
-         * If the member is not cached for some reason, then retrieve it via REST api.
-         * If the guild object is const, it wont cache the newly retrieved member object.
+         * If you set `can_request` to true, and the member is not found in cache, then we will request
+         * the member from the REST API. But if its not true, and its not found, an exception will be
+         * thrown of DiscordObjectNotFound.
          *
          * @param[in] id The member's id
          *
          * @return std::shared_ptr<discpp::Member>
          */
-        std::shared_ptr<discpp::Member> GetMember(const Snowflake& id) const;
-
-        /**
-         * @brief Gets a discpp::Member from this guild.
-         *
-         * If the member is not cached for some reason, then retrieve it via REST api.
-         *
-         * @param[in] id The member's id
-         *
-         * @return std::shared_ptr<discpp::Member>
-         */
-        std::shared_ptr<discpp::Member> GetMember(const Snowflake& id);
+        std::shared_ptr<discpp::Member> GetMember(const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Ensures the bot has a permission.
@@ -364,7 +354,7 @@ namespace discpp {
          * @param[in] req_perm The permission to check if the bot has.
          *
          */
-        void EnsureBotPermission(const Permission& req_perm) const;
+        void EnsureBotPermission(const Permission& req_perm);
 
         /**
          * @brief Adds a discpp::Member to this guild.
@@ -875,7 +865,7 @@ namespace discpp {
          *
          * @return std::shared_ptr<discpp::Member>
          */
-        inline std::shared_ptr<discpp::Member> GetOwnerMember() const;
+        inline std::shared_ptr<discpp::Member> GetOwnerMember();
 
         /**
          * @brief Returns an audit log object.
