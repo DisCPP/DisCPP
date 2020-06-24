@@ -332,15 +332,25 @@ namespace discpp {
         /**
          * @brief Gets a discpp::Member from this guild.
          *
-         * ```cpp
-         *      discpp::Member member = guild.GetMember("228846961774559232");
-         * ```
+         * If the member is not cached for some reason, then retrieve it via REST api.
+         * If the guild object is const, it wont cache the newly retrieved member object.
          *
          * @param[in] id The member's id
          *
          * @return std::shared_ptr<discpp::Member>
          */
         std::shared_ptr<discpp::Member> GetMember(const Snowflake& id) const;
+
+        /**
+         * @brief Gets a discpp::Member from this guild.
+         *
+         * If the member is not cached for some reason, then retrieve it via REST api.
+         *
+         * @param[in] id The member's id
+         *
+         * @return std::shared_ptr<discpp::Member>
+         */
+        std::shared_ptr<discpp::Member> GetMember(const Snowflake& id);
 
         /**
          * @brief Ensures the bot has a permission.

@@ -7,7 +7,7 @@
 
 namespace discpp {
 	Channel::Channel(const Snowflake& id) : discpp::DiscordObject(id) {
-		*this = globals::client_instance->GetChannel(id);
+		*this = globals::client_instance->cache.GetChannel(id);
 	}
 
 	Channel::Channel(rapidjson::Document& json) {
@@ -267,7 +267,7 @@ namespace discpp {
             throw std::runtime_error("discpp::Channel::GetGuild only available for guild channels!");
         }
 
-        std::shared_ptr<Guild> tmp = globals::client_instance->GetGuild(guild_id);
+        std::shared_ptr<Guild> tmp = globals::client_instance->cache.GetGuild(guild_id);
         return tmp;
     }
 

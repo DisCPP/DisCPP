@@ -186,21 +186,6 @@ namespace discpp {
          */
         std::unordered_map<discpp::Snowflake, discpp::UserRelationship> GetRelationships();
 
-        /**
-         * @brief Gets a discpp::Guild from a guild id.
-         *
-         * This will throw a runtime exception if the guild is not found.
-         *
-         * ```cpp
-         *      std::shared_ptr<discpp::Guild> guild = bot.GetGuild(583251190591258624);
-         * ```
-         *
-         * @param[in] guild_id The guild id of the guild you want to get.
-         *
-         * @return std::shared_ptr<discpp::Guild>
-         */
-        std::shared_ptr<discpp::Guild> GetGuild(const Snowflake& guild_id);
-
 
         /**
          * @brief Modify the bot's username.
@@ -265,20 +250,6 @@ namespace discpp {
          * @return std::vector<discpp::User::Connection>
          */
         std::vector<discpp::User::Connection> GetBotUserConnections();
-
-        /**
-         * @brief Gets a channel from guild cache and private caches.
-         *
-         * @return discpp::Channel
-         */
-        discpp::Channel GetChannel(const discpp::Snowflake& id);
-
-        /**
-         * @brief Get a DM channel with id
-         *
-         * @return discpp::Channel
-         */
-        discpp::Channel GetDMChannel(const discpp::Snowflake& id);
 
         /**
          * @brief Get all DM's for this user. Only supports user tokens!

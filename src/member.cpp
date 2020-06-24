@@ -186,6 +186,6 @@ namespace discpp {
     }
 
     std::shared_ptr<discpp::Guild> Member::GetGuild() {
-        return discpp::globals::client_instance->GetGuild(guild_id);
+        return discpp::globals::client_instance->cache.GetGuild(guild_id);
     }
 }

@@ -355,29 +355,6 @@ namespace discpp {
         if (heartbeat_thread.joinable()) heartbeat_thread.join();
     }
 
-    discpp::Channel Client::GetChannel(const discpp::Snowflake& id) {
-        discpp::Channel channel = GetDMChannel(id);
-
-        if (channel.id == 0) {
-            for (const auto &guild : cache.guilds) {
-                channel = guild.second->GetChannel(id);
-
-                if (channel.id != 0) return channel;
-            }
-        }
-
-        return channel;
-    }
-
-    discpp::Channel Client::GetDMChannel(const discpp::Snowflake& id) {
-        auto it = cache.private_channels.find(id);
-        if (it != cache.private_channels.end()) {
-            return it->second;
-        }
-
-        return discpp::Channel();
-    }
-
     std::unordered_map<discpp::Snowflake, discpp::Channel> Client::GetUserDMs() {
 
         if (!discpp::globals::client_instance->client_user.IsBot()) {
@@ -515,15 +492,6 @@ namespace discpp {
             }
             return relationships;
         }
-    }
-
-    std::shared_ptr<discpp::Guild> Client::GetGuild(const Snowflake& guild_id) {
-        auto it = cache.guilds.find(guild_id);
-        if (it != cache.guilds.end()) {
-            return it->second;
-        }
-
-        throw DiscordObjectNotFound("Guild not found");
     }
 
     discpp::User Client::ModifyCurrentUser(const std::string& username, discpp::Image& avatar) {

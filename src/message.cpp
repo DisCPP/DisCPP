@@ -21,7 +21,7 @@ namespace discpp {
 
 	Message::Message(rapidjson::Document& json) {
 		id = GetIDSafely(json, "id");
-		channel = globals::client_instance->GetChannel(SnowflakeFromString(json["channel_id"].GetString()));
+		channel = globals::client_instance->cache.GetChannel(SnowflakeFromString(json["channel_id"].GetString()));
 		try {
             guild = channel.GetGuild();
         } catch (const DiscordObjectNotFound& e) {

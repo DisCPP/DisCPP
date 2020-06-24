@@ -284,17 +284,33 @@ namespace discpp {
 	}
 
 	std::shared_ptr<discpp::Member> Guild::GetMember(const Snowflake& id) const {
+		if (id == 0) {
+			throw DiscordObjectNotFound("Member id: " + std::to_string(id) + " is not valid!");
+		}
+
 		auto it = members.find(id);
 
         if (it != members.end()) {
             return it->second;
         }
 
-		throw std::runtime_error("Member not found (Exceptions like these should be handled)!");
+        throw DiscordObjectNotFound("Member not found of id: " + std::to_string(id));
+	}
+
+	std::shared_ptr<discpp::Member> Guild::GetMember(const Snowflake& id) {
+		try {
+			return GetMember(id);
+		} catch (const DiscordObjectNotFound& e) {
+			rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/"+ std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+
+			auto member = std::make_shared<discpp::Member>(result, this->id);
+			members.emplace(member->id, member);
+			return member;
+		}
 	}
 
 	void Guild::EnsureBotPermission(const Permission& req_perm) const {
-		std::shared_ptr<Member> tmp = this->GetMember(discpp::globals::client_instance->client_user.id);
+		std::shared_ptr<Member> tmp = GetMember(discpp::globals::client_instance->client_user.id);
 		if (this->owner_id != tmp->id && !tmp->HasPermission(req_perm) && !tmp->HasPermission(Permission::ADMINISTRATOR)) {
 			globals::client_instance->logger->Error(LogTextColor::RED + "The bot does not have permission: " + PermissionToString(req_perm) + " (Exceptions like these should be handled)!");
 
@@ -845,7 +861,7 @@ namespace discpp {
     GuildInvite::GuildInvite(rapidjson::Document &json) {
         code = json["code"].GetString();
         if (ContainsNotNull(json, "guild")) {
-            guild = discpp::globals::client_instance->GetGuild(discpp::Snowflake(json["guild"]["id"].GetString()));
+            guild = discpp::globals::client_instance->cache.GetGuild(discpp::Snowflake(json["guild"]["id"].GetString()));
         }
         channel = discpp::Channel(guild->GetChannel(Snowflake(json["channel"]["id"].GetString())));
         if (ContainsNotNull(json, "inviter")) {
