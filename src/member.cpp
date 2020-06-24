@@ -1,5 +1,8 @@
+#include "member.h"
 #include "guild.h"
 #include "client.h"
+#include "role.h"
+
 #include <climits>
 
 namespace discpp {
@@ -19,40 +22,27 @@ namespace discpp {
 				role_json.CopyFrom(role, role_json.GetAllocator());
 
 				std::shared_ptr<discpp::Role> r = guild.GetRole(SnowflakeFromString(role_json.GetString()));
-
 				if (r->position > highest_hiearchy) {
 					highest_hiearchy = r->position;
 				}
 
-				// Save permissions
-				if (json["roles"][0] == role) {
-					permissions.allow_perms.value = r->permissions.allow_perms.value;
-					permissions.deny_perms.value = r->permissions.deny_perms.value;
-				} else {
-					permissions.allow_perms.value |= r->permissions.allow_perms.value;
-					permissions.deny_perms.value |= r->permissions.deny_perms.value;
-				}
-
-				roles.insert({ r->id, r });
+				roles.emplace_back(r->id);
 			}
 		}
-
-		if (guild.owner_id == this->id) {
-            hierarchy = INT_MAX;
-		} else {
-            hierarchy = highest_hiearchy;
-        }
-
-		joined_at = TimeFromDiscord(GetDataSafely<std::string>(json, "joined_at"));
-		std::string prm_since = GetDataSafely<std::string>(json, "premium_since");
-		if (prm_since != "") premium_since = TimeFromDiscord(prm_since);
+        joined_at = ContainsNotNull(json, "joined_at") ? TimeFromDiscord(json["joined_at"].GetString()) : 0;
+        premium_since = ContainsNotNull(json, "premium_since") ? TimeFromDiscord(json["premium_since"].GetString()) : 0;
 		if (GetDataSafely<bool>(json, "deaf")) {
 		    flags |= 0b1;
 		}
 		if (GetDataSafely<bool>(json, "mute")) {
 		    flags |= 0b10;
 		}
-		presence = ConstructDiscppObjectFromJson(json, "presence", discpp::Presence());
+		if (discpp::ContainsNotNull(json, "presence")) {
+            rapidjson::Document json_presence;
+            json_presence.CopyFrom(json["presence"], json_presence.GetAllocator());
+
+            presence = std::make_unique<discpp::Presence>(json_presence);
+		}
 	}
 
 	bool Member::IsDeafened() {
@@ -108,10 +98,18 @@ namespace discpp {
 	}
 
 	bool Member::HasRole(const discpp::Role& role) {
-		return count_if(roles.begin(), roles.end(), [role](std::pair<discpp::Snowflake, std::shared_ptr<discpp::Role>> pair) { return role.id == pair.second->id; }) != 0;
+	    auto roles_ptrs = GetRoles();
+		return std::any_of(roles_ptrs.begin(), roles_ptrs.end(), [role](std::pair<Snowflake, std::shared_ptr<Role>> r) { return role.id == r.second->id; }) != 0;
 	}
 
+    bool Member::HasRole(discpp::Snowflake role_id) {
+        auto roles_ptrs = GetRoles();
+        return std::any_of(roles_ptrs.begin(), roles_ptrs.end(), [role_id](std::pair<Snowflake, std::shared_ptr<Role>> r) { return role_id == r.second->id; }) != 0;
+    }
+
 	bool Member::HasPermission(const discpp::Permission& perm) {
+        discpp::Permissions permissions = GetPermissions();
+
 		// Check if the member has the permission, has the admin permission, or is the guild owner.
 		bool has_perm = permissions.allow_perms.HasPermission(perm) && !permissions.deny_perms.HasPermission(perm);
 		has_perm = has_perm || (permissions.allow_perms.HasPermission(Permission::ADMINISTRATOR) && !permissions.deny_perms.HasPermission(Permission::ADMINISTRATOR));
@@ -119,4 +117,75 @@ namespace discpp {
 
 		return has_perm;
 	}
+
+    discpp::Permissions Member::GetPermissions() {
+        discpp::Permissions permissions;
+
+        std::shared_ptr<discpp::Guild> guild = GetGuild();
+        for (auto const& role : roles) {
+            auto role_ptr = guild->GetRole(role);
+            if (role == roles.front()) {
+                permissions.allow_perms.value = role_ptr->permissions.allow_perms.value;
+                permissions.deny_perms.value = role_ptr->permissions.deny_perms.value;
+            } else {
+                permissions.allow_perms.value |= role_ptr->permissions.allow_perms.value;
+                permissions.deny_perms.value |= role_ptr->permissions.deny_perms.value;
+            }
+        }
+
+        return permissions;
+    }
+
+    int Member::GetHierarchy() {
+	    std::shared_ptr<discpp::Guild> guild = GetGuild();
+        if (guild->owner_id == this->id) {
+            return INT_MAX;
+        } else {
+            int highest_hiearchy = 0;
+            for (auto& role : roles) {
+                auto r_ptr = guild->GetRole(role);
+                if (r_ptr->position > highest_hiearchy) {
+                    highest_hiearchy = r_ptr->position;
+                }
+            }
+
+            return highest_hiearchy;
+        }
+    }
+
+    Member::Member(const Member &member) {
+        this->user = member.user;
+        this->guild_id = member.guild_id;
+        this->nick = member.nick;
+
+        this->roles = member.roles;
+        this->joined_at = member.joined_at;
+        this->premium_since = member.premium_since;
+
+        if (member.presence != nullptr) {
+            this->presence = std::make_unique<discpp::Presence>(*member.presence);
+        }
+
+        this->flags = member.flags;
+    }
+
+    Member Member::operator=(const discpp::Member& mbr) {
+        return std::move(Member(mbr));
+    }
+
+    std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>> Member::GetRoles() {
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>> r;
+
+        std::shared_ptr<discpp::Guild> guild = GetGuild();
+	    for (auto const& role : roles) {
+	        auto r_ptr = guild->GetRole(role);
+            r.emplace(role, r_ptr);
+	    }
+
+        return r;
+    }
+
+    std::shared_ptr<discpp::Guild> Member::GetGuild() {
+        return discpp::globals::client_instance->cache.GetGuild(guild_id);
+    }
 }

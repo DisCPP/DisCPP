@@ -1,5 +1,6 @@
 #include "emoji.h"
 #include "guild.h"
+#include "user.h"
 
 namespace discpp {
 	Emoji::Emoji(const discpp::Guild& guild, const Snowflake& id) : id(id) {
@@ -22,7 +23,7 @@ namespace discpp {
 		if (ContainsNotNull(json, "user")) {
 			rapidjson::Document user_json;
 			user_json.CopyFrom(json["user"], user_json.GetAllocator());
-			creator = discpp::User(user_json);
+			creator = std::make_shared<discpp::User>(discpp::User(user_json));
 		}
 		require_colons = GetDataSafely<bool>(json, "require_colons");
         managed = GetDataSafely<bool>(json, "managed");

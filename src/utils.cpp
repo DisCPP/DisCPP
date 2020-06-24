@@ -7,6 +7,8 @@
 #include <numeric>
 #include <iomanip>
 
+#include <rapidjson/writer.h>
+
 std::string discpp::GetOsName() {
 	#ifdef _WIN32
 		return "Windows 32-bit";
@@ -281,7 +283,7 @@ int discpp::WaitForRateLimits(const Snowflake& object, const RateLimitBucketType
 		double milisecond_time = rlmt->ratelimit_reset * 1000 - time(NULL) * 1000;
 
 		if (milisecond_time > 0) {
-			globals::client_instance->logger->Debug("Rate limit wait time: " + std::to_string(milisecond_time) + " miliseconds");
+			globals::client_instance->logger->Debug("Rate limit wait time: " + std::to_string(milisecond_time) + " milliseconds");
 			std::this_thread::sleep_for(std::chrono::milliseconds((int)milisecond_time));
 		}
 	}
@@ -461,5 +463,16 @@ std::string discpp::URIEncode(const std::string& str) {
 }
 
 discpp::Snowflake discpp::SnowflakeFromString(const std::string& str) {
-    return strtoll(str.c_str(), NULL, 10);
+    return strtoll(str.c_str(), nullptr, 10);
+}
+
+void discpp::SplitAvatarHash(const std::string &hash, uint64_t out[2]) {
+    out[0] = std::stoull(hash.substr(0, 16), nullptr, 16);
+    out[1] = std::stoull(hash.substr(16), nullptr, 16);
+}
+
+std::string discpp::CombineAvatarHash(const uint64_t in[2]) {
+    std::stringstream stream;
+    stream << std::hex << in[0] << in[1];
+    return stream.str();
 }

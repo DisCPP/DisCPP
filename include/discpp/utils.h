@@ -5,9 +5,9 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #endif
 
-#include "discord_object.h"
-
 #include <rapidjson/document.h>
+
+#include "discord_object.h"
 
 #include <cpr/cpr.h>
 
@@ -23,20 +23,20 @@ namespace discpp {
 	}
 
 	namespace specials {
-		enum class NitroSubscription : int {
+		enum class NitroSubscription : uint8_t {
 			NO_NITRO = 0,
 			NITRO_CLASSIC = 1,
 			NITRO = 2
 		};
 
-		enum class NitroTier : int {
+		enum class NitroTier : uint8_t {
 			NO_TIER = 0,
 			TIER_1 = 1,
 			TIER_2 = 2,
 			TIER_3 = 3
 		};
 
-		enum VerificationLevel : int {
+		enum VerificationLevel : uint8_t {
 			NO_VERIFICATION = 0,
 			LOW = 1,
 			MEDIUM = 2,
@@ -44,22 +44,29 @@ namespace discpp {
 			VERY_HIGH = 4
 		};
 
-		enum DefaultMessageNotificationLevel : int {
+		enum DefaultMessageNotificationLevel : uint8_t {
 			ALL_MESSAGES = 0,
 			ONLY_MENTIONS = 1
 		};
 
-		enum class ExplicitContentFilterLevel : int {
+		enum class ExplicitContentFilterLevel : uint8_t {
 			DISABLED = 0,
 			MEMBERS_WITHOUT_ROLES = 1,
 			ALL_MEMBERS = 2
 		};
 
-		enum class MFALevel : int {
+		enum class MFALevel : uint8_t {
 			NO_MFA = 0,
 			ELEVATED = 1
 		};
 	}
+
+    enum ImageType : int { AUTO, WEBP, PNG, JPEG, GIF };
+
+    enum ChannelType : int {
+        GUILD_TEXT, DM, GUILD_VOICE, GROUP_DM,
+        GROUP_CATEGORY, GROUP_NEWS, GROUP_STORE
+    };
 
     /**
      * @brief Get the OS name this application is running on.
@@ -414,6 +421,8 @@ namespace discpp {
 	time_t TimeFromSnowflake(const Snowflake& snow);
     std::string FormatTime(const time_t& time, const std::string& format = "%Y-%m-%d @ %H:%M:%S GMT");
 	std::string URIEncode(const std::string& str);
+    void SplitAvatarHash(const std::string& hash, uint64_t out[2]);
+    std::string CombineAvatarHash(const uint64_t in[2]);
 }
 
 #endif

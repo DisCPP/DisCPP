@@ -7,8 +7,6 @@
 #ifndef DISCORDCLIENT_EXCEPTIONS_H
 #define DISCORDCLIENT_EXCEPTIONS_H
 
-#include <rapidjson/document.h>
-
 #include "utils.h"
 
 #include <exception>

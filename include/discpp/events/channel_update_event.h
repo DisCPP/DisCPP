@@ -11,7 +11,7 @@ namespace discpp {
 	public:
 		inline ChannelUpdateEvent(discpp::Channel channel) : channel(channel) {}
 
-		discpp::Channel channel;
+        discpp::Channel channel;
 	};
 }
 

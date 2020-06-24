@@ -5,14 +5,17 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #endif
 
-#include "discord_object.h"
-#include <memory>
 #include <rapidjson/document.h>
+
+#include <memory>
+#include <vector>
+#include <string>
 
 namespace discpp {
 	class Color;
 
 	class EmbedBuilder {
+    friend class Channel;
 	public:
 		EmbedBuilder();
 
@@ -44,6 +47,10 @@ namespace discpp {
          */
         EmbedBuilder(rapidjson::Document& json);
 
+        EmbedBuilder(const discpp::EmbedBuilder& embed);
+        EmbedBuilder operator=(const EmbedBuilder embed) {
+            return embed;
+        }
 
         /**
          * @brief Set the title of the embed.
@@ -212,6 +219,15 @@ namespace discpp {
         EmbedBuilder& SetAuthor(const std::string& name, const std::string& url = "", const std::string& icon_url = "");
 
         /**
+         * @brief Set fields of the embed.
+         *
+         * @param[in] Fields Think of it as: `std::vector<std::tuple<title, value, inline>>`.
+         *
+         * @return void
+         */
+        void SetFields(std::vector<std::tuple<std::string, std::string, bool>> fields);
+
+        /**
          * @brief Add a field to the embed.
          *
          * ```cpp
@@ -225,13 +241,63 @@ namespace discpp {
          */
         EmbedBuilder& AddField(const std::string& name, const std::string& value, const bool& is_inline = false);
 
-		std::string GetDescription();
-		std::string GetTitle();
-		std::string GetUrl();
-		std::string GetTimestamp();
-		Color GetColor();
-		std::pair<std::string, std::string> GetFooter();
-        std::pair<std::string, std::string> GetProvider();
+        /**
+         * @brief Get description of the embed.
+         *
+         * @return std::string
+         */
+		std::string GetDescription() const;
+
+        /**
+         * @brief Get title of the embed.
+         *
+         * @return std::string
+         */
+		std::string GetTitle() const;
+
+        /**
+         * @brief Get url of the embed.
+         *
+         * @return std::string
+         */
+		std::string GetUrl() const;
+
+        /**
+         * @brief Get timestamp url of the embed.
+         *
+         * @return std::string
+         */
+		std::string GetTimestamp() const;
+
+        /**
+         * @brief Get fields of the embed.
+         *
+         * This is a vector filled with title, then value string pairs so: `std::pair<title, value>`.
+         *
+         * @return std::vector<std::tuple<std::string, std::string, bool>>. Think of it as: `std::vector<std::tuple<title, value, inline>>`.
+         */
+        std::vector<std::tuple<std::string, std::string, bool>> GetFields() const;
+
+        /**
+         * @brief Get color of the embed.
+         *
+         * @return discpp::Color
+         */
+		Color GetColor() const;
+
+        /**
+         * @brief Get footer of the embed.
+         *
+         * @return std::pair<std::string, std::string>. Think of it as: `std::pair<text, url>`.
+         */
+		std::pair<std::string, std::string> GetFooter() const;
+
+        /**
+         * @brief Get provider of the embed.
+         *
+         * @return std::pair<std::string, std::string>. Think of it as: `std::pair<name, url>`.
+         */
+        std::pair<std::string, std::string> GetProvider() const;
 
 
         /**
@@ -243,9 +309,9 @@ namespace discpp {
          *
          * @return rapidjson::Document
          */
-        rapidjson::Document ToJson();
+        rapidjson::Document ToJson() const;
 	private:
-        std::shared_ptr<rapidjson::Document> embed_json;
+        rapidjson::Document embed_json;
 	};
 }
 

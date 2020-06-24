@@ -188,11 +188,25 @@ namespace discpp {
 			 * @return discpp::Logger
 			 */
 
-			log_file.open(file_path, std::ios::out | std::ios::binary);
-			this->file_path = file_path;
+			// Check if the log file is empty, and if it is then open, else delete then reopen.
+			std::ifstream file(file_path, std::ios::in | std::ios::binary);
+			if (file.peek() == std::ifstream::traits_type::eof()) {
+                log_file.open(file_path, std::ios::out | std::ios::binary);
 
-			if (!log_file.is_open()) {
-				throw std::runtime_error("Failed to open logger file: " + file_path);
+                if (!log_file.is_open()) {
+                    throw std::runtime_error("Failed to open logger file: " + file_path);
+                } else {
+                    this->file_path = file_path;
+                }
+			} else {
+			    remove(file_path.c_str());
+
+                log_file.open(file_path, std::ios::out | std::ios::binary);
+                if (!log_file.is_open()) {
+                    throw std::runtime_error("Failed to open logger file: " + file_path);
+                } else {
+                    this->file_path = file_path;
+                }
 			}
 		}
 

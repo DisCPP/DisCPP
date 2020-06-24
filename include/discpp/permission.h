@@ -5,15 +5,16 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #endif
 
+#include <rapidjson/document.h>
+
 #include "snowflake.h"
+
 #include <unordered_map>
 #include <stdexcept>
 
-#include <rapidjson/document.h>
-
 namespace discpp {
 
-	enum class PermissionType : int {
+	enum class PermissionType : unsigned char {
 		ROLE,
 		MEMBER
 	};
@@ -130,7 +131,7 @@ namespace discpp {
          */
 		void AddPermission(const Permission& permission);
 
-		int value = 0;
+		unsigned int value = 0;
 	};
 
 	class NoPermissionException : public std::runtime_error {

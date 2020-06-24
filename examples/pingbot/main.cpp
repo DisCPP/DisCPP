@@ -21,7 +21,7 @@ int main(int argc, const char* argv[]) {
 	std::getline(token_file, token);
 
 	discpp::ClientConfig* config = new discpp::ClientConfig({"!"});
-	discpp::Client bot{ token, config }; // Token, config 
+	discpp::Client bot{ token, config }; // Token, config
 
 	PingCommand(); // This runs the constructor which will register the command.
 

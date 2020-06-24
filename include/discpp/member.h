@@ -40,11 +40,14 @@ namespace discpp {
          * ```
          *
          * @param[in] json The json that makes up of member object.
-         * @param[in] json guild_id The guild id.
+         * @param[in] json guild The guild containing this member.
          *
          * @return discpp::Member, this is a constructor.
          */
 		Member(rapidjson::Document& json, const discpp::Guild& guild);
+
+        Member(const discpp::Member& member);
+        Member operator=(const discpp::Member& mbr);
 
         /**
          * @brief Modifies this guild member.
@@ -167,17 +170,50 @@ namespace discpp {
             return FormatTime(this->premium_since);
         }
 
+        /**
+         * @brief Returns true if the user has this role
+         *
+         * @return bool
+         */
+        bool HasRole(discpp::Snowflake role_id);
+
+        /**
+         * @brief Gets all permissions for the user from the roles and returns them.
+         *
+         * @return discpp::Permissions
+         */
+        discpp::Permissions GetPermissions();
+
+        /**
+         * @brief Gets role hierarchy for the member.
+         *
+         * @return int
+         */
+        int GetHierarchy();
+
+        /**
+         * @brief Returns member roles as objects instead of the snowflake vector.
+         *
+         * @return std::vector<std::shared_ptr<discpp::Role>>
+         */
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>> GetRoles();
+
+        /**
+         * @brief Returns guild object.
+         *
+         * @return std::shared_ptr<discpp::Guild>
+         */
+        std::shared_ptr<discpp::Guild> GetGuild();
+
 		discpp::User user; /**< The user this guild member represents. */
-		Snowflake guild_id; /**< ID of the guild the current member is in. */
-		std::string nick; /**< This users guild nickname. */
-		std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>> roles; /**< Roles the current member has. */
+		discpp::Snowflake guild_id; /**< The ID of the guild this member is in. */
+        std::string nick; /**< This members guild nickname. If the member has no nickname, its a nullptr. */
 		time_t joined_at; /**< When the user joined the guild. */
         time_t premium_since; /**< When the user started boosting the guild. */
-		discpp::Permissions permissions; /**< Guild permissions for the current member. */
-		discpp::Presence presence; /**< Presence for the current member. */
-		int hierarchy; /**< Role hierarchy for the current member. */
+		std::unique_ptr<discpp::Presence> presence = nullptr; /**< Presence for the current member. If the member has no presence, its a nullptr. */
+        std::vector<discpp::Snowflake> roles;
 	private:
-	    char flags; /**< Internal use only. */
+	    unsigned char flags;
 	};
 }
 

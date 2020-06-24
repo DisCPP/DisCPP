@@ -66,7 +66,6 @@ namespace discpp {
     }
 
     void Client::DisconnectWebsocket() {
-        //std::lock_guard<std::mutex> lock(websocket_client_mutex);
         logger->Debug(LogTextColor::YELLOW + "Closing websocket connection...");
 
         websocket.close(ix::WebSocketCloseConstants::kNormalClosureCode);
@@ -76,16 +75,16 @@ namespace discpp {
     void Client::WebSocketStart() {
         rapidjson::Document gateway_request(rapidjson::kObjectType);
         switch (config->type) {
-        case TokenType::USER: {
-            rapidjson::Document user_doc = SendGetRequest(Endpoint("/gateway"), {{"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"}}, {}, {});
-            gateway_request.CopyFrom(user_doc, gateway_request.GetAllocator());
+            case TokenType::USER: {
+                rapidjson::Document user_doc = SendGetRequest(Endpoint("/gateway"), {{"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"}}, {}, {});
+                gateway_request.CopyFrom(user_doc, gateway_request.GetAllocator());
 
-            break;
-        } case TokenType::BOT:
-            rapidjson::Document bot_doc = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
-            gateway_request.CopyFrom(bot_doc, gateway_request.GetAllocator());
+                break;
+            } case TokenType::BOT:
+                rapidjson::Document bot_doc = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
+                gateway_request.CopyFrom(bot_doc, gateway_request.GetAllocator());
 
-            break;
+                break;
         }
 
         rapidjson::Value::ConstMemberIterator itr = gateway_request.FindMember("url");
@@ -96,7 +95,7 @@ namespace discpp {
             itr = gateway_request.FindMember("session_start_limit");
             if (itr != gateway_request.MemberEnd() && gateway_request["session_start_limit"]["remaining"].GetInt() == 0) {
                 logger->Debug(LogTextColor::RED + "GATEWAY ERROR: Maximum start limit reached");
-                throw new StartLimitException();
+                throw StartLimitException();
             }
 
             // Specify version and encoding just ot be safe
@@ -112,13 +111,12 @@ namespace discpp {
 #endif
 
             {
-                //std::lock_guard<std::mutex> lock(websocket_client_mutex);
 
                 websocket.setUrl(gateway_endpoint);
                 websocket.disableAutomaticReconnection();
 
                 websocket.setOnMessageCallback([this](const ix::WebSocketMessagePtr& msg) {
-                    OnWebSocketListen(msg);
+                    OnWebSocketListen(const_cast<ix::WebSocketMessagePtr&>(msg));
                 });
 
                 /*ix::SocketTLSOptions tls_options;
@@ -144,43 +142,40 @@ namespace discpp {
             return;
         } else if (stay_disconnected) {
             logger->Warn(LogTextColor::YELLOW + "Websocket was closed.");
+            return;
         } else {
-            logger->Error(LogTextColor::RED + "Websocket was closed with error: " + std::to_string(msg->closeInfo.code) + ", " + msg->closeInfo.reason + "! Attempting reconnect in 10 seconds...");
+            logger->Error(LogTextColor::RED + "Websocket was closed with error: " + std::to_string(msg->closeInfo.code) + ", " + msg->closeInfo.reason + "! Attempting reconnect...");
         }
 
         heartbeat_acked = false;
         disconnected = true;
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-        if (disconnected) {
-            reconnecting = true;
-            ReconnectToWebsocket();
-        }
+        reconnecting = true;
+        DoFunctionLater(&Client::ReconnectToWebsocket, this);
     }
 
-    void Client::OnWebSocketListen(const ix::WebSocketMessagePtr& msg) {
-        if (msg->type == ix::WebSocketMessageType::Open) {
-            logger->Info(LogTextColor::GREEN + "Connected to gateway!");
-
-            disconnected = false;
-        } else if (msg->type == ix::WebSocketMessageType::Close) {
-            if (!reconnecting) {
-                HandleDiscordDisconnect(msg);
-            }
-        } else if (msg->type == ix::WebSocketMessageType::Error) {
-            logger->Info(LogTextColor::RED + "Error: " + msg->errorInfo.reason);
-        } else if (msg->type == ix::WebSocketMessageType::Message) {
-            rapidjson::Document result;
-            result.Parse(msg->str);
-            if (result.HasParseError()) {
-                logger->Debug(LogTextColor::YELLOW + "A non-json payload was received and ignored: \"" + msg->str);
-            }
-
-            if (!result.IsNull()) {
-                OnWebSocketPacket(result);
-            }
-        } else {
-            logger->Warn(LogTextColor::YELLOW + "Unknown message sent");
+    void Client::OnWebSocketListen(ix::WebSocketMessagePtr& msg) {
+        switch(msg->type) {
+            case ix::WebSocketMessageType::Open:
+                logger->Info(LogTextColor::GREEN + "Connected to gateway!");
+                disconnected = false;
+                break;
+            case ix::WebSocketMessageType::Close: {
+                std::lock_guard<std::mutex> futures_guard(futures_mutex);
+                futures.push_back(std::async(std::launch::async, &Client::HandleDiscordDisconnect, this, std::move(msg)));
+                break;
+            } case ix::WebSocketMessageType::Error:
+                logger->Error(LogTextColor::RED + "Error: " + msg->errorInfo.reason);
+                break;
+            case ix::WebSocketMessageType::Message:{
+                rapidjson::Document result;
+                result.Parse(msg->str);
+                if (result.HasParseError()) logger->Debug(LogTextColor::YELLOW + "A non-json payload was received and ignored: \"" + msg->str);
+                if (!result.IsNull()) OnWebSocketPacket(result);
+                break;
+            } default:
+                logger->Warn(LogTextColor::YELLOW + "Unknown message sent");
+                break;
         }
     }
 
@@ -188,78 +183,82 @@ namespace discpp {
         logger->Debug("Received payload: " + DumpJson(result));
 
         switch (result["op"].GetInt()) {
-        case (hello): {
-            if (reconnecting) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(1200));
-                logger->Info(LogTextColor::GREEN + "Reconnected!");
+            case (hello): {
+                if (reconnecting) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1200));
+                    logger->Info(LogTextColor::GREEN + "Reconnected!");
 
-                rapidjson::Document resume(rapidjson::kObjectType);
-                resume.AddMember("op", 6, resume.GetAllocator());
+                    // Send the resume payload
+                    rapidjson::Document resume(rapidjson::kObjectType);
+                    resume.AddMember("op", 6, resume.GetAllocator());
 
-                rapidjson::Value resume_d(rapidjson::kObjectType);
-                resume_d.AddMember("token", token, resume.GetAllocator());
-                resume_d.AddMember("session_id", session_id, resume.GetAllocator());
-                resume_d.AddMember("seq", std::to_string(last_sequence_number), resume.GetAllocator());
+                    rapidjson::Value resume_d(rapidjson::kObjectType);
+                    resume_d.AddMember("token", token, resume.GetAllocator());
+                    resume_d.AddMember("session_id", session_id, resume.GetAllocator());
+                    resume_d.AddMember("seq", last_sequence_number, resume.GetAllocator());
 
-                resume.AddMember("d", resume_d, resume.GetAllocator());
+                    resume.AddMember("d", resume_d, resume.GetAllocator());
 
-                CreateWebsocketRequest(resume);
+                    CreateWebsocketRequest(resume);
 
-                // Heartbeat just to be safe
-                rapidjson::Document data;
-                data.SetObject();
-                rapidjson::Document::AllocatorType& data_allocator = data.GetAllocator();
-                data.AddMember("op", packet_opcode::heartbeat, data_allocator);
-                data.AddMember("d", NULL, data_allocator);
-                if (last_sequence_number != -1) {
-                    data["d"] = last_sequence_number;
+                    // Heartbeat just to be safe
+                    rapidjson::Document data;
+                    data.SetObject();
+                    rapidjson::Document::AllocatorType& data_allocator = data.GetAllocator();
+                    data.AddMember("op", packet_opcode::heartbeat, data_allocator);
+                    data.AddMember("d", NULL, data_allocator);
+                    if (last_sequence_number != -1) {
+                        data["d"] = last_sequence_number;
+                    }
+
+                    heartbeat_acked = true;
+                    reconnecting = false;
+
+                    discpp::EventHandler<discpp::ReconnectEvent>::TriggerEvent(discpp::ReconnectEvent());
+                } else {
+#ifndef __INTELLISENSE__
+                    hello_packet = std::move(result);
+#endif
+                    rapidjson::Document identify = GetIdentifyPacket();
+                    CreateWebsocketRequest(identify);
+                }
+                break;
+            }
+            case heartbeat_ack:
+                heartbeat_acked = true;
+                break;
+            case reconnect:
+                DoFunctionLater(&Client::ReconnectToWebsocket, this);
+                break;
+            case invalid_session:
+                // Check if the session is resumable
+                if (result["d"].GetBool()) {
+                    // Send resume payload
+                    rapidjson::Document resume(rapidjson::kObjectType);
+
+                    rapidjson::Document::AllocatorType& allocator = resume.GetAllocator();
+                    resume.AddMember("op", 6, allocator);
+
+                    rapidjson::Value d(rapidjson::kObjectType);
+                    d.AddMember("token", token, allocator);
+                    d.AddMember("session_id", session_id, allocator);
+                    d.AddMember("seq", last_sequence_number, resume.GetAllocator());
+
+                    resume.AddMember("d", d, allocator);
+
+                    CreateWebsocketRequest(resume);
+                } else {
+                    logger->Debug("Waiting 2 seconds before sending an identify packet for invalid session.");
+                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+                    rapidjson::Document identify = GetIdentifyPacket();
+                    CreateWebsocketRequest(identify);
                 }
 
-                heartbeat_acked = true;
-                reconnecting = false;
-
-                discpp::EventHandler<discpp::ReconnectEvent>::TriggerEvent(discpp::ReconnectEvent());
-            } else {
-                hello_packet = std::move(result);
-
-                rapidjson::Document identify = GetIdentifyPacket();
-                CreateWebsocketRequest(identify);
-            }
-            break;
-        }
-        case heartbeat_ack:
-            heartbeat_acked = true;
-            break;
-        case reconnect:
-            ReconnectToWebsocket();
-            break;
-        case invalid_session:
-            // Check if the session is resumable
-            if (result["d"].GetBool()) {
-                rapidjson::Document resume(rapidjson::kObjectType);
-
-                rapidjson::Document::AllocatorType& allocator = resume.GetAllocator();
-                resume.AddMember("op", 6, allocator);
-
-                rapidjson::Value d(rapidjson::kObjectType);
-                d.AddMember("token", token, allocator);
-                d.AddMember("session_id", session_id, allocator);
-                d.AddMember("seq", std::to_string(last_sequence_number), allocator);
-
-                resume.AddMember("d", d, allocator);
-
-                CreateWebsocketRequest(resume);
-            } else {
-                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-                rapidjson::Document identify = GetIdentifyPacket();
-                CreateWebsocketRequest(identify);
-            }
-
-            break;
-        default:
-            EventDispatcher::HandleDiscordEvent(result, result["t"].GetString());
-            break;
+                break;
+            default:
+                EventDispatcher::HandleDiscordEvent(result, result["t"].GetString());
+                break;
         }
 
         packet_counter++;
@@ -272,17 +271,13 @@ namespace discpp {
                 while (reconnecting && !run) {}
 
                 rapidjson::Document data(rapidjson::kObjectType);
-                rapidjson::Document::AllocatorType& data_allocator = data.GetAllocator();
-                data.AddMember("op", packet_opcode::heartbeat, data_allocator);
-                data.AddMember("d", NULL, data_allocator);
+                data.AddMember("op", packet_opcode::heartbeat, data.GetAllocator());
+                data.AddMember("d", NULL, data.GetAllocator());
                 if (last_sequence_number != -1) {
                     data["d"] = last_sequence_number;
                 }
 
-                rapidjson::StringBuffer buffer;
-                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-                data.Accept(writer);
-                std::string json_payload = buffer.GetString();
+                std::string json_payload = DumpJson(data);
                 CreateWebsocketRequest(data, "Sending heartbeat payload: " + json_payload);
 
                 heartbeat_acked = false;
@@ -337,18 +332,18 @@ namespace discpp {
 
         document.AddMember("d", d, allocator);
 
+#ifndef __INTELLISENSE__
         return std::move(document);
+#endif
     }
 
     void Client::ReconnectToWebsocket() {
-        if (!reconnecting) {
-            logger->Info(LogTextColor::YELLOW + "Reconnecting to Discord gateway!");
+        logger->Info(LogTextColor::YELLOW + "Reconnecting to Discord gateway!");
 
-            reconnecting = true;
+        reconnecting = true;
 
-            DisconnectWebsocket();
-            WebSocketStart();
-        }
+        DisconnectWebsocket();
+        WebSocketStart();
     }
 
     void Client::StopClient() {
@@ -360,33 +355,10 @@ namespace discpp {
         if (heartbeat_thread.joinable()) heartbeat_thread.join();
     }
 
-    discpp::Channel Client::GetChannel(const discpp::Snowflake& id) {
-        discpp::Channel channel = GetDMChannel(id);
-
-        if (channel.id == 0) {
-            for (const auto &guild : guilds) {
-                channel = guild.second->GetChannel(id);
-
-                if (channel.id != 0) return channel;
-            }
-        }
-
-        return channel;
-    }
-
-    discpp::Channel Client::GetDMChannel(const discpp::Snowflake& id) {
-        auto it = private_channels.find(id);
-        if (it != private_channels.end()) {
-            return it->second;
-        }
-
-        return discpp::Channel();
-    }
-
     std::unordered_map<discpp::Snowflake, discpp::Channel> Client::GetUserDMs() {
 
         if (!discpp::globals::client_instance->client_user.IsBot()) {
-            throw new ProhibitedEndpointException("/users/@me/channels is a user only endpoint");
+            throw ProhibitedEndpointException("/users/@me/channels is a user only endpoint");
         } else {
             std::unordered_map<discpp::Snowflake, discpp::Channel> dm_channels;
 
@@ -404,39 +376,40 @@ namespace discpp {
     }
 
     std::vector<discpp::User::Connection> ClientUser::GetUserConnections() {
-		rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
+        rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
 
-		std::vector<Connection> connections;
-		for (auto const& connection : result.GetArray()) {
-			rapidjson::Document connection_json;
-			connection_json.CopyFrom(connection, connection_json.GetAllocator());
-			connections.push_back(discpp::User::Connection(connection_json));
-		}
+        std::vector<Connection> connections;
+        for (auto const& connection : result.GetArray()) {
+            rapidjson::Document connection_json;
+            connection_json.CopyFrom(connection, connection_json.GetAllocator());
+            connections.emplace_back(connection_json);
+        }
 
-		return connections;
-	}
+        return connections;
+    }
 
-	ClientUser::ClientUser(rapidjson::Document& json) : User(json) {
-		mfa_enabled = GetDataSafely<bool>(json, "mfa_enabled");
-		locale = GetDataSafely<std::string>(json, "locale");
-		verified = GetDataSafely<bool>(json, "verified");
-	}
+    ClientUser::ClientUser(rapidjson::Document& json) : User(json) {
+        mfa_enabled = GetDataSafely<bool>(json, "mfa_enabled");
+        locale = GetDataSafely<std::string>(json, "locale");
+        verified = GetDataSafely<bool>(json, "verified");
+        premium_type = static_cast<discpp::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type"));
+    }
 
     ClientUserSettings ClientUser::GetSettings() {
         if (!discpp::globals::client_instance->client_user.IsBot()) {
-            throw new ProhibitedEndpointException("users/@me/settings is a user only endpoint");
+            throw ProhibitedEndpointException("users/@me/settings is a user only endpoint");
         }
         else {
             rapidjson::Document result = SendGetRequest(Endpoint("users/@me/settings/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
-            ClientUserSettings settings(result);
-            this->settings = settings;
-            return settings;
+            ClientUserSettings user_settings(result);
+            this->settings = user_settings;
+            return user_settings;
         }
     }
 
-    void ClientUser::ModifySettings(ClientUserSettings& settings) {
+    void ClientUser::ModifySettings(ClientUserSettings& user_settings) {
         if (!discpp::globals::client_instance->client_user.IsBot()) {
-            throw new ProhibitedEndpointException("users/@me/settings is a user only endpoint");
+            throw ProhibitedEndpointException("users/@me/settings is a user only endpoint");
         }
         else {
             rapidjson::Document new_settings;
@@ -444,43 +417,43 @@ namespace discpp {
 
             rapidjson::Document::AllocatorType& allocator = new_settings.GetAllocator();
             ClientUserSettings old_settings = this->settings;
-            if (settings.afk_timeout != old_settings.afk_timeout) new_settings.AddMember("afk_timeout", settings.afk_timeout, allocator);
-            if (settings.custom_status != old_settings.custom_status) new_settings.AddMember("custom_status", settings.custom_status, allocator);
-            if (settings.explicit_content_filter != old_settings.explicit_content_filter) new_settings.AddMember("explicit_content_filter", (int) settings.explicit_content_filter, allocator);
-            if (settings.theme != old_settings.theme) new_settings.AddMember("theme", ThemeToString(settings.theme), allocator);
+            if (user_settings.afk_timeout != old_settings.afk_timeout) new_settings.AddMember("afk_timeout", user_settings.afk_timeout, allocator);
+            if (user_settings.custom_status != old_settings.custom_status) new_settings.AddMember("custom_status", user_settings.custom_status, allocator);
+            if (user_settings.explicit_content_filter != old_settings.explicit_content_filter) new_settings.AddMember("explicit_content_filter", (int) user_settings.explicit_content_filter, allocator);
+            if (user_settings.theme != old_settings.theme) new_settings.AddMember("theme", ThemeToString(user_settings.theme), allocator);
             rapidjson::Value friend_source_flags(rapidjson::kObjectType);
             bool add_friend_source_flags = false;
-            if (settings.friend_source_flags.GetAll() != old_settings.friend_source_flags.GetAll()) {
-                friend_source_flags.AddMember("all", settings.friend_source_flags.GetAll(), allocator);
+            if (user_settings.friend_source_flags.GetAll() != old_settings.friend_source_flags.GetAll()) {
+                friend_source_flags.AddMember("all", user_settings.friend_source_flags.GetAll(), allocator);
                 add_friend_source_flags = true;
             }
-            if (settings.friend_source_flags.GetMutualFriends() != old_settings.friend_source_flags.GetMutualFriends()) {
-                friend_source_flags.AddMember("mutual_friends", settings.friend_source_flags.GetMutualFriends(), allocator);
+            if (user_settings.friend_source_flags.GetMutualFriends() != old_settings.friend_source_flags.GetMutualFriends()) {
+                friend_source_flags.AddMember("mutual_friends", user_settings.friend_source_flags.GetMutualFriends(), allocator);
                 add_friend_source_flags = true;
             }
-            if (settings.friend_source_flags.GetMutualGuilds() != old_settings.friend_source_flags.GetMutualGuilds()) {
-                friend_source_flags.AddMember("mutual_guilds", settings.friend_source_flags.GetMutualGuilds(), allocator);
+            if (user_settings.friend_source_flags.GetMutualGuilds() != old_settings.friend_source_flags.GetMutualGuilds()) {
+                friend_source_flags.AddMember("mutual_guilds", user_settings.friend_source_flags.GetMutualGuilds(), allocator);
                 add_friend_source_flags = true;
             }
             if (add_friend_source_flags) new_settings.AddMember("friend_source_flags", friend_source_flags, allocator);
-            if (settings.GetAllowAccessibilityDetection() != old_settings.GetAllowAccessibilityDetection()) new_settings.AddMember("allow_accessibility_detection", settings.GetAllowAccessibilityDetection(), allocator);
-            if (settings.GetAnimateEmoji() != old_settings.GetAnimateEmoji()) new_settings.AddMember("animate_emoji", settings.GetAnimateEmoji(), allocator);
-            if (settings.GetContactSyncEnabled() != old_settings.GetContactSyncEnabled()) new_settings.AddMember("contact_sync_enabled", settings.GetContactSyncEnabled(), allocator);
-            if (settings.GetConvertEmoticons() != old_settings.GetConvertEmoticons()) new_settings.AddMember("convert_emoticons", settings.GetConvertEmoticons(), allocator);
-            if (settings.GetDefaultGuildsRestricted() != old_settings.GetDefaultGuildsRestricted()) new_settings.AddMember("default_guilds_restricted", settings.GetDefaultGuildsRestricted(), allocator);
-            if (settings.GetDetectPlatformAccounts() != old_settings.GetDetectPlatformAccounts()) new_settings.AddMember("detect_platform_accounts", settings.GetDetectPlatformAccounts(), allocator);
-            if (settings.GetDeveloperMode() != old_settings.GetDeveloperMode()) new_settings.AddMember("developer_mode", settings.GetDeveloperMode(), allocator);
-            if (settings.GetDisableGamesTab() != old_settings.GetDisableGamesTab()) new_settings.AddMember("disable_games_tab", settings.GetDisableGamesTab(), allocator);
-            if (settings.GetEnableTtsCommand() != old_settings.GetEnableTtsCommand()) new_settings.AddMember("enable_tts_command", settings.GetEnableTtsCommand(), allocator);
-            if (settings.GetGifAutoPlay() != old_settings.GetGifAutoPlay()) new_settings.AddMember("gif_auto_play", settings.GetGifAutoPlay(), allocator);
-            if (settings.GetInlineAttachmentMedia() != old_settings.GetInlineAttachmentMedia()) new_settings.AddMember("inline_attachment_media", settings.GetInlineAttachmentMedia(), allocator);
-            if (settings.GetInlineEmbedMedia() != old_settings.GetInlineEmbedMedia()) new_settings.AddMember("inline_embed_media", settings.GetInlineEmbedMedia(), allocator);
-            if (settings.GetMessageDisplayCompact() != old_settings.GetMessageDisplayCompact()) new_settings.AddMember("message_display_compact", settings.GetMessageDisplayCompact(), allocator);
-            if (settings.GetNativePhoneIntegrationEnabled() != old_settings.GetNativePhoneIntegrationEnabled()) new_settings.AddMember("native_phone_integration_enabled", settings.GetNativePhoneIntegrationEnabled(), allocator);
-            if (settings.GetRenderEmbeds() != old_settings.GetRenderEmbeds()) new_settings.AddMember("render_embeds", settings.GetRenderEmbeds(), allocator);
-            if (settings.GetRenderReactions() != old_settings.GetRenderReactions()) new_settings.AddMember("render_reactions", settings.GetRenderReactions(), allocator);
-            if (settings.GetShowCurrentGame() != old_settings.GetShowCurrentGame()) new_settings.AddMember("show_current_game", settings.GetShowCurrentGame(), allocator);
-            if (settings.GetStreamNotificationsEnabled() != old_settings.GetStreamNotificationsEnabled()) new_settings.AddMember("stream_notifications_enabled", settings.GetStreamNotificationsEnabled(), allocator);
+            if (user_settings.GetAllowAccessibilityDetection() != old_settings.GetAllowAccessibilityDetection()) new_settings.AddMember("allow_accessibility_detection", user_settings.GetAllowAccessibilityDetection(), allocator);
+            if (user_settings.GetAnimateEmoji() != old_settings.GetAnimateEmoji()) new_settings.AddMember("animate_emoji", user_settings.GetAnimateEmoji(), allocator);
+            if (user_settings.GetContactSyncEnabled() != old_settings.GetContactSyncEnabled()) new_settings.AddMember("contact_sync_enabled", user_settings.GetContactSyncEnabled(), allocator);
+            if (user_settings.GetConvertEmoticons() != old_settings.GetConvertEmoticons()) new_settings.AddMember("convert_emoticons", user_settings.GetConvertEmoticons(), allocator);
+            if (user_settings.GetDefaultGuildsRestricted() != old_settings.GetDefaultGuildsRestricted()) new_settings.AddMember("default_guilds_restricted", user_settings.GetDefaultGuildsRestricted(), allocator);
+            if (user_settings.GetDetectPlatformAccounts() != old_settings.GetDetectPlatformAccounts()) new_settings.AddMember("detect_platform_accounts", user_settings.GetDetectPlatformAccounts(), allocator);
+            if (user_settings.GetDeveloperMode() != old_settings.GetDeveloperMode()) new_settings.AddMember("developer_mode", user_settings.GetDeveloperMode(), allocator);
+            if (user_settings.GetDisableGamesTab() != old_settings.GetDisableGamesTab()) new_settings.AddMember("disable_games_tab", user_settings.GetDisableGamesTab(), allocator);
+            if (user_settings.GetEnableTtsCommand() != old_settings.GetEnableTtsCommand()) new_settings.AddMember("enable_tts_command", user_settings.GetEnableTtsCommand(), allocator);
+            if (user_settings.GetGifAutoPlay() != old_settings.GetGifAutoPlay()) new_settings.AddMember("gif_auto_play", user_settings.GetGifAutoPlay(), allocator);
+            if (user_settings.GetInlineAttachmentMedia() != old_settings.GetInlineAttachmentMedia()) new_settings.AddMember("inline_attachment_media", user_settings.GetInlineAttachmentMedia(), allocator);
+            if (user_settings.GetInlineEmbedMedia() != old_settings.GetInlineEmbedMedia()) new_settings.AddMember("inline_embed_media", user_settings.GetInlineEmbedMedia(), allocator);
+            if (user_settings.GetMessageDisplayCompact() != old_settings.GetMessageDisplayCompact()) new_settings.AddMember("message_display_compact", user_settings.GetMessageDisplayCompact(), allocator);
+            if (user_settings.GetNativePhoneIntegrationEnabled() != old_settings.GetNativePhoneIntegrationEnabled()) new_settings.AddMember("native_phone_integration_enabled", user_settings.GetNativePhoneIntegrationEnabled(), allocator);
+            if (user_settings.GetRenderEmbeds() != old_settings.GetRenderEmbeds()) new_settings.AddMember("render_embeds", user_settings.GetRenderEmbeds(), allocator);
+            if (user_settings.GetRenderReactions() != old_settings.GetRenderReactions()) new_settings.AddMember("render_reactions", user_settings.GetRenderReactions(), allocator);
+            if (user_settings.GetShowCurrentGame() != old_settings.GetShowCurrentGame()) new_settings.AddMember("show_current_game", user_settings.GetShowCurrentGame(), allocator);
+            if (user_settings.GetStreamNotificationsEnabled() != old_settings.GetStreamNotificationsEnabled()) new_settings.AddMember("stream_notifications_enabled", user_settings.GetStreamNotificationsEnabled(), allocator);
 
             rapidjson::Document result = SendPatchRequest(Endpoint("users/@me/settings/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL, cpr::Body(DumpJson(new_settings)));
         }
@@ -488,7 +461,7 @@ namespace discpp {
 
     void Client::AddFriend(const discpp::User& user) {
         if (!discpp::globals::client_instance->client_user.IsBot()) {
-            throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+            throw ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
             rapidjson::Document result = SendPutRequest(Endpoint("users/@me/relationships/" + std::to_string(user.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
@@ -496,7 +469,7 @@ namespace discpp {
 
     void Client::RemoveFriend(const discpp::User& user) {
         if(discpp::globals::client_instance->client_user.IsBot()) {
-            throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+            throw ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
             rapidjson::Document result = SendDeleteRequest(Endpoint("users/@me/relationships/" + std::to_string(user.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
@@ -505,7 +478,7 @@ namespace discpp {
     std::unordered_map<discpp::Snowflake, discpp::UserRelationship> Client::GetRelationships() {
         //todo implement this endpoint
         if(discpp::globals::client_instance->client_user.IsBot()) {
-            throw new ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+            throw ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
             std::unordered_map<discpp::Snowflake, discpp::UserRelationship> relationships;
 
@@ -521,16 +494,6 @@ namespace discpp {
         }
     }
 
-    std::shared_ptr<discpp::Guild> Client::GetGuild(const Snowflake& guild_id) {
-
-        auto it = discpp::globals::client_instance->guilds.find(guild_id);
-        if (it != discpp::globals::client_instance->guilds.end()) {
-            return it->second;
-        }
-
-        throw new DiscordObjectNotFound("Guild not found");
-    }
-
     discpp::User Client::ModifyCurrentUser(const std::string& username, discpp::Image& avatar) {
         cpr::Body body("{\"username\": \"" + username + "\", \"avatar\": " + avatar.ToDataURI() + "}");
         rapidjson::Document result = SendPatchRequest(Endpoint("/users/@me"), DefaultHeaders(), 0, discpp::RateLimitBucketType::GLOBAL, body);
@@ -541,7 +504,6 @@ namespace discpp {
     }
 
     void Client::LeaveGuild(const discpp::Guild& guild) {
-
         SendDeleteRequest(Endpoint("/users/@me/guilds/" + std::to_string(guild.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
     }
 
@@ -571,7 +533,7 @@ namespace discpp {
         for (auto const& connection : result.GetArray()) {
             rapidjson::Document connection_json;
             connection_json.CopyFrom(connection, connection_json.GetAllocator());
-            connections.push_back(discpp::User::Connection(connection_json));
+            connections.emplace_back(connection_json);
         }
 
         return connections;

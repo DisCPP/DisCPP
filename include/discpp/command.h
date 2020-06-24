@@ -42,7 +42,7 @@ namespace discpp {
          *
          * @return void
          */
-        virtual void CommandBody(const discpp::Context& ctx);
+        virtual void CommandBody(discpp::Context ctx);
 
         /**
          * @brief This method checks if the requirements of the command allowes it to run.
@@ -53,7 +53,7 @@ namespace discpp {
          *
          * @return void
          */
-        virtual bool CanRun(const discpp::Context& ctx);
+        virtual bool CanRun(discpp::Context ctx);
 
 		std::function<void(discpp::Context)> function = nullptr;
 		std::string name; /**< Name of the current command. Ex: "ping"*/

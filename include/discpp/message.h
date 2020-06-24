@@ -2,16 +2,16 @@
 #define DISCPP_MESSAGE_H
 
 #include "discord_object.h"
-#include "channel.h"
 #include "user.h"
-#include "member.h"
-#include "guild.h"
 #include "reaction.h"
-#include "role.h"
-#include "embed_builder.h"
 #include "attachment.h"
+#include "channel.h"
 
 namespace discpp {
+    class Guild;
+    class EmbedBuilder;
+    class Member;
+
 	enum class GetReactionsMethod : int {
 		BEFORE_USER,
 		AFTER_USER
@@ -37,7 +37,6 @@ namespace discpp {
 	};
 
 	struct MessageApplication : public DiscordObject {
-		//Snowflake id;
 		std::string cover_image;
 		std::string description;
 		std::string icon;
@@ -233,7 +232,7 @@ namespace discpp {
          *
          * @return discpp::Message
          */
-		discpp::Message EditMessage(discpp::EmbedBuilder& embed);
+		discpp::Message EditMessage(const discpp::EmbedBuilder& embed);
 
         /**
          * @brief Edit the message's embed.
@@ -335,7 +334,8 @@ namespace discpp {
 
         discpp::Channel channel;
         std::shared_ptr<discpp::Guild> guild;
-        std::shared_ptr<discpp::User> author;
+        discpp::User author;
+        std::shared_ptr<discpp::Member> member;
 		std::string content;
 		time_t timestamp;
 		time_t edited_timestamp;
@@ -347,11 +347,11 @@ namespace discpp {
 		std::vector<discpp::Reaction> reactions;
 		Snowflake webhook_id;
 		int type;
-		discpp::MessageActivity activity;
-		discpp::MessageApplication application;
-		discpp::MessageReference message_reference;
+		std::shared_ptr<discpp::MessageActivity> activity;
+        std::shared_ptr<discpp::MessageApplication> application;
+        std::shared_ptr<discpp::MessageReference> message_reference;
 		int flags;
-	private:
+    protected:
 	    char bit_flags; /**< For internal use only. */
 	};
 }

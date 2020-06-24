@@ -6,6 +6,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 set(EXTERNAL_INSTALL_LOCATION "${PROJECT_SOURCE_DIR}/thirdparty")
 set(USE_TLS TRUE)
 set(USE_OPEN_SSL TRUE)
+set(RAPIDJSON_HAS_STDSTRING 1)
 project(discpp)
 
 # set options
@@ -127,7 +128,6 @@ if (USE_RAPID)
 elseif(USE_SIMD)
 	target_link_libraries(discpp PUBLIC simdjson)
 endif()
-
 
 target_link_libraries(discpp PUBLIC ZLIB::ZLIB)
 target_link_libraries(discpp PUBLIC CURL::libcurl)

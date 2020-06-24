@@ -1,22 +1,25 @@
 #include "channel.h"
 #include "utils.h"
 #include "client.h"
+#include "message.h"
+#include "log.h"
+#include "guild.h"
 
 namespace discpp {
 	Channel::Channel(const Snowflake& id) : discpp::DiscordObject(id) {
-		*this = globals::client_instance->GetChannel(id);
+		*this = globals::client_instance->cache.GetChannel(id);
 	}
 
 	Channel::Channel(rapidjson::Document& json) {
-		id = SnowflakeFromString(json["id"].GetString());
+	    id = SnowflakeFromString(json["id"].GetString());
 		type = static_cast<ChannelType>(json["type"].GetInt());
 		name = GetDataSafely<std::string>(json, "name");
 		topic = GetDataSafely<std::string>(json, "topic");
 		last_message_id = GetIDSafely(json, "last_message_id");
-		std::string lstpintmstmp = GetDataSafely<std::string>(json, "last_pin_timestamp");
-		if (lstpintmstmp != "") last_pin_timestamp = TimeFromDiscord(lstpintmstmp);
+		if (ContainsNotNull(json, "last_pin_timestamp")) last_pin_timestamp = TimeFromDiscord(json["last_pin_timestamp"].GetString());
         guild_id = GetIDSafely(json, "guild_id");
         position = GetDataSafely<int>(json, "position");
+
         if (ContainsNotNull(json, "permission_overwrites")) {
             for (auto& permission_overwrite : json["permission_overwrites"].GetArray()) {
                 rapidjson::Document permission_json;
@@ -25,11 +28,13 @@ namespace discpp {
                 permissions.push_back(discpp::Permissions(permission_json));
             }
         }
+
         nsfw = GetDataSafely<bool>(json, "nsfw");
         bitrate = GetDataSafely<int>(json, "bitrate");
         user_limit = GetDataSafely<int>(json, "user_limit");
         rate_limit_per_user = GetDataSafely<int>(json, "rate_limit_per_user");
         category_id = GetIDSafely(json, "parent_id");
+
         if (ContainsNotNull(json, "recipients")) {
             for (auto& recipient : json["recipients"].GetArray()) {
                 rapidjson::Document user_json;
@@ -38,73 +43,91 @@ namespace discpp {
                 recipients.emplace_back(user_json);
             }
         }
-        icon = GetDataSafely<std::string>(json, "icon");
+
+        if (ContainsNotNull(json, "icon")) {
+            std::string icon_str = json["icon"].GetString();
+
+            if (StartsWith(icon_str, "a_")) {
+                is_icon_gif = true;
+                SplitAvatarHash(icon_str.substr(2), icon_hex);
+            } else {
+                SplitAvatarHash(icon_str, icon_hex);
+            }
+        }
+
         owner_id = GetIDSafely(json, "owner_id");
         application_id = GetIDSafely(json, "application_id");
 	}
 
 	discpp::Message Channel::Send(const std::string& text, const bool& tts, discpp::EmbedBuilder* embed, std::vector<File> files) {
-		std::string escaped_text = EscapeString(text);
+        //std::string escaped_text = EscapeString(text);
 
-		// Send a file filled with message contents if the message is more than 2000 characters.
-		if (escaped_text.size() >= 2000) {
-			// Write message to file
-			std::ofstream message("message.txt", std::ios::out | std::ios::binary);
-			message << escaped_text;
-			message.close();
+        // Send a file filled with message contents if the message is more than 2000 characters.
+        if (text.size() >= 2000) {
+            // Write message to file
+            std::ofstream message("message.txt", std::ios::out | std::ios::binary);
+            message << text;
+            message.close();
 
-			// Ensure the file will be deleted even if it runs into an exception sending the file.
-			discpp::Message sent_message;
-			try {
-				// Send the message
-				std::vector<discpp::File> files;
-				files.push_back({ "message.txt", "message.txt" });
-				sent_message = Send("Message was too large to fit in 2000 characters", tts, nullptr, files);
+            // Ensure the file will be deleted even if it runs into an exception sending the file.
+            discpp::Message sent_message;
+            try {
+                // Send the message
+                std::vector<discpp::File> files;
+                files.push_back({ "message.txt", "message.txt" });
+                sent_message = Send("Message was too large to fit in 2000 characters", tts, nullptr, files);
 
-				// Delete the temporary message file
-				remove("message.txt");
-			} catch (std::exception e) {
-				// Delete the temporary message file
-				remove("message.txt");
+                // Delete the temporary message file
+                remove("message.txt");
+            } catch (std::exception e) {
+                // Delete the temporary message file
+                remove("message.txt");
 
-				throw std::exception(e);
-			}
+                throw std::exception(e);
+            }
 
-			return sent_message;
-		}
+            return sent_message;
+        }
 
-        rapidjson::Document message_json;
-        std::string message_json_str = "{\"content\":\"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
-        message_json.Parse(message_json_str);
+        rapidjson::Document message_json(rapidjson::kObjectType);
+        message_json.AddMember("content", text, message_json.GetAllocator());
+        message_json.AddMember("tts", tts, message_json.GetAllocator());
 
-		cpr::Body body;
-		if (embed != nullptr) { // Set the HTTP payload to an embed.
-		    rapidjson::Document embed_json = embed->ToJson();
-			body = cpr::Body("{\"embed\": " + DumpJson(embed_json) + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
-		} else if (!files.empty()) { // Send files.
-			cpr::Multipart multipart_data{};
+        if (embed != nullptr) {
+            rapidjson::Value embed_value(rapidjson::kObjectType);
+            embed_value.CopyFrom(embed->embed_json, message_json.GetAllocator());
 
-			for (int i = 0; i < files.size(); i++) {
-				multipart_data.parts.emplace_back("file" + std::to_string(i), cpr::File(files[i].file_path), "application/octet-stream");
-			}
+            message_json.AddMember("embed", embed_value, message_json.GetAllocator());
+        }
 
-			multipart_data.parts.emplace_back("payload_json", "{\"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "\"}");
+        if (!files.empty()) {
+            cpr::Multipart multipart_data{};
 
-			WaitForRateLimits(id, RateLimitBucketType::CHANNEL);
-			cpr::Response response = cpr::Post(cpr::Url{ Endpoint("/channels/" + std::to_string(id) + "/messages") }, DefaultHeaders({ {"Content-Type", "multipart/form-data"} }), multipart_data);
-			HandleRateLimits(response.header, id, RateLimitBucketType::CHANNEL);
+            for (int i = 0; i < files.size(); i++) {
+                multipart_data.parts.emplace_back("file" + std::to_string(i), cpr::File(files[i].file_path), "application/octet-stream");
+            }
 
-			rapidjson::Document result_json(rapidjson::kObjectType);
-			result_json.Parse(response.text);
+            globals::client_instance->logger->Debug("Sending payload_json inside multipart data for files: " + DumpJson(message_json));
 
-			return discpp::Message(result_json);
-		} else {
-			body = cpr::Body(DumpJson(message_json));
-		}
+            multipart_data.parts.emplace_back("payload_json", DumpJson(message_json));
 
-		rapidjson::Document result = SendPostRequest(Endpoint("/channels/" + std::to_string(id) + "/messages"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+            WaitForRateLimits(id, RateLimitBucketType::CHANNEL);
 
-		return discpp::Message(result);
+            cpr::Response response = cpr::Post(cpr::Url{ Endpoint("/channels/" + std::to_string(id) + "/messages") }, DefaultHeaders({ {"Content-Type", "multipart/form-data"} }), multipart_data);
+            globals::client_instance->logger->Debug("Received requested payload: " + response.text);
+
+            HandleRateLimits(response.header, id, RateLimitBucketType::CHANNEL);
+
+            rapidjson::Document result_json(rapidjson::kObjectType);
+            result_json.Parse(response.text);
+
+            return discpp::Message(result_json);
+        }
+
+        cpr::Body body(DumpJson(message_json));
+        rapidjson::Document result = SendPostRequest(Endpoint("/channels/" + std::to_string(id) + "/messages"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+
+        return discpp::Message(result);
 	}
 
 	std::string ChannelPropertyToString(ChannelProperty prop) {
@@ -194,7 +217,6 @@ namespace discpp {
 
 	void Channel::BulkDeleteMessage(const std::vector<Snowflake>& messages) {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::BulkDeleteMessage only available for guild channels!");
             throw std::runtime_error("discpp::Channel::BulkDeleteMessage only available for guild channels!");
         }
 
@@ -215,7 +237,6 @@ namespace discpp {
 
     void Channel::DeletePermission(const discpp::Permissions& permissions) {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::DeletePermission only available for guild channels!");
             throw std::runtime_error("discpp::Channel::DeletePermission only available for guild channels!");
         }
 
@@ -224,7 +245,6 @@ namespace discpp {
 
     void Channel::EditPermissions(const discpp::Permissions& permissions) {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::EditPermissions only available for guild channels!");
             throw std::runtime_error("discpp::Channel::EditPermissions only available for guild channels!");
         }
 
@@ -237,27 +257,22 @@ namespace discpp {
         permission_json.AddMember("deny", permissions.deny_perms.value, permission_allocator);
         permission_json.AddMember("type", s_type, permission_allocator);
 
-        rapidjson::StringBuffer buffer;
-        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-        permission_json.Accept(writer);
-        std::string json_payload = buffer.GetString();
+        std::string json_payload = DumpJson(permission_json);
 
         SendPutRequest(Endpoint("/channels/" + std::to_string(id) + "/permissions/" + std::to_string(permissions.role_user_id)), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(json_payload));
     }
 
-    std::shared_ptr<discpp::Guild> Channel::GetGuild() {
+    std::shared_ptr<discpp::Guild> Channel::GetGuild() const {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::GetGuild only available for guild channels!");
             throw std::runtime_error("discpp::Channel::GetGuild only available for guild channels!");
         }
 
-        std::shared_ptr<Guild> tmp = globals::client_instance->GetGuild(guild_id);
+        std::shared_ptr<Guild> tmp = globals::client_instance->cache.GetGuild(guild_id);
         return tmp;
     }
 
     discpp::GuildInvite Channel::CreateInvite(const int& max_age, const int& max_uses, const bool& temporary, const bool& unique) {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::CreateInvite only available for guild channels!");
             throw std::runtime_error("discpp::Channel::CreateInvite only available for guild channels!");
         }
 
@@ -270,7 +285,6 @@ namespace discpp {
 
 	std::vector<discpp::GuildInvite> Channel::GetInvites() {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::GetInvites only available for guild channels!");
             throw std::runtime_error("discpp::Channel::GetInvites only available for guild channels!");
         }
 
@@ -287,18 +301,19 @@ namespace discpp {
 
 	std::unordered_map<discpp::Snowflake, discpp::Channel> Channel::GetChildren() {
         if (type != ChannelType::GROUP_CATEGORY) {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::GetChildren only available for category channels!");
+            globals::client_instance->logger->Debug(LogTextColor::RED + "discpp::Channel::GetChildren only available for category channels!");
             throw std::runtime_error("discpp::Channel::GetChildren only available for category channels!");
         }
 
 	    std::unordered_map<discpp::Snowflake, discpp::Channel> tmp;
 	    for (auto const chnl : this->GetGuild()->channels) {
 	        if (chnl.second.category_id == this->id) {
-                tmp.insert({chnl.first, chnl.second});
+                tmp.insert({ chnl.first, chnl.second });
 	        } else {
 	            continue;
 	        }
 	    }
+
 	    return tmp;
 	}
 
@@ -306,7 +321,7 @@ namespace discpp {
 	    if (type == ChannelType::DM || type == ChannelType::GROUP_DM) {
 		    SendPutRequest(Endpoint("/channels/" + std::to_string(id) + "/recipients/" + std::to_string(user.id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 		} else {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::GroupDMAddRecipient only available for DM/Group DM channels!");
+            globals::client_instance->logger->Debug(LogTextColor::RED + "discpp::Channel::GroupDMAddRecipient only available for DM/Group DM channels!");
 	        throw std::runtime_error("discpp::Channel::GroupDMAddRecipient only available for DM/Group DM channels!");
 	    }
 	}
@@ -315,7 +330,7 @@ namespace discpp {
         if (type == ChannelType::DM || type == ChannelType::GROUP_DM) {
             SendDeleteRequest(Endpoint("/channels/" + std::to_string(id) + "/recipients/" + std::to_string(user.id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
         } else {
-            globals::client_instance->logger->Error(LogTextColor::RED + "discpp::Channel::GroupDMRemoveRecipient only available for DM/Group DM channels!");
+            globals::client_instance->logger->Debug(LogTextColor::RED + "discpp::Channel::GroupDMRemoveRecipient only available for DM/Group DM channels!");
             throw std::runtime_error("discpp::Channel::GroupDMRemoveRecipient only available for DM/Group DM channels!");
         }
 	}
@@ -325,4 +340,24 @@ namespace discpp {
 
         return discpp::Message(result);
     }
-}
+
+    std::string Channel::GetIconURL(const ImageType &img_type) const {
+        std::string icon_str = CombineAvatarHash(icon_hex);
+
+        std::string url = "https://cdn.discordapp.com/channel-icons/" + std::to_string(id) + "/" + icon_str;
+        ImageType tmp = img_type;
+        if (tmp == ImageType::AUTO) tmp = is_icon_gif ? ImageType::GIF : ImageType::PNG;
+        switch (img_type) {
+            case ImageType::GIF:
+                return cpr::Url(url + ".gif");
+            case ImageType::JPEG:
+                return cpr::Url(url + ".jpeg");
+            case ImageType::PNG:
+                return cpr::Url(url + ".png");
+            case ImageType::WEBP:
+                return cpr::Url(url + ".webp");
+            default:
+                return cpr::Url(url);
+        }
+    }
+}                                                               

@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "message.h"
 #include "client.h"
+#include "guild.h"
 
 #include <fstream>
 
@@ -10,10 +11,12 @@ namespace discpp {
         id = SnowflakeFromString(json["id"].GetString());
         type = static_cast<WebhookType>(json["type"].GetInt());
         guild = std::make_shared<discpp::Guild>(ConstructDiscppObjectFromID(json, "guild_id", discpp::Guild()));
-        channel = std::make_shared<discpp::Channel>(globals::client_instance->GetChannel(SnowflakeFromString(json["guild_id"].GetString())));
+        channel = std::make_shared<discpp::Channel>(globals::client_instance->cache.GetChannel(SnowflakeFromString(json["guild_id"].GetString())));
 		user = std::make_shared<discpp::User>(ConstructDiscppObjectFromJson(json, "user", discpp::User()));
         name = GetDataSafely<std::string>(json, "name");
-        avatar = GetDataSafely<std::string>(json, "avatar");
+        if (ContainsNotNull(json, "avatar")) {
+            SplitAvatarHash(json["avatar"].GetString(), avatar_hex);
+        }
         token = GetDataSafely<std::string>(json, "token");
     }
 

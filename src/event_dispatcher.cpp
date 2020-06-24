@@ -34,13 +34,15 @@ namespace discpp {
 
                 discpp::Channel dm_channel(private_channel_json);
 
-                discpp::globals::client_instance->private_channels.insert({ dm_channel.id, dm_channel });
+                discpp::globals::client_instance->cache.private_channels.insert({ dm_channel.id, dm_channel });
             }
         } else {
-            // Get the bot user
-            rapidjson::Document user_json = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
+            if (globals::client_instance->client_user.id == 0) {
+                // Get the bot user
+                rapidjson::Document user_json = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
 
-            discpp::globals::client_instance->client_user = discpp::ClientUser(user_json);
+                discpp::globals::client_instance->client_user = discpp::ClientUser(user_json);
+            }
         }
 
         discpp::DispatchEvent(discpp::ReadyEvent(result));
@@ -60,23 +62,23 @@ namespace discpp {
 
     void EventDispatcher::ChannelCreateEvent(rapidjson::Document& result) {
         if (ContainsNotNull(result, "guild_id")) {
-            discpp::Channel new_channel = result;
-            std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
+            discpp::Channel new_channel(result);
+            std::shared_ptr<discpp::Guild> guild = globals::client_instance->cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
             guild->channels.insert({ guild->id, new_channel });
             discpp::DispatchEvent(discpp::ChannelCreateEvent(new_channel));
         } else {
-            discpp::Channel new_channel = discpp::Channel(result);
+            discpp::Channel new_channel(result);
 
-            globals::client_instance->private_channels.insert({ new_channel.id, new_channel });
+            globals::client_instance->cache.private_channels.insert({ new_channel.id, new_channel });
             discpp::DispatchEvent(discpp::ChannelCreateEvent(new_channel));
         }
     }
 
     void EventDispatcher::ChannelUpdateEvent(rapidjson::Document& result) {
         if (ContainsNotNull(result, "guild_id")) {
-            discpp::Channel updated_channel = result;
-            std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
+            discpp::Channel updated_channel(result);
+            std::shared_ptr<discpp::Guild> guild = globals::client_instance->cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
             auto guild_chan_it = guild->channels.find(updated_channel.id);
             if (guild_chan_it != guild->channels.end()) {
@@ -85,9 +87,9 @@ namespace discpp {
 
             discpp::DispatchEvent(discpp::ChannelUpdateEvent(updated_channel));
         } else {
-            discpp::Channel updated_channel = discpp::Channel(result);
+            discpp::Channel updated_channel(result);
 
-            auto client_chan_it = discpp::globals::client_instance->private_channels.find(updated_channel.id);
+            auto client_chan_it = discpp::globals::client_instance->cache.private_channels.find(updated_channel.id);
             client_chan_it->second = updated_channel;
 
             discpp::DispatchEvent(discpp::ChannelUpdateEvent(updated_channel));
@@ -96,16 +98,12 @@ namespace discpp {
 
     void EventDispatcher::ChannelDeleteEvent(rapidjson::Document& result) {
         if (ContainsNotNull(result, "guild_id")) {
-            discpp::Channel updated_channel = result;
-            std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
-
-            auto guild_chan_it = guild->channels.erase(updated_channel.id);
+            discpp::Channel updated_channel(result);
+            std::shared_ptr<discpp::Guild> guild = globals::client_instance->cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
             discpp::DispatchEvent(discpp::ChannelUpdateEvent(updated_channel));
         } else {
-            discpp::Channel updated_channel = discpp::Channel(result);
-
-            auto client_chan_it = discpp::globals::client_instance->private_channels.erase(updated_channel.id);
+            discpp::Channel updated_channel(result);
 
             discpp::DispatchEvent(discpp::ChannelUpdateEvent(updated_channel));
         }
@@ -125,8 +123,8 @@ namespace discpp {
         } else {
             discpp::Channel pin_update_channel = discpp::Channel(SnowflakeFromString(result["channel_id"].GetString()));
 
-            auto it = globals::client_instance->private_channels.find(pin_update_channel.id);
-            if (it != globals::client_instance->private_channels.end()) {
+            auto it = globals::client_instance->cache.private_channels.find(pin_update_channel.id);
+            if (it != globals::client_instance->cache.private_channels.end()) {
                 it->second.last_pin_timestamp = TimeFromDiscord(result["last_pin_timestamp"].GetString());
             }
 
@@ -138,8 +136,8 @@ namespace discpp {
         Snowflake guild_id = SnowflakeFromString(result["id"].GetString());
 
         std::shared_ptr<discpp::Guild> guild = std::make_shared<discpp::Guild>(result);
-        discpp::globals::client_instance->guilds.insert({ guild->id, guild });
-        discpp::globals::client_instance->members.insert(guild->members.begin(), guild->members.end());
+        globals::client_instance->cache.guilds.emplace(guild_id, guild);
+        globals::client_instance->cache.members.insert(guild->members.begin(), guild->members.end());
 
         discpp::DispatchEvent(discpp::GuildCreateEvent(guild));
     }
@@ -147,8 +145,8 @@ namespace discpp {
     void EventDispatcher::GuildUpdateEvent(rapidjson::Document& result) {
         std::shared_ptr<discpp::Guild> guild = std::make_shared<discpp::Guild>(result);
 
-        auto it = discpp::globals::client_instance->guilds.find(guild->id);
-        if (it != discpp::globals::client_instance->guilds.end()) {
+        auto it = globals::client_instance->cache.guilds.find(guild->id);
+        if (it != globals::client_instance->cache.guilds.end()) {
             it->second = guild;
         }
 
@@ -158,7 +156,7 @@ namespace discpp {
     void EventDispatcher::GuildDeleteEvent(rapidjson::Document& result) {
         std::shared_ptr<discpp::Guild> guild = std::make_shared<discpp::Guild>(SnowflakeFromString(result["id"].GetString()));
 
-        discpp::globals::client_instance->guilds.erase(guild->id);
+        globals::client_instance->cache.guilds.erase(guild->id);
         discpp::DispatchEvent(discpp::GuildDeleteEvent(guild));
     }
 
@@ -181,7 +179,7 @@ namespace discpp {
     }
 
     void EventDispatcher::GuildEmojisUpdateEvent(rapidjson::Document& result) {
-        std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
+        std::shared_ptr<discpp::Guild> guild = globals::client_instance->cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
         std::unordered_map<Snowflake, Emoji> emojis;
         for (auto& emoji : result["emojis"].GetArray()) {
@@ -193,8 +191,8 @@ namespace discpp {
         }
 
         guild->emojis = emojis;
-        auto it = discpp::globals::client_instance->guilds.find(guild->id);
-        if (it != discpp::globals::client_instance->guilds.end()) {
+        auto it = globals::client_instance->cache.guilds.find(guild->id);
+        if (it != globals::client_instance->cache.guilds.end()) {
             it->second = guild;
         }
 
@@ -206,17 +204,17 @@ namespace discpp {
     }
 
     void EventDispatcher::GuildMemberAddEvent(rapidjson::Document& result) {
-        std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
+        std::shared_ptr<discpp::Guild> guild = globals::client_instance->cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
         std::shared_ptr<discpp::Member> member = std::make_shared<discpp::Member>(result, *guild);
-        discpp::globals::client_instance->members.insert({ member->id, member });
+        globals::client_instance->cache.members.insert({ member->id, member });
 
         discpp::DispatchEvent(discpp::GuildMemberAddEvent(guild, member));
     }
 
     void EventDispatcher::GuildMemberRemoveEvent(rapidjson::Document& result) {
-        std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
+        std::shared_ptr<discpp::Guild> guild = globals::client_instance->cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
         std::shared_ptr<discpp::Member> member = std::make_shared<discpp::Member>(SnowflakeFromString(result["user"]["id"].GetString()), *guild);
-        discpp::globals::client_instance->members.erase(member->id);
+        globals::client_instance->cache.members.erase(member->id);
 
         discpp::DispatchEvent(discpp::GuildMemberRemoveEvent(guild, member));
     }
@@ -238,11 +236,10 @@ namespace discpp {
             rapidjson::Document role_json;
             role_json.CopyFrom(role, role_json.GetAllocator());
 
-            std::shared_ptr<discpp::Role> tmp = std::make_shared<discpp::Role>(SnowflakeFromString(role_json.GetString()), *guild);
-            member->roles.insert({ tmp->id, tmp });
+            member->roles.emplace_back(SnowflakeFromString(role_json.GetString()));
         }
         rapidjson::Value::ConstMemberIterator itr = result.FindMember("nick");
-        if (itr != result.MemberEnd() && !result["nick"].IsNull()) {
+        if (discpp::ContainsNotNull(result, "nick")) {
             member->nick = result["nick"].GetString();
         }
 
@@ -250,7 +247,7 @@ namespace discpp {
     }
 
     void EventDispatcher::GuildMembersChunkEvent(rapidjson::Document& result) {
-        std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
+        std::shared_ptr<discpp::Guild> guild = globals::client_instance->cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
         std::unordered_map<discpp::Snowflake, discpp::Member> members;
         for (auto const& member : result["members"].GetArray()) {
             rapidjson::Document member_json(rapidjson::kObjectType);
@@ -303,12 +300,12 @@ namespace discpp {
 
     void EventDispatcher::MessageCreateEvent(rapidjson::Document& result) {
         std::shared_ptr<discpp::Message> message = std::make_shared<discpp::Message>(result);
-        if (!discpp::globals::client_instance->messages.empty()) {
-            if (discpp::globals::client_instance->messages.size() >= discpp::globals::client_instance->message_cache_count) {
-                discpp::globals::client_instance->messages.erase(discpp::globals::client_instance->messages.begin());
+        if (!globals::client_instance->cache.messages.empty()) {
+            if (globals::client_instance->cache.messages.size() >= discpp::globals::client_instance->message_cache_count) {
+                globals::client_instance->cache.messages.erase(globals::client_instance->cache.messages.begin());
             }
 
-            discpp::globals::client_instance->messages.insert({message->id, message});
+            globals::client_instance->cache.messages.insert({message->id, message});
         }
 
         if (discpp::globals::client_instance->config->type == discpp::TokenType::BOT) {
@@ -319,14 +316,14 @@ namespace discpp {
     }
 
     void EventDispatcher::MessageUpdateEvent(rapidjson::Document& result) {
-        auto message_it = discpp::globals::client_instance->messages.find(SnowflakeFromString(result["id"].GetString()));
+        auto message_it = globals::client_instance->cache.messages.find(SnowflakeFromString(result["id"].GetString()));
 
         discpp::Message old_message;
         discpp::Message edited_message = discpp::Message(result);
         bool is_edited = ContainsNotNull(result, "edited_timestamp");
-        if (message_it != discpp::globals::client_instance->messages.end()) {
-            if (discpp::globals::client_instance->messages.size() >= discpp::globals::client_instance->message_cache_count) {
-                discpp::globals::client_instance->messages.erase(discpp::globals::client_instance->messages.begin());
+        if (message_it != globals::client_instance->cache.messages.end()) {
+            if (globals::client_instance->cache.messages.size() >= discpp::globals::client_instance->message_cache_count) {
+                globals::client_instance->cache.messages.erase(globals::client_instance->cache.messages.begin());
             }
 
             old_message = *message_it->second;
@@ -336,12 +333,12 @@ namespace discpp {
     }
 
     void EventDispatcher::MessageDeleteEvent(rapidjson::Document& result) {
-        auto message = discpp::globals::client_instance->messages.find(SnowflakeFromString(result["id"].GetString()));
+        auto message = globals::client_instance->cache.messages.find(SnowflakeFromString(result["id"].GetString()));
 
-        if (message != discpp::globals::client_instance->messages.end()) {
+        if (message != globals::client_instance->cache.messages.end()) {
             discpp::DispatchEvent(discpp::MessageDeleteEvent(*message->second));
 
-            discpp::globals::client_instance->messages.erase(message);
+            globals::client_instance->cache.messages.erase(message);
         }
     }
 
@@ -350,12 +347,12 @@ namespace discpp {
         for (auto& id : result["ids"].GetArray()) {
             rapidjson::Document id_json;
             id_json.CopyFrom(id, id_json.GetAllocator());
-            auto message = discpp::globals::client_instance->messages.find(SnowflakeFromString(id_json.GetString()));
+            auto message = globals::client_instance->cache.messages.find(SnowflakeFromString(id_json.GetString()));
 
-            if (message != discpp::globals::client_instance->messages.end()) {
+            if (message != globals::client_instance->cache.messages.end()) {
                 // Make sure the messages values are up to date.
                 if (ContainsNotNull(result, "guild_id")) {
-                    std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));;
+                    std::shared_ptr<discpp::Guild> guild = globals::client_instance->cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));;
                     message->second->guild = guild;
 
                     auto channel_it = guild->channels.find(SnowflakeFromString(result["channel_id"].GetString()));
@@ -363,9 +360,9 @@ namespace discpp {
                         message->second->channel = channel_it->second;
                     }
                 } else {
-                    auto channel_it = globals::client_instance->private_channels.find(SnowflakeFromString(result["channel_id"].GetString()));
+                    auto channel_it = globals::client_instance->cache.private_channels.find(SnowflakeFromString(result["channel_id"].GetString()));
 
-                    if (channel_it != globals::client_instance->private_channels.end()) {
+                    if (channel_it != globals::client_instance->cache.private_channels.end()) {
                         message->second->channel = channel_it->second;
                     }
                 }
@@ -375,27 +372,28 @@ namespace discpp {
         }
 
         for (discpp::Message message : msgs) {
-            discpp::globals::client_instance->messages.erase(message.id);
+            globals::client_instance->cache.messages.erase(message.id);
         }
 
         discpp::DispatchEvent(discpp::MessageBulkDeleteEvent(msgs));
     }
 
     void EventDispatcher::MessageReactionAddEvent(rapidjson::Document& result) {
-        auto message = discpp::globals::client_instance->messages.find(SnowflakeFromString(result["message_id"].GetString()));
+        auto message = globals::client_instance->cache.messages.find(SnowflakeFromString(result["message_id"].GetString()));
 
-        if (message != discpp::globals::client_instance->messages.end()) {
+        if (message != globals::client_instance->cache.messages.end()) {
             // Make sure the messages values are up to date.
             discpp::Channel channel;
             if (ContainsNotNull(result, "guild_id")) {
-                std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
+                std::shared_ptr<discpp::Guild> guild = globals::client_instance->cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
+                message->second->channel.guild_id = guild->id;
                 message->second->guild = guild;
                 channel = guild->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
             } else {
-                auto it = globals::client_instance->private_channels.find(SnowflakeFromString(result["channel_id"].GetString()));
+                auto it = globals::client_instance->cache.private_channels.find(SnowflakeFromString(result["channel_id"].GetString()));
 
-                if (it != globals::client_instance->private_channels.end()) {
+                if (it != globals::client_instance->cache.private_channels.end()) {
                     channel = it->second;
                 }
             }
@@ -425,8 +423,13 @@ namespace discpp {
 
             discpp::DispatchEvent(discpp::MessageReactionAddEvent(*message->second, emoji, user));
         } else {
-            discpp::Channel channel = globals::client_instance->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
+            discpp::Channel channel = globals::client_instance->cache.GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
             discpp::Message message = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
+
+            if (ContainsNotNull(result, "guild_id")) {
+                channel.guild_id = Snowflake(result["guild_id"].GetString());
+                message.guild = globals::client_instance->cache.GetGuild(Snowflake(result["guild_id"].GetString()));
+            }
 
             rapidjson::Document emoji_json;
             emoji_json.CopyFrom(result["emoji"], emoji_json.GetAllocator());
@@ -438,20 +441,20 @@ namespace discpp {
     }
 
     void EventDispatcher::MessageReactionRemoveEvent(rapidjson::Document& result) {
-        auto message = discpp::globals::client_instance->messages.find(SnowflakeFromString(result["message_id"].GetString()));
+        auto message = globals::client_instance->cache.messages.find(SnowflakeFromString(result["message_id"].GetString()));
 
-        if (message != discpp::globals::client_instance->messages.end()) {
+        if (message != globals::client_instance->cache.messages.end()) {
             // Make sure the messages values are up to date.
             discpp::Channel channel;
             if (ContainsNotNull(result, "guild_id")) {
-                std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
+                std::shared_ptr<discpp::Guild> guild = globals::client_instance->cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
                 message->second->guild = guild;
                 channel = guild->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
             } else {
-                auto it = globals::client_instance->private_channels.find(SnowflakeFromString(result["channel_id"].GetString()));
+                auto it = globals::client_instance->cache.private_channels.find(SnowflakeFromString(result["channel_id"].GetString()));
 
-                if (it != globals::client_instance->private_channels.end()) {
+                if (it != globals::client_instance->cache.private_channels.end()) {
                     channel = it->second;
                 }
             }
@@ -480,8 +483,13 @@ namespace discpp {
 
             discpp::DispatchEvent(discpp::MessageReactionRemoveEvent(*message->second, emoji, user));
         } else {
-            discpp::Channel channel = globals::client_instance->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
+            discpp::Channel channel = globals::client_instance->cache.GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
             discpp::Message message = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
+
+            if (ContainsNotNull(result, "guild_id")) {
+                channel.guild_id = Snowflake(result["guild_id"].GetString());
+                message.guild = globals::client_instance->cache.GetGuild(Snowflake(result["guild_id"].GetString()));
+            }
 
             rapidjson::Document emoji_json;
             emoji_json.CopyFrom(result["emoji"], emoji_json.GetAllocator());
@@ -493,20 +501,19 @@ namespace discpp {
     }
 
     void EventDispatcher::MessageReactionRemoveAllEvent(rapidjson::Document& result) {
-        auto message = discpp::globals::client_instance->messages.find(SnowflakeFromString(result["message_id"].GetString()));
+        auto message = globals::client_instance->cache.messages.find(SnowflakeFromString(result["message_id"].GetString()));
 
-        if (message != discpp::globals::client_instance->messages.end()) {
-            //if (auto channel_it = globals::client_instance->channels.find(SnowflakeFromString(result["channel_id"].GetString())); channel_it != globals::client_instance->channels.end()) {
+        if (message != globals::client_instance->cache.messages.end()) {
             discpp::Channel channel;
             if (ContainsNotNull(result, "guild_id")) {
-                std::shared_ptr<discpp::Guild> guild = globals::client_instance->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
+                std::shared_ptr<discpp::Guild> guild = globals::client_instance->cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
                 message->second->guild = guild;
                 channel = guild->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
             } else {
-                auto it = globals::client_instance->private_channels.find(SnowflakeFromString(result["channel_id"].GetString()));
+                auto it = globals::client_instance->cache.private_channels.find(SnowflakeFromString(result["channel_id"].GetString()));
 
-                if (it != globals::client_instance->private_channels.end()) {
+                if (it != globals::client_instance->cache.private_channels.end()) {
                     channel = it->second;
                 }
             }
@@ -514,8 +521,14 @@ namespace discpp {
 
             discpp::DispatchEvent(discpp::MessageReactionRemoveAllEvent(*message->second));
         } else {
-            discpp::Channel channel = globals::client_instance->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
+            discpp::Channel channel = globals::client_instance->cache.GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
             discpp::Message message = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
+
+            if (ContainsNotNull(result, "guild_id")) {
+                channel.guild_id = Snowflake(result["guild_id"].GetString());
+                message.guild = globals::client_instance->cache.GetGuild(Snowflake(result["guild_id"].GetString()));
+            }
+
             discpp::DispatchEvent(discpp::MessageReactionRemoveAllEvent(message));
         }
     }
@@ -565,7 +578,7 @@ namespace discpp {
 
     void EventDispatcher::BindEvents() {
         internal_event_map["READY"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::ReadyEvent(result); };
-        internal_event_map["RESUMED"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::ChannelCreateEvent(result); };
+        internal_event_map["RESUMED"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::ResumedEvent(result); };
         internal_event_map["INVALID_SESSION"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::InvalidSessionEvent(result); };
         internal_event_map["CHANNEL_CREATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::ChannelCreateEvent(result); };
         internal_event_map["CHANNEL_UPDATE"] = [&](rapidjson::Document& result) { discpp::EventDispatcher::ChannelUpdateEvent(result); };
@@ -619,11 +632,10 @@ namespace discpp {
         data_ptr = std::make_shared<rapidjson::Document>(std::move(data));
 #endif
 
-        rapidjson::Value::ConstMemberIterator itr = j.FindMember("s");
-        if (itr != j.MemberEnd() && j["s"].IsNumber()) {
+        if (ContainsNotNull(j, "s")) {
             discpp::globals::client_instance->last_sequence_number = j["s"].GetInt();
         } else {
-            discpp::globals::client_instance->last_sequence_number = -1;
+            discpp::globals::client_instance->last_sequence_number = NULL;
         }
 
         if (internal_event_map.find(event_name) != internal_event_map.end()) {

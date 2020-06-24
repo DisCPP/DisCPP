@@ -1,41 +1,33 @@
 #ifndef DISCPP_BOT_H
 #define DISCPP_BOT_H
 
-#ifndef RAPIDJSON_HAS_STDSTRING
-#define RAPIDJSON_HAS_STDSTRING 1
-#endif
-
 #include <string>
 #include <future>
 #include <string_view>
-#include <optional>
 #include <vector>
-
-#include <rapidjson/document.h>
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/writer.h>
 
 #include <ixwebsocket/IXWebSocket.h>
 
-#include "channel.h"
-#include "message.h"
-#include "member.h"
-#include "guild.h"
-#include "log.h"
+#include "user.h"
 #include "settings.h"
+#include "channel.h"
+#include "cache.h"
 
 namespace discpp {
 	class Role;
-	class User;
 	class Presence;
 	class ClientConfig;
+	class Member;
+	class Guild;
+	class Message;
+	class Logger;
+	class Image;
 
 	class ClientUser : public User {
 	public:
 		ClientUser() = default;
 		ClientUser(const Snowflake& id) : User(id) {}
 		ClientUser(rapidjson::Document & json);
-
 
         /**
          * @brief Get all connections of this user.
@@ -48,13 +40,14 @@ namespace discpp {
          */
         std::vector<Connection> GetUserConnections();
 		ClientUserSettings GetSettings();
-		void ModifySettings(ClientUserSettings& settings);
+		void ModifySettings(ClientUserSettings& user_settings);
 
 		ClientUserSettings settings;
 		bool mfa_enabled;
 		std::string locale;
 		bool verified;
 		std::string email;
+        discpp::specials::NitroSubscription premium_type; /**< The type of Nitro subscription on a user's account. */
 	};
 
 	class UserRelationship {
@@ -92,10 +85,7 @@ namespace discpp {
 		discpp::Logger* logger; /**< discpp::Logger object representing current logger. */
 
 		//std::unordered_map<Snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
-		std::unordered_map<Snowflake, std::shared_ptr<Member>> members; /**< List of members the current bot can access. */
-		std::unordered_map<Snowflake, std::shared_ptr<Guild>> guilds; /**< List of guilds the current bot can access. */
-		std::unordered_map<Snowflake, std::shared_ptr<Message>> messages; /**< List of messages the current bot can access. */
-        std::unordered_map<discpp::Snowflake, discpp::Channel> private_channels; /**< List of dm channels the current client can access. */
+        discpp::Cache cache; /**< Bot cache. Stores members, channels, guilds, etc. */
 
 		enum packet_opcode : int {
 			dispatch = 0,				// Receive
@@ -110,7 +100,6 @@ namespace discpp {
 			hello = 10,					// Receive
 			heartbeat_ack = 11			// Receive
 		};
-
 
         /**
          * @brief Constructs a discpp::Bot object.
@@ -197,21 +186,6 @@ namespace discpp {
          */
         std::unordered_map<discpp::Snowflake, discpp::UserRelationship> GetRelationships();
 
-        /**
-         * @brief Gets a discpp::Guild from a guild id.
-         *
-         * This will throw a runtime exception if the guild is not found.
-         *
-         * ```cpp
-         *      std::shared_ptr<discpp::Guild> guild = bot.GetGuild(583251190591258624);
-         * ```
-         *
-         * @param[in] guild_id The guild id of the guild you want to get.
-         *
-         * @return std::shared_ptr<discpp::Guild>
-         */
-        std::shared_ptr<discpp::Guild> GetGuild(const Snowflake& guild_id);
-
 
         /**
          * @brief Modify the bot's username.
@@ -278,20 +252,6 @@ namespace discpp {
         std::vector<discpp::User::Connection> GetBotUserConnections();
 
         /**
-         * @brief Gets a channel from guild cache and private caches.
-         *
-         * @return discpp::Channel
-         */
-        discpp::Channel GetChannel(const discpp::Snowflake& id);
-
-        /**
-         * @brief Get a DM channel with id
-         *
-         * @return discpp::Channel
-         */
-        discpp::Channel GetDMChannel(const discpp::Snowflake& id);
-
-        /**
          * @brief Get all DM's for this user. Only supports user tokens!
          *
          * @return std::vector<discpp::User::Connection>
@@ -303,6 +263,8 @@ namespace discpp {
 		bool user_mfa_enabled;
 		std::string user_locale;
 		bool user_verified;
+
+        void OnWebSocketPacket(rapidjson::Document& result);
 
 		template <typename FType, typename... T>
 		void DoFunctionLater(FType&& func, T&&... args) {
@@ -326,8 +288,8 @@ namespace discpp {
 		}
 	private:
 		friend class EventDispatcher;
-		bool ready = false;
-		bool disconnected = true;
+        bool ready = false;
+        bool disconnected = true;
 		bool reconnecting = false;
 		bool stay_disconnected = false;
 		bool run = true;
@@ -342,7 +304,6 @@ namespace discpp {
 		std::thread heartbeat_thread;
 		std::thread future_loop_thread;
 
-		//std::mutex websocket_client_mutex;
 		std::mutex futures_mutex;
 
 		ix::WebSocket websocket;
@@ -355,8 +316,8 @@ namespace discpp {
 
 		// Websocket Methods
 		void WebSocketStart();
-		void OnWebSocketListen(const ix::WebSocketMessagePtr& msg);
-		void OnWebSocketPacket(rapidjson::Document& result);
+		void OnWebSocketListen(ix::WebSocketMessagePtr& msg);
+		//void OnWebSocketPacket(rapidjson::Document& result);
 		void HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg);
 		void HandleHeartbeat();
 		rapidjson::Document GetIdentifyPacket();

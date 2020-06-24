@@ -8,6 +8,7 @@ latex/*
 .idea/*
 cmake-build-debug-w10/*
 cmake-build-debug-wsl/*
+cmake-build-debug/
 
 # Compiled source #
 ###################

@@ -1,3 +1,4 @@
+#include "role.h"
 #include "guild.h"
 
 namespace discpp {
@@ -12,10 +13,28 @@ namespace discpp {
 		id = SnowflakeFromString(json["id"].GetString());
 		name = json["name"].GetString();
 		color = json["color"].GetInt();
-		hoist = json["hoist"].GetBool();
+        if (GetDataSafely<bool>(json, "hoist")) {
+            flags |= 0b1;
+        }
 		position = json["position"].GetInt();
         permissions = Permissions(PermissionType::ROLE, json["permissions"].GetInt());
-		managed = json["managed"].GetBool();
-		mentionable = json["mentionable"].GetBool();
+        if (GetDataSafely<bool>(json, "managed")) {
+            flags |= 0b10;
+        }
+        if (GetDataSafely<bool>(json, "mentionable")) {
+            flags |= 0b100;
+        }
 	}
+
+    bool Role::IsHoistable() {
+        return (flags & 0b1) == 0b1;
+    }
+
+    bool Role::IsManaged() {
+        return (flags & 0b10) == 0b10;
+    }
+
+    bool Role::IsMentionable() {
+        return (flags & 0b100) == 0b100;
+    }
 }

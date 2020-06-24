@@ -1,11 +1,14 @@
-#include <iomanip>
 #include "user.h"
 #include "client.h"
+#include "guild.h"
+#include "member.h"
+
+#include <iomanip>
 
 namespace discpp {
 	User::User(const Snowflake& id) : discpp::DiscordObject(id) {
-		auto it = discpp::globals::client_instance->members.find(id);
-		if (it != discpp::globals::client_instance->members.end()) {
+		auto it = discpp::globals::client_instance->cache.members.find(id);
+		if (it != discpp::globals::client_instance->cache.members.end()) {
 			*this = it->second->user;
 		}
 	}
@@ -13,12 +16,19 @@ namespace discpp {
 		id = GetIDSafely(json, "id");
 		username = GetDataSafely<std::string>(json, "username");
 		discriminator = (unsigned short) strtoul(GetDataSafely<std::string>(json, "discriminator").c_str(), nullptr, 10);
-		avatar = GetDataSafely<std::string>(json, "avatar");
+		if (ContainsNotNull(json, "avatar")) {
+			std::string icon_str = json["avatar"].GetString();
+
+			if (StartsWith(icon_str, "a_")) {
+				is_avatar_gif = true;
+				SplitAvatarHash(icon_str.substr(2), avatar_hex);
+			} else {
+				SplitAvatarHash(icon_str, avatar_hex);
+			}
+		}
 		if (GetDataSafely<bool>(json, "bot")) flags |= 0b1;
         if (GetDataSafely<bool>(json, "system")) flags |= 0b10;
-		public_flags = GetDataSafely<int>(json, "flags");
-		premium_type = static_cast<discpp::specials::NitroSubscription>(GetDataSafely<int>(json, "premium_type"));
-		public_flags = GetDataSafely<int>(json, "public_flags");
+		//public_flags = GetDataSafely<int>(json, "public_flags");
 	}
 
 	User::Connection::Connection(rapidjson::Document& json) {
@@ -56,14 +66,16 @@ namespace discpp {
 		return discpp::Channel(result);
 	}
 	
-	std::string User::GetAvatarURL(const ImageType& imgType) const {
-		if (this->avatar == "") {
-			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(this->discriminator % 5) + ".png");
+	std::string User::GetAvatarURL(const ImageType& img_type) const {
+        if (avatar_hex[0] == 0) {
+			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(discriminator % 5) + ".png");
 		} else {
-			std::string url = "https://cdn.discordapp.com/avatars/" + std::to_string(id) + "/" + this->avatar;
-			ImageType tmp = imgType;
-			if (tmp == ImageType::AUTO) tmp = StartsWith(this->avatar, "a_") ? ImageType::GIF : ImageType::PNG;
-			switch (imgType) {
+		    std::string avatar_str = CombineAvatarHash(avatar_hex);
+
+			std::string url = "https://cdn.discordapp.com/avatars/" + std::to_string(id) + "/" + avatar_str;
+			ImageType tmp = img_type;
+			if (tmp == ImageType::AUTO) tmp = is_avatar_gif ? ImageType::GIF : ImageType::PNG;
+			switch (tmp) {
 			case ImageType::GIF:
 				return cpr::Url(url + ".gif");
 			case ImageType::JPEG:

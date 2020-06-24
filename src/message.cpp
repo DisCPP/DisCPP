@@ -1,10 +1,15 @@
 #include "message.h"
 #include "client.h"
+#include "channel.h"
+#include "guild.h"
+#include "member.h"
+#include "embed_builder.h"
+#include "exceptions.h"
 
 namespace discpp {
 	Message::Message(const Snowflake& id) : discpp::DiscordObject(id) {
-		auto message = discpp::globals::client_instance->messages.find(id);
-		if (message != discpp::globals::client_instance->messages.end()) {
+		auto message = discpp::globals::client_instance->cache.messages.find(id);
+		if (message != discpp::globals::client_instance->cache.messages.end()) {
 			*this = *message->second;
 		}
 	}
@@ -16,13 +21,32 @@ namespace discpp {
 
 	Message::Message(rapidjson::Document& json) {
 		id = GetIDSafely(json, "id");
-		channel = globals::client_instance->GetChannel(SnowflakeFromString(json["channel_id"].GetString()));
-        guild = std::make_shared<discpp::Guild>(ConstructDiscppObjectFromID(json, "guild_id", discpp::Guild()));
-		author = std::make_shared<discpp::User>(ConstructDiscppObjectFromJson(json, "author", discpp::User()));
+		channel = globals::client_instance->cache.GetChannel(SnowflakeFromString(json["channel_id"].GetString()));
+		try {
+            guild = channel.GetGuild();
+        } catch (const DiscordObjectNotFound& e) {
+		} catch (const std::runtime_error& e) {}
+		author = ConstructDiscppObjectFromJson(json, "author", discpp::User());
+        if (ContainsNotNull(json, "member")) {
+            try {
+                auto mbr = guild->GetMember(id);
+                member = mbr;
+            } catch (const std::runtime_error& error) {
+                rapidjson::Document doc(rapidjson::kObjectType);
+                doc.CopyFrom(json["member"], doc.GetAllocator());
+
+                // Since the member isn't cached, create it.
+                auto mbr = std::make_shared<discpp::Member>(discpp::Member(doc, *guild));
+                mbr->user = author;
+                member = mbr;
+
+                // Add the new member into cache since it isn't already.
+                guild->members.emplace(id, mbr);
+            }
+        }
 		content = GetDataSafely<std::string>(json, "content");
 		timestamp = TimeFromDiscord(GetDataSafely<std::string>(json, "timestamp"));
-		std::string tmstamp = GetDataSafely<std::string>(json, "edited_timestamp");
-		if (tmstamp != "") edited_timestamp = TimeFromDiscord(tmstamp);
+		if (discpp::ContainsNotNull(json, "edited_timestamp")) edited_timestamp = TimeFromDiscord(json["edited_timestamp"].GetString());
 		if (GetDataSafely<bool>(json, "tts")) {
 		    bit_flags |= 0b1;
 		}
@@ -90,9 +114,9 @@ namespace discpp {
         }
 		webhook_id = GetIDSafely(json, "webhook_id");
 		type = GetDataSafely<int>(json, "type");
-		activity = ConstructDiscppObjectFromJson(json, "activity", discpp::MessageActivity());
-        application = ConstructDiscppObjectFromJson(json, "application", discpp::MessageApplication());
-        message_reference = ConstructDiscppObjectFromJson(json, "message_reference", discpp::MessageReference());
+		activity = std::make_shared<discpp::MessageActivity>(ConstructDiscppObjectFromJson(json, "activity", discpp::MessageActivity()));
+        application = std::make_shared<discpp::MessageApplication>(ConstructDiscppObjectFromJson(json, "application", discpp::MessageApplication()));
+        message_reference = std::make_shared<discpp::MessageReference>(ConstructDiscppObjectFromJson(json, "message_reference", discpp::MessageReference()));
 		flags = GetDataSafely<int>(json, "flags");
 	}
 
@@ -172,7 +196,7 @@ namespace discpp {
 		return *this;
 	}
 
-	discpp::Message Message::EditMessage(discpp::EmbedBuilder& embed) {
+	discpp::Message Message::EditMessage(const discpp::EmbedBuilder& embed) {
 
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id));
 		rapidjson::Document json = embed.ToJson();
