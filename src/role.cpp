@@ -34,7 +34,7 @@ namespace discpp {
         return (flags & 0b10) == 0b10;
     }
 
-    bool Role::IsMentionable() {const
+    bool Role::IsMentionable() const {
         return (flags & 0b100) == 0b100;
     }
 }
