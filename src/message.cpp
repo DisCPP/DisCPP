@@ -32,7 +32,7 @@ namespace discpp {
                 try {
                     auto mbr = guild->GetMember(id);
                     member = mbr;
-                } catch (const std::runtime_error &error) {
+                } catch (DiscordObjectNotFound) {
                     rapidjson::Document doc(rapidjson::kObjectType);
                     doc.CopyFrom(json["member"], doc.GetAllocator());
 
