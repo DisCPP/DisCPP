@@ -234,6 +234,7 @@ namespace discpp {
 		bool user_mfa_enabled;
 		std::string user_locale;
 		bool user_verified;
+        std::vector<Shard*> shards;
 
 		template <typename FType, typename... T>
 		void DoFunctionLater(FType&& func, T&&... args) {
@@ -262,7 +263,6 @@ namespace discpp {
 		bool run = true;
 
         std::vector<std::future<void>> futures;
-        std::vector<Shard*> shards;
 
 		std::mutex futures_mutex;
 
