@@ -306,14 +306,15 @@ namespace discpp {
             HELLO = 10,					// Receive
             HEARTBEAT_ACK = 11			// Receive
         };
+
+        int id;
+        Client& client;
     private:
         friend class Client;
         friend class EventDispatcher;
 
         Shard(Client& client, int id, std::string endpoint) : client(client), id(id), gateway_endpoint(endpoint) {}
 
-        int id;
-        Client& client;
         std::string session_id;
         std::string gateway_endpoint;
 
