@@ -139,7 +139,10 @@ namespace discpp {
 		preferred_locale = json["preferred_locale"].GetString();
 
 		if (ContainsNotNull(json, "public_updates_channel_id")) {
-            public_updates_channel = discpp::Channel(discpp::Channel(SnowflakeFromString(json["public_updates_channel_id"].GetString())));
+		    auto channel = channels.find(Snowflake(json["public_updates_channel_id"].GetString()));
+		    if (channel != channels.end()) {
+                public_updates_channel = channel->second;
+		    }
         }
 
 		created_at = FormatTime(TimeFromSnowflake(id));
