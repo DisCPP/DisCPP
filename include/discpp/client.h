@@ -76,6 +76,8 @@ namespace discpp {
         discpp::User user;
 	};
 
+	class Shard;
+
 	class Client {
 	public:
 		std::string token; /**< Token for the current client. */
@@ -86,20 +88,6 @@ namespace discpp {
 
 		//std::unordered_map<Snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
         discpp::Cache cache; /**< Bot cache. Stores members, channels, guilds, etc. */
-
-		enum packet_opcode : int {
-			dispatch = 0,				// Receive
-			heartbeat = 1,				// Send/Receive
-			identify = 2,				// Send
-			status_update = 3,			// Send
-			voice_state_update = 4,		// Send
-			resume = 6,					// Send
-			reconnect = 7,				// Receive
-			request_guild_members = 8,	// Send
-			invalid_session = 9,		// Receive
-			hello = 10,					// Receive
-			heartbeat_ack = 11			// Receive
-		};
 
         /**
          * @brief Constructs a discpp::Bot object.
@@ -130,22 +118,6 @@ namespace discpp {
 		int Run();
 
         /**
-         * @brief Send a request to the websocket.
-         *
-         * Be cautious with this as it may close the websocket connection if it is invalid.
-         *
-         * ```cpp
-         *      bot.CreateWebsocketRequest(request_json);
-         * ```
-         *
-         * @param[in] json The request to send to the websocket.
-         * @param[in] message The message to print to the debug log. If this is empty it will be set to default. (Default: "Sending gateway payload" + payload)
-         *
-         * @return void
-         */
-		void CreateWebsocketRequest(rapidjson::Document& json, const std::string& message = "");
-
-        /**
          * @brief Change the command handler.
          *
          * This is used in case you wanted to add functionality to the command handler.
@@ -159,9 +131,8 @@ namespace discpp {
          * @return void
          */
 		void SetCommandHandler(const std::function<void(discpp::Client*, discpp::Message)>& command_handler);
-		void DisconnectWebsocket();
+
 		void StopClient();
-		void ReconnectToWebsocket();
 
 		// Discord based methods.
 
@@ -264,8 +235,6 @@ namespace discpp {
 		std::string user_locale;
 		bool user_verified;
 
-        void OnWebSocketPacket(rapidjson::Document& result);
-
 		template <typename FType, typename... T>
 		void DoFunctionLater(FType&& func, T&&... args) {
 			/**
@@ -287,43 +256,88 @@ namespace discpp {
             }
 		}
 	private:
-		friend class EventDispatcher;
-        bool ready = false;
-        bool disconnected = true;
-		bool reconnecting = false;
+		friend class Shard;
+        friend class EventDispatcher;
 		bool stay_disconnected = false;
 		bool run = true;
 
         std::vector<std::future<void>> futures;
-
-		std::string session_id;
-		std::string gateway_endpoint;
-
-		rapidjson::Document hello_packet;
-
-		std::thread heartbeat_thread;
-		std::thread future_loop_thread;
+        std::vector<Shard*> shards;
 
 		std::mutex futures_mutex;
-
-		ix::WebSocket websocket;
-
-		bool heartbeat_acked;
-		int last_sequence_number;
-		long long packet_counter;
 
 		int message_cache_count;
 
 		// Websocket Methods
-		void WebSocketStart();
-		void OnWebSocketListen(ix::WebSocketMessagePtr& msg);
-		//void OnWebSocketPacket(rapidjson::Document& result);
-		void HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg);
-		void HandleHeartbeat();
-		rapidjson::Document GetIdentifyPacket();
+
 
 		// Commands
 		std::function<void(discpp::Client*, discpp::Message)> fire_command_method;
+    };
+
+    class Shard {
+    public:
+        /**
+         * @brief Send a request to the websocket.
+         *
+         * Be cautious with this as it will close the websocket connection if the packet is invalid.
+         *
+         * ```cpp
+         *      bot.CreateWebsocketRequest(request_json);
+         * ```
+         *
+         * @param[in] json The request to send to the websocket.
+         * @param[in] message The message to print to the debug log. If this is empty it will be set to default. (Default: "Sending gateway payload" + payload)
+         *
+         * @return void
+         */
+        void CreateWebsocketRequest(rapidjson::Document& json, const std::string& message = "");
+
+        enum Opcode : int {
+            DISPATCH = 0,				// Receive
+            HEARTBEAT = 1,				// Send/Receive
+            IDENTIFY = 2,				// Send
+            STATUS_UPDATE = 3,			// Send
+            VOICE_STATE_UPDATE = 4,		// Send
+            RESUME = 6,					// Send
+            RECONNECT = 7,				// Receive
+            REQUEST_GUILD_MEMBERS = 8,	// Send
+            INVALID_SESSION = 9,		// Receive
+            HELLO = 10,					// Receive
+            HEARTBEAT_ACK = 11			// Receive
+        };
+    private:
+        friend class Client;
+        friend class EventDispatcher;
+
+        Shard(Client& client, int id, std::string endpoint) : client(client), id(id), gateway_endpoint(endpoint) {}
+
+        int id;
+        Client& client;
+        std::string session_id;
+        std::string gateway_endpoint;
+
+        rapidjson::Document hello_packet;
+
+        std::thread heartbeat_thread;
+
+        ix::WebSocket websocket;
+
+        bool ready = false;
+        bool disconnected = true;
+        bool reconnecting = false;
+        bool heartbeat_acked;
+        int last_sequence_number;
+        long long packet_counter;
+
+        void ReconnectToWebsocket();
+        void DisconnectWebsocket();
+        void WebSocketStart();
+        void OnWebSocketListen(ix::WebSocketMessagePtr& msg);
+        void OnWebSocketPacket(rapidjson::Document& result);
+        void HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg);
+        void HandleHeartbeat();
+        rapidjson::Document GetIdentifyPacket();
     };
 }
 

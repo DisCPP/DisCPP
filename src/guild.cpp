@@ -298,15 +298,21 @@ namespace discpp {
 	}
 
 	std::shared_ptr<discpp::Member> Guild::GetMember(const Snowflake& id) {
-		try {
-			return GetMember(id);
-		} catch (const DiscordObjectNotFound& e) {
-			rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/"+ std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+        if (id == 0) {
+            throw DiscordObjectNotFound("Member id: " + std::to_string(id) + " is not valid!");
+        }
 
-			auto member = std::make_shared<discpp::Member>(result, this->id);
-			members.emplace(member->id, member);
-			return member;
-		}
+        auto it = members.find(id);
+
+        if (it != members.end()) {
+            return it->second;
+        }
+
+        rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/"+ std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+
+        auto member = std::make_shared<discpp::Member>(result, this->id);
+        members.emplace(member->id, member);
+        return member;
 	}
 
 	void Guild::EnsureBotPermission(const Permission& req_perm) const {
