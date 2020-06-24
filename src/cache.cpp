@@ -25,11 +25,11 @@ std::shared_ptr<discpp::Guild> discpp::Cache::GetGuild(const discpp::Snowflake &
 }
 
 discpp::Channel discpp::Cache::GetChannel(const discpp::Snowflake &id, bool can_request) {
-    discpp::Channel channel = GetDMChannel(id);
-
-    if (channel.id == 0) {
+    try {
+        return GetDMChannel(id, can_request);
+    } catch (DiscordObjectNotFound) {
         for (const auto &guild : guilds) {
-            channel = guild.second->GetChannel(id);
+            discpp::Channel channel = guild.second->GetChannel(id);
 
             if (channel.id != 0) return channel;
         }
@@ -40,8 +40,6 @@ discpp::Channel discpp::Cache::GetChannel(const discpp::Snowflake &id, bool can_
         } else {
             throw DiscordObjectNotFound("Channel not found of id: " + std::to_string(id));
         }
-    } else {
-        return channel;
     }
 }
 

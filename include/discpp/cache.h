@@ -46,6 +46,8 @@ namespace discpp {
          * the channel from the REST API. But if its not true, and its not found, an exception will be
          * thrown of DiscordObjectNotFound.
          *
+         * If the id is of a DM channel's id, it will return that DM channel.
+         *
          * @return discpp::Channel
          */
         discpp::Channel GetChannel(const discpp::Snowflake& id, bool can_request = false);
