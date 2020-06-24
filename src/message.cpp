@@ -28,20 +28,22 @@ namespace discpp {
 		} catch (const std::runtime_error& e) {}
 		author = ConstructDiscppObjectFromJson(json, "author", discpp::User());
         if (ContainsNotNull(json, "member")) {
-            try {
-                auto mbr = guild->GetMember(id);
-                member = mbr;
-            } catch (const std::runtime_error& error) {
-                rapidjson::Document doc(rapidjson::kObjectType);
-                doc.CopyFrom(json["member"], doc.GetAllocator());
+            if (guild != nullptr) {
+                try {
+                    auto mbr = guild->GetMember(id);
+                    member = mbr;
+                } catch (const std::runtime_error &error) {
+                    rapidjson::Document doc(rapidjson::kObjectType);
+                    doc.CopyFrom(json["member"], doc.GetAllocator());
 
-                // Since the member isn't cached, create it.
-                auto mbr = std::make_shared<discpp::Member>(discpp::Member(doc, *guild));
-                mbr->user = author;
-                member = mbr;
+                    // Since the member isn't cached, create it.
+                    auto mbr = std::make_shared<discpp::Member>(discpp::Member(doc, *guild));
+                    mbr->user = author;
+                    member = mbr;
 
-                // Add the new member into cache since it isn't already.
-                guild->members.emplace(id, mbr);
+                    // Add the new member into cache since it isn't already.
+                    guild->members.emplace(id, mbr);
+                }
             }
         }
 		content = GetDataSafely<std::string>(json, "content");

@@ -49,18 +49,21 @@ namespace discpp {
             }
 
             if (ContainsNotNull(gateway_request, "url")) {
-                if (gateway_request["session_start_limit"]["remaining"].GetInt() == 0) {
+                if (ContainsNotNull(gateway_request, "session_start_limit") &&
+                    gateway_request["session_start_limit"]["remaining"].GetInt() == 0) {
 
                     logger->Debug(LogTextColor::RED + "GATEWAY ERROR: Maximum start limit reached");
                     throw StartLimitException();
                 }
 
-                int recommended_shards = gateway_request["shards"].GetInt();
-                if (recommended_shards > config->shard_amount) {
-                    logger->Warn(LogTextColor::YELLOW + "You set shard amount to \"" + std::to_string(config->shard_amount) + \
-                        "\" but discord recommends to use \"" + std::to_string(recommended_shards) + "\", so we're gonna listen to Discord...");
+                if (ContainsNotNull(gateway_request, "shards")) {
+                    int recommended_shards = gateway_request["shards"].GetInt();
+                    if (recommended_shards > config->shard_amount) {
+                        logger->Warn(LogTextColor::YELLOW + "You set shard amount to \"" + std::to_string(config->shard_amount) + \
+                            "\" but discord recommends to use \"" + std::to_string(recommended_shards) + "\", so we're gonna listen to Discord...");
 
-                    config->shard_amount = recommended_shards;
+                        config->shard_amount = recommended_shards;
+                    }
                 }
 
                 // Specify version and encoding just ot be safe
