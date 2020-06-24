@@ -812,6 +812,13 @@ namespace discpp {
 		std::string GetIconURL(const discpp::ImageType& img_type = discpp::ImageType::AUTO) const;
 
         /**
+         * @brief Returns if the guild has an icon.
+         *
+         * @return bool
+         */
+        bool HasIcon() const;
+
+        /**
          * @brief Retrieve guild banner url.
          *
          * @param[in] img_type Optional parameter for type of image
@@ -819,6 +826,13 @@ namespace discpp {
          * @return std::string
          */
         std::string GetBannerURL(const discpp::ImageType& img_type = discpp::ImageType::AUTO) const;
+
+        /**
+         * @brief Returns if the guild has a banner.
+         *
+         * @return bool
+         */
+        bool HasBanner() const;
 
         /**
          * @brief Retrieve guild splash url.
@@ -830,6 +844,13 @@ namespace discpp {
         std::string GetSplashURL(const discpp::ImageType& img_type = discpp::ImageType::AUTO) const;
 
         /**
+         * @brief Returns if the guild has a splash.
+         *
+         * @return bool
+         */
+        bool HasSplash() const;
+
+        /**
          * @brief Retrieve guild discovery splash url.
          *
          * @param[in] img_type Optional parameter for type of image
@@ -837,6 +858,13 @@ namespace discpp {
          * @return std::string
          */
         std::string GetDiscoverySplashURL(const discpp::ImageType& img_type = discpp::ImageType::AUTO) const;
+
+        /**
+         * @brief Returns if the guild has a splash.
+         *
+         * @return bool
+         */
+        bool HasDiscoverySplash() const;
 
         /**
          * @brief Retrieve guild owner as a discpp::Member object

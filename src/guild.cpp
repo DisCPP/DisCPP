@@ -687,6 +687,30 @@ namespace discpp {
 		}
 	}
 
+    bool Guild::HasIcon() const {
+        std::string icon_str = CombineAvatarHash(icon_hex);
+
+        return !icon_str.empty();
+	}
+
+    bool Guild::HasBanner() const {
+        std::string banner_str = CombineAvatarHash(banner_hex);
+
+        return !banner_str.empty();
+    }
+
+    bool Guild::HasSplash() const {
+        std::string splash_str = CombineAvatarHash(splash_hex);
+
+        return !splash_str.empty();
+    }
+
+    bool Guild::HasDiscoverySplash() const {
+        std::string discovery_splash_str = CombineAvatarHash(discovery_hex);
+
+        return !discovery_splash_str.empty();
+    }
+
 	inline std::shared_ptr<discpp::Member> Guild::GetOwnerMember() const {
 		return this->GetMember(this->owner_id);
 	}

@@ -26,15 +26,15 @@ namespace discpp {
         }
 	}
 
-    bool Role::IsHoistable() {
+    bool Role::IsHoistable() const {
         return (flags & 0b1) == 0b1;
     }
 
-    bool Role::IsManaged() {
+    bool Role::IsManaged() const {
         return (flags & 0b10) == 0b10;
     }
 
-    bool Role::IsMentionable() {
+    bool Role::IsMentionable() {const
         return (flags & 0b100) == 0b100;
     }
 }
