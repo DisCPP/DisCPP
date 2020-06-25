@@ -153,7 +153,7 @@ namespace discpp {
          *
          * @return std::vector<discpp::Message>
          */
-        std::vector<discpp::Message> RequestMessages(int amount, GetChannelsMessagesMethod get_method = GetChannelsMessagesMethod::LIMIT);
+        std::vector<discpp::Message> RequestMessages(int amount, GetChannelsMessagesMethod get_method = GetChannelsMessagesMethod::LIMIT) const;
 
         /**
          * @brief Requests the channel's message from the discord api.

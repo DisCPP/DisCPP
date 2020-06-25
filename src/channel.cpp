@@ -173,7 +173,7 @@ namespace discpp {
 		return *this;
 	}
 
-	std::vector<discpp::Message> Channel::RequestMessages(int amount, GetChannelsMessagesMethod get_method) {
+	std::vector<discpp::Message> Channel::RequestMessages(int amount, GetChannelsMessagesMethod get_method) const {
 		rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/messages"), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 
 		std::vector<discpp::Message> messages;

@@ -24,15 +24,15 @@ namespace discpp {
 		channel = globals::client_instance->cache.GetChannel(SnowflakeFromString(json["channel_id"].GetString()));
 		try {
             guild = channel.GetGuild();
-        } catch (const DiscordObjectNotFound& e) {
-		} catch (const std::runtime_error& e) {}
+        } catch (const DiscordObjectNotFound&) {}
+
 		author = ConstructDiscppObjectFromJson(json, "author", discpp::User());
         if (ContainsNotNull(json, "member")) {
             if (guild != nullptr) {
                 try {
                     auto mbr = guild->GetMember(id);
                     member = mbr;
-                } catch (DiscordObjectNotFound) {
+                } catch (const DiscordObjectNotFound&) {
                     rapidjson::Document doc(rapidjson::kObjectType);
                     doc.CopyFrom(json["member"], doc.GetAllocator());
 
