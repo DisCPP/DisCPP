@@ -56,7 +56,7 @@ namespace discpp {
      *
      * @return RequestChannelsMessageMethod
      */
-    RequestChannelsMessageMethod RequestChannelsMessageAround(Snowflake around_id) {
+    inline RequestChannelsMessageMethod RequestMessagesAround(Snowflake around_id) {
         RequestChannelsMessageMethod request;
         request.around_id = around_id;
         return request;
@@ -69,7 +69,7 @@ namespace discpp {
      *
      * @return RequestChannelsMessageMethod
      */
-    RequestChannelsMessageMethod RequestChannelsMessageBefore(Snowflake before_id) {
+    inline RequestChannelsMessageMethod RequestMessagesBefore(Snowflake before_id) {
         RequestChannelsMessageMethod request;
         request.before_id = before_id;
         return request;
@@ -82,7 +82,7 @@ namespace discpp {
      *
      * @return RequestChannelsMessageMethod
      */
-    RequestChannelsMessageMethod RequestChannelsMessageAfter(Snowflake after_id) {
+    inline RequestChannelsMessageMethod RequestMessagesAfter(Snowflake after_id) {
         RequestChannelsMessageMethod request;
         request.after_id = after_id;
         return request;
