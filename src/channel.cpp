@@ -172,15 +172,24 @@ namespace discpp {
 		return *this;
 	}
 
-	std::vector<discpp::Message> Channel::RequestMessages(int amount, GetChannelsMessagesMethod get_method) const {
-		rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/messages"), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+	std::vector<discpp::Message> Channel::RequestMessages(int amount, RequestChannelsMessageMethod get_method) const {
+	    std::string url = Endpoint("/channels/" + std::to_string(id) + "/messages?limit=" + std::to_string(amount));
+
+	    if (get_method.around_id != 0) {
+            url += "&around=" + std::to_string(get_method.around_id);
+	    } else if (get_method.before_id != 0) {
+            url += "&before=" + std::to_string(get_method.before_id);
+        } else if (get_method.after_id != 0) {
+            url += "&after=" + std::to_string(get_method.after_id);
+        }
+
+		rapidjson::Document result = SendGetRequest(url, DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 
 		std::vector<discpp::Message> messages;
-
 		for (auto& message : result.GetArray()) {
 			rapidjson::Document message_json;
 			message_json.CopyFrom(message, message_json.GetAllocator());
-			messages.push_back(discpp::Message(message_json));
+			messages.emplace_back(message_json);
 		}
 
 		return messages;
