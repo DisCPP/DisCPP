@@ -476,13 +476,5 @@ std::string discpp::CombineAvatarHash(const uint64_t in[2]) {
     stream << std::setw(16) << std::setfill('0') << std::hex << in[0];
     stream << std::setw(16) << std::setfill('0') << std::hex << in[1];
 
-    std::string hex_str = stream.str();
-
-    // Some image hashes may start with zero. This character gets removed
-    // from the avatar_hex after transported back to string.
-    if (hex_str.size() == 31) {
-        hex_str = "0" + hex_str;
-    }
-
-    return hex_str;
+    return stream.str();
 }
