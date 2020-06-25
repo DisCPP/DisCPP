@@ -4,6 +4,7 @@
 #include "message.h"
 #include "log.h"
 #include "guild.h"
+#include "exceptions.h"
 
 namespace discpp {
 	Channel::Channel(const Snowflake& id) : discpp::DiscordObject(id) {
@@ -60,8 +61,6 @@ namespace discpp {
 	}
 
 	discpp::Message Channel::Send(const std::string& text, const bool& tts, discpp::EmbedBuilder* embed, std::vector<File> files) {
-        //std::string escaped_text = EscapeString(text);
-
         // Send a file filled with message contents if the message is more than 2000 characters.
         if (text.size() >= 2000) {
             // Write message to file
@@ -79,11 +78,11 @@ namespace discpp {
 
                 // Delete the temporary message file
                 remove("message.txt");
-            } catch (std::exception e) {
-                // Delete the temporary message file
+            } catch (const std::runtime_error& e) {
+                // Delete the temporary message file and then throw this exception again.
                 remove("message.txt");
 
-                throw std::exception(e);
+                throw std::runtime_error(e);
             }
 
             return sent_message;
@@ -264,7 +263,7 @@ namespace discpp {
 
     std::shared_ptr<discpp::Guild> Channel::GetGuild() const {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            throw std::runtime_error("discpp::Channel::GetGuild only available for guild channels!");
+            throw ProhibitedEndpointException("discpp::Channel::GetGuild only available for guild channels!");
         }
 
         std::shared_ptr<Guild> tmp = globals::client_instance->cache.GetGuild(guild_id);
