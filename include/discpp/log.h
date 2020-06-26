@@ -162,15 +162,13 @@ namespace discpp {
                 return;
             }
 
-            { // Log to console
-                std::lock_guard<std::mutex> lock_guard(console_mutex);
-                std::cout << tmp << std::endl;
-            }
+            // Log to console
+            std::lock_guard<std::mutex> lock_guard(console_mutex);
+            std::cout << tmp << std::endl;
 
-            { // Log to file
-                std::lock_guard<std::mutex> lock_guard(file_mutex);
-                log_file << tmp << std::endl;
-            }
+            // Log to file
+            std::lock_guard<std::mutex> lock(file_mutex);
+            log_file << tmp << std::endl;
 		}
 
 	public:

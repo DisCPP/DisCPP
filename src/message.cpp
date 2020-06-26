@@ -48,8 +48,12 @@ namespace discpp {
             }
         }
 		content = GetDataSafely<std::string>(json, "content");
-		timestamp = TimeFromDiscord(GetDataSafely<std::string>(json, "timestamp"));
-		if (discpp::ContainsNotNull(json, "edited_timestamp")) edited_timestamp = TimeFromDiscord(json["edited_timestamp"].GetString());
+        if (discpp::ContainsNotNull(json, "timestamp")) {
+            timestamp = std::chrono::system_clock::from_time_t(TimeFromDiscord(json["timestamp"].GetString()));
+        }
+		if (discpp::ContainsNotNull(json, "edited_timestamp")) {
+		    edited_timestamp = std::chrono::system_clock::from_time_t(TimeFromDiscord(json["edited_timestamp"].GetString()));
+		}
 		if (GetDataSafely<bool>(json, "tts")) {
 		    bit_flags |= 0b1;
 		}
