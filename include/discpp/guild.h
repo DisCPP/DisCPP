@@ -283,6 +283,8 @@ namespace discpp {
          */
 		std::unordered_map<discpp::Snowflake, discpp::Channel> GetCategories();
 
+        std::unordered_map<Snowflake, Channel> GetParentlessChannels();
+
         /**
          * @brief Gets a channel in this guild.
          *
@@ -960,7 +962,7 @@ namespace discpp {
         uint64_t banner_hex[2] = {0, 0};
 
         bool is_icon_gif = false;
-	};
+    };
 
     class VoiceState {
     public:
