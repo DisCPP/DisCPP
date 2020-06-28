@@ -199,6 +199,21 @@ namespace discpp {
         std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>> GetRoles();
 
         /**
+         * @brief Returns member roles but ordered by position.
+         *
+         * @return std::vector<std::shared_ptr<discpp::Role>>
+         */
+        std::vector<std::shared_ptr<discpp::Role>> GetSortedRoles();
+
+        /**
+         * @brief Returns highest role.
+         *
+         * @param isHoistable
+         * @return std::shared_ptr<discpp::Role>
+         */
+        std::shared_ptr<discpp::Role> GetHighestRole(const bool isHoistable = false);
+
+        /**
          * @brief Returns guild object.
          *
          * @return std::shared_ptr<discpp::Guild>

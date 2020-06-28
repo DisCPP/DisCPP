@@ -184,6 +184,38 @@ namespace discpp {
         return r;
     }
 
+    std::vector<std::shared_ptr<discpp::Role>> Member::GetSortedRoles() {
+        std::vector<std::shared_ptr<discpp::Role>> tmp;
+
+        std::shared_ptr<discpp::Guild> guild = GetGuild();
+        for (auto const& role : roles) {
+            auto r_ptr = guild->GetRole(role);
+            tmp.push_back(r_ptr);
+        }
+
+        std::sort(tmp.begin(), tmp.end(), [](std::shared_ptr<discpp::Role> x, std::shared_ptr<discpp::Role> y) {
+            return x->position < y->position;
+        });
+
+        return tmp;
+    }
+
+    std::shared_ptr<discpp::Role> Member::GetHighestRole(const bool isHoistable) {
+        std::vector<std::shared_ptr<discpp::Role>> rolelist = this->GetSortedRoles();
+	    std::shared_ptr<discpp::Role> role;
+        if (isHoistable) {
+	        for (auto tmp : rolelist) {
+                if (tmp->IsHoistable()) {
+                    role = tmp;
+                    break;
+                }
+	        }
+	    } else {
+            return rolelist[0];
+        }
+        return role;
+	}
+
     std::shared_ptr<discpp::Guild> Member::GetGuild() {
         return discpp::globals::client_instance->cache.GetGuild(guild_id);
     }
