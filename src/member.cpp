@@ -211,7 +211,7 @@ namespace discpp {
                 }
 	        }
 	    } else {
-            return rolelist[0];
+            role = rolelist[0];
         }
         return role;
 	}
