@@ -45,7 +45,7 @@ rapidjson::Document discpp::HandleResponse(cpr::Response& response, const Snowfl
 
 	// Check if we were returned an error and throw an exception if so.
 	if (!tmp.IsNull() && tmp.IsObject() && ContainsNotNull(tmp, "code")) {
-        throw discpp::GetException(tmp);
+        discpp::ThrowException(tmp);
     }
 
     // This shows an error in inteliisense for some reason but compiles fine.

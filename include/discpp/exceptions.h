@@ -86,7 +86,7 @@ namespace discpp {
         explicit InvalidAPIVersionException(const std::string& str) : std::runtime_error(str) {}
     };
 
-    inline std::runtime_error GetException(rapidjson::Document& json) {
+    inline void ThrowException(rapidjson::Document& json) {
         switch (json["code"].GetInt()) {
             case 10001:
             case 10002:
@@ -111,11 +111,11 @@ namespace discpp {
             case 10031:
             case 10032:
             case 10036:
-                return DiscordObjectNotFound(json["message"].GetString());
+                throw DiscordObjectNotFound(json["message"].GetString());
             case 20001:
             case 20002:
             case 500003: // Cannot execute action on a DM channel.
-                return ProhibitedEndpointException(json["message"].GetString());
+                throw ProhibitedEndpointException(json["message"].GetString());
             case 30001:
             case 30002:
             case 30003:
@@ -125,37 +125,37 @@ namespace discpp {
             case 30013:
             case 30015:
             case 30016:
-                return MaximumLimitException(json["message"].GetString());
+                throw MaximumLimitException(json["message"].GetString());
             case 400001:
             case 400002:
-                return AuthenticationException(json["message"].GetString());
+                throw AuthenticationException(json["message"].GetString());
             case 400005:
-                return RequestTooLargeException(json["message"].GetString());
+                throw RequestTooLargeException(json["message"].GetString());
             case 400006:
-                return FeatureDisabledException(json["message"].GetString());
+                throw FeatureDisabledException(json["message"].GetString());
             case 400007:
-                return BannedException(json["message"].GetString());
+                throw BannedException(json["message"].GetString());
             case 50001:
-                return MissingAccessException(json["message"].GetString());
+                throw MissingAccessException(json["message"].GetString());
             case 50003:
-                return InvalidAccountTypeException(json["message"].GetString());
+                throw InvalidAccountTypeException(json["message"].GetString());
             case 50004:
-                return GuildWidgetDisabledException(json["message"].GetString());
+                throw GuildWidgetDisabledException(json["message"].GetString());
             case 50005:
             case 50006:
             case 50007:
             case 50008:
             case 50009:
-                return MissingAccessException(json["message"].GetString());
+                throw MissingAccessException(json["message"].GetString());
             case 50010:
             case 50011:
             case 50012:
             case 50025:
-                return OAuth2Exception(json["message"].GetString());
+                throw OAuth2Exception(json["message"].GetString());
             case 50013:
-                return NoPermissionException(json["message"].GetString());
+                throw NoPermissionException(json["message"].GetString());
             case 50014:
-                return AuthenticationException(json["message"].GetString());
+                throw AuthenticationException(json["message"].GetString());
             case 50015:
             case 50016:
             case 50019:
@@ -165,14 +165,14 @@ namespace discpp {
             case 50035:
             case 50036:
             case 90001:
-                return EndpointParameterException(json["message"].GetString());
+                throw EndpointParameterException(json["message"].GetString());
             case 50041:
-                return InvalidAPIVersionException(json["message"].GetString());
+                throw InvalidAPIVersionException(json["message"].GetString());
             case 130000:
-                return APIOverloadedException(json["message"].GetString());
+                throw APIOverloadedException(json["message"].GetString());
         }
 
-        return std::runtime_error(std::to_string(json["code"].GetInt()) + ": " + json["message"].GetString());
+        throw std::runtime_error(std::to_string(json["code"].GetInt()) + ": " + json["message"].GetString());
     }
 }
 

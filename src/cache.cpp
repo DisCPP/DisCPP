@@ -76,7 +76,7 @@ std::shared_ptr<discpp::Member> discpp::Cache::GetMember(const discpp::Snowflake
     }
 }
 
-discpp::Message discpp::Cache::GetMessage(const discpp::Snowflake &channel_id, const discpp::Snowflake &id, bool can_request) {
+discpp::Message discpp::Cache::GetDiscordMessage(const discpp::Snowflake &channel_id, const discpp::Snowflake &id, bool can_request) {
     auto message = messages.find(id);
     if (message != messages.end()) {
         return *message->second;

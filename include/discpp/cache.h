@@ -87,7 +87,7 @@ namespace discpp {
          *
          * @return discpp::Message
          */
-        discpp::Message GetMessage(const Snowflake& channel_id, const Snowflake& id, bool can_request = false);
+        discpp::Message GetDiscordMessage(const Snowflake& channel_id, const Snowflake& id, bool can_request = false);
     };
 }
 

@@ -8,7 +8,7 @@
 
 namespace discpp {
 	Message::Message(const Snowflake& channel_id, const Snowflake& id, bool can_request) : discpp::DiscordObject(id) {
-        *this = globals::client_instance->cache.GetMessage(channel_id, id, can_request);
+        *this = globals::client_instance->cache.GetDiscordMessage(channel_id, id, can_request);
 	}
 
 	Message::Message(rapidjson::Document& json) {
