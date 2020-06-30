@@ -204,15 +204,16 @@ namespace discpp {
          *
          * This constructor searches the guild cache to get a guild object.
          *
-         * ```cpp
-         *      discpp::Guild guild(583251190591258624);
-         * ```
+         * If you set `can_request` to true, and the message is not found in cache, then we will request
+         * the message from the REST API. But if its not true, and its not found, an exception will be
+         * thrown of DiscordObjectNotFound.
          *
-         * @param[in] id The id of the guild
+         * @param[in] id The id of the guild.
+         * @param[in] can_request Whether or not the library can request the message from the REST API.
          *
          * @return discpp::Guild, this is a constructor.
          */
-		Guild(const Snowflake& id);
+		Guild(const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Constructs a discpp::Guild object by parsing json

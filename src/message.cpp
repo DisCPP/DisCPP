@@ -7,17 +7,9 @@
 #include "exceptions.h"
 
 namespace discpp {
-	Message::Message(const Snowflake& id) : discpp::DiscordObject(id) {
-		auto message = discpp::globals::client_instance->cache.messages.find(id);
-		if (message != discpp::globals::client_instance->cache.messages.end()) {
-			*this = *message->second;
-		}
+	Message::Message(const Snowflake& channel_id, const Snowflake& id, bool can_request) : discpp::DiscordObject(id) {
+        *this = globals::client_instance->cache.GetMessage(channel_id, id, can_request);
 	}
-
-    Message::Message(const Snowflake& message_id, const Snowflake& channel_id) {
-        rapidjson::Document message = SendGetRequest(Endpoint("/channels/" + std::to_string(channel_id) + "/messages/" + std::to_string(message_id)), DefaultHeaders(), channel_id, RateLimitBucketType::CHANNEL);
-        *this = discpp::Message(message);
-    }
 
 	Message::Message(rapidjson::Document& json) {
 		id = GetIDSafely(json, "id");

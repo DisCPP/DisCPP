@@ -75,3 +75,19 @@ std::shared_ptr<discpp::Member> discpp::Cache::GetMember(const discpp::Snowflake
         throw DiscordObjectNotFound("Member not found of id: " + std::to_string(guild_id) + ", in guild of id: " + std::to_string(guild_id));
     }
 }
+
+discpp::Message discpp::Cache::GetMessage(const discpp::Snowflake &channel_id, const discpp::Snowflake &id, bool can_request) {
+    auto message = messages.find(id);
+    if (message != messages.end()) {
+        return *message->second;
+    }
+
+    if (can_request) {
+        rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + std::to_string(channel_id) + "/messages/" + std::to_string(id)),
+            DefaultHeaders(), channel_id, RateLimitBucketType::CHANNEL);
+
+        return Message(result);
+    } else {
+        throw DiscordObjectNotFound("Message of id \"" + std::to_string(id) + "\" was not found!");
+    }
+}

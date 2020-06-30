@@ -100,15 +100,16 @@ namespace discpp {
         /**
          * @brief Constructs a discpp::Channel object from the id.
          *
-         * ```cpp
-         *      discpp::Channel channel(674023471063498772);
-         * ```
+         * If you set `can_request` to true, and the message is not found in cache, then we will request
+         * the message from the REST API. But if its not true, and its not found, an exception will be
+         * thrown of DiscordObjectNotFound.
          *
-         * @param[in] id The channel id
+         * @param[in] id The id of the channel.
+         * @param[in] can_request Whether or not the library can request the message from the REST API.
          *
          * @return discpp::Channel, this is a constructor.
          */
-		Channel(const Snowflake& id);
+		Channel(const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Constructs a discpp::Channel object from json.

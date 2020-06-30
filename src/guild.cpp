@@ -11,12 +11,8 @@
 #include <memory>
 
 namespace discpp {
-	Guild::Guild(const Snowflake& id) : DiscordObject(id) {
-		auto it = discpp::globals::client_instance->cache.guilds.find(id);
-
-		if (it != discpp::globals::client_instance->cache.guilds.end()) {
-			*this = *it->second;
-		}
+	Guild::Guild(const Snowflake& id, bool can_request) : DiscordObject(id) {
+        *this = *globals::client_instance->cache.GetGuild(id, can_request);
 	}
 
 	Guild::Guild(rapidjson::Document& json) {

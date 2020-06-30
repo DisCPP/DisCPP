@@ -73,6 +73,21 @@ namespace discpp {
          * @return discpp::Member
          */
         std::shared_ptr<discpp::Member> GetMember(const discpp::Snowflake& guild_id, const discpp::Snowflake& id, bool can_request = false);
+
+        /**
+         * @brief Get a member with id.
+         *
+         * If you set `can_request` to true, and the message is not found in cache, then we will request
+         * the message from the REST API. But if its not true, and its not found, an exception will be
+         * thrown of DiscordObjectNotFound.
+         *
+         * @param[in] channel_id The channel_id of the message.
+         * @param[in] id The id of the message.
+         * @param[in] can_request Whether or not the library can request the message from the REST API.
+         *
+         * @return discpp::Message
+         */
+        discpp::Message GetMessage(const Snowflake& channel_id, const Snowflake& id, bool can_request = false);
     };
 }
 

@@ -7,8 +7,8 @@
 #include "exceptions.h"
 
 namespace discpp {
-	Channel::Channel(const Snowflake& id) : discpp::DiscordObject(id) {
-		*this = globals::client_instance->cache.GetChannel(id);
+	Channel::Channel(const Snowflake& id, bool can_request) : discpp::DiscordObject(id) {
+		*this = globals::client_instance->cache.GetChannel(id, can_request);
 	}
 
 	Channel::Channel(rapidjson::Document& json) {

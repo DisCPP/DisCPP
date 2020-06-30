@@ -166,8 +166,8 @@ namespace discpp {
 
         std::string delete_member_days;
         std::string members_removed;
-        std::shared_ptr<discpp::Channel> channel;
-		std::shared_ptr<discpp::Message> message;
+		discpp::Snowflake channel_id = 0;
+		discpp::Snowflake message_id = 0;
         std::string count;
         discpp::Snowflake id;
         std::string type;

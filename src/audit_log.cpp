@@ -196,9 +196,11 @@ discpp::AuditEntryOptions::AuditEntryOptions(rapidjson::Document& json) {
 	members_removed = GetDataSafely<std::string>(json, "members_removed");
 	// @TODO: Make channel valid.
 	if (ContainsNotNull(json, "channel_id")) {
-	    channel = std::make_shared<discpp::Channel>(globals::client_instance->cache.GetChannel(discpp::SnowflakeFromString(json["channel_id"].GetString())));
-	} else channel = nullptr;
-    message = std::make_shared<discpp::Message>(ConstructDiscppObjectFromID(json, "message_id", discpp::Message()));
+        channel_id = discpp::SnowflakeFromString(json["channel_id"].GetString());
+	}
+    if (ContainsNotNull(json, "message_id")) {
+        message_id = discpp::SnowflakeFromString(json["message_id"].GetString());
+    }
 	count = GetDataSafely<std::string>(json, "count");
 	id = GetIDSafely(json, "id");
 	type = GetDataSafely<std::string>(json, "type");

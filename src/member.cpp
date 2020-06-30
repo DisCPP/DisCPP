@@ -6,8 +6,8 @@
 #include <climits>
 
 namespace discpp {
-	Member::Member(const Snowflake& id, discpp::Guild& guild) {
-		*this = *guild.GetMember(id);
+	Member::Member(const Snowflake& id, discpp::Guild& guild, bool can_request) {
+		*this = *guild.GetMember(id, can_request);
 	}
 
 	Member::Member(rapidjson::Document& json, const discpp::Guild& guild) : guild_id(guild.id) {
