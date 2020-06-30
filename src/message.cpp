@@ -23,7 +23,7 @@ namespace discpp {
         if (ContainsNotNull(json, "member")) {
             if (guild != nullptr) {
                 try {
-                    auto mbr = guild->GetMember(id);
+                    auto mbr = guild->GetMember(author.id);
                     member = mbr;
                 } catch (const DiscordObjectNotFound&) {
                     rapidjson::Document doc(rapidjson::kObjectType);
