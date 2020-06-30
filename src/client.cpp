@@ -53,7 +53,7 @@ namespace discpp {
                     gateway_request["session_start_limit"]["remaining"].GetInt() == 0) {
 
                     logger->Debug(LogTextColor::RED + "GATEWAY ERROR: Maximum start limit reached");
-                    throw StartLimitException();
+                    throw MaximumLimitException("Gateway start limit exceeded!");
                 }
 
                 if (ContainsNotNull(gateway_request, "shards")) {

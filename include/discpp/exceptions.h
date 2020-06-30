@@ -8,34 +8,168 @@
 #define DISCORDCLIENT_EXCEPTIONS_H
 
 #include "utils.h"
+#include "permission.h"
 
 #include <exception>
 
 namespace discpp {
     class DiscordObjectNotFound : public std::runtime_error {
     public:
-        DiscordObjectNotFound(rapidjson::Document& json) : std::runtime_error(std::to_string(json["code"].GetInt()) + ": " + json["message"].GetString()) {}
-        DiscordObjectNotFound(const std::string& str) : std::runtime_error(str) {}
+        explicit DiscordObjectNotFound(rapidjson::Document& json) : std::runtime_error(std::to_string(json["code"].GetInt()) + ": " + json["message"].GetString()) {}
+        explicit DiscordObjectNotFound(const std::string& str) : std::runtime_error(str) {}
     };
 
-    class StartLimitException : public std::runtime_error {
+    class MaximumLimitException : public std::runtime_error {
     public:
-        StartLimitException() : std::runtime_error("Maximum start limit reached") {}
+        explicit MaximumLimitException(rapidjson::Document& json) : std::runtime_error(std::to_string(json["code"].GetInt()) + ": " + json["message"].GetString()) {}
+        explicit MaximumLimitException(const std::string& str) : std::runtime_error(str) {}
     };
 
     class ProhibitedEndpointException : public std::runtime_error {
     public:
-        ProhibitedEndpointException(const std::string& msg) : std::runtime_error(msg) {}
+        explicit ProhibitedEndpointException(const std::string& msg) : std::runtime_error(msg) {}
     };
 
     class AuthenticationException : public std::runtime_error {
     public:
         AuthenticationException() : std::runtime_error("Invalid token, failed to connect to gateway") {}
+        explicit AuthenticationException(const std::string& str) : std::runtime_error(str) {}
+    };
+
+    class RequestTooLargeException : public std::runtime_error {
+    public:
+        explicit RequestTooLargeException(const std::string& str) : std::runtime_error(str) {}
+    };
+
+    class FeatureDisabledException : public std::runtime_error {
+    public:
+        explicit FeatureDisabledException(const std::string& str) : std::runtime_error(str) {}
+    };
+
+    class BannedException : public std::runtime_error {
+    public:
+        explicit BannedException(const std::string& str) : std::runtime_error(str) {}
+    };
+
+    class MissingAccessException : public std::runtime_error {
+    public:
+        explicit MissingAccessException(const std::string& str) : std::runtime_error(str) {}
+    };
+
+    class InvalidAccountTypeException : public std::runtime_error {
+    public:
+        explicit InvalidAccountTypeException(const std::string& str) : std::runtime_error(str) {}
+    };
+
+    class GuildWidgetDisabledException : public std::runtime_error {
+    public:
+        explicit GuildWidgetDisabledException(const std::string& str) : std::runtime_error(str) {}
+    };
+
+    class OAuth2Exception : public std::runtime_error {
+    public:
+        explicit OAuth2Exception(const std::string& str) : std::runtime_error(str) {}
+    };
+
+    class EndpointParameterException : public std::runtime_error {
+    public:
+        explicit EndpointParameterException(const std::string& str) : std::runtime_error(str) {}
+    };
+
+    class APIOverloadedException : public std::runtime_error {
+    public:
+        explicit APIOverloadedException(const std::string& str) : std::runtime_error(str) {}
+    };
+
+    class InvalidAPIVersionException : public std::runtime_error {
+    public:
+        explicit InvalidAPIVersionException(const std::string& str) : std::runtime_error(str) {}
     };
 
     inline std::runtime_error GetException(rapidjson::Document& json) {
-        if (json["message"] == "Unknown User") {
-            return DiscordObjectNotFound(json);
+        switch (json["code"].GetInt()) {
+            case 10001:
+            case 10002:
+            case 10003:
+            case 10004:
+            case 10005:
+            case 10006:
+            case 10007:
+            case 10008:
+            case 10009:
+            case 10010:
+            case 10011:
+            case 10012:
+            case 10013:
+            case 10014:
+            case 10015:
+            case 10026:
+            case 10027:
+            case 10028:
+            case 10029:
+            case 10030:
+            case 10031:
+            case 10032:
+            case 10036:
+                return DiscordObjectNotFound(json["message"].GetString());
+            case 20001:
+            case 20002:
+            case 500003: // Cannot execute action on a DM channel.
+                return ProhibitedEndpointException(json["message"].GetString());
+            case 30001:
+            case 30002:
+            case 30003:
+            case 30005:
+            case 30007:
+            case 30010:
+            case 30013:
+            case 30015:
+            case 30016:
+                return MaximumLimitException(json["message"].GetString());
+            case 400001:
+            case 400002:
+                return AuthenticationException(json["message"].GetString());
+            case 400005:
+                return RequestTooLargeException(json["message"].GetString());
+            case 400006:
+                return FeatureDisabledException(json["message"].GetString());
+            case 400007:
+                return BannedException(json["message"].GetString());
+            case 50001:
+                return MissingAccessException(json["message"].GetString());
+            case 50003:
+                return InvalidAccountTypeException(json["message"].GetString());
+            case 50004:
+                return GuildWidgetDisabledException(json["message"].GetString());
+            case 50005:
+            case 50006:
+            case 50007:
+            case 50008:
+            case 50009:
+                return MissingAccessException(json["message"].GetString());
+            case 50010:
+            case 50011:
+            case 50012:
+            case 50025:
+                return OAuth2Exception(json["message"].GetString());
+            case 50013:
+                return NoPermissionException(json["message"].GetString());
+            case 50014:
+                return AuthenticationException(json["message"].GetString());
+            case 50015:
+            case 50016:
+            case 50019:
+            case 50020:
+            case 50021:
+            case 50034:
+            case 50035:
+            case 50036:
+            case 90001:
+                return EndpointParameterException(json["message"].GetString());
+            case 50041:
+                return InvalidAPIVersionException(json["message"].GetString());
+            case 130000:
+                return APIOverloadedException(json["message"].GetString());
         }
 
         return std::runtime_error(std::to_string(json["code"].GetInt()) + ": " + json["message"].GetString());
