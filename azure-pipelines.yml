@@ -20,11 +20,11 @@ jobs:
     steps:
     - script: git submodule update --init
       displayName: Checkout IXWebsocket submodule.
-    #- task: Cache@2
-    #  displayName: Cache vcpkg
-    #  inputs:
-    #    key: $(vcpkgArgs) | "$(vcpkgGitRef)"" | "$(Agent.OS)"
-    #    path: '$(vcpkgLocation)'
+    - task: Cache@2
+      displayName: Cache vcpkg
+      inputs:
+        key: $(vcpkgArgs) | "$(vcpkgGitRef)"" | "$(Agent.OS)"
+        path: '$(vcpkgLocation)'
     - task: run-vcpkg@0
       displayName: 'Run vcpkg'
       inputs:
@@ -49,11 +49,11 @@ jobs:
     steps:
     - script: git submodule update --init
       displayName: Checkout IXWebsocket submodule.
-    #- task: Cache@2
-    #  displayName: Cache vcpkg
-    #  inputs:
-    #    key: $(vcpkgArgs) | "$(vcpkgGitRef)"" | "$(Agent.OS)"
-    #    path: '$(vcpkgLocation)'
+    - task: Cache@2
+      displayName: Cache vcpkg
+      inputs:
+        key: $(vcpkgArgs) | "$(vcpkgGitRef)"" | "$(Agent.OS)"
+        path: '$(vcpkgLocation)'
     - task: run-vcpkg@0
       displayName: 'Run vcpkg'
       inputs:
