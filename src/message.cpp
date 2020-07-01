@@ -16,8 +16,8 @@ namespace discpp {
 		channel = globals::client_instance->cache.GetChannel(SnowflakeFromString(json["channel_id"].GetString()));
 		try {
             guild = channel.GetGuild();
-        } catch (const DiscordObjectNotFound&) {
-		} catch (const ProhibitedEndpointException&) {}
+        } catch (const exceptions::DiscordObjectNotFound&) {
+		} catch (const exceptions::ProhibitedEndpointException&) {}
 
 		author = ConstructDiscppObjectFromJson(json, "author", discpp::User());
         if (ContainsNotNull(json, "member")) {
@@ -25,7 +25,7 @@ namespace discpp {
                 try {
                     auto mbr = guild->GetMember(author.id);
                     member = mbr;
-                } catch (const DiscordObjectNotFound&) {
+                } catch (const exceptions::DiscordObjectNotFound&) {
                     rapidjson::Document doc(rapidjson::kObjectType);
                     doc.CopyFrom(json["member"], doc.GetAllocator());
 

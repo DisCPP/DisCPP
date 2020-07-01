@@ -294,7 +294,7 @@ namespace discpp {
 
 	std::shared_ptr<discpp::Member> Guild::GetMember(const Snowflake& id, bool can_request) {
 		if (id == 0) {
-			throw DiscordObjectNotFound("Member id: " + std::to_string(id) + " is not valid!");
+			throw exceptions::DiscordObjectNotFound("Member id: " + std::to_string(id) + " is not valid!");
 		}
 
 		auto it = members.find(id);
@@ -310,7 +310,7 @@ namespace discpp {
             members.emplace(member->user.id, member);
             return member;
         } else {
-            throw DiscordObjectNotFound("Member not found of id: " + std::to_string(id));
+            throw exceptions::DiscordObjectNotFound("Member not found of id: " + std::to_string(id));
         }
 	}
 
@@ -833,7 +833,7 @@ namespace discpp {
         if (tmp == ImageType::AUTO) tmp = ImageType::PNG;
         switch (tmp) {
             case ImageType::GIF:
-                throw ProhibitedEndpointException("Guild banner url's can't be a GIF.");
+                throw exceptions::ProhibitedEndpointException("Guild banner url's can't be a GIF.");
             case ImageType::JPEG:
                 return cpr::Url(url + ".jpeg");
             case ImageType::PNG:
@@ -854,7 +854,7 @@ namespace discpp {
         if (tmp == ImageType::AUTO) tmp = ImageType::PNG;
         switch (tmp) {
             case ImageType::GIF:
-                throw ProhibitedEndpointException("Guild splash url's can't be a GIF.");
+                throw exceptions::ProhibitedEndpointException("Guild splash url's can't be a GIF.");
             case ImageType::JPEG:
                 return cpr::Url(url + ".jpeg");
             case ImageType::PNG:
@@ -875,7 +875,7 @@ namespace discpp {
         if (tmp == ImageType::AUTO) tmp = ImageType::PNG;
         switch (tmp) {
             case ImageType::GIF:
-                throw ProhibitedEndpointException("Guild discovery splash url's can't be a GIF.");
+                throw exceptions::ProhibitedEndpointException("Guild discovery splash url's can't be a GIF.");
             case ImageType::JPEG:
                 return cpr::Url(url + ".jpeg");
             case ImageType::PNG:

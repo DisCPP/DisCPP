@@ -53,7 +53,7 @@ namespace discpp {
                     gateway_request["session_start_limit"]["remaining"].GetInt() == 0) {
 
                     logger->Debug(LogTextColor::RED + "GATEWAY ERROR: Maximum start limit reached");
-                    throw MaximumLimitException("Gateway start limit exceeded!");
+                    throw exceptions::MaximumLimitException("Gateway start limit exceeded!");
                 }
 
                 if (ContainsNotNull(gateway_request, "shards")) {
@@ -379,7 +379,7 @@ namespace discpp {
     std::unordered_map<discpp::Snowflake, discpp::Channel> Client::GetUserDMs() {
 
         if (!discpp::globals::client_instance->client_user.IsBot()) {
-            throw ProhibitedEndpointException("/users/@me/channels is a user only endpoint");
+            throw exceptions::ProhibitedEndpointException("/users/@me/channels is a user only endpoint");
         } else {
             std::unordered_map<discpp::Snowflake, discpp::Channel> dm_channels;
 
@@ -418,7 +418,7 @@ namespace discpp {
 
     ClientUserSettings ClientUser::GetSettings() {
         if (!discpp::globals::client_instance->client_user.IsBot()) {
-            throw ProhibitedEndpointException("users/@me/settings is a user only endpoint");
+            throw exceptions::ProhibitedEndpointException("users/@me/settings is a user only endpoint");
         }
         else {
             rapidjson::Document result = SendGetRequest(Endpoint("users/@me/settings/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
@@ -430,7 +430,7 @@ namespace discpp {
 
     void ClientUser::ModifySettings(ClientUserSettings& user_settings) {
         if (!discpp::globals::client_instance->client_user.IsBot()) {
-            throw ProhibitedEndpointException("users/@me/settings is a user only endpoint");
+            throw exceptions::ProhibitedEndpointException("users/@me/settings is a user only endpoint");
         }
         else {
             rapidjson::Document new_settings;
@@ -482,7 +482,7 @@ namespace discpp {
 
     void Client::AddFriend(const discpp::User& user) {
         if (!discpp::globals::client_instance->client_user.IsBot()) {
-            throw ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+            throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
             rapidjson::Document result = SendPutRequest(Endpoint("users/@me/relationships/" + std::to_string(user.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
@@ -490,7 +490,7 @@ namespace discpp {
 
     void Client::RemoveFriend(const discpp::User& user) {
         if(discpp::globals::client_instance->client_user.IsBot()) {
-            throw ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+            throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
             rapidjson::Document result = SendDeleteRequest(Endpoint("users/@me/relationships/" + std::to_string(user.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
@@ -499,7 +499,7 @@ namespace discpp {
     std::unordered_map<discpp::Snowflake, discpp::UserRelationship> Client::GetRelationships() {
         //todo implement this endpoint
         if(discpp::globals::client_instance->client_user.IsBot()) {
-            throw ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+            throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
             std::unordered_map<discpp::Snowflake, discpp::UserRelationship> relationships;
 

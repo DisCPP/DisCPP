@@ -20,14 +20,14 @@ std::shared_ptr<discpp::Guild> discpp::Cache::GetGuild(const discpp::Snowflake &
         guilds.emplace(guild->id, guild);
         return guild;
     } else {
-        throw DiscordObjectNotFound("Guild not found of id: " + std::to_string(guild_id));
+        throw exceptions::DiscordObjectNotFound("Guild not found of id: " + std::to_string(guild_id));
     }
 }
 
 discpp::Channel discpp::Cache::GetChannel(const discpp::Snowflake &id, bool can_request) {
     try {
         return GetDMChannel(id, can_request);
-    } catch (DiscordObjectNotFound) {
+    } catch (exceptions::DiscordObjectNotFound) {
         for (const auto &guild : guilds) {
             discpp::Channel channel = guild.second->GetChannel(id);
 
@@ -38,7 +38,7 @@ discpp::Channel discpp::Cache::GetChannel(const discpp::Snowflake &id, bool can_
             rapidjson::Document result = SendGetRequest(Endpoint("/channels/" + std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
             return discpp::Channel(result);
         } else {
-            throw DiscordObjectNotFound("Channel not found of id: " + std::to_string(id));
+            throw exceptions::DiscordObjectNotFound("Channel not found of id: " + std::to_string(id));
         }
     }
 }
@@ -56,7 +56,7 @@ discpp::Channel discpp::Cache::GetDMChannel(const discpp::Snowflake &id, bool ca
         private_channels.emplace(channel.id, channel);
         return channel;
     } else {
-        throw DiscordObjectNotFound("DM Channel not found of id: " + std::to_string(id));
+        throw exceptions::DiscordObjectNotFound("DM Channel not found of id: " + std::to_string(id));
     }
 }
 
@@ -72,7 +72,7 @@ std::shared_ptr<discpp::Member> discpp::Cache::GetMember(const discpp::Snowflake
         members.emplace(member->user.id, member);
         return member;
     } else {
-        throw DiscordObjectNotFound("Member not found of id: " + std::to_string(guild_id) + ", in guild of id: " + std::to_string(guild_id));
+        throw exceptions::DiscordObjectNotFound("Member not found of id: " + std::to_string(guild_id) + ", in guild of id: " + std::to_string(guild_id));
     }
 }
 
@@ -88,6 +88,6 @@ discpp::Message discpp::Cache::GetDiscordMessage(const discpp::Snowflake &channe
 
         return Message(result);
     } else {
-        throw DiscordObjectNotFound("Message of id \"" + std::to_string(id) + "\" was not found!");
+        throw exceptions::DiscordObjectNotFound("Message of id \"" + std::to_string(id) + "\" was not found!");
     }
 }

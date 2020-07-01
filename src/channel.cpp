@@ -272,7 +272,7 @@ namespace discpp {
 
     std::shared_ptr<discpp::Guild> Channel::GetGuild() const {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            throw ProhibitedEndpointException("discpp::Channel::GetGuild only available for guild channels!");
+            throw exceptions::ProhibitedEndpointException("discpp::Channel::GetGuild only available for guild channels!");
         }
 
         std::shared_ptr<Guild> tmp = globals::client_instance->cache.GetGuild(guild_id);

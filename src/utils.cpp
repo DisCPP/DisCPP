@@ -40,10 +40,45 @@ rapidjson::Document discpp::HandleResponse(cpr::Response& response, const Snowfl
         tmp.SetObject();
     }
 
+    // Handle http response codes and throw an exception if it failed.
+    if (response.status_code != 200 && response.status_code != 201 && response.status_code != 204) {
+        std::string response_msg;
+        switch (response.status_code) {
+            case 304:
+                response_msg = "NOT MODIFIED";
+                break;
+            case 400:
+                response_msg = "BAD REQUEST";
+                break;
+            case 401:
+                response_msg = "UNAUTHORIZED";
+                break;
+            case 403:
+                response_msg = "FORBIDDEN";
+                break;
+            case 404:
+                response_msg = "NOT FOUND";
+                break;
+            case 405:
+                response_msg = "METHOD NOT ALLOWED";
+                break;
+            case 249:
+                response_msg = "TOO MANY REQUESTS";
+                break;
+            case 502:
+                response_msg = "GATEWAY UNAVAILABLE";
+                break;
+            default:
+                response_msg = "SERVER ERROR";
+        }
+
+        throw exceptions::http::HTTPResponseException(response.status_code, response_msg);
+    }
+
 	HandleRateLimits(response.header, object, ratelimit_bucket);
 	tmp.Parse((!response.text.empty() ? response.text.c_str() : "{}"));
 
-	// Check if we were returned an error and throw an exception if so.
+	// Check if we were returned a json error and throw an exception if so.
 	if (!tmp.IsNull() && tmp.IsObject() && ContainsNotNull(tmp, "code")) {
         discpp::ThrowException(tmp);
     }
