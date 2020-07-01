@@ -87,7 +87,7 @@ namespace discpp {
         rules_channel_id = GetIDSafely(json, "rules_channel_id");
 
         if (ContainsNotNull(json, "joined_at")) {
-            joined_at = TimeFromDiscord(json["joined_at"].GetString());
+            joined_at = std::chrono::system_clock::from_time_t(TimeFromDiscord(json["joined_at"].GetString()));
         }
 
         if (GetDataSafely<bool>(json, "large")) flags |= 0b1000;
@@ -140,8 +140,6 @@ namespace discpp {
                 public_updates_channel = channel->second;
 		    }
         }
-
-		created_at = FormatTime(TimeFromSnowflake(id));
 
         if (ContainsNotNull(json, "members")) {
             for (auto const& member : json["members"].GetArray()) {
@@ -887,6 +885,22 @@ namespace discpp {
             default:
                 return cpr::Url(url);
         }
+    }
+
+    std::string Guild::GetFormattedJoinedAt() const {
+        return FormatTime(std::chrono::system_clock::to_time_t(joined_at));
+    }
+
+    std::chrono::system_clock::time_point Guild::GetJoinedAt() const {
+        return joined_at;
+    }
+
+    std::string Guild::GetFormattedCreatedAt() const {
+        return FormatTime(TimeFromSnowflake(id));
+    }
+
+    std::chrono::system_clock::time_point Guild::GetCreatedAt() const {
+        return std::chrono::system_clock::from_time_t(TimeFromSnowflake(id));
     }
 
     GuildInvite::GuildInvite(rapidjson::Document &json) {

@@ -86,7 +86,7 @@ namespace discpp {
             if (ContainsNotNull(json, "url")) {
                 url = json["url"].GetString();
             }
-            created_at = json["created_at"].Get<std::time_t>();
+            created_at = std::chrono::system_clock::from_time_t(json["created_at"].Get<std::time_t>());
             if (ContainsNotNull(json, "timestamps")) {
                 rapidjson::Document timestamps_json(rapidjson::kObjectType);
                 timestamps_json.CopyFrom(json["timestamps"], timestamps_json.GetAllocator());
@@ -117,7 +117,7 @@ namespace discpp {
         std::string name;
         discpp::Activity::ActivityType type;
         std::string url;
-        std::time_t created_at;
+        std::chrono::system_clock::time_point created_at;
         std::unordered_map<std::string, std::time_t> timestamps;
         std::string application_id;
         std::string details;

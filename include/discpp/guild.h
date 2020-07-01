@@ -916,9 +916,37 @@ namespace discpp {
          */
 		bool IsUnavailable() const;
 
-        inline std::string GetFormattedJoinedAt() const {
-            return FormatTime(this->joined_at);
-        }
+        /**
+         * @brief Gets the formatted joined at time and date for the bot.
+         *
+         * Formatted output: `%Y-%m-%d @ %H:%M:%S GMT`
+         *
+         * @return std::string
+         */
+        std::string GetFormattedJoinedAt() const;
+
+        /**
+         * @brief Gets the joined at time and date for the bot.
+         *
+         * @return std::chrono::system_clock::time_point
+         */
+        std::chrono::system_clock::time_point GetJoinedAt() const;
+
+        /**
+         * @brief Gets the formatted created at time and date for this guild.
+         *
+         * Formatted output: `%Y-%m-%d @ %H:%M:%S GMT`
+         *
+         * @return std::string
+         */
+        std::string GetFormattedCreatedAt() const;
+
+        /**
+         * @brief Gets the created at time and date for this guild.
+         *
+         * @return std::chrono::system_clock::time_point
+         */
+        std::chrono::system_clock::time_point GetCreatedAt() const;
 
 		std::string name; /**< Guild name. */
 		Snowflake owner_id; /**< ID of the guild owner. */
@@ -939,7 +967,7 @@ namespace discpp {
 		Snowflake system_channel_id; /**< The id of the channel where guild notices such as welcome messages and boost events are posted. */
         int system_channel_flags; /**< System channel flags. */
         Snowflake rules_channel_id; /**< The id of the channel where "PUBLIC" guilds display rules and/or guidelines. */
-		time_t joined_at; /**< When this guild was joined at. */
+        std::chrono::system_clock::time_point joined_at; /**< When this guild was joined at. */
 		int member_count; /**< Total number of members in this guild. */
 		std::vector<discpp::VoiceState> voice_states; /**< Array of partial voice state objects. */
 		std::unordered_map<Snowflake, std::shared_ptr<Member>> members; /**< Users in the guild. */
@@ -954,7 +982,6 @@ namespace discpp {
         discpp::Channel public_updates_channel; /**< The channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */
 		int approximate_member_count; /**< Approximate number of members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
 		int approximate_presence_count; /**< Approximate number of online members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
-		std::string created_at; /**< The id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */
 	private:
         unsigned char flags;
         uint64_t icon_hex[2] = {0, 0};

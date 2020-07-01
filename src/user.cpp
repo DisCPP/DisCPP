@@ -90,9 +90,13 @@ namespace discpp {
 		}
 	}
 
-    std::string User::CreatedAt() {
+    std::string User::GetFormattedCreatedAt() const {
         return FormatTime(TimeFromSnowflake(id));
     }
+
+    std::chrono::system_clock::time_point User::GetCreatedAt() const {
+        return std::chrono::system_clock::from_time_t(TimeFromSnowflake(id));
+	}
 
     std::string User::CreateMention() {
         return "<@" + std::to_string(id) + ">";

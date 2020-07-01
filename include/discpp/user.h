@@ -98,15 +98,20 @@ namespace discpp {
         std::string GetAvatarURL(const ImageType& img_type = ImageType::AUTO) const;
 
         /**
-         * @brief Gets the created at time and date for this user.
+         * @brief Gets the formatted created at time and date for this user.
          *
-         * ```cpp
-         *      std::string created_at = user.CreatedAt();
-         * ```
+         * Formatted output: `%Y-%m-%d @ %H:%M:%S GMT`
          *
          * @return std::string
          */
-		std::string CreatedAt();
+		std::string GetFormattedCreatedAt() const;
+
+        /**
+         * @brief Gets the created at time and date for this guild.
+         *
+         * @return std::chrono::system_clock::time_point
+         */
+        std::chrono::system_clock::time_point GetCreatedAt() const;
 
         /**
          * @brief Creates a mention string for this user.
