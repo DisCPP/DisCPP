@@ -154,10 +154,10 @@ namespace discpp {
         discpp::Emoji tmp = emoji;
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + tmp.ToURL());
 		cpr::Body body("{\"limit\": " + std::to_string(amount) + "}");
-		rapidjson::Document result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
+		std::unique_ptr<rapidjson::Document> result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
 		
 		std::unordered_map<discpp::Snowflake, discpp::User> users;
-		IterateThroughNotNullJson(result, [&](rapidjson::Document& user_json) {
+		IterateThroughNotNullJson(*result, [&](rapidjson::Document& user_json) {
 		    discpp::User tmp(user_json);
 		    users.insert({ tmp.id, tmp });
 		});
@@ -170,10 +170,10 @@ namespace discpp {
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + tmp.ToURL());
 		std::string method_str = (method == GetReactionsMethod::BEFORE_USER) ? "before" : "after";
 		cpr::Body body("{\"" + method_str + "\": " + std::to_string(user.id) + "}");
-		rapidjson::Document result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
+		std::unique_ptr<rapidjson::Document> result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
 
         std::unordered_map<discpp::Snowflake, discpp::User> users;
-        IterateThroughNotNullJson(result, [&](rapidjson::Document& user_json) {
+        IterateThroughNotNullJson(*result, [&](rapidjson::Document& user_json) {
             discpp::User tmp(user_json);
             users.insert({ tmp.id, tmp });
         });
@@ -189,29 +189,29 @@ namespace discpp {
 	discpp::Message Message::EditMessage(const std::string& text) {
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id));
 		cpr::Body body("{\"content\": \"" + EscapeString(text) + "\"}");
-		rapidjson::Document result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL);
+		std::unique_ptr<rapidjson::Document> result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL);
 
-		*this = discpp::Message(result);
+		*this = discpp::Message(*result);
 		return *this;
 	}
 
 	discpp::Message Message::EditMessage(const discpp::EmbedBuilder& embed) {
 
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id));
-		rapidjson::Document json = embed.ToJson();
-		cpr::Body body("{\"embed\": " + DumpJson(json) + "}");
-		rapidjson::Document result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+		std::unique_ptr<rapidjson::Document> json = embed.ToJson();
+		cpr::Body body("{\"embed\": " + DumpJson(*json) + "}");
+		std::unique_ptr<rapidjson::Document> result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
-        *this = discpp::Message(result);
+        *this = discpp::Message(*result);
 		return *this;
 	}
 
 	discpp::Message Message::EditMessage(const int& flags) {
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id));
 		cpr::Body body("{\"flags\": " + std::to_string(flags) + "}");
-        rapidjson::Document result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+        std::unique_ptr<rapidjson::Document> result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
-        *this = discpp::Message(result);
+        *this = discpp::Message(*result);
 		return *this;
 	}
 

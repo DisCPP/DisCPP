@@ -37,13 +37,13 @@ namespace discpp {
             rapidjson::Document gateway_request(rapidjson::kObjectType);
             switch (config->type) {
                 case TokenType::USER: {
-                    rapidjson::Document user_doc = SendGetRequest(Endpoint("/gateway"), {{"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"}}, {}, {});
-                    gateway_request.CopyFrom(user_doc, gateway_request.GetAllocator());
+                    std::unique_ptr<rapidjson::Document> user_doc = SendGetRequest(Endpoint("/gateway"), {{"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"}}, {}, {});
+                    gateway_request.CopyFrom(*user_doc, gateway_request.GetAllocator());
 
                     break;
                 } case TokenType::BOT:
-                    rapidjson::Document bot_doc = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
-                    gateway_request.CopyFrom(bot_doc, gateway_request.GetAllocator());
+                    std::unique_ptr<rapidjson::Document> bot_doc = SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
+                    gateway_request.CopyFrom(*bot_doc, gateway_request.GetAllocator());
 
                     break;
             }
@@ -209,25 +209,15 @@ namespace discpp {
 
                     CreateWebsocketRequest(resume);
 
-                    /*rapidjson::Document data;
-                    data.SetObject();
-                    rapidjson::Document::AllocatorType& data_allocator = data.GetAllocator();
-                    data.AddMember("op", Opcode::H, data_allocator);
-                    data.AddMember("d", NULL, data_allocator);
-                    if (last_sequence_number != -1) {
-                        data["d"] = last_sequence_number;
-                    }*/
-
                     heartbeat_acked = true;
                     reconnecting = false;
 
                     discpp::EventHandler<discpp::ReconnectEvent>::TriggerEvent(discpp::ReconnectEvent());
                 } else {
-#ifndef __INTELLISENSE__
-                    hello_packet = std::move(result);
-#endif
-                    rapidjson::Document identify = GetIdentifyPacket();
-                    CreateWebsocketRequest(identify);
+                    hello_packet.SetObject();
+                    hello_packet.CopyFrom(result, hello_packet.GetAllocator());
+
+                    CreateWebsocketRequest(*GetIdentifyPacket());
                 }
                 break;
             }
@@ -258,8 +248,7 @@ namespace discpp {
                     client.logger->Debug("[SHARD " + std::to_string(id) + "] Waiting 2 seconds before sending an identify packet for invalid session.");
                     std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-                    rapidjson::Document identify = GetIdentifyPacket();
-                    CreateWebsocketRequest(identify);
+                    CreateWebsocketRequest(*GetIdentifyPacket());
                 }
 
                 break;
@@ -318,12 +307,11 @@ namespace discpp {
         }
     }
 
-    rapidjson::Document Shard::GetIdentifyPacket() {
-        rapidjson::Document document;
-        document.SetObject();
+    std::unique_ptr<rapidjson::Document> Shard::GetIdentifyPacket() {
+        auto document = std::make_unique<rapidjson::Document>(rapidjson::kObjectType);
 
-        rapidjson::Document::AllocatorType& allocator = document.GetAllocator();
-        document.AddMember("op", Opcode::IDENTIFY, allocator);
+        rapidjson::Document::AllocatorType& allocator = document->GetAllocator();
+        document->AddMember("op", Opcode::IDENTIFY, allocator);
 
         rapidjson::Value d(rapidjson::kObjectType);
         d.AddMember("token", client.token, allocator);
@@ -346,11 +334,9 @@ namespace discpp {
             d.AddMember("shard", shard, allocator);
         }
 
-        document.AddMember("d", d, allocator);
+        document->AddMember("d", d, allocator);
 
-#ifndef __INTELLISENSE__
-        return std::move(document);
-#endif
+        return document;
     }
 
     void Shard::ReconnectToWebsocket() {
@@ -383,8 +369,8 @@ namespace discpp {
         } else {
             std::unordered_map<discpp::Snowflake, discpp::Channel> dm_channels;
 
-            rapidjson::Document result = SendGetRequest(Endpoint("users/@me/channels"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
-            for (auto const& channel : result.GetArray()) {
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("users/@me/channels"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            for (auto const& channel : result->GetArray()) {
                 rapidjson::Document channel_json(rapidjson::kObjectType);
                 channel_json.CopyFrom(channel, channel_json.GetAllocator());
 
@@ -397,10 +383,10 @@ namespace discpp {
     }
 
     std::vector<discpp::User::Connection> ClientUser::GetUserConnections() {
-        rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
+        std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
 
         std::vector<Connection> connections;
-        for (auto const& connection : result.GetArray()) {
+        for (auto const& connection : result->GetArray()) {
             rapidjson::Document connection_json;
             connection_json.CopyFrom(connection, connection_json.GetAllocator());
             connections.emplace_back(connection_json);
@@ -421,8 +407,8 @@ namespace discpp {
             throw exceptions::ProhibitedEndpointException("users/@me/settings is a user only endpoint");
         }
         else {
-            rapidjson::Document result = SendGetRequest(Endpoint("users/@me/settings/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
-            ClientUserSettings user_settings(result);
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("users/@me/settings/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            ClientUserSettings user_settings(*result);
             this->settings = user_settings;
             return user_settings;
         }
@@ -476,7 +462,7 @@ namespace discpp {
             if (user_settings.GetShowCurrentGame() != old_settings.GetShowCurrentGame()) new_settings.AddMember("show_current_game", user_settings.GetShowCurrentGame(), allocator);
             if (user_settings.GetStreamNotificationsEnabled() != old_settings.GetStreamNotificationsEnabled()) new_settings.AddMember("stream_notifications_enabled", user_settings.GetStreamNotificationsEnabled(), allocator);
 
-            rapidjson::Document result = SendPatchRequest(Endpoint("users/@me/settings/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL, cpr::Body(DumpJson(new_settings)));
+            std::unique_ptr<rapidjson::Document> result = SendPatchRequest(Endpoint("users/@me/settings/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL, cpr::Body(DumpJson(new_settings)));
         }
     }
 
@@ -484,7 +470,7 @@ namespace discpp {
         if (!discpp::globals::client_instance->client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            rapidjson::Document result = SendPutRequest(Endpoint("users/@me/relationships/" + std::to_string(user.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            std::unique_ptr<rapidjson::Document> result = SendPutRequest(Endpoint("users/@me/relationships/" + std::to_string(user.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
     }
 
@@ -492,7 +478,7 @@ namespace discpp {
         if(discpp::globals::client_instance->client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            rapidjson::Document result = SendDeleteRequest(Endpoint("users/@me/relationships/" + std::to_string(user.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            std::unique_ptr<rapidjson::Document> result = SendDeleteRequest(Endpoint("users/@me/relationships/" + std::to_string(user.id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
     }
 
@@ -503,8 +489,8 @@ namespace discpp {
         } else {
             std::unordered_map<discpp::Snowflake, discpp::UserRelationship> relationships;
 
-            rapidjson::Document result = SendGetRequest(Endpoint("users/@me/relationships/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
-            for (auto const& relationship : result.GetArray()) {
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("users/@me/relationships/"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            for (auto const& relationship : result->GetArray()) {
                 rapidjson::Document relationship_json(rapidjson::kObjectType);
                 relationship_json.CopyFrom(relationship, relationship_json.GetAllocator());
 
@@ -517,9 +503,9 @@ namespace discpp {
 
     discpp::User Client::ModifyCurrentUser(const std::string& username, discpp::Image& avatar) {
         cpr::Body body("{\"username\": \"" + username + "\", \"avatar\": " + avatar.ToDataURI() + "}");
-        rapidjson::Document result = SendPatchRequest(Endpoint("/users/@me"), DefaultHeaders(), 0, discpp::RateLimitBucketType::GLOBAL, body);
+        std::unique_ptr<rapidjson::Document> result = SendPatchRequest(Endpoint("/users/@me"), DefaultHeaders(), 0, discpp::RateLimitBucketType::GLOBAL, body);
 
-        client_user = discpp::ClientUser(result);
+        client_user = discpp::ClientUser(*result);
 
         return client_user;
     }
@@ -530,10 +516,10 @@ namespace discpp {
 
     void Client::UpdatePresence(discpp::Presence& presence) {
         rapidjson::Document payload(rapidjson::kObjectType);
-        rapidjson::Document activity_json = presence.ToJson();
+        std::unique_ptr<rapidjson::Document> activity_json = presence.ToJson();
 
         payload.AddMember("op", Shard::Opcode::STATUS_UPDATE, payload.GetAllocator());
-        payload.AddMember("d", activity_json, payload.GetAllocator());
+        payload.AddMember("d", *activity_json, payload.GetAllocator());
 
         shards.front()->CreateWebsocketRequest(payload);
     }
@@ -541,17 +527,17 @@ namespace discpp {
     discpp::User Client::ReqestUserIfNotCached(const discpp::Snowflake& id) {
         discpp::User user(id);
         if (user.username.empty()) {
-            rapidjson::Document result = SendGetRequest(Endpoint("/users/" + std::to_string(id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
-            return discpp::User(result);
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/users/" + std::to_string(id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            return discpp::User(*result);
         }
 
         return user;
     }
 
     std::vector<discpp::User::Connection> Client::GetBotUserConnections() {
-        rapidjson::Document result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+        std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/users/@me/connections"), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         std::vector<discpp::User::Connection> connections;
-        for (auto const& connection : result.GetArray()) {
+        for (auto const& connection : result->GetArray()) {
             rapidjson::Document connection_json;
             connection_json.CopyFrom(connection, connection_json.GetAllocator());
             connections.emplace_back(connection_json);

@@ -28,16 +28,16 @@ std::string discpp::GetOsName() {
 }
 
 // @TODO: Test if the json document type returned is what its supposed to be, like an array or object.
-rapidjson::Document discpp::HandleResponse(cpr::Response& response, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
+std::unique_ptr<rapidjson::Document> discpp::HandleResponse(cpr::Response& response, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Received requested payload: " + response.text);
     }
 
-    rapidjson::Document tmp;
+    auto tmp = std::make_unique<rapidjson::Document>();
     if (!response.text.empty() && response.text[0] == '[' && response.text[response.text.size() - 1] == ']') {
-        tmp.SetArray();
+        tmp->SetArray();
     } else {
-        tmp.SetObject();
+        tmp->SetObject();
     }
 
     // Handle http response codes and throw an exception if it failed.
@@ -76,17 +76,15 @@ rapidjson::Document discpp::HandleResponse(cpr::Response& response, const Snowfl
     }
 
 	HandleRateLimits(response.header, object, ratelimit_bucket);
-	tmp.Parse((!response.text.empty() ? response.text.c_str() : "{}"));
+	tmp->Parse((!response.text.empty() ? response.text.c_str() : "{}"));
 
 	// Check if we were returned a json error and throw an exception if so.
-	if (!tmp.IsNull() && tmp.IsObject() && ContainsNotNull(tmp, "code")) {
-        discpp::ThrowException(tmp);
+	if (!tmp->IsNull() && tmp->IsObject() && ContainsNotNull(*tmp, "code")) {
+        discpp::ThrowException(*tmp);
     }
 
     // This shows an error in inteliisense for some reason but compiles fine.
-#ifndef __INTELLISENSE__
-    return std::move(tmp);
-#endif
+	return tmp;
 }
 
 std::string CprBodyToString(const cpr::Body& body) {
@@ -97,22 +95,20 @@ std::string CprBodyToString(const cpr::Body& body) {
 	return body;
 }
 
-rapidjson::Document discpp::SendGetRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+std::unique_ptr<rapidjson::Document> discpp::SendGetRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
     }
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
 
-	rapidjson::Document doc = HandleResponse(result, object, ratelimit_bucket);
+    std::unique_ptr<rapidjson::Document> doc = HandleResponse(result, object, ratelimit_bucket);
 
     // This shows an error in inteliisense for some reason but compiles fine.
-#ifndef __INTELLISENSE__
-    return std::move(doc);
-#endif
+	return doc;
 }
 
-rapidjson::Document discpp::SendPostRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+std::unique_ptr<rapidjson::Document> discpp::SendPostRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + CprBodyToString(body));
     }
@@ -121,7 +117,7 @@ rapidjson::Document discpp::SendPostRequest(const std::string& url, const cpr::H
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendPutRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+std::unique_ptr<rapidjson::Document> discpp::SendPutRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("put patch request, URL: " + url + ", body: " + CprBodyToString(body));
     }
@@ -130,7 +126,7 @@ rapidjson::Document discpp::SendPutRequest(const std::string& url, const cpr::He
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendPatchRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+std::unique_ptr<rapidjson::Document> discpp::SendPatchRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
 	if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + CprBodyToString(body));
     }
@@ -139,7 +135,7 @@ rapidjson::Document discpp::SendPatchRequest(const std::string& url, const cpr::
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendDeleteRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
+std::unique_ptr<rapidjson::Document> discpp::SendDeleteRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending delete request, URL: " + url);
     }
@@ -444,14 +440,11 @@ void discpp::IterateThroughNotNullJson(rapidjson::Document &json, const std::fun
     }
 }
 
-rapidjson::Document discpp::GetDocumentInsideJson(rapidjson::Document &json, const char* value_name) {
-    rapidjson::Document inside_json;
-    inside_json.CopyFrom(json[value_name], inside_json.GetAllocator());
+std::unique_ptr<rapidjson::Document> discpp::GetDocumentInsideJson(rapidjson::Document &json, const char* value_name) {
+    auto inside_json = std::make_unique<rapidjson::Document>(json.GetType());
+    inside_json->CopyFrom(json[value_name], inside_json->GetAllocator());
 
-    // This shows an error in inteliisense for some reason but compiles fine.
-#ifndef __INTELLISENSE__
-    return std::move(inside_json);
-#endif
+	return inside_json;
 }
 
 std::string discpp::DumpJson(rapidjson::Document &json) {

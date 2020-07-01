@@ -5,7 +5,6 @@ namespace discpp {
 		count = json["count"].GetInt();
 		from_bot = json["me"].GetBool();
 
-		rapidjson::Document emoji_json = GetDocumentInsideJson(json, "emoji");
-		emoji = discpp::Emoji(emoji_json);
+		emoji = discpp::Emoji(*GetDocumentInsideJson(json, "emoji"));
 	}
 }

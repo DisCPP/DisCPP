@@ -309,7 +309,7 @@ namespace discpp {
          *
          * @return rapidjson::Document
          */
-        rapidjson::Document ToJson() const;
+        std::unique_ptr<rapidjson::Document> ToJson() const;
 	private:
         rapidjson::Document embed_json;
 	};

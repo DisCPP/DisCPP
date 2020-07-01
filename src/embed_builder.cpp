@@ -270,13 +270,11 @@ namespace discpp {
 		return *this;
 	}
 
-    rapidjson::Document EmbedBuilder::ToJson() const {
-	    rapidjson::Document json_copy(rapidjson::kObjectType);
-	    json_copy.CopyFrom(embed_json, json_copy.GetAllocator());
+    std::unique_ptr<rapidjson::Document> EmbedBuilder::ToJson() const {
+	    auto json_copy = std::make_unique<rapidjson::Document>(rapidjson::kObjectType);
+	    json_copy->CopyFrom(embed_json, json_copy->GetAllocator());
 
-#ifndef __INTELLISENSE__
-		return std::move(json_copy);
-#endif
+		return json_copy;
 	}
 
     std::string EmbedBuilder::GetDescription() const {

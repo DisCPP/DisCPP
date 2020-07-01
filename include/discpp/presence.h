@@ -154,18 +154,16 @@ namespace discpp {
 
 		Presence(std::shared_ptr<discpp::Activity> activity, const bool& afk, const std::string& status) : game(activity), afk(afk), status(status) {}
 
-		rapidjson::Document ToJson() {
+		std::unique_ptr<rapidjson::Document> ToJson() {
 		    std::string str_activity = "{\"status\": \"" + status + "\", \"afk\": " + (afk ? "true" : "false") + ", \"game\": " + \
                 "{\"name\": \"" + game->name + "\", \"type\": " + std::to_string(static_cast<int>(game->type)) + \
                 ((!game->url.empty()) ? ", \"url\": \"" + game->url + "\"" : "") + "}, \"since\": \"" + \
                 std::to_string(time(NULL) - 10) + "\"}";
 
-            rapidjson::Document result(rapidjson::kObjectType);
-		    result.Parse(str_activity.c_str());
+            auto result = std::make_unique<rapidjson::Document>(rapidjson::kObjectType);
+		    result->Parse(str_activity.c_str());
 
-#ifndef __INTELLISENSE__
-            return std::move(result);
-#endif
+	        return result;
 		}
 
 		std::string status;

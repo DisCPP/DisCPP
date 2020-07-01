@@ -91,9 +91,9 @@ namespace discpp {
 
 	bool Member::IsBanned() {
 
-		rapidjson::Document result = SendGetRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/bans/" + std::to_string(user.id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
-		rapidjson::Value::ConstMemberIterator itr = result.FindMember("reason");
-		return itr != result.MemberEnd();
+		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/bans/" + std::to_string(user.id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
+		rapidjson::Value::ConstMemberIterator itr = result->FindMember("reason");
+		return itr != result->MemberEnd();
 	}
 
 	bool Member::HasRole(const discpp::Role& role) {

@@ -61,9 +61,9 @@ namespace discpp {
 
 	discpp::Channel User::CreateDM() {
 		cpr::Body body("{\"recipient_id\": \"" + std::to_string(id) + "\"}");
-		rapidjson::Document result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders({ {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
+		std::unique_ptr<rapidjson::Document> result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders({ {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
 
-		return discpp::Channel(result);
+		return discpp::Channel(*result);
 	}
 	
 	std::string User::GetAvatarURL(const ImageType& img_type) const {

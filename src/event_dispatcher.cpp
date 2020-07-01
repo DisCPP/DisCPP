@@ -42,9 +42,9 @@ namespace discpp {
         } else {
             if (globals::client_instance->client_user.id == 0) {
                 // Get the bot user
-                rapidjson::Document user_json = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
+                std::unique_ptr<rapidjson::Document> user_json = SendGetRequest(Endpoint("/users/@me"), DefaultHeaders(), {}, {});
 
-                discpp::globals::client_instance->client_user = discpp::ClientUser(user_json);
+                discpp::globals::client_instance->client_user = discpp::ClientUser(*user_json);
             }
         }
 
@@ -279,15 +279,15 @@ namespace discpp {
     }
 
     void EventDispatcher::GuildRoleCreateEvent(Shard& shard, rapidjson::Document& result) {
-        rapidjson::Document role_json = GetDocumentInsideJson(result, "role");
-        discpp::Role role(role_json);
+        std::unique_ptr<rapidjson::Document> role_json = GetDocumentInsideJson(result, "role");
+        discpp::Role role(*role_json);
 
         discpp::DispatchEvent(discpp::GuildRoleCreateEvent(role));
     }
 
     void EventDispatcher::GuildRoleUpdateEvent(Shard& shard, rapidjson::Document& result) {
-        rapidjson::Document role_json = GetDocumentInsideJson(result, "role");
-        discpp::Role role(role_json);
+        std::unique_ptr<rapidjson::Document> role_json = GetDocumentInsideJson(result, "role");
+        discpp::Role role(*role_json);
 
         discpp::DispatchEvent(discpp::GuildRoleUpdateEvent(role));
     }
@@ -621,15 +621,14 @@ namespace discpp {
     }
 
     void EventDispatcher::HandleDiscordEvent(Shard& shard, rapidjson::Document& j, const std::string& event_name) {
-        std::shared_ptr<rapidjson::Document> data_ptr;
+        //std::shared_ptr<rapidjson::Document> data_ptr;
 
         rapidjson::Document data(rapidjson::kObjectType);
         data.CopyFrom(j["d"], data.GetAllocator());
 
         // This shows an error for intellisense but compiles fine.
-#ifndef __INTELLISENSE__
-        data_ptr = std::make_shared<rapidjson::Document>(std::move(data));
-#endif
+        std::shared_ptr<rapidjson::Document> data_ptr = std::make_shared<rapidjson::Document>(data.GetType());
+        data_ptr->CopyFrom(data, data_ptr->GetAllocator());
 
         if (ContainsNotNull(j, "s")) {
             shard.last_sequence_number = j["s"].GetInt();
@@ -639,8 +638,8 @@ namespace discpp {
 
         Shard* sh = &shard;
         if (internal_event_map.find(event_name) != internal_event_map.end()) {
-            globals::client_instance->DoFunctionLater([sh, data_ptr, event_name] {
-                internal_event_map[event_name](*sh, *data_ptr);
+            globals::client_instance->DoFunctionLater([sh, data = std::move(data_ptr), event_name] {
+                internal_event_map[event_name](*sh, *data);
             });
         }
     }

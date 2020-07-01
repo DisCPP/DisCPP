@@ -181,13 +181,13 @@ discpp::AuditLogChange::AuditLogChange(rapidjson::Document& json) {
 	key = json["key"].GetString();
 
 	if (ContainsNotNull(json, "new_value")) {
-	    rapidjson::Document new_value_json = GetDocumentInsideJson(json, "new_value");
-		new_value = GetKey(key, new_value_json);
+	    std::unique_ptr<rapidjson::Document> new_value_json = GetDocumentInsideJson(json, "new_value");
+		new_value = GetKey(key, *new_value_json);
 	}
 
     if (ContainsNotNull(json, "old_value")) {
-        rapidjson::Document new_value_json = GetDocumentInsideJson(json, "old_value");
-        old_value = GetKey(key, new_value_json);
+        std::unique_ptr<rapidjson::Document> old_value_json = GetDocumentInsideJson(json, "old_value");
+        old_value = GetKey(key, *old_value_json);
     }
 }
 
