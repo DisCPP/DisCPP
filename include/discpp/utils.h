@@ -419,7 +419,7 @@ namespace discpp {
 
 	time_t TimeFromDiscord(const std::string& time);
 	time_t TimeFromSnowflake(const Snowflake& snow);
-    std::string FormatTime(const time_t& time, const std::string& format = "%Y-%m-%d @ %H:%M:%S GMT");
+    std::string FormatTime(const time_t& time, const std::string& format = "%F @ %r %Z");
 	std::string URIEncode(const std::string& str);
     void SplitAvatarHash(const std::string& hash, uint64_t out[2]);
     std::string CombineAvatarHash(const uint64_t in[2]);
