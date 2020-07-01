@@ -633,7 +633,7 @@ namespace discpp {
         if (ContainsNotNull(j, "s")) {
             shard.last_sequence_number = j["s"].GetInt();
         } else {
-            shard.last_sequence_number = NULL;
+            shard.last_sequence_number = 0;
         }
 
         Shard* sh = &shard;

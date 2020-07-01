@@ -212,7 +212,7 @@ namespace discpp {
 	    std::unordered_map<discpp::Snowflake, discpp::Channel> tmp;
 
 	    for (auto& chnl : this->GetChannels()) {
-	        if (chnl.second.category_id == NULL) {
+	        if (chnl.second.category_id == 0) {
 	            tmp.emplace(std::pair(chnl.first, chnl.second));
 	        }
 	    }

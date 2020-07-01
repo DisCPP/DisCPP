@@ -7,6 +7,7 @@ set(EXTERNAL_INSTALL_LOCATION "${PROJECT_SOURCE_DIR}/thirdparty")
 set(USE_TLS TRUE)
 set(USE_OPEN_SSL TRUE)
 set(RAPIDJSON_HAS_STDSTRING 1)
+set(__STDC_WANT_LIB_EXT1__ 1)
 project(discpp)
 
 # set options

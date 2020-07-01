@@ -371,7 +371,7 @@ namespace discpp {
         int rate_limit_per_user; /**< Amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected. */
         int user_limit; /**< The user limit of the voice channel. */
         Snowflake guild_id; /**< Guild id of the current channel. */
-        Snowflake category_id; /**< ID of the parent category for a channel (each parent category can contain up to 50 channels). */
+        Snowflake category_id = 0; /**< ID of the parent category for a channel (each parent category can contain up to 50 channels). */
         std::vector<discpp::Permissions> permissions; /**< Explicit permission overwrites for members and roles. */
         Snowflake owner_id; /**< ID of the DM creator. */
         Snowflake application_id; /**< Application ID of the group DM creator if it is bot-created. */

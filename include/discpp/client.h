@@ -328,7 +328,7 @@ namespace discpp {
         bool disconnected = true;
         bool reconnecting = false;
         bool heartbeat_acked;
-        int last_sequence_number;
+        int last_sequence_number = 0;
         long long packet_counter;
 
         void ReconnectToWebsocket();

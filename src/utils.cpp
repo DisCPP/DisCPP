@@ -392,10 +392,14 @@ time_t discpp::TimeFromDiscord(const std::string &time) {
         t.tm_min = minute;
         t.tm_sec = (int) second;
 
-        time_t utc_time = _mkgmtime(&t);
+        time_t utc_time = mktime(&t);
         struct tm utc_buf;
 
+#ifndef __linux__
         localtime_s(&utc_buf, &utc_time);
+#else
+        utc_buf = *localtime(&utc_time);
+#endif
 
         std::cout << "Parsed time: " << FormatTime(utc_time) << std::endl;
 
@@ -412,7 +416,11 @@ time_t discpp::TimeFromSnowflake(const Snowflake& snow) {
 
 std::string discpp::FormatTime(const time_t& time, const std::string& format) {
     struct tm now{};
+#ifndef __linux__
     localtime_s(&now, &time);
+#else
+    now = *localtime(&time);
+#endif
 
     char buffer[256];
     strftime(buffer, sizeof(buffer), format.c_str(), &now);
