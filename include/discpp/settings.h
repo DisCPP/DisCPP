@@ -111,7 +111,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyAll(const bool& all);
+		void ModifyAll(const bool all);
 
         /**
          * @brief Modifies MutualFriends bool value
@@ -124,7 +124,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyMutualFriends(const bool& mutual_friends);
+		void ModifyMutualFriends(const bool mutual_friends);
 
         /**
          * @brief Modifies MutualGuilds bool value
@@ -137,7 +137,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyMutualGuilds(const bool& mutual_guilds);
+		void ModifyMutualGuilds(const bool mutual_guilds);
 
         /**
          * @brief Check if all is enabled
@@ -225,7 +225,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyShowCurrentGame(const bool& show_current_game);
+		void ModifyShowCurrentGame(const bool show_current_game);
 
         /**
          * @brief Modifies DefaultGuildsRestricted bool value
@@ -238,7 +238,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyDefaultGuildsRestricted(const bool& default_guilds_restricted);
+		void ModifyDefaultGuildsRestricted(const bool default_guilds_restricted);
 
         /**
          * @brief Modifies InlineAttachmentMedia bool value
@@ -251,7 +251,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyInlineAttachmentMedia(const bool& inline_attachment_media);
+		void ModifyInlineAttachmentMedia(const bool inline_attachment_media);
 
         /**
          * @brief Modifies InlineEmbedMedia bool value
@@ -264,7 +264,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyInlineEmbedMedia(const bool& inline_embed_media);
+		void ModifyInlineEmbedMedia(const bool inline_embed_media);
 
         /**
          * @brief Modifies GifAutoPlay bool value
@@ -277,7 +277,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyGifAutoPlay(const bool& gif_auto_play);
+		void ModifyGifAutoPlay(const bool gif_auto_play);
 
         /**
          * @brief Modifies RenderEmbeds bool value
@@ -290,7 +290,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyRenderEmbeds(const bool& render_embeds);
+		void ModifyRenderEmbeds(const bool render_embeds);
 
         /**
          * @brief Modifies RenderReactions bool value
@@ -303,7 +303,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyRenderReactions(const bool& render_reactions);
+		void ModifyRenderReactions(const bool render_reactions);
 
         /**
          * @brief Modifies AnimateEmoji bool value
@@ -316,7 +316,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyAnimateEmoji(const bool& animate_emoji);
+		void ModifyAnimateEmoji(const bool animate_emoji);
 
         /**
          * @brief Modifies EnableTtsCommand bool value
@@ -329,7 +329,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyEnableTtsCommand(const bool& enable_tts_command);
+		void ModifyEnableTtsCommand(const bool enable_tts_command);
 
         /**
          * @brief Modifies MessageDisplayCompact bool value
@@ -342,7 +342,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyMessageDisplayCompact(const bool& message_display_compact);
+		void ModifyMessageDisplayCompact(const bool message_display_compact);
 
         /**
          * @brief Modifies ConvertEmoticons bool value
@@ -355,7 +355,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyConvertEmoticons(const bool& convert_emoticons);
+		void ModifyConvertEmoticons(const bool convert_emoticons);
 
         /**
          * @brief Modifies DisableGamesTab bool value
@@ -368,7 +368,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyDisableGamesTab(const bool& disable_games_tab);
+		void ModifyDisableGamesTab(const bool disable_games_tab);
 
         /**
          * @brief Modifies DeveloperMode bool value
@@ -381,7 +381,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyDeveloperMode(const bool& developer_mode);
+		void ModifyDeveloperMode(const bool developer_mode);
 
         /**
          * @brief Modifies DetectPlatformAccounts bool value
@@ -394,7 +394,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyDetectPlatformAccounts(const bool& detect_platform_accounts);
+		void ModifyDetectPlatformAccounts(const bool detect_platform_accounts);
 
         /**
          * @brief Modifies StreamNotificationsEnabled bool value
@@ -407,7 +407,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyStreamNotificationsEnabled(const bool& stream_notifications_enabled);
+		void ModifyStreamNotificationsEnabled(const bool stream_notifications_enabled);
 
         /**
          * @brief Modifies AllowAccessibilityDetection bool value
@@ -420,7 +420,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyAllowAccessibilityDetection(const bool& allow_accessibility_detection);
+		void ModifyAllowAccessibilityDetection(const bool allow_accessibility_detection);
 
         /**
          * @brief Modifies ContactSyncEnabled bool value
@@ -433,7 +433,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyContactSyncEnabled(const bool& contact_sync_enabled);
+		void ModifyContactSyncEnabled(const bool contact_sync_enabled);
 
         /**
          * @brief Modifies NativePhoneIntegrationEnabled bool value
@@ -446,7 +446,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyNativePhoneIntegrationEnabled(const bool& native_phone_integration_enabled);
+		void ModifyNativePhoneIntegrationEnabled(const bool native_phone_integration_enabled);
 
         /**
          * @brief Check if ShowCurrentGame is enabled

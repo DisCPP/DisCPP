@@ -229,7 +229,7 @@ namespace discpp {
 		return *this;
 	}
 
-	EmbedBuilder& EmbedBuilder::AddField(const std::string& name, const std::string& value, const bool& is_inline) {
+	EmbedBuilder& EmbedBuilder::AddField(const std::string& name, const std::string& value, const bool is_inline) {
 		if (name.empty()) {
 			globals::client_instance->logger->Error(LogTextColor::RED + "You can not have an empty or null field name!");
 			throw std::runtime_error("You can not have an empty or null field title!");

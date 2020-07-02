@@ -65,7 +65,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyMember(const std::string& nick, std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf, const Snowflake& channel_id);
+		void ModifyMember(const std::string& nick, std::vector<discpp::Role>& roles, const bool mute, const bool deaf, const Snowflake& channel_id);
 
         /**
          * @brief Adds a role to a guild member.

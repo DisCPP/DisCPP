@@ -149,7 +149,7 @@ namespace discpp {
          *
          * @return discpp::Message
          */
-		discpp::Message Send(const std::string& text, const bool& tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
+		discpp::Message Send(const std::string& text, const bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
 
         /**
          * @brief Modify the channel.
@@ -307,7 +307,7 @@ namespace discpp {
          *
          * @return discpp::GuildInvite
          */
-        GuildInvite CreateInvite(const int& max_age, const int& max_uses, const bool& temporary, const bool& unique);
+        GuildInvite CreateInvite(const int& max_age, const int& max_uses, const bool temporary, const bool unique);
 
         std::vector<GuildInvite> GetInvites();
 

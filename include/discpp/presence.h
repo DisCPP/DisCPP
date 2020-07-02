@@ -144,7 +144,7 @@ namespace discpp {
             }
 		}
 
-		Presence(const std::string& text, const discpp::Activity::ActivityType& type, const std::string& status = "online", const bool& afk = false,
+		Presence(const std::string& text, const discpp::Activity::ActivityType& type, const std::string& status = "online", const bool afk = false,
 		        const std::string& url = "") : status(status), afk(afk) {
             game = std::make_shared<discpp::Activity>();
 		    game->name = text;
@@ -152,7 +152,7 @@ namespace discpp {
 		    game->url = url;
 		}
 
-		Presence(std::shared_ptr<discpp::Activity> activity, const bool& afk, const std::string& status) : game(activity), afk(afk), status(status) {}
+		Presence(std::shared_ptr<discpp::Activity> activity, const bool afk, const std::string& status) : game(activity), afk(afk), status(status) {}
 
 		std::unique_ptr<rapidjson::Document> ToJson() {
 		    std::string str_activity = "{\"status\": \"" + status + "\", \"afk\": " + (afk ? "true" : "false") + ", \"game\": " + \

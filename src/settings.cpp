@@ -7,7 +7,7 @@ namespace discpp {
 		if (GetDataSafely<bool>(json, "mutual_guilds")) flags |= (unsigned int)FriendSourceFlags::MUTUAL_GUILDS;
 	}
 
-	void FriendSource::ModifyAll(const bool& all) {
+	void FriendSource::ModifyAll(const bool all) {
 		if (all) {
 			this->flags |= (unsigned int)FriendSourceFlags::ALL;
 		} else {
@@ -15,7 +15,7 @@ namespace discpp {
 		}
 	}
 	
-	void FriendSource::ModifyMutualFriends(const bool& mutual_friends) {
+	void FriendSource::ModifyMutualFriends(const bool mutual_friends) {
 		if (mutual_friends) {
 			this->flags |= (unsigned int)FriendSourceFlags::MUTUAL_FRIENDS;
 		} else {
@@ -23,7 +23,7 @@ namespace discpp {
 		}
 	}
 
-	void FriendSource::ModifyMutualGuilds(const bool& mutual_guilds) {
+	void FriendSource::ModifyMutualGuilds(const bool mutual_guilds) {
 		if (mutual_guilds) {
 			this->flags |= (unsigned int)FriendSourceFlags::MUTUAL_GUILDS;
 		} else {
@@ -82,7 +82,7 @@ namespace discpp {
 		if (GetDataSafely<bool>(json, "native_phone_integration_enabled")) flags |= (unsigned int)ClientUserSettingsFlags::NATIVE_PHONE_INTEGRATION_ENABLED;
 	}
 
-	void ClientUserSettings::ModifyShowCurrentGame(const bool& show_current_game) {
+	void ClientUserSettings::ModifyShowCurrentGame(const bool show_current_game) {
 		if (show_current_game) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::SHOW_CURRENT_GAME;
 		} else {
@@ -90,7 +90,7 @@ namespace discpp {
 		}
 	}
 
-	void ClientUserSettings::ModifyDefaultGuildsRestricted(const bool& default_guilds_restricted) {
+	void ClientUserSettings::ModifyDefaultGuildsRestricted(const bool default_guilds_restricted) {
 		if (default_guilds_restricted) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::DEFAULT_GUILDS_RESTRICTED;
 		} else {
@@ -98,7 +98,7 @@ namespace discpp {
 		}
 	}
 
-	void ClientUserSettings::ModifyInlineAttachmentMedia(const bool& inline_attachment_media) {
+	void ClientUserSettings::ModifyInlineAttachmentMedia(const bool inline_attachment_media) {
 		if (inline_attachment_media) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::INLINE_ATTACHMENT_MEDIA;
 		} else {
@@ -106,7 +106,7 @@ namespace discpp {
 		}
 	}
 
-	void ClientUserSettings::ModifyInlineEmbedMedia(const bool& inline_embed_media) {
+	void ClientUserSettings::ModifyInlineEmbedMedia(const bool inline_embed_media) {
 		if (inline_embed_media) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::INLINE_EMBED_MEDIA;
 		} else {
@@ -114,7 +114,7 @@ namespace discpp {
 		}
 	}
 
-	void ClientUserSettings::ModifyGifAutoPlay(const bool& gif_auto_play) {
+	void ClientUserSettings::ModifyGifAutoPlay(const bool gif_auto_play) {
 		if (gif_auto_play) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::GIF_AUTO_PLAY;
 		} else {
@@ -122,7 +122,7 @@ namespace discpp {
 		}
 	}
 
-	void ClientUserSettings::ModifyRenderEmbeds(const bool& render_embeds) {
+	void ClientUserSettings::ModifyRenderEmbeds(const bool render_embeds) {
 		if (render_embeds) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::RENDER_EMBEDS;
 		} else {
@@ -130,7 +130,7 @@ namespace discpp {
 		}
 	}
 
-	void ClientUserSettings::ModifyRenderReactions(const bool& render_reactions) {
+	void ClientUserSettings::ModifyRenderReactions(const bool render_reactions) {
 		if (render_reactions) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::RENDER_REACTIONS;
 		} else {
@@ -138,7 +138,7 @@ namespace discpp {
 		}
 	}
 
-	void ClientUserSettings::ModifyAnimateEmoji(const bool& animate_emoji) {
+	void ClientUserSettings::ModifyAnimateEmoji(const bool animate_emoji) {
 		if (animate_emoji) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::ANIMATE_EMOJI;
 		} else {
@@ -146,7 +146,7 @@ namespace discpp {
 		}
 	}
 	
-	void ClientUserSettings::ModifyEnableTtsCommand(const bool& enable_tts_command) {
+	void ClientUserSettings::ModifyEnableTtsCommand(const bool enable_tts_command) {
 		if (enable_tts_command) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::ENABLE_TTS_COMMAND;
 		} else {
@@ -154,7 +154,7 @@ namespace discpp {
 		}
 	}
 	
-	void ClientUserSettings::ModifyMessageDisplayCompact(const bool& message_display_compact) {
+	void ClientUserSettings::ModifyMessageDisplayCompact(const bool message_display_compact) {
 		if (message_display_compact) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::MESSAGE_DISPLAY_COMPACT;
 		} else {
@@ -162,7 +162,7 @@ namespace discpp {
 		}
 	}
 	
-	void ClientUserSettings::ModifyConvertEmoticons(const bool& convert_emoticons) {
+	void ClientUserSettings::ModifyConvertEmoticons(const bool convert_emoticons) {
 		if (convert_emoticons) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::CONVERT_EMOTICONS;
 		} else {
@@ -170,7 +170,7 @@ namespace discpp {
 		}
 	}
 	
-	void ClientUserSettings::ModifyDisableGamesTab(const bool& disable_games_tab) {
+	void ClientUserSettings::ModifyDisableGamesTab(const bool disable_games_tab) {
 		if (disable_games_tab) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::DISABLE_GAMES_TAB;
 		} else {
@@ -178,7 +178,7 @@ namespace discpp {
 		}
 	}
 	
-	void ClientUserSettings::ModifyDeveloperMode(const bool& developer_mode) {
+	void ClientUserSettings::ModifyDeveloperMode(const bool developer_mode) {
 		if (developer_mode) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::DEVELOPER_MODE;
 		} else {
@@ -186,7 +186,7 @@ namespace discpp {
 		}
 	}
 	
-	void ClientUserSettings::ModifyDetectPlatformAccounts(const bool& detect_platform_accounts) {
+	void ClientUserSettings::ModifyDetectPlatformAccounts(const bool detect_platform_accounts) {
 		if (detect_platform_accounts) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::DETECT_PLATFORM_ACCOUNTS;
 		} else {
@@ -194,7 +194,7 @@ namespace discpp {
 		}
 	}
 	
-	void ClientUserSettings::ModifyStreamNotificationsEnabled(const bool& stream_notifications_enabled) {
+	void ClientUserSettings::ModifyStreamNotificationsEnabled(const bool stream_notifications_enabled) {
 		if (stream_notifications_enabled) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::STREAM_NOTIFICATIONS_ENABLED;
 		} else {
@@ -202,7 +202,7 @@ namespace discpp {
 		}
 	}
 	
-	void ClientUserSettings::ModifyAllowAccessibilityDetection(const bool& allow_accessibility_detection) {
+	void ClientUserSettings::ModifyAllowAccessibilityDetection(const bool allow_accessibility_detection) {
 		if (allow_accessibility_detection) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::ALLOW_ACCESSIBILITY_DETECTION;
 		} else {
@@ -210,7 +210,7 @@ namespace discpp {
 		}
 	}
 	
-	void ClientUserSettings::ModifyContactSyncEnabled(const bool& contact_sync_enabled) {
+	void ClientUserSettings::ModifyContactSyncEnabled(const bool contact_sync_enabled) {
 		if (contact_sync_enabled) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::CONTACT_SYNC_ENABLED;
 		} else {
@@ -218,7 +218,7 @@ namespace discpp {
 		}
 	}
 	
-	void ClientUserSettings::ModifyNativePhoneIntegrationEnabled(const bool& native_phone_integration_enabled) {
+	void ClientUserSettings::ModifyNativePhoneIntegrationEnabled(const bool native_phone_integration_enabled) {
 		if (native_phone_integration_enabled) {
 			this->flags |= (unsigned int)ClientUserSettingsFlags::NATIVE_PHONE_INTEGRATION_ENABLED;
 		} else {

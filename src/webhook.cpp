@@ -25,7 +25,7 @@ namespace discpp {
 		this->id = id;
 	};
 
-	discpp::Message Webhook::Send(const std::string& text, const bool& tts, discpp::EmbedBuilder* embed, const std::vector<discpp::File>& files) {
+	discpp::Message Webhook::Send(const std::string& text, const bool tts, discpp::EmbedBuilder* embed, const std::vector<discpp::File>& files) {
 
 		std::string escaped_text = EscapeString(text);
         rapidjson::Document message_json = rapidjson::Document(rapidjson::kObjectType);

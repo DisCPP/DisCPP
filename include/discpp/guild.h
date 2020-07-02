@@ -317,7 +317,7 @@ namespace discpp {
          */
         discpp::Channel CreateChannel(const std::string& name, const std::string& topic = "", const ChannelType& type = ChannelType::GUILD_TEXT,
                 const int& bitrate = 0, const int& user_limit = 0, const int& rate_limit_per_user = 0, const int& position = 0,
-                const std::vector<discpp::Permissions>& permission_overwrites = {}, const discpp::Snowflake& parent_id = 0, const bool& nsfw = false);
+                const std::vector<discpp::Permissions>& permission_overwrites = {}, const discpp::Snowflake& parent_id = 0, const bool nsfw = false);
 
         /**
          * @brief Modifies channel's positions in order to vector elements.
@@ -375,7 +375,7 @@ namespace discpp {
          *
          * @return std::shared_ptr<discpp::Member>
          */
-        std::shared_ptr<discpp::Member> AddMember(const Snowflake& id, const std::string& access_token, const std::string& nick, const std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf);
+        std::shared_ptr<discpp::Member> AddMember(const Snowflake& id, const std::string& access_token, const std::string& nick, const std::vector<discpp::Role>& roles, const bool mute, const bool deaf);
 
         /**
          * @brief Remove a member from the guild.
@@ -522,7 +522,7 @@ namespace discpp {
          *
          * @return discpp::Role
          */
-        std::shared_ptr<discpp::Role> CreateRole(const std::string& name, const Permissions& permissions = Permissions(), const int& color = 0, const bool& hoist = false, const bool& mentionable = false);
+        std::shared_ptr<discpp::Role> CreateRole(const std::string& name, const Permissions& permissions = Permissions(), const int& color = 0, const bool hoist = false, const bool mentionable = false);
 
         /**
          * @brief Modifies role's positions in order to vector elements.
@@ -552,7 +552,7 @@ namespace discpp {
          *
          * @return discpp::Role
          */
-        std::shared_ptr<discpp::Role> ModifyRole(const discpp::Role& role, const std::string& name, const Permissions& permissions = Permissions(), const int& color = 0, const bool& hoist = false, const bool& mentionable = false);
+        std::shared_ptr<discpp::Role> ModifyRole(const discpp::Role& role, const std::string& name, const Permissions& permissions = Permissions(), const int& color = 0, const bool hoist = false, const bool mentionable = false);
 
         /**
          * @brief Deleted a guild role.
@@ -643,7 +643,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyIntegration(const discpp::Integration& guild_integration, const int& expire_behavior, const int& expire_grace_period, const bool& enable_emoticons);
+		void ModifyIntegration(const discpp::Integration& guild_integration, const int& expire_behavior, const int& expire_grace_period, const bool enable_emoticons);
 
         /**
          * @brief Delete a guild integration.
@@ -691,7 +691,7 @@ namespace discpp {
          *
          * @return discpp::GuildEmbed
          */
-		GuildEmbed ModifyGuildEmbed(const Snowflake& channel_id, const bool& enabled);
+		GuildEmbed ModifyGuildEmbed(const Snowflake& channel_id, const bool enabled);
 
         /**
          * @brief Returns a partial invite object for guilds with that feature enabled.

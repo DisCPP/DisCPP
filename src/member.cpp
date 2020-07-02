@@ -52,7 +52,7 @@ namespace discpp {
         return (flags & 0b10) == 0b10;
 	}
 
-	void Member::ModifyMember(const std::string& nick, std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf, const Snowflake& channel_id) {
+	void Member::ModifyMember(const std::string& nick, std::vector<discpp::Role>& roles, const bool mute, const bool deaf, const Snowflake& channel_id) {
 		std::string json_roles = "[";
 		for (discpp::Role role : roles) {
 			if (&role == &roles.front()) {
