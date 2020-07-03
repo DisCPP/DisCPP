@@ -11,10 +11,6 @@ DisC++ is a simplified, but feature rich Discord API wrapper written in modern C
 
 ## What makes DisC++ different?
 * Low memory usage.
-    * Aegis with 20 million members uses 8.4GBs.
-    * DisC++ with 20 million members uses 7.1GBs.
-    * SleepyDiscord has no support for caching, this causes you to request everything from REST API (which slows your bot due to ratelimiting).
-    * Note: DisC++'s and Aegis's memory test was simulated, so results may slightly vary.
 * Even though its very memory optimized, it doesn't loose any readability, usability or features.
 * Asynchronous.
 * Built in async command handler.
@@ -22,7 +18,7 @@ DisC++ is a simplified, but feature rich Discord API wrapper written in modern C
     * You can override the built in command handler if you decide to.
 * Built in async event handler and listener.
     * Event listeners are dispatched on separate threads.
-    * You can have several event listeners listening for the same event which are all ran on seperate threads.
+    * You can have several event listeners listening for the same event which are all ran on separate threads.
 
 ## State
 This library is ready to use but is still in development so you may encounter a few issues, if you do, please submit an issue!
