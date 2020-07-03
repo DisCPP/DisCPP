@@ -522,7 +522,7 @@ std::string discpp::URIEncode(const std::string& str) {
 }
 
 discpp::Snowflake discpp::SnowflakeFromString(const std::string& str) {
-    return strtoll(str.c_str(), nullptr, 10);
+    return std::stoll(str, nullptr, 10);
 }
 
 void discpp::SplitAvatarHash(const std::string &hash, uint64_t out[2]) {
