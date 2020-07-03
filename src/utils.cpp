@@ -401,7 +401,7 @@ time_t discpp::TimeFromDiscord(const std::string &time) {
         utc_buf = *localtime(&utc_time);
 #endif
 
-        std::cout << "Parsed time: " << FormatTime(utc_time) << std::endl;
+        discpp::globals::client_instance->logger->Debug("Parsed time: " + FormatTime(utc_time));
 
         return utc_time;
     }
