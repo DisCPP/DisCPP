@@ -23,7 +23,7 @@ jobs:
     - task: Cache@2
       displayName: Cache vcpkg
       inputs:
-        key: $(vcpkgArgs) | "$(vcpkgGitRef)"" | "$(Agent.OS)"
+        key: 'version2 | $(vcpkgArgs) | "$(vcpkgGitRef)"" | "$(Agent.OS)"'
         path: '$(vcpkgLocation)'
     - task: run-vcpkg@0
       displayName: 'Run vcpkg'
@@ -52,7 +52,7 @@ jobs:
     - task: Cache@2
       displayName: Cache vcpkg
       inputs:
-        key: $(vcpkgArgs) | "$(vcpkgGitRef)"" | "$(Agent.OS)"
+        key: 'version2 | $(vcpkgArgs) | "$(vcpkgGitRef)"" | "$(Agent.OS)"'
         path: '$(vcpkgLocation)'
     - task: run-vcpkg@0
       displayName: 'Run vcpkg'
