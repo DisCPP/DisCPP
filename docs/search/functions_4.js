@@ -1,0 +1,9 @@
+var searchData=
+[
+  ['editmessage_576',['EditMessage',['../classdiscpp_1_1Message.html#aef5cd8157c96b3d8a1425665ce5e00ea',1,'discpp::Message::EditMessage(const std::string &amp;text)'],['../classdiscpp_1_1Message.html#a8ee528a741c7f838bb8cd9fe1e590ece',1,'discpp::Message::EditMessage(const discpp::EmbedBuilder &amp;embed)'],['../classdiscpp_1_1Message.html#a74e2c2c9a3ee1d2602a367fe2ef33c9b',1,'discpp::Message::EditMessage(const int &amp;flags)']]],
+  ['editpermissions_577',['EditPermissions',['../classdiscpp_1_1Channel.html#a4b4386c17d7233171a1eb6544c3723ca',1,'discpp::Channel']]],
+  ['embedbuilder_578',['EmbedBuilder',['../classdiscpp_1_1EmbedBuilder.html#a93b2dcc372a2d843a96801266e5655e1',1,'discpp::EmbedBuilder::EmbedBuilder(const std::string &amp;title, const std::string &amp;description, const Color &amp;color)'],['../classdiscpp_1_1EmbedBuilder.html#a4e13bccf9789b9286845b618eadd4f42',1,'discpp::EmbedBuilder::EmbedBuilder(rapidjson::Document &amp;json)']]],
+  ['emoji_579',['Emoji',['../classdiscpp_1_1Emoji.html#aab92d0ac316152a78ab67f3379150b9c',1,'discpp::Emoji::Emoji(const std::string &amp;name, const Snowflake &amp;id)'],['../classdiscpp_1_1Emoji.html#adf73ebc816bd8ab0335c2babd33db6cf',1,'discpp::Emoji::Emoji(const discpp::Guild &amp;guild, const Snowflake &amp;id)'],['../classdiscpp_1_1Emoji.html#a89113843cc754dd3d950f11088285291',1,'discpp::Emoji::Emoji(rapidjson::Document &amp;json)'],['../classdiscpp_1_1Emoji.html#a9ded882edeacf89bfdd648535c03f946',1,'discpp::Emoji::Emoji(std::wstring w_unicode)'],['../classdiscpp_1_1Emoji.html#a21c4510a7b204dbe6e0490174229533a',1,'discpp::Emoji::Emoji(const std::string &amp;s_unicode)']]],
+  ['ensurebotpermission_580',['EnsureBotPermission',['../classdiscpp_1_1Guild.html#a1cd624bac30b00be8a5be7888c9151dd',1,'discpp::Guild']]],
+  ['error_581',['Error',['../classdiscpp_1_1Logger.html#afd9f6ecb9a6300c3710ca6d2dc9da600',1,'discpp::Logger']]]
+];
