@@ -395,13 +395,19 @@ namespace discpp {
         SendDeleteRequest(Endpoint("/guilds/" + std::to_string(id) + "/bans/" + std::to_string(user_id)), DefaultHeaders(), id, RateLimitBucketType::GUILD);
     }
 
-	void Guild::KickMember(const discpp::Member& member) {
-		KickMemberById(member.user.id);
+	void Guild::KickMember(const discpp::Member& member, const std::string& reason) {
+		KickMemberById(member.user.id, reason);
 	}
 
-    void Guild::KickMemberById(const Snowflake& member_id) {
+    void Guild::KickMemberById(const Snowflake& member_id, const std::string& reason) {
         Guild::EnsureBotPermission(Permission::KICK_MEMBERS);
-        SendDeleteRequest(Endpoint("guilds/" + std::to_string(id) + "/members/" + std::to_string(member_id)), DefaultHeaders(), id, RateLimitBucketType::GUILD);
+
+        std::string url = Endpoint("guilds/" + std::to_string(id) + "/members/" + std::to_string(member_id));
+        if (!reason.empty()) {
+            url += "?reason=" + URIEncode(reason);
+        }
+
+        SendDeleteRequest(url, DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
 	std::shared_ptr<discpp::Role> Guild::GetRole(const Snowflake& id) const {

@@ -273,7 +273,7 @@ namespace discpp {
         /**
          * @brief Gets a list of channel categories in this guild.
          *
-         * The first element in the map is the id of the category, while the second in the category.
+         * The first element in the map is the id of the category, while the second is the category channel object.
          * This makes it easy to find a channel in the array by using the `std::unordered_map::find()` method.
          *
          * ```cpp
@@ -284,6 +284,14 @@ namespace discpp {
          */
 		std::unordered_map<discpp::Snowflake, discpp::Channel> GetCategories();
 
+        /**
+         * @brief Gets a list of channel that don't have parents in this guild.
+         *
+         * The first element in the map is the id of the channel, while the second is the channel object.
+         * This makes it easy to find a channel in the array by using the `std::unordered_map::find()` method.
+         *
+         * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
+         */
         std::unordered_map<Snowflake, Channel> GetParentlessChannels();
 
         /**
@@ -479,7 +487,7 @@ namespace discpp {
          *
          * @return void
          */
-		void KickMember(const discpp::Member& member);
+		void KickMember(const discpp::Member& member, const std::string& reason = "");
 
         /**
          * @brief Kick a guild member by id.
@@ -492,7 +500,7 @@ namespace discpp {
          *
          * @return void
          */
-        void KickMemberById(const Snowflake& member_id);
+        void KickMemberById(const Snowflake& member_id, const std::string& reason = "");
 
         /**
          * @brief Retrieve a guild role.
