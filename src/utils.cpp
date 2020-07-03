@@ -70,6 +70,7 @@ std::unique_ptr<rapidjson::Document> discpp::HandleResponse(cpr::Response& respo
                 break;
             default:
                 response_msg = "SERVER ERROR";
+                break;
         }
 
         throw exceptions::http::HTTPResponseException(response.status_code, response_msg);
