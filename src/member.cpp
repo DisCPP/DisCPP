@@ -31,10 +31,10 @@ namespace discpp {
         joined_at = ContainsNotNull(json, "joined_at") ? TimeFromDiscord(json["joined_at"].GetString()) : 0;
         premium_since = ContainsNotNull(json, "premium_since") ? TimeFromDiscord(json["premium_since"].GetString()) : 0;
 		if (GetDataSafely<bool>(json, "deaf")) {
-		    flags |= 0b1;
+		    flags << 3;
 		}
 		if (GetDataSafely<bool>(json, "mute")) {
-		    flags |= 0b10;
+		    flags << 4;
 		}
 		if (discpp::ContainsNotNull(json, "presence")) {
             rapidjson::Document json_presence;
@@ -45,11 +45,11 @@ namespace discpp {
 	}
 
 	bool Member::IsDeafened() {
-	    return (flags & 0b1) == 0b1;
+	    return flags & 3;
 	}
 
 	bool Member::IsMuted() {
-        return (flags & 0b10) == 0b10;
+        return flags & 4;
 	}
 
 	void Member::ModifyMember(const std::string& nick, std::vector<discpp::Role>& roles, const bool mute, const bool deaf, const Snowflake& channel_id) {

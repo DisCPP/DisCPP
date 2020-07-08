@@ -26,8 +26,8 @@ namespace discpp {
 				SplitAvatarHash(icon_str, avatar_hex);
 			}
 		}
-		if (GetDataSafely<bool>(json, "bot")) flags |= 0b1;
-        if (GetDataSafely<bool>(json, "system")) flags |= 0b10;
+		if (GetDataSafely<bool>(json, "bot")) flags << 1;
+        if (GetDataSafely<bool>(json, "system")) flags << 2;
 		//public_flags = GetDataSafely<int>(json, "public_flags");
 	}
 
@@ -103,11 +103,11 @@ namespace discpp {
     }
 
     bool User::IsBot() const {
-	    return (flags & 0b1) == 0b1;
+	    return flags & 1;
     }
 
     bool User::IsSystemUser() {
-        return (flags & 0b10) == 0b10;
+        return flags & 2;
     }
 
     std::string User::GetDiscriminator() const {
