@@ -78,7 +78,7 @@ namespace discpp {
 	}
 
 	enum class FriendSourceFlags : int {
-		ALL, MUTUAL_FRIENDS
+		ALL, MUTUAL_FRIENDS,
 		MUTUAL_GUILDS
 	};
 
