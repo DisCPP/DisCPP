@@ -4,7 +4,7 @@
 #include <fstream>
 #include <utility>
 
-#ifndef __STDC_WANT_LIB_EXT1__
+#ifndef __STDC_LIB_EXT1__
 #define __STDC_WANT_LIB_EXT1__ 1
 #endif
 
@@ -142,7 +142,7 @@ namespace discpp {
             std::tm now{};
             char st[80];
 
-#ifdef __STDC_LIB_EXT1__
+#ifndef __linux__
             localtime_s(&now, &now_time_t);
 #else
             now = *localtime(&now_time_t);
@@ -162,15 +162,13 @@ namespace discpp {
                 return;
             }
 
-            { // Log to console
-                std::lock_guard<std::mutex> lock_guard(console_mutex);
-                std::cout << tmp << std::endl;
-            }
+            // Log to console
+            std::lock_guard<std::mutex> lock_guard(console_mutex);
+            std::cout << tmp << std::endl;
 
-            { // Log to file
-                std::lock_guard<std::mutex> lock_guard(file_mutex);
-                log_file << tmp << std::endl;
-            }
+            // Log to file
+            std::lock_guard<std::mutex> lock(file_mutex);
+            log_file << tmp << std::endl;
 		}
 
 	public:

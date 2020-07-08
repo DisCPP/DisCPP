@@ -229,7 +229,7 @@ namespace discpp {
 		return *this;
 	}
 
-	EmbedBuilder& EmbedBuilder::AddField(const std::string& name, const std::string& value, const bool& is_inline) {
+	EmbedBuilder& EmbedBuilder::AddField(const std::string& name, const std::string& value, const bool is_inline) {
 		if (name.empty()) {
 			globals::client_instance->logger->Error(LogTextColor::RED + "You can not have an empty or null field name!");
 			throw std::runtime_error("You can not have an empty or null field title!");
@@ -270,13 +270,11 @@ namespace discpp {
 		return *this;
 	}
 
-    rapidjson::Document EmbedBuilder::ToJson() const {
-	    rapidjson::Document json_copy(rapidjson::kObjectType);
-	    json_copy.CopyFrom(embed_json, json_copy.GetAllocator());
+    std::unique_ptr<rapidjson::Document> EmbedBuilder::ToJson() const {
+	    auto json_copy = std::make_unique<rapidjson::Document>(rapidjson::kObjectType);
+	    json_copy->CopyFrom(embed_json, json_copy->GetAllocator());
 
-#ifndef __INTELLISENSE__
-		return std::move(json_copy);
-#endif
+		return json_copy;
 	}
 
     std::string EmbedBuilder::GetDescription() const {

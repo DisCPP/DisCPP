@@ -86,7 +86,7 @@ namespace discpp {
             if (ContainsNotNull(json, "url")) {
                 url = json["url"].GetString();
             }
-            created_at = json["created_at"].Get<std::time_t>();
+            created_at = std::chrono::system_clock::from_time_t(json["created_at"].Get<std::time_t>());
             if (ContainsNotNull(json, "timestamps")) {
                 rapidjson::Document timestamps_json(rapidjson::kObjectType);
                 timestamps_json.CopyFrom(json["timestamps"], timestamps_json.GetAllocator());
@@ -117,7 +117,7 @@ namespace discpp {
         std::string name;
         discpp::Activity::ActivityType type;
         std::string url;
-        std::time_t created_at;
+        std::chrono::system_clock::time_point created_at;
         std::unordered_map<std::string, std::time_t> timestamps;
         std::string application_id;
         std::string details;
@@ -144,7 +144,7 @@ namespace discpp {
             }
 		}
 
-		Presence(const std::string& text, const discpp::Activity::ActivityType& type, const std::string& status = "online", const bool& afk = false,
+		Presence(const std::string& text, const discpp::Activity::ActivityType& type, const std::string& status = "online", const bool afk = false,
 		        const std::string& url = "") : status(status), afk(afk) {
             game = std::make_shared<discpp::Activity>();
 		    game->name = text;
@@ -152,20 +152,18 @@ namespace discpp {
 		    game->url = url;
 		}
 
-		Presence(std::shared_ptr<discpp::Activity> activity, const bool& afk, const std::string& status) : game(activity), afk(afk), status(status) {}
+		Presence(std::shared_ptr<discpp::Activity> activity, const bool afk, const std::string& status) : game(activity), afk(afk), status(status) {}
 
-		rapidjson::Document ToJson() {
+		std::unique_ptr<rapidjson::Document> ToJson() {
 		    std::string str_activity = "{\"status\": \"" + status + "\", \"afk\": " + (afk ? "true" : "false") + ", \"game\": " + \
                 "{\"name\": \"" + game->name + "\", \"type\": " + std::to_string(static_cast<int>(game->type)) + \
                 ((!game->url.empty()) ? ", \"url\": \"" + game->url + "\"" : "") + "}, \"since\": \"" + \
                 std::to_string(time(NULL) - 10) + "\"}";
 
-            rapidjson::Document result(rapidjson::kObjectType);
-		    result.Parse(str_activity.c_str());
+            auto result = std::make_unique<rapidjson::Document>(rapidjson::kObjectType);
+		    result->Parse(str_activity.c_str());
 
-#ifndef __INTELLISENSE__
-            return std::move(result);
-#endif
+	        return result;
 		}
 
 		std::string status;

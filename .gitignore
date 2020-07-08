@@ -3,7 +3,6 @@
 CMakeFiles/*
 .vs/*
 out/*
-docs/*
 latex/*
 .idea/*
 cmake-build-debug-w10/*

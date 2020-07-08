@@ -86,29 +86,17 @@ namespace discpp {
         /**
          * @brief Constructs a discpp::Message object from an id.
          *
-         * ```cpp
-         *      discpp::Message message(583251190591258624);
-         * ```
+         * If you set `can_request` to true, and the message is not found in cache, then we will request
+         * the message from the REST API. But if its not true, and its not found, an exception will be
+         * thrown of DiscordObjectNotFound.
          *
+         * @param[in] channel_id The channel_id of the message.
          * @param[in] id The id of the message.
+         * @param[in] can_request Whether or not the library can request the message from the REST API.
          *
          * @return discpp::Message, this is a constructor.
          */
-		Message(const Snowflake& id);
-
-        /**
-		 * @brief Sends a REST request to get the message, use this if the message isn't cached.
-		 *
-		 * ```cpp
-		 *      discpp::Message message(583251190591258624);
-		 * ```
-		 *
-		 * @param[in] message_id The id of the message.
-         * @param[in] channel_id The id of the channel.
-		 *
-		 * @return discpp::Message, this is a constructor.
-		 */
-		Message(const Snowflake& message_id, const Snowflake& channel_id);
+		Message(const Snowflake& channel_id, const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Constructs a discpp::Message object by parsing json
@@ -319,8 +307,9 @@ namespace discpp {
          * @return std::string
          */
         inline std::string GetFormattedEditedTimestamp() const {
-            if (edited_timestamp == 0) return "";
-            return FormatTime(this->edited_timestamp);
+        	time_t time = std::chrono::system_clock::to_time_t(edited_timestamp);
+            if (time == 0) return "";
+            return FormatTime(time);
         }
 
         /**
@@ -329,7 +318,7 @@ namespace discpp {
          * @return std::string
          */
         inline std::string GetFormattedTimestamp() const {
-            return FormatTime(this->timestamp);
+            return FormatTime(std::chrono::system_clock::to_time_t(timestamp));
         }
 
         discpp::Channel channel;
@@ -337,8 +326,8 @@ namespace discpp {
         discpp::User author;
         std::shared_ptr<discpp::Member> member;
 		std::string content;
-		time_t timestamp;
-		time_t edited_timestamp;
+		std::chrono::system_clock::time_point timestamp;
+		std::chrono::system_clock::time_point edited_timestamp = std::chrono::system_clock::from_time_t(0);
 		std::unordered_map<discpp::Snowflake, discpp::User> mentions;
 		std::vector<discpp::Snowflake> mentioned_roles;
         std::unordered_map<discpp::Snowflake, ChannelMention> mention_channels;

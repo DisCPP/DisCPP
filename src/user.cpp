@@ -26,8 +26,8 @@ namespace discpp {
 				SplitAvatarHash(icon_str, avatar_hex);
 			}
 		}
-		if (GetDataSafely<bool>(json, "bot")) flags |= 0b1;
-        if (GetDataSafely<bool>(json, "system")) flags |= 0b10;
+		if (GetDataSafely<bool>(json, "bot")) flags << 1;
+        if (GetDataSafely<bool>(json, "system")) flags << 2;
 		//public_flags = GetDataSafely<int>(json, "public_flags");
 	}
 
@@ -61,9 +61,9 @@ namespace discpp {
 
 	discpp::Channel User::CreateDM() {
 		cpr::Body body("{\"recipient_id\": \"" + std::to_string(id) + "\"}");
-		rapidjson::Document result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders({ {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
+		std::unique_ptr<rapidjson::Document> result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders({ {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
 
-		return discpp::Channel(result);
+		return discpp::Channel(*result);
 	}
 	
 	std::string User::GetAvatarURL(const ImageType& img_type) const {
@@ -90,20 +90,24 @@ namespace discpp {
 		}
 	}
 
-    std::string User::CreatedAt() {
+    std::string User::GetFormattedCreatedAt() const {
         return FormatTime(TimeFromSnowflake(id));
     }
+
+    std::chrono::system_clock::time_point User::GetCreatedAt() const {
+        return std::chrono::system_clock::from_time_t(TimeFromSnowflake(id));
+	}
 
     std::string User::CreateMention() {
         return "<@" + std::to_string(id) + ">";
     }
 
     bool User::IsBot() const {
-	    return (flags & 0b1) == 0b1;
+	    return flags & 1;
     }
 
     bool User::IsSystemUser() {
-        return (flags & 0b10) == 0b10;
+        return flags & 2;
     }
 
     std::string User::GetDiscriminator() const {

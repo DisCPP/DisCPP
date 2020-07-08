@@ -157,7 +157,7 @@ namespace discpp {
     bool ContainsNotNull(rapidjson::Document& json, const char * value_name);
     std::string DumpJson(rapidjson::Document& json);
     std::string DumpJson(rapidjson::Value& json);
-    rapidjson::Document GetDocumentInsideJson(rapidjson::Document &json, const char* value_name);
+    std::unique_ptr<rapidjson::Document> GetDocumentInsideJson(rapidjson::Document &json, const char* value_name);
 
 	// Rate limits
 	struct RateLimit {
@@ -221,7 +221,7 @@ namespace discpp {
      *
      * @return rapidjson::Document
      */
-	extern rapidjson::Document HandleResponse(cpr::Response& response, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket);
+	extern std::unique_ptr<rapidjson::Document> HandleResponse(cpr::Response& response, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket);
 
     /**
      * @brief Sends a get request to a url.
@@ -238,7 +238,7 @@ namespace discpp {
      *
      * @return rapidjson::Document
      */
-	extern rapidjson::Document SendGetRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+	extern std::unique_ptr<rapidjson::Document> SendGetRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
 
     /**
      * @brief Sends a post request to a url.
@@ -255,7 +255,7 @@ namespace discpp {
      *
      * @return rapidjson::Document
      */
-	extern rapidjson::Document SendPostRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+	extern std::unique_ptr<rapidjson::Document> SendPostRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
 
     /**
      * @brief Sends a put request to a url.
@@ -272,7 +272,7 @@ namespace discpp {
      *
      * @return rapidjson::Document
      */
-	extern rapidjson::Document SendPutRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+	extern std::unique_ptr<rapidjson::Document> SendPutRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
 
     /**
      * @brief Sends a patch request to a url.
@@ -289,7 +289,7 @@ namespace discpp {
      *
      * @return rapidjson::Document
      */
-	extern rapidjson::Document SendPatchRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+	extern std::unique_ptr<rapidjson::Document> SendPatchRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
 
     /**
      * @brief Sends a delete request to a url.
@@ -305,7 +305,7 @@ namespace discpp {
      *
      * @return rapidjson::Document
      */
-	extern rapidjson::Document SendDeleteRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket);
+	extern std::unique_ptr<rapidjson::Document> SendDeleteRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket);
 
     /**
      * @brief Gets the default headers to communicate with the discpp servers.
@@ -408,7 +408,7 @@ namespace discpp {
      * ```cpp
      *      std::string raw_text = "{\"content\":\"" + EscapeString(text) + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
      *		cpr::Body body = cpr::Body(raw_text);
-     *		rapidjson::Document result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+     *		std::unique_ptr<rapidjson::Document> result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
      * ```
      *
      * @param[in] string The string to escape.
@@ -419,7 +419,7 @@ namespace discpp {
 
 	time_t TimeFromDiscord(const std::string& time);
 	time_t TimeFromSnowflake(const Snowflake& snow);
-    std::string FormatTime(const time_t& time, const std::string& format = "%Y-%m-%d @ %H:%M:%S GMT");
+    std::string FormatTime(const time_t& time, const std::string& format = "%F @ %r %Z");
 	std::string URIEncode(const std::string& str);
     void SplitAvatarHash(const std::string& hash, uint64_t out[2]);
     std::string CombineAvatarHash(const uint64_t in[2]);

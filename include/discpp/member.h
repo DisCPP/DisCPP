@@ -12,7 +12,7 @@ namespace discpp {
 	class Role;
 	class Guild;
 
-	class Member : public DiscordObject {
+	class Member {
 	public:
 		Member() = default;
 
@@ -21,16 +21,17 @@ namespace discpp {
          *
          * This constructor searches the guild's member cache to get a member object.
          *
-         * ```cpp
-         *      discpp::Member member("222189653795667968", guild);
-         * ```
+         * If you set `can_request` to true, and the message is not found in cache, then we will request
+         * the message from the REST API. But if its not true, and its not found, an exception will be
+         * thrown of DiscordObjectNotFound.
          *
          * @param[in] id The id of the member.
-         * @param[in] guild The guild containing the member.
+         * @param[in] guild The guild the member is in.
+         * @param[in] can_request Whether or not the library can request the message from the REST API.
          *
          * @return discpp::Member, this is a constructor.
          */
-		Member(const Snowflake& id, const discpp::Guild& guild);
+		Member(const Snowflake& id, discpp::Guild& guild, bool can_request = false);
 
         /**
          * @brief Constructs a discpp::Member object by parsing json and stores the guild_id.
@@ -64,7 +65,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyMember(const std::string& nick, std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf, const Snowflake& channel_id);
+		void ModifyMember(const std::string& nick, std::vector<discpp::Role>& roles, const bool mute, const bool deaf, const Snowflake& channel_id);
 
         /**
          * @brief Adds a role to a guild member.
@@ -197,6 +198,21 @@ namespace discpp {
          * @return std::vector<std::shared_ptr<discpp::Role>>
          */
         std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>> GetRoles();
+
+        /**
+         * @brief Returns member roles but ordered by position.
+         *
+         * @return std::vector<std::shared_ptr<discpp::Role>>
+         */
+        std::vector<std::shared_ptr<discpp::Role>> GetSortedRoles();
+
+        /**
+         * @brief Returns highest role.
+         *
+         * @param isHoistable
+         * @return std::shared_ptr<discpp::Role>
+         */
+        std::shared_ptr<discpp::Role> GetHighestRole(const bool isHoistable = false);
 
         /**
          * @brief Returns guild object.

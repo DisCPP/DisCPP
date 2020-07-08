@@ -22,7 +22,7 @@ namespace discpp {
          * @return discpp::Reaction, this is a constructor.
          */
 		Reaction(rapidjson::Document& json);
-		Reaction(const int& count, const bool& from_bot, const discpp::Emoji& emoji) : count(count), from_bot(from_bot), emoji(emoji) { }
+		Reaction(const int& count, const bool from_bot, const discpp::Emoji& emoji) : count(count), from_bot(from_bot), emoji(emoji) { }
 
 		int count;
 		bool from_bot;

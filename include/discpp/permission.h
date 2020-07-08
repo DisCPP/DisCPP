@@ -135,8 +135,9 @@ namespace discpp {
 	};
 
 	class NoPermissionException : public std::runtime_error {
-	public: 
-		NoPermissionException (const Permission& req_perm) : std::runtime_error("Required permission " + PermissionToString(req_perm) + " not met.") {}
+	public:
+        explicit NoPermissionException(const Permission& req_perm) : std::runtime_error("Required permission " + PermissionToString(req_perm) + " not met.") {}
+        explicit NoPermissionException(const std::string& str) : std::runtime_error(str) {}
 	};
 
 	class NotGuildOwnerException : public std::runtime_error {

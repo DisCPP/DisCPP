@@ -28,30 +28,64 @@ std::string discpp::GetOsName() {
 }
 
 // @TODO: Test if the json document type returned is what its supposed to be, like an array or object.
-rapidjson::Document discpp::HandleResponse(cpr::Response& response, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
+std::unique_ptr<rapidjson::Document> discpp::HandleResponse(cpr::Response& response, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Received requested payload: " + response.text);
     }
 
-    rapidjson::Document tmp;
+    auto tmp = std::make_unique<rapidjson::Document>();
     if (!response.text.empty() && response.text[0] == '[' && response.text[response.text.size() - 1] == ']') {
-        tmp.SetArray();
+        tmp->SetArray();
     } else {
-        tmp.SetObject();
+        tmp->SetObject();
+    }
+
+    // Handle http response codes and throw an exception if it failed.
+    if (response.status_code != 200 && response.status_code != 201 && response.status_code != 204) {
+        std::string response_msg;
+        switch (response.status_code) {
+            case 304:
+                response_msg = "NOT MODIFIED";
+                break;
+            case 400:
+                response_msg = "BAD REQUEST";
+                break;
+            case 401:
+                response_msg = "UNAUTHORIZED";
+                break;
+            case 403:
+                response_msg = "FORBIDDEN";
+                break;
+            case 404:
+                response_msg = "NOT FOUND";
+                break;
+            case 405:
+                response_msg = "METHOD NOT ALLOWED";
+                break;
+            case 249:
+                response_msg = "TOO MANY REQUESTS";
+                break;
+            case 502:
+                response_msg = "GATEWAY UNAVAILABLE";
+                break;
+            default:
+                response_msg = "SERVER ERROR";
+                break;
+        }
+
+        throw exceptions::http::HTTPResponseException(response.status_code, response_msg);
     }
 
 	HandleRateLimits(response.header, object, ratelimit_bucket);
-	tmp.Parse((!response.text.empty() ? response.text.c_str() : "{}"));
+	tmp->Parse((!response.text.empty() ? response.text.c_str() : "{}"));
 
-	// Check if we were returned an error and throw an exception if so.
-	if (!tmp.IsNull() && tmp.IsObject() && ContainsNotNull(tmp, "code")) {
-        throw discpp::GetException(tmp);
+	// Check if we were returned a json error and throw an exception if so.
+	if (!tmp->IsNull() && tmp->IsObject() && ContainsNotNull(*tmp, "code")) {
+        discpp::ThrowException(*tmp);
     }
 
     // This shows an error in inteliisense for some reason but compiles fine.
-#ifndef __INTELLISENSE__
-    return std::move(tmp);
-#endif
+	return tmp;
 }
 
 std::string CprBodyToString(const cpr::Body& body) {
@@ -62,22 +96,20 @@ std::string CprBodyToString(const cpr::Body& body) {
 	return body;
 }
 
-rapidjson::Document discpp::SendGetRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+std::unique_ptr<rapidjson::Document> discpp::SendGetRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
     }
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
 
-	rapidjson::Document doc = HandleResponse(result, object, ratelimit_bucket);
+    std::unique_ptr<rapidjson::Document> doc = HandleResponse(result, object, ratelimit_bucket);
 
     // This shows an error in inteliisense for some reason but compiles fine.
-#ifndef __INTELLISENSE__
-    return std::move(doc);
-#endif
+	return doc;
 }
 
-rapidjson::Document discpp::SendPostRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+std::unique_ptr<rapidjson::Document> discpp::SendPostRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + CprBodyToString(body));
     }
@@ -86,7 +118,7 @@ rapidjson::Document discpp::SendPostRequest(const std::string& url, const cpr::H
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendPutRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+std::unique_ptr<rapidjson::Document> discpp::SendPutRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("put patch request, URL: " + url + ", body: " + CprBodyToString(body));
     }
@@ -95,7 +127,7 @@ rapidjson::Document discpp::SendPutRequest(const std::string& url, const cpr::He
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendPatchRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+std::unique_ptr<rapidjson::Document> discpp::SendPatchRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
 	if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + CprBodyToString(body));
     }
@@ -104,7 +136,7 @@ rapidjson::Document discpp::SendPatchRequest(const std::string& url, const cpr::
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-rapidjson::Document discpp::SendDeleteRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
+std::unique_ptr<rapidjson::Document> discpp::SendDeleteRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending delete request, URL: " + url);
     }
@@ -342,14 +374,40 @@ void discpp::HandleRateLimits(cpr::Header& header, const Snowflake& object, cons
 }
 
 time_t discpp::TimeFromDiscord(const std::string &time) {
-    std::tm t{};
-    std::istringstream ss(time);
-    ss >> std::get_time(&t, "%Y-%m-%dT%H:%M:%S");
-    if (ss.fail()) {
-        throw std::runtime_error("failed to parse time");
+    int year, month, day, hour, minute;
+    int timezone_hr = 0, timezone_min = 0;
+    float second;
+    if (6 < sscanf(time.c_str(), "%d-%d-%dT%d:%d:%f%d:%d", &year, &month, &day, &hour, &minute, &second, &timezone_hr, &timezone_min)) {
+        if (timezone_hr < 0) {
+            timezone_min = -timezone_min;
+        }
+
+        hour += timezone_hr;
+        minute += timezone_hr;
+
+        struct tm t{};
+        t.tm_year = year - 1900;
+        t.tm_mon = month - 1;
+        t.tm_mday = day;
+        t.tm_hour = hour;
+        t.tm_min = minute;
+        t.tm_sec = (int) second;
+
+        time_t utc_time = mktime(&t);
+        struct tm utc_buf;
+
+#ifndef __linux__
+        localtime_s(&utc_buf, &utc_time);
+#else
+        utc_buf = *localtime(&utc_time);
+#endif
+
+        discpp::globals::client_instance->logger->Debug("Parsed time: " + FormatTime(utc_time));
+
+        return utc_time;
     }
 
-    return mktime(&t);
+    throw std::runtime_error("Failed to parse time");
 }
 
 time_t discpp::TimeFromSnowflake(const Snowflake& snow) {
@@ -358,8 +416,13 @@ time_t discpp::TimeFromSnowflake(const Snowflake& snow) {
 }
 
 std::string discpp::FormatTime(const time_t& time, const std::string& format) {
-    tm* n = std::gmtime(&time);
-    tm now = *n;
+    struct tm now{};
+#ifndef __linux__
+    localtime_s(&now, &time);
+#else
+    now = *localtime(&time);
+#endif
+
     char buffer[256];
     strftime(buffer, sizeof(buffer), format.c_str(), &now);
 
@@ -386,14 +449,11 @@ void discpp::IterateThroughNotNullJson(rapidjson::Document &json, const std::fun
     }
 }
 
-rapidjson::Document discpp::GetDocumentInsideJson(rapidjson::Document &json, const char* value_name) {
-    rapidjson::Document inside_json;
-    inside_json.CopyFrom(json[value_name], inside_json.GetAllocator());
+std::unique_ptr<rapidjson::Document> discpp::GetDocumentInsideJson(rapidjson::Document &json, const char* value_name) {
+    auto inside_json = std::make_unique<rapidjson::Document>(json.GetType());
+    inside_json->CopyFrom(json[value_name], inside_json->GetAllocator());
 
-    // This shows an error in inteliisense for some reason but compiles fine.
-#ifndef __INTELLISENSE__
-    return std::move(inside_json);
-#endif
+	return inside_json;
 }
 
 std::string discpp::DumpJson(rapidjson::Document &json) {
@@ -463,7 +523,7 @@ std::string discpp::URIEncode(const std::string& str) {
 }
 
 discpp::Snowflake discpp::SnowflakeFromString(const std::string& str) {
-    return strtoll(str.c_str(), nullptr, 10);
+    return std::stoll(str, nullptr, 10);
 }
 
 void discpp::SplitAvatarHash(const std::string &hash, uint64_t out[2]) {
@@ -473,6 +533,8 @@ void discpp::SplitAvatarHash(const std::string &hash, uint64_t out[2]) {
 
 std::string discpp::CombineAvatarHash(const uint64_t in[2]) {
     std::stringstream stream;
-    stream << std::hex << in[0] << in[1];
+    stream << std::setw(16) << std::setfill('0') << std::hex << in[0];
+    stream << std::setw(16) << std::setfill('0') << std::hex << in[1];
+
     return stream.str();
 }

@@ -204,15 +204,16 @@ namespace discpp {
          *
          * This constructor searches the guild cache to get a guild object.
          *
-         * ```cpp
-         *      discpp::Guild guild(583251190591258624);
-         * ```
+         * If you set `can_request` to true, and the message is not found in cache, then we will request
+         * the message from the REST API. But if its not true, and its not found, an exception will be
+         * thrown of DiscordObjectNotFound.
          *
-         * @param[in] id The id of the guild
+         * @param[in] id The id of the guild.
+         * @param[in] can_request Whether or not the library can request the message from the REST API.
          *
          * @return discpp::Guild, this is a constructor.
          */
-		Guild(const Snowflake& id);
+		Guild(const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Constructs a discpp::Guild object by parsing json
@@ -272,7 +273,7 @@ namespace discpp {
         /**
          * @brief Gets a list of channel categories in this guild.
          *
-         * The first element in the map is the id of the category, while the second in the category.
+         * The first element in the map is the id of the category, while the second is the category channel object.
          * This makes it easy to find a channel in the array by using the `std::unordered_map::find()` method.
          *
          * ```cpp
@@ -282,6 +283,16 @@ namespace discpp {
          * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
          */
 		std::unordered_map<discpp::Snowflake, discpp::Channel> GetCategories();
+
+        /**
+         * @brief Gets a list of channel that don't have parents in this guild.
+         *
+         * The first element in the map is the id of the channel, while the second is the channel object.
+         * This makes it easy to find a channel in the array by using the `std::unordered_map::find()` method.
+         *
+         * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
+         */
+        std::unordered_map<Snowflake, Channel> GetParentlessChannels();
 
         /**
          * @brief Gets a channel in this guild.
@@ -314,7 +325,7 @@ namespace discpp {
          */
         discpp::Channel CreateChannel(const std::string& name, const std::string& topic = "", const ChannelType& type = ChannelType::GUILD_TEXT,
                 const int& bitrate = 0, const int& user_limit = 0, const int& rate_limit_per_user = 0, const int& position = 0,
-                const std::vector<discpp::Permissions>& permission_overwrites = {}, const discpp::Snowflake& parent_id = 0, const bool& nsfw = false);
+                const std::vector<discpp::Permissions>& permission_overwrites = {}, const discpp::Snowflake& parent_id = 0, const bool nsfw = false);
 
         /**
          * @brief Modifies channel's positions in order to vector elements.
@@ -332,25 +343,15 @@ namespace discpp {
         /**
          * @brief Gets a discpp::Member from this guild.
          *
-         * If the member is not cached for some reason, then retrieve it via REST api.
-         * If the guild object is const, it wont cache the newly retrieved member object.
+         * If you set `can_request` to true, and the member is not found in cache, then we will request
+         * the member from the REST API. But if its not true, and its not found, an exception will be
+         * thrown of DiscordObjectNotFound.
          *
          * @param[in] id The member's id
          *
          * @return std::shared_ptr<discpp::Member>
          */
-        std::shared_ptr<discpp::Member> GetMember(const Snowflake& id) const;
-
-        /**
-         * @brief Gets a discpp::Member from this guild.
-         *
-         * If the member is not cached for some reason, then retrieve it via REST api.
-         *
-         * @param[in] id The member's id
-         *
-         * @return std::shared_ptr<discpp::Member>
-         */
-        std::shared_ptr<discpp::Member> GetMember(const Snowflake& id);
+        std::shared_ptr<discpp::Member> GetMember(const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Ensures the bot has a permission.
@@ -364,7 +365,7 @@ namespace discpp {
          * @param[in] req_perm The permission to check if the bot has.
          *
          */
-        void EnsureBotPermission(const Permission& req_perm) const;
+        void EnsureBotPermission(const Permission& req_perm);
 
         /**
          * @brief Adds a discpp::Member to this guild.
@@ -382,7 +383,7 @@ namespace discpp {
          *
          * @return std::shared_ptr<discpp::Member>
          */
-        std::shared_ptr<discpp::Member> AddMember(const Snowflake& id, const std::string& access_token, const std::string& nick, const std::vector<discpp::Role>& roles, const bool& mute, const bool& deaf);
+        std::shared_ptr<discpp::Member> AddMember(const Snowflake& id, const std::string& access_token, const std::string& nick, const std::vector<discpp::Role>& roles, const bool mute, const bool deaf);
 
         /**
          * @brief Remove a member from the guild.
@@ -486,7 +487,7 @@ namespace discpp {
          *
          * @return void
          */
-		void KickMember(const discpp::Member& member);
+		void KickMember(const discpp::Member& member, const std::string& reason = "");
 
         /**
          * @brief Kick a guild member by id.
@@ -499,7 +500,7 @@ namespace discpp {
          *
          * @return void
          */
-        void KickMemberById(const Snowflake& member_id);
+        void KickMemberById(const Snowflake& member_id, const std::string& reason = "");
 
         /**
          * @brief Retrieve a guild role.
@@ -529,7 +530,7 @@ namespace discpp {
          *
          * @return discpp::Role
          */
-        std::shared_ptr<discpp::Role> CreateRole(const std::string& name, const Permissions& permissions = Permissions(), const int& color = 0, const bool& hoist = false, const bool& mentionable = false);
+        std::shared_ptr<discpp::Role> CreateRole(const std::string& name, const Permissions& permissions = Permissions(), const int& color = 0, const bool hoist = false, const bool mentionable = false);
 
         /**
          * @brief Modifies role's positions in order to vector elements.
@@ -559,7 +560,7 @@ namespace discpp {
          *
          * @return discpp::Role
          */
-        std::shared_ptr<discpp::Role> ModifyRole(const discpp::Role& role, const std::string& name, const Permissions& permissions = Permissions(), const int& color = 0, const bool& hoist = false, const bool& mentionable = false);
+        std::shared_ptr<discpp::Role> ModifyRole(const discpp::Role& role, const std::string& name, const Permissions& permissions = Permissions(), const int& color = 0, const bool hoist = false, const bool mentionable = false);
 
         /**
          * @brief Deleted a guild role.
@@ -650,7 +651,7 @@ namespace discpp {
          *
          * @return void
          */
-		void ModifyIntegration(const discpp::Integration& guild_integration, const int& expire_behavior, const int& expire_grace_period, const bool& enable_emoticons);
+		void ModifyIntegration(const discpp::Integration& guild_integration, const int& expire_behavior, const int& expire_grace_period, const bool enable_emoticons);
 
         /**
          * @brief Delete a guild integration.
@@ -698,7 +699,7 @@ namespace discpp {
          *
          * @return discpp::GuildEmbed
          */
-		GuildEmbed ModifyGuildEmbed(const Snowflake& channel_id, const bool& enabled);
+		GuildEmbed ModifyGuildEmbed(const Snowflake& channel_id, const bool enabled);
 
         /**
          * @brief Returns a partial invite object for guilds with that feature enabled.
@@ -812,6 +813,13 @@ namespace discpp {
 		std::string GetIconURL(const discpp::ImageType& img_type = discpp::ImageType::AUTO) const;
 
         /**
+         * @brief Returns if the guild has an icon.
+         *
+         * @return bool
+         */
+        bool HasIcon() const;
+
+        /**
          * @brief Retrieve guild banner url.
          *
          * @param[in] img_type Optional parameter for type of image
@@ -819,6 +827,13 @@ namespace discpp {
          * @return std::string
          */
         std::string GetBannerURL(const discpp::ImageType& img_type = discpp::ImageType::AUTO) const;
+
+        /**
+         * @brief Returns if the guild has a banner.
+         *
+         * @return bool
+         */
+        bool HasBanner() const;
 
         /**
          * @brief Retrieve guild splash url.
@@ -830,6 +845,13 @@ namespace discpp {
         std::string GetSplashURL(const discpp::ImageType& img_type = discpp::ImageType::AUTO) const;
 
         /**
+         * @brief Returns if the guild has a splash.
+         *
+         * @return bool
+         */
+        bool HasSplash() const;
+
+        /**
          * @brief Retrieve guild discovery splash url.
          *
          * @param[in] img_type Optional parameter for type of image
@@ -837,6 +859,13 @@ namespace discpp {
          * @return std::string
          */
         std::string GetDiscoverySplashURL(const discpp::ImageType& img_type = discpp::ImageType::AUTO) const;
+
+        /**
+         * @brief Returns if the guild has a splash.
+         *
+         * @return bool
+         */
+        bool HasDiscoverySplash() const;
 
         /**
          * @brief Retrieve guild owner as a discpp::Member object
@@ -847,7 +876,7 @@ namespace discpp {
          *
          * @return std::shared_ptr<discpp::Member>
          */
-        inline std::shared_ptr<discpp::Member> GetOwnerMember() const;
+        inline std::shared_ptr<discpp::Member> GetOwnerMember();
 
         /**
          * @brief Returns an audit log object.
@@ -895,9 +924,37 @@ namespace discpp {
          */
 		bool IsUnavailable() const;
 
-        inline std::string GetFormattedJoinedAt() const {
-            return FormatTime(this->joined_at);
-        }
+        /**
+         * @brief Gets the formatted joined at time and date for the bot.
+         *
+         * Formatted output: `%Y-%m-%d @ %H:%M:%S GMT`
+         *
+         * @return std::string
+         */
+        std::string GetFormattedJoinedAt() const;
+
+        /**
+         * @brief Gets the joined at time and date for the bot.
+         *
+         * @return std::chrono::system_clock::time_point
+         */
+        std::chrono::system_clock::time_point GetJoinedAt() const;
+
+        /**
+         * @brief Gets the formatted created at time and date for this guild.
+         *
+         * Formatted output: `%Y-%m-%d @ %H:%M:%S GMT`
+         *
+         * @return std::string
+         */
+        std::string GetFormattedCreatedAt() const;
+
+        /**
+         * @brief Gets the created at time and date for this guild.
+         *
+         * @return std::chrono::system_clock::time_point
+         */
+        std::chrono::system_clock::time_point GetCreatedAt() const;
 
 		std::string name; /**< Guild name. */
 		Snowflake owner_id; /**< ID of the guild owner. */
@@ -918,7 +975,7 @@ namespace discpp {
 		Snowflake system_channel_id; /**< The id of the channel where guild notices such as welcome messages and boost events are posted. */
         int system_channel_flags; /**< System channel flags. */
         Snowflake rules_channel_id; /**< The id of the channel where "PUBLIC" guilds display rules and/or guidelines. */
-		time_t joined_at; /**< When this guild was joined at. */
+        std::chrono::system_clock::time_point joined_at; /**< When this guild was joined at. */
 		int member_count; /**< Total number of members in this guild. */
 		std::vector<discpp::VoiceState> voice_states; /**< Array of partial voice state objects. */
 		std::unordered_map<Snowflake, std::shared_ptr<Member>> members; /**< Users in the guild. */
@@ -933,7 +990,6 @@ namespace discpp {
         discpp::Channel public_updates_channel; /**< The channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */
 		int approximate_member_count; /**< Approximate number of members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
 		int approximate_presence_count; /**< Approximate number of online members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
-		std::string created_at; /**< The id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */
 	private:
         unsigned char flags;
         uint64_t icon_hex[2] = {0, 0};
@@ -942,7 +998,7 @@ namespace discpp {
         uint64_t banner_hex[2] = {0, 0};
 
         bool is_icon_gif = false;
-	};
+    };
 
     class VoiceState {
     public:

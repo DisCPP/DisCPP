@@ -239,7 +239,7 @@ namespace discpp {
          *
          * @return discpp::EmbedBuilder, just returns an object of this.
          */
-        EmbedBuilder& AddField(const std::string& name, const std::string& value, const bool& is_inline = false);
+        EmbedBuilder& AddField(const std::string& name, const std::string& value, const bool is_inline = false);
 
         /**
          * @brief Get description of the embed.
@@ -309,7 +309,7 @@ namespace discpp {
          *
          * @return rapidjson::Document
          */
-        rapidjson::Document ToJson() const;
+        std::unique_ptr<rapidjson::Document> ToJson() const;
 	private:
         rapidjson::Document embed_json;
 	};

@@ -25,7 +25,7 @@ namespace discpp {
 		this->id = id;
 	};
 
-	discpp::Message Webhook::Send(const std::string& text, const bool& tts, discpp::EmbedBuilder* embed, const std::vector<discpp::File>& files) {
+	discpp::Message Webhook::Send(const std::string& text, const bool tts, discpp::EmbedBuilder* embed, const std::vector<discpp::File>& files) {
 
 		std::string escaped_text = EscapeString(text);
         rapidjson::Document message_json = rapidjson::Document(rapidjson::kObjectType);
@@ -60,8 +60,8 @@ namespace discpp {
 
 		cpr::Body body;
 		if (embed != nullptr) {
-		    rapidjson::Document json = embed->ToJson();
-			body = cpr::Body("{\"embed\": " + DumpJson(json) + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
+		    std::unique_ptr<rapidjson::Document> json = embed->ToJson();
+			body = cpr::Body("{\"embed\": " + DumpJson(*json) + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
 		}
 		else if (!files.empty()) {
 			cpr::Multipart multipart_data{};
@@ -82,9 +82,9 @@ namespace discpp {
 		} else {
 			body = cpr::Body(DumpJson(message_json));
 		}
-		rapidjson::Document result = SendPostRequest(Endpoint("/webhooks/" + std::to_string(id) + "/" + token), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::WEBHOOK, body);
+		std::unique_ptr<rapidjson::Document> result = SendPostRequest(Endpoint("/webhooks/" + std::to_string(id) + "/" + token), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::WEBHOOK, body);
 
-		return discpp::Message(result);
+		return discpp::Message(*result);
 	}
 
 	void Webhook::EditName(std::string& name) {

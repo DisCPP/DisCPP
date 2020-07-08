@@ -43,12 +43,50 @@ namespace discpp {
 		}
 	};
 
-	enum class GetChannelsMessagesMethod {
-		AROUND,
-		BEFORE,
-		AFTER,
-		LIMIT
+	struct RequestChannelsMessageMethod {
+	    Snowflake around_id = 0;
+        Snowflake before_id = 0;
+        Snowflake after_id = 0;
 	};
+
+    /**
+     * @brief Helper method for requesting channel messages around a specific message id.
+     *
+     * @param[in] around_id The message id to get messages around.
+     *
+     * @return RequestChannelsMessageMethod
+     */
+    inline RequestChannelsMessageMethod RequestMessagesAround(Snowflake around_id) {
+        RequestChannelsMessageMethod request;
+        request.around_id = around_id;
+        return request;
+    }
+
+    /**
+     * @brief Helper method for requesting channel messages before a specific message id.
+     *
+     * @param[in] before_id The message id to get messages before.
+     *
+     * @return RequestChannelsMessageMethod
+     */
+    inline RequestChannelsMessageMethod RequestMessagesBefore(Snowflake before_id) {
+        RequestChannelsMessageMethod request;
+        request.before_id = before_id;
+        return request;
+    }
+
+    /**
+     * @brief Helper method for requesting channel messages after a specific message id.
+     *
+     * @param[in] after_id The message id to get messages after.
+     *
+     * @return RequestChannelsMessageMethod
+     */
+    inline RequestChannelsMessageMethod RequestMessagesAfter(Snowflake after_id) {
+        RequestChannelsMessageMethod request;
+        request.after_id = after_id;
+        return request;
+    }
 
 	struct File {
 		std::string file_name;
@@ -58,19 +96,20 @@ namespace discpp {
 	class Channel : public DiscordObject {
 	public:
 		Channel() = default;
+
         /**
          * @brief Constructs a discpp::Channel object from the id.
          *
-         * ```cpp
-         *      discpp::Channel channel(674023471063498772);
-         * ```
+         * If you set `can_request` to true, and the message is not found in cache, then we will request
+         * the message from the REST API. But if its not true, and its not found, an exception will be
+         * thrown of DiscordObjectNotFound.
          *
-         * @param[in] id The channel id
+         * @param[in] id The id of the channel.
+         * @param[in] can_request Whether or not the library can request the message from the REST API.
          *
          * @return discpp::Channel, this is a constructor.
          */
-
-		Channel(const Snowflake& id);
+		Channel(const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Constructs a discpp::Channel object from json.
@@ -110,7 +149,7 @@ namespace discpp {
          *
          * @return discpp::Message
          */
-		discpp::Message Send(const std::string& text, const bool& tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
+		discpp::Message Send(const std::string& text, const bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
 
         /**
          * @brief Modify the channel.
@@ -144,8 +183,13 @@ namespace discpp {
         /**
          * @brief Get channel's messages depending on the given method.
          *
+         * If you set the RequestChannelsMessageMethod yourself, dont set more than one of the message ids.
+         *
+         *
          * ```cpp
-         *      std::vector<discpp::Message> messages = channel.RequestMessages(50);
+         *      std::vector<discpp::Message> messages_after = channel.RequestMessages(50, RequestChannelsMessageAfter(725152124471738388));
+         *      std::vector<discpp::Message> messages_before = channel.RequestMessages(50, RequestChannelsMessageBefore(725152124471738388));
+         *      std::vector<discpp::Message> messages_around = channel.RequestMessages(50, RequestChannelsMessageAround(725152124471738388));
          * ```
          *
          * @param[in] amount The amount of the messages to get unless the method is not "limit".
@@ -153,7 +197,7 @@ namespace discpp {
          *
          * @return std::vector<discpp::Message>
          */
-        std::vector<discpp::Message> RequestMessages(int amount, GetChannelsMessagesMethod get_method = GetChannelsMessagesMethod::LIMIT);
+        std::vector<discpp::Message> RequestMessages(int amount, RequestChannelsMessageMethod get_method = {}) const;
 
         /**
          * @brief Requests the channel's message from the discord api.
@@ -263,7 +307,7 @@ namespace discpp {
          *
          * @return discpp::GuildInvite
          */
-        GuildInvite CreateInvite(const int& max_age, const int& max_uses, const bool& temporary, const bool& unique);
+        GuildInvite CreateInvite(const int& max_age, const int& max_uses, const bool temporary, const bool unique);
 
         std::vector<GuildInvite> GetInvites();
 
@@ -327,7 +371,7 @@ namespace discpp {
         int rate_limit_per_user; /**< Amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected. */
         int user_limit; /**< The user limit of the voice channel. */
         Snowflake guild_id; /**< Guild id of the current channel. */
-        Snowflake category_id; /**< ID of the parent category for a channel (each parent category can contain up to 50 channels). */
+        Snowflake category_id = 0; /**< ID of the parent category for a channel (each parent category can contain up to 50 channels). */
         std::vector<discpp::Permissions> permissions; /**< Explicit permission overwrites for members and roles. */
         Snowflake owner_id; /**< ID of the DM creator. */
         Snowflake application_id; /**< Application ID of the group DM creator if it is bot-created. */

@@ -45,21 +45,21 @@ namespace discpp {
          *
          * @return bool
          */
-        bool IsHoistable();
+        bool IsHoistable() const;
 
         /**
          * @brief Returns if the role is manged by an integration.
          *
          * @return bool
          */
-        bool IsManaged();
+        bool IsManaged() const;
 
         /**
          * @brief Returns if the role is mentionable.
          *
          * @return bool
          */
-        bool IsMentionable();
+        bool IsMentionable() const;
 
 		std::string name; /**< Name of the current role. */
 		int color; /**< Color of the current role. */
