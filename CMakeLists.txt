@@ -8,7 +8,6 @@ project(discpp)
 
 # Set options for IXWebsocket
 set(USE_TLS TRUE)
-set(USE_OPEN_SSL TRUE)
 
 # Set options for RapidJSON
 set(RAPIDJSON_BUILD_DOC OFF)
@@ -17,35 +16,41 @@ set(RAPIDJSON_BUILD_TESTS OFF)
 set(RAPIDJSON_BUILD_THIRDPARTY_GTEST OFF)
 set(RAPIDJSON_HAS_STDSTRING ON)
 
-# Set options for CPR
-set(CURL_ZLIB OFF) # No need for zlib
-
 # Build static libs
 set(CURL_STATICLIB ON)
 set(BUILD_SHARED_LIBS OFF)
 
-# Set TLS library. For some reason I have to define `CMAKE_USE_...` and `USE_...`
-# for the TLS library. I'm not sure why but so what.
-if(WIN32)
-	set(CMAKE_USE_WINSSL ON)
-	set(CMAKE_USE_OPENSSL OFF)
+# Set options for CPR/Curl
+set(BUILD_CPR_TESTS OFF)
+set(BUILD_CURL_EXE OFF)
 
+# Set TLS library for CPR and also IXWebsocket
+if(WIN32) # Use MBedTLS for Windows
 	set(USE_WINSSL ON)
 	set(USE_OPENSSL OFF)
-elseif(APPLE)
-	set(CMAKE_USE_DARWINSSL ON)
+	#[[set(CMAKE_USE_WINSSL OFF)
 	set(CMAKE_USE_OPENSSL OFF)
+	set(CMAKE_USE_MBEDTLS ON)
 
-	set(USE_DARWINSSL ON)
+	set(SSL_ENABLED ON CACHE INTERNAL "" FORCE)
+	set(CURL_CA_PATH "auto" CACHE INTERNAL "" FORCE)]]
+
+	# For IXWebsocket
+	set(USE_MBED_TLS ON)
+	set(USE_OPEN_SSL OFF)
+elseif(APPLE) # Use secure transport for Apple
+	set(CMAKE_USE_SECTRANSP ON)
+	set(CMAKE_USE_OPENSSL OFF)
 	set(USE_OPENSSL OFF)
-else()
-	set(CMAKE_USE_OPENSSL ON)
 
+	# For IXWebsocket
+	set(USE_SECURE_TRANSPORT ON)
+	set(USE_OPEN_SSL OFF)
+else() # Use OpenSSL for anything else.
 	set(USE_OPENSSL ON)
-endif()
 
-# Set options for C++ standard lib.
-set(__STDC_WANT_LIB_EXT1__ 1)
+	set(USE_OPEN_SSL ON) # For IXWebsocket
+endif()
 
 # Set default options
 option(USE_RAPID "Uses RapidJSON for json parsing." ON)
@@ -100,6 +105,9 @@ if (USE_RAPID)
 elseif(USE_SIMD)
 	target_link_libraries(discpp PUBLIC simdjson)
 endif()
+
+# Set options for C++ standard lib.
+target_compile_definitions(discpp PUBLIC __STDC_WANT_LIB_EXT1__)
 
 # I have to do some weird stuff to get Cpr to link
 target_compile_definitions(${CPR_LIBRARIES} PUBLIC CURL_STATICLIB)
