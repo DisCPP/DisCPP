@@ -7,29 +7,27 @@ set(EXTERNAL_INSTALL_LOCATION "${PROJECT_SOURCE_DIR}/thirdparty")
 project(discpp)
 
 # Set options for IXWebsocket
-set(USE_TLS TRUE)
+set(USE_TLS TRUE CACHE BOOL "")
 
 # Set options for RapidJSON
-set(RAPIDJSON_BUILD_DOC OFF)
-set(RAPIDJSON_BUILD_EXAMPLES OFF)
-set(RAPIDJSON_BUILD_TESTS OFF)
-set(RAPIDJSON_BUILD_THIRDPARTY_GTEST OFF)
-set(RAPIDJSON_HAS_STDSTRING ON)
-set(GTESTSRC_FOUND FALSE)
+set(RAPIDJSON_BUILD_DOC OFF CACHE BOOL "")
+set(RAPIDJSON_BUILD_EXAMPLES OFF CACHE BOOL "")
+set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "")
+set(RAPIDJSON_BUILD_THIRDPARTY_GTEST OFF CACHE BOOL "")
+set(RAPIDJSON_HAS_STDSTRING ON CACHE BOOL "")
 
 # Build static libs
-set(CURL_STATICLIB ON)
-set(BUILD_SHARED_LIBS OFF)
+set(CURL_STATICLIB ON CACHE BOOL "")
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
 
 # Set options for CPR/Curl
-set(BUILD_CPR_TESTS OFF)
-set(BUILD_CPR_TESTS_SSL OFF)
-set(BUILD_CURL_EXE OFF)
+set(BUILD_CPR_TESTS OFF CACHE BOOL "")
+set(BUILD_CURL_EXE OFF CACHE BOOL "")
 
 # Set TLS library for CPR and also IXWebsocket
 if(WIN32) # Use MBedTLS for Windows
-	set(USE_WINSSL ON)
-	set(USE_OPENSSL OFF)
+	set(USE_WINSSL ON CACHE BOOL "")
+	set(USE_OPENSSL OFF CACHE BOOL "")
 	#[[set(CMAKE_USE_WINSSL OFF)
 	set(CMAKE_USE_OPENSSL OFF)
 	set(CMAKE_USE_MBEDTLS ON)
@@ -38,20 +36,23 @@ if(WIN32) # Use MBedTLS for Windows
 	set(CURL_CA_PATH "auto" CACHE INTERNAL "" FORCE)]]
 
 	# For IXWebsocket
-	set(USE_MBED_TLS ON)
-	set(USE_OPEN_SSL OFF)
+	set(USE_MBED_TLS ON CACHE BOOL "")
+	set(USE_OPEN_SSL OFF CACHE BOOL "")
 elseif(APPLE) # Use secure transport for Apple
-	set(CMAKE_USE_SECTRANSP ON)
-	set(CMAKE_USE_OPENSSL OFF)
-	set(USE_OPENSSL OFF)
+	set(CMAKE_USE_SECTRANSP ON CACHE BOOL "")
+	set(CMAKE_USE_OPENSSL OFF CACHE BOOL "")
+	set(USE_OPENSSL OFF CACHE BOOL "")
 
 	# For IXWebsocket
-	set(USE_SECURE_TRANSPORT ON)
-	set(USE_OPEN_SSL OFF)
+	set(USE_SECURE_TRANSPORT ON CACHE BOOL "")
+	set(USE_OPEN_SSL OFF CACHE BOOL "")
 else() # Use OpenSSL for anything else.
-	set(USE_OPENSSL ON)
+	set(USE_OPENSSL ON CACHE BOOL "")
 
-	set(USE_OPEN_SSL ON) # For IXWebsocket
+	set(USE_OPEN_SSL ON CACHE BOOL "") # For IXWebsocket
+
+	set(CURL_CA_PATH "${CMAKE_CURRENT_SOURCE_DIR}/ca-chain.cert.pem" CACHE INTERNAL "" FORCE)
+	set(CURL_CA_BUNDLE "${CMAKE_CURRENT_SOURCE_DIR}/ca-chain.cert.pem" CACHE INTERNAL "" FORCE)
 endif()
 
 # Set default options
@@ -120,7 +121,7 @@ target_link_libraries(discpp PUBLIC $<BUILD_INTERFACE:ixwebsocket>)
 
 # Build unit tests
 if (BUILD_TESTS)
-    add_subdirectory(tests)
+	add_subdirectory(tests)
 endif()
 
 # Build examples
