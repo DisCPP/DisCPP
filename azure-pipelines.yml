@@ -16,6 +16,9 @@ jobs:
       displayName: Update submodules.
     - task: CMake@1
       displayName: 'Run CMake with Ninja'
+      inputs:
+        workingDirectory: 'build'
+        cmakeArgs: ..
   - job: Linux_Latest
     pool:
       vmImage: 'ubuntu-latest'
@@ -24,3 +27,6 @@ jobs:
       displayName: Update submodules.
     - task: CMake@1
       displayName: 'Run CMake'
+      inputs:
+        workingDirectory: 'build'
+        cmakeArgs: ..
