@@ -23,6 +23,7 @@ set(BUILD_SHARED_LIBS OFF)
 
 # Set options for CPR/Curl
 set(BUILD_CPR_TESTS OFF)
+set(BUILD_CPR_TESTS_SSL OFF)
 set(BUILD_CURL_EXE OFF)
 
 # Set TLS library for CPR and also IXWebsocket
