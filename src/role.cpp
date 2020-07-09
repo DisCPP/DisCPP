@@ -24,8 +24,6 @@ namespace discpp {
         if (GetDataSafely<bool>(json, "mentionable")) {
             flags |= 0b100;
         }
-
-        std::cout << "Flags: " << flags << ", flags_uint: " << ((unsigned int) flags) << std::endl;
 	}
 
     bool Role::IsHoistable() const {

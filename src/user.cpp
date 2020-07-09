@@ -12,6 +12,7 @@ namespace discpp {
 			*this = it->second->user;
 		}
 	}
+
 	User::User(rapidjson::Document& json) {
 		id = GetIDSafely(json, "id");
 		username = GetDataSafely<std::string>(json, "username");
@@ -26,8 +27,8 @@ namespace discpp {
 				SplitAvatarHash(icon_str, avatar_hex);
 			}
 		}
-		if (GetDataSafely<bool>(json, "bot")) flags << 1;
-        if (GetDataSafely<bool>(json, "system")) flags << 2;
+		if (GetDataSafely<bool>(json, "bot")) flags |= 0b1;
+        if (GetDataSafely<bool>(json, "system")) flags |= 0b10;
 		//public_flags = GetDataSafely<int>(json, "public_flags");
 	}
 
@@ -103,11 +104,11 @@ namespace discpp {
     }
 
     bool User::IsBot() const {
-	    return flags & 1;
+	    return (flags & 0b1) == 0b1;
     }
 
     bool User::IsSystemUser() {
-        return flags & 2;
+        return (flags & 0b10) == 0b10;
     }
 
     std::string User::GetDiscriminator() const {
