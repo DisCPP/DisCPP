@@ -10,14 +10,45 @@ project(discpp)
 set(USE_TLS TRUE)
 set(USE_OPEN_SSL TRUE)
 
-# Set options for RapidJson
-set(RAPIDJSON_HAS_STDSTRING 1)
+# Set options for RapidJSON
+set(RAPIDJSON_BUILD_DOC OFF)
+set(RAPIDJSON_BUILD_EXAMPLES OFF)
+set(RAPIDJSON_BUILD_TESTS OFF)
+set(RAPIDJSON_BUILD_THIRDPARTY_GTEST OFF)
+set(RAPIDJSON_HAS_STDSTRING ON)
+
+# Set options for CPR
+set(CURL_ZLIB OFF) # No need for zlib
+
+# Build static libs
+set(CURL_STATICLIB ON)
+set(BUILD_SHARED_LIBS OFF)
+
+# Set TLS library. For some reason I have to define `CMAKE_USE_...` and `USE_...`
+# for the TLS library. I'm not sure why but so what.
+if(WIN32)
+	set(CMAKE_USE_WINSSL ON)
+	set(CMAKE_USE_OPENSSL OFF)
+
+	set(USE_WINSSL ON)
+	set(USE_OPENSSL OFF)
+elseif(APPLE)
+	set(CMAKE_USE_DARWINSSL ON)
+	set(CMAKE_USE_OPENSSL OFF)
+
+	set(USE_DARWINSSL ON)
+	set(USE_OPENSSL OFF)
+else()
+	set(CMAKE_USE_OPENSSL ON)
+
+	set(USE_OPENSSL ON)
+endif()
 
 # Set options for C++ standard lib.
 set(__STDC_WANT_LIB_EXT1__ 1)
 
 # Set default options
-option(USE_RAPID "Uses rapidjson for json parsing." ON)
+option(USE_RAPID "Uses RapidJSON for json parsing." ON)
 option(USE_SIMD "Uses simdjson for json parsing. - NOT YET SUPPORTED" OFF)
 option(USE_FMT "Uses fmt for logger - NOT YET SUPPORTED" OFF)
 option(BUILD_EXAMPLES "Build example bots." OFF)
@@ -26,23 +57,17 @@ option(BUILD_TESTS "Build unit tests." OFF)
 # Find dependencies
 if (USE_FMT)
 	find_package(fmt REQUIRED)
-	add_compile_definitions(FMT_SUPPORT)
-else()
-	add_compile_definitions(IOSTREAM_SUPPORT)
 endif()
 
 if (USE_RAPID)
-	find_package(RapidJSON CONFIG REQUIRED)
+	add_subdirectory(thirdparty/rapidjson)
 	add_compile_definitions(RAPIDJSON_BACKEND)
 elseif(USE_SIMD)
 	find_package(simdjson CONFIG REQUIRED)
 	add_compile_definitions(SIMDJSON_BACKEND)
 endif()
 
-find_package(OpenSSL REQUIRED)
-find_package(cpr REQUIRED)
-find_package(CURL CONFIG REQUIRED)
-find_package(ZLIB REQUIRED)
+add_subdirectory(thirdparty/cpr)
 add_subdirectory(thirdparty/IXWebSocket)
 
 # Link sources
@@ -64,6 +89,10 @@ endif()
 # Link dependencies
 if (FMT_ENABLED)
 	target_link_libraries(discpp PUBLIC fmt)
+
+	target_compile_definitions(discpp PUBLIC FMT_SUPPORT)
+else()
+	target_compile_definitions(discpp PUBLIC IOSTREAM_SUPPORT)
 endif()
 
 if (USE_RAPID)
@@ -72,12 +101,12 @@ elseif(USE_SIMD)
 	target_link_libraries(discpp PUBLIC simdjson)
 endif()
 
-target_link_libraries(discpp PUBLIC ZLIB::ZLIB)
-target_link_libraries(discpp PUBLIC CURL::libcurl)
-target_link_libraries(discpp PUBLIC OpenSSL::SSL OpenSSL::Crypto)
+# I have to do some weird stuff to get Cpr to link
+target_compile_definitions(${CPR_LIBRARIES} PUBLIC CURL_STATICLIB)
+target_include_directories(discpp PUBLIC ${CPR_INCLUDE_DIRS})
+target_link_libraries(discpp PUBLIC ${CPR_LIBRARIES})
+
 target_link_libraries(discpp PUBLIC $<BUILD_INTERFACE:ixwebsocket>)
-#target_include_directories(discpp PUBLIC $<BUILD_INTERFACE:${IXWEBSOCKET_HEADERS}>)
-target_link_libraries(discpp PUBLIC cpr)
 
 # Build unit tests
 if (BUILD_TESTS)
