@@ -229,7 +229,7 @@ namespace discpp {
 		std::unique_ptr<discpp::Presence> presence = nullptr; /**< Presence for the current member. If the member has no presence, its a nullptr. */
         std::vector<discpp::Snowflake> roles;
 	private:
-	    unsigned char flags;
+	    unsigned char flags = 0b0;
 	};
 }
 

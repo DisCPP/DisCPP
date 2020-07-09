@@ -14,27 +14,29 @@ namespace discpp {
 		name = json["name"].GetString();
 		color = json["color"].GetInt();
         if (GetDataSafely<bool>(json, "hoist")) {
-            flags << 1;
+            flags |= 0b1;
         }
 		position = json["position"].GetInt();
         permissions = Permissions(PermissionType::ROLE, json["permissions"].GetInt());
         if (GetDataSafely<bool>(json, "managed")) {
-            flags << 2;
+            flags |= 0b10;
         }
         if (GetDataSafely<bool>(json, "mentionable")) {
-            flags << 3;
+            flags |= 0b100;
         }
+
+        std::cout << "Flags: " << flags << ", flags_uint: " << ((unsigned int) flags) << std::endl;
 	}
 
     bool Role::IsHoistable() const {
-        return flags & 1;
+        return (flags & 0b1) == 0b1;
     }
 
     bool Role::IsManaged() const {
-        return flags & 2;
+        return (flags & 0b10) == 0b10;
     }
 
     bool Role::IsMentionable() const {
-        return flags & 3;
+        return (flags & 0b100) == 0b100;
     }
 }

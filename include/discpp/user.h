@@ -148,7 +148,7 @@ namespace discpp {
 		std::string username; /**< The user's username, not unique across the platform. */
 		// int public_flags; // Is this ever needed?
     private:
-        unsigned char flags;
+        unsigned char flags = 0b0;
         unsigned short discriminator;
 
         uint64_t avatar_hex[2] = {0, 0};
