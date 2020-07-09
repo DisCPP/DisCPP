@@ -66,7 +66,7 @@ namespace discpp {
 		int position; /**< Position of the current role. */
 		Permissions permissions; /**< PermissionOverwrites for the current role. */
 	private:
-	    unsigned char flags;
+	    unsigned char flags = 0b0;
 	};
 }
 

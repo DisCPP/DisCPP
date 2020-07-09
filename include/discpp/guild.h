@@ -991,7 +991,7 @@ namespace discpp {
 		int approximate_member_count; /**< Approximate number of members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
 		int approximate_presence_count; /**< Approximate number of online members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
 	private:
-        unsigned char flags;
+        unsigned char flags = 0b0;
         uint64_t icon_hex[2] = {0, 0};
         uint64_t splash_hex[2] = {0, 0};
         uint64_t discovery_hex[2] = {0, 0};
