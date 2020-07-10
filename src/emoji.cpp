@@ -37,7 +37,7 @@ namespace discpp {
             throw std::runtime_error("Failed to convert emoji to string!");
         } else {
             this->unicode = thick_emoji;
-        }*/
+        }
 #else
         auto converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
         this->unicode = converter.from_bytes(s_unicode);

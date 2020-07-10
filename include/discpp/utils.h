@@ -13,6 +13,7 @@
 
 #include <unordered_map>
 #include <climits>
+
 #include <ixwebsocket/IXHttp.h>
 
 namespace discpp {
@@ -182,10 +183,6 @@ namespace discpp {
     /**
      * @brief Wait for rate limits.
      *
-     * ```cpp
-     *      discpp::WaitForRateLimits(message.id, discpp::RateLimitBucketType::CHANNEL);
-     * ```
-     *
      * @param[in] object The object id.
      * @param[in] ratelimit_bucket The rate limit bucket.
      *
@@ -196,25 +193,17 @@ namespace discpp {
     /**
      * @brief Handle rate limites
      *
-     * ```cpp
-     *      discpp::HandleRateLimits(header, id, bucket);
-     * ```
-     *
      * @param[in] header The headers to get the wait rate limit from.
      * @param[in] object The object id.
      * @param[in] ratelimit_bucket The rate limit bucket.
      *
      * @return int
      */
-	void HandleRateLimits(ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket);
+	void HandleRateLimits(ix::WebSocketHttpHeaders headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket);
 	// End of rate limits
 
     /**
      * @brief Handles a response from the discpp servers.
-     *
-     * ```cpp
-     *      rapidjson::Document response = discpp::HandleResponse(cpr_response, object, discpp::RateLimitBucketType::CHANNEL);
-     * ```
      *
      * @param[in] reponse The cpr response from the servers.
      * @param[in] object The object id to handle the ratelimits for.
@@ -222,21 +211,11 @@ namespace discpp {
      *
      * @return rapidjson::Document
      */
-	extern std::unique_ptr<rapidjson::Document> HandleResponse(cpr::Response& response, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket);
-    extern rapidjson::Document HandleResponse(ix::HttpResponsePtr response, snowflake object, RateLimitBucketType ratelimit_bucket);
-	extern rapidjson::Document SendGetRequest(std::string url, ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
-    extern rapidjson::Document SendPostRequest(std::string url, ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
-    extern rapidjson::Document SendPutRequest(std::string url, ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
-    extern rapidjson::Document SendPatchRequest(std::string url, ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
-    extern rapidjson::Document SendDeleteRequest(std::string url, ix::WebSocketHttpHeaders headers, snowflake object, RateLimitBucketType ratelimit_bucket);
+	extern std::unique_ptr<rapidjson::Document> HandleResponse(ix::HttpResponsePtr response, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket);
 
     /**
      * @brief Sends a get request to a url.
      *
-     * ```cpp
-     *      rapidjson::Document response = discpp::SendGetRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
-     * ```
-     *
      * @param[in] url The url to create a request to.
      * @param[in] headers The http header.
      * @param[in] object The object id to handle the ratelimits for.
@@ -245,14 +224,11 @@ namespace discpp {
      *
      * @return rapidjson::Document
      */
+    extern std::unique_ptr<rapidjson::Document> SendGetRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
 
     /**
      * @brief Sends a post request to a url.
      *
-     * ```cpp
-     *      rapidjson::Document response = discpp::SendPostRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
-     * ```
-     *
      * @param[in] url The url to create a request to.
      * @param[in] headers The http header.
      * @param[in] object The object id to handle the ratelimits for.
@@ -261,14 +237,11 @@ namespace discpp {
      *
      * @return rapidjson::Document
      */
+    extern std::unique_ptr<rapidjson::Document> SendPostRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
 
     /**
      * @brief Sends a put request to a url.
      *
-     * ```cpp
-     *      rapidjson::Document response = discpp::SendPutRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
-     * ```
-     *
      * @param[in] url The url to create a request to.
      * @param[in] headers The http header.
      * @param[in] object The object id to handle the ratelimits for.
@@ -277,14 +250,11 @@ namespace discpp {
      *
      * @return rapidjson::Document
      */
+    extern std::unique_ptr<rapidjson::Document> SendPutRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
 
     /**
      * @brief Sends a patch request to a url.
      *
-     * ```cpp
-     *      rapidjson::Document response = discpp::SendPatchRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
-     * ```
-     *
      * @param[in] url The url to create a request to.
      * @param[in] headers The http header.
      * @param[in] object The object id to handle the ratelimits for.
@@ -293,33 +263,28 @@ namespace discpp {
      *
      * @return rapidjson::Document
      */
+    extern std::unique_ptr<rapidjson::Document> SendPatchRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
 
     /**
      * @brief Sends a delete request to a url.
-     *
-     * ```cpp
-     *      rapidjson::Document response = discpp::SendDeleteRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL);
-     * ```
      *
      * @param[in] url The url to create a request to.
      * @param[in] headers The http header.
      * @param[in] object The object id to handle the ratelimits for.
      * @param[in] ratelimit_bucket The rate limit bucket.
      *
-     * @return rapidjson::Document
+     * @return std::unique_ptr<rapidjson::Document>
      */
+    extern std::unique_ptr<rapidjson::Document> SendDeleteRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket);
 
     /**
      * @brief Gets the default headers to communicate with the discpp servers.
      *
-     * ```cpp
-     *      cpr::Header default_headers = discpp::DefaultHeaders({});
-     * ```
-     *
      * @param[in] add The headers to add to the default ones.
      *
-     * @return rapidjson::Document
+     * @return ix::WebSocketHttpHeaders
      */
+    ix::WebSocketHttpHeaders DefaultHeaders(ix::WebSocketHttpHeaders add = {});
 
     /**
      * @brief Check if a string starts with another string.
@@ -333,6 +298,7 @@ namespace discpp {
      *
      * @return bool
      */
+    bool StartsWith(const std::string& string, const std::string& prefix);
 
     /**
      * @brief Split a string into a vector.
@@ -346,6 +312,7 @@ namespace discpp {
      *
      * @return std::vector<std::string>
      */
+    std::vector<std::string> SplitString(const std::string& str, const std::string& delimiter);
 
     /**
      * @brief Combine a vector into a string with spaces between each element.
@@ -360,6 +327,7 @@ namespace discpp {
      *
      * @return std::string
      */
+    std::string CombineStringVector(const std::vector<std::string>& vector, const std::string& delimiter = " ", const int& offset = 0);
 
     /**
      * @brief Reads an entire file.
@@ -372,10 +340,6 @@ namespace discpp {
      *
      * @return std::string
      */
-	ix::WebSocketHttpHeaders DefaultHeaders(ix::WebSocketHttpHeaders add = {});
-	bool StartsWith(std::string string, std::string prefix);
-	std::vector<std::string> SplitString(std::string str, std::string delimter);
-	std::string CombineStringVector(std::vector<std::string> v, std::string delimiter = " ", int offset = 0);
 	std::string ReadEntireFile(std::ifstream& file);
 
     /**

@@ -9,6 +9,9 @@
 
 #include <rapidjson/writer.h>
 
+#include <ixwebsocket/IXHttpClient.h>
+#include <ixwebsocket/IXNetSystem.h>
+
 std::string discpp::GetOsName() {
 	#ifdef _WIN32
 		return "Windows 32-bit";
@@ -28,23 +31,26 @@ std::string discpp::GetOsName() {
 }
 
 // @TODO: Test if the json document type returned is what its supposed to be, like an array or object.
-rapidjson::Document discpp::HandleResponse(ix::HttpResponsePtr response, snowflake object, RateLimitBucketType ratelimit_bucket) {
-std::unique_ptr<rapidjson::Document> discpp::HandleResponse(cpr::Response& response, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
+std::unique_ptr<rapidjson::Document> discpp::HandleResponse(ix::HttpResponsePtr response, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Received requested payload: " + response->payload);
     }
 
     auto tmp = std::make_unique<rapidjson::Document>();
-    if (!response.text.empty() && response.text[0] == '[' && response.text[response.text.size() - 1] == ']') {
+    if (!response->payload.empty() && response->payload[0] == '[' && response->payload[response->payload.size() - 1] == ']') {
         tmp->SetArray();
     } else {
         tmp->SetObject();
     }
 
+    if (!response->errorMsg.empty()) {
+        globals::client_instance->logger->Error(LogTextColor::RED + "Received HTTPS error: " + response->errorMsg);
+    }
+
     // Handle http response codes and throw an exception if it failed.
-    if (response.status_code != 200 && response.status_code != 201 && response.status_code != 204) {
+    if (response->statusCode != 200 && response->statusCode != 201 && response->statusCode != 204) {
         std::string response_msg;
-        switch (response.status_code) {
+        switch (response->statusCode) {
             case 304:
                 response_msg = "NOT MODIFIED";
                 break;
@@ -74,11 +80,11 @@ std::unique_ptr<rapidjson::Document> discpp::HandleResponse(cpr::Response& respo
                 break;
         }
 
-        throw exceptions::http::HTTPResponseException(response.status_code, response_msg);
+        throw exceptions::http::HTTPResponseException(response->statusCode, response_msg);
     }
 
-	HandleRateLimits(response.header, object, ratelimit_bucket);
-	tmp->Parse((!response.text.empty() ? response.text.c_str() : "{}"));
+	HandleRateLimits(response->headers, object, ratelimit_bucket);
+	tmp->Parse((!response->payload.empty() ? response->payload.c_str() : "{}"));
 
 	// Check if we were returned a json error and throw an exception if so.
 	if (!tmp->IsNull() && tmp->IsObject() && ContainsNotNull(*tmp, "code")) {
@@ -97,12 +103,12 @@ std::string CprBodyToString(const cpr::Body& body) {
 	return body;
 }
 
-std::unique_ptr<rapidjson::Document> discpp::SendGetRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+std::unique_ptr<rapidjson::Document> discpp::SendGetRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + body);
     }
 
-    std::unique_ptr<rapidjson::Document> doc = HandleResponse(result, object, ratelimit_bucket);
+    ix::initNetSystem();
 
     WaitForRateLimits(object, ratelimit_bucket);
 
@@ -113,20 +119,17 @@ std::unique_ptr<rapidjson::Document> discpp::SendGetRequest(const std::string& u
     ix::HttpResponsePtr result;
     result = httpClient.get(url, args);
 
-    rapidjson::Document doc = HandleResponse(result, object, ratelimit_bucket);
+    std::unique_ptr<rapidjson::Document> doc = HandleResponse(result, object, ratelimit_bucket);
 
-    // This shows an error in inteliisense for some reason but compiles fine.
 	return doc;
 }
 
-std::unique_ptr<rapidjson::Document> discpp::SendPostRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+std::unique_ptr<rapidjson::Document> discpp::SendPostRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + body);
     }
 
-#ifdef _WIN32
     ix::initNetSystem();
-#endif
 
     WaitForRateLimits(object, ratelimit_bucket);
 
@@ -136,37 +139,37 @@ std::unique_ptr<rapidjson::Document> discpp::SendPostRequest(const std::string& 
     ix::HttpResponsePtr result;
     result = httpClient.post(url, body, args);
 
-    return HandleResponse(result, object, ratelimit_bucket);
+    std::unique_ptr<rapidjson::Document> doc = HandleResponse(result, object, ratelimit_bucket);
+
+    return doc;
 }
 
-std::unique_ptr<rapidjson::Document> discpp::SendPutRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+std::unique_ptr<rapidjson::Document> discpp::SendPutRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body) {
     if (globals::client_instance != nullptr) {
-	    globals::client_instance->logger->Debug("Sending put request, URL: " + url + ", body: " + body);
+        globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + body);
     }
 
-#ifdef _WIN32
     ix::initNetSystem();
-#endif
 
-	WaitForRateLimits(object, ratelimit_bucket);
+    WaitForRateLimits(object, ratelimit_bucket);
 
-std::unique_ptr<rapidjson::Document> discpp::SendPatchRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
-	if (globals::client_instance != nullptr) {
-        globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + CprBodyToString(body));
-    }
-	WaitForRateLimits(object, ratelimit_bucket);
-	cpr::Response result = cpr::Patch(cpr::Url{ url }, headers, body);
-	return HandleResponse(result, object, ratelimit_bucket);
+    ix::HttpClient httpClient;
+    ix::HttpRequestArgsPtr args = httpClient.createRequest();
+    args->extraHeaders = headers;
+    ix::HttpResponsePtr result;
+    result = httpClient.put(url, body, args);
+
+    std::unique_ptr<rapidjson::Document> doc = HandleResponse(result, object, ratelimit_bucket);
+
+    return doc;
 }
 
-std::unique_ptr<rapidjson::Document> discpp::SendDeleteRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
+std::unique_ptr<rapidjson::Document> discpp::SendPatchRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + body);
     }
 
-#ifdef _WIN32
     ix::initNetSystem();
-#endif
 
     WaitForRateLimits(object, ratelimit_bucket);
 
@@ -176,18 +179,17 @@ std::unique_ptr<rapidjson::Document> discpp::SendDeleteRequest(const std::string
     ix::HttpResponsePtr result;
     result = httpClient.patch(url, body, args);
 
-    return HandleResponse(result, object, ratelimit_bucket);
+    std::unique_ptr<rapidjson::Document> doc = HandleResponse(result, object, ratelimit_bucket);
+
+    return doc;
 }
 
-cpr::Header discpp::DefaultHeaders(const cpr::Header& add) {
-    cpr::Header headers = { { "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" },
-                            { "X-RateLimit-Precision", "millisecond"} };
-    // Add the correct authorization header depending on the token type.
-	if (globals::client_instance->config->type == TokenType::USER) {
-	    headers.insert({ "Authorization", discpp::globals::client_instance->token });
-	} else {
-        headers.insert({ "Authorization", "Bot " + discpp::globals::client_instance->token });
-	}
+std::unique_ptr<rapidjson::Document> discpp::SendDeleteRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket) {
+    if (globals::client_instance != nullptr) {
+        globals::client_instance->logger->Debug("Sending delete request, URL: " + url);
+    }
+
+    ix::initNetSystem();
 
     WaitForRateLimits(object, ratelimit_bucket);
 
@@ -197,7 +199,28 @@ cpr::Header discpp::DefaultHeaders(const cpr::Header& add) {
     ix::HttpResponsePtr result;
     result = httpClient.del(url, args);
 
-    return HandleResponse(result, object, ratelimit_bucket);
+    std::unique_ptr<rapidjson::Document> doc = HandleResponse(result, object, ratelimit_bucket);
+
+    return doc;
+}
+
+ix::WebSocketHttpHeaders discpp::DefaultHeaders(ix::WebSocketHttpHeaders add) {
+    ix::WebSocketHttpHeaders headers = {
+        { "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" },
+        { "X-RateLimit-Precision", "millisecond"}};
+
+    // Add the correct authorization header depending on the token type.
+    if (globals::client_instance->config->type == TokenType::USER) {
+        headers.insert({ "Authorization", discpp::globals::client_instance->token });
+    } else {
+        headers.insert({ "Authorization", "Bot " + discpp::globals::client_instance->token });
+    }
+
+    for (auto head : add) {
+        headers.insert(headers.end(), head);
+    }
+
+    return headers;
 }
 
 bool discpp::StartsWith(const std::string& string, const std::string& prefix) {
@@ -360,28 +383,15 @@ int discpp::WaitForRateLimits(const Snowflake& object, const RateLimitBucketType
 	return 0;
 }
 
-bool HeaderContains(const cpr::Header& header, const std::string& key) {
-	/**
-	 * @brief Check if a cpr::Header contains a specific key.
-	 *
-	 * ```cpp
-	 *      bool contains = discpp::HeaderContains(headers, "auth");
-	 * ```
-	 *
-	 * @param[in] header The headers to see if the key is contained in.
-	 * @param[in] key The key to check if the headers contain.
-	 *
-	 * @return bool
-	 */
-
-    return header.count(key) > 0;
+bool HeaderContains(const ix::WebSocketHttpHeaders& headers, const std::string& key) {
+    return headers.count(key) > 0;
 }
 
-void discpp::HandleRateLimits(cpr::Header& header, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
+void discpp::HandleRateLimits(ix::WebSocketHttpHeaders headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
 	RateLimit* obj = nullptr;
-	if (HeaderContains(header, "x-ratelimit-global")) {
+	if (HeaderContains(headers, "x-ratelimit-global")) {
 		obj = &global_ratelimit;
-	} else if (HeaderContains(header, "x-ratelimit-limit")) {
+	} else if (HeaderContains(headers, "x-ratelimit-limit")) {
 		switch (ratelimit_bucket) {
 		    case RateLimitBucketType::CHANNEL:
 		        obj = &channel_ratelimit[object];
@@ -403,9 +413,9 @@ void discpp::HandleRateLimits(cpr::Header& header, const Snowflake& object, cons
 		return;
 	}
 
-    obj->limit = std::stoi(header["x-ratelimit-limit"]);
-    obj->remaining_limit = std::stoi(header["x-ratelimit-remaining"]);
-    obj->ratelimit_reset = std::stod(header["x-ratelimit-reset"]);
+    obj->limit = std::stoi(headers["x-ratelimit-limit"]);
+    obj->remaining_limit = std::stoi(headers["x-ratelimit-remaining"]);
+    obj->ratelimit_reset = std::stod(headers["x-ratelimit-reset"]);
 }
 
 time_t discpp::TimeFromDiscord(const std::string &time) {

@@ -776,7 +776,7 @@ namespace discpp {
         }
 
         cpr::Body body(DumpJson(j_body));
-        std::unique_ptr<rapidjson::Document> result = SendPatchRequest(Endpoint("/guilds/" + std::to_string(id)), headers, id, RateLimitBucketType::CHANNEL, body);
+        std::unique_ptr<rapidjson::Document> result = SendPatchRequest(Endpoint("/guilds/" + std::to_string(id)), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
         *this = discpp::Guild(*result);
         return *this;

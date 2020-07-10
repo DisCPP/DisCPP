@@ -97,85 +97,54 @@ namespace discpp {
             rapidjson::Value embed_value(rapidjson::kObjectType);
             embed_value.CopyFrom(embed->embed_json, message_json.GetAllocator());
 
-		cpr::Body body;
-		if (embed != nullptr) { // Set the HTTP payload to an embed.
-		    rapidjson::Document embed_json = embed->ToJson();
-			body = cpr::Body("{\"embed\": " + DumpJson(embed_json) + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
-		} else if (!files.empty()) { // Send files.
+            message_json.AddMember("embed", embed_value, message_json.GetAllocator());
+        }
 
+        if (!files.empty()) {
             // @TODO THIS:
-		    ix::HttpClient* client = new ix::HttpClient();
+            ix::HttpClient* client = new ix::HttpClient();
 
             ix::HttpRequestArgsPtr args = client->createRequest();
             args->logger = [](const std::string& msg) { globals::client_instance->logger->Debug(msg); };
-            //args->extraHeaders = DefaultHeaders();
 
             ix::HttpFormDataParameters data_parameters;
-            for (int i = 0; i < files.size(); i++) {
-                std::vector<uint8_t> memblock;
-                std::ifstream file(files[i].file_path);
+            /*for (int i = 0; i < files.size(); i++) {
+                std::ifstream file(files[i].file_path, std::ios::in | std::ios::binary);
+                std::ostringstream ss;
+                ss << file.rdbuf(); // reading data
 
-                file.seekg(0, file.end);
-                std::streamoff size = file.tellg();
-                file.seekg(0, file.beg);
+                std::cout << "Read file: " << ss.str() << std::endl;
 
-                memblock.resize(size);
+                data_parameters["file_" + std::to_string(i)] = ss.str();
+            }*/
+            std::string test_content = "test";
 
-                file.read((char*) &memblock.front(), static_cast<std::streamsize>(size));
-
-                std::string file_bytes(memblock.begin(), memblock.end());
-
-                data_parameters["file_" + std::to_string(i)] = file_bytes;
+            rapidjson::Document doc(rapidjson::kObjectType);
+            if (!text.empty()) {
+                doc.AddMember("content", EscapeString(text), doc.GetAllocator());
+                doc.AddMember("tts", tts, doc.GetAllocator());
             }
-            //data_parameters["payload_json"] = "{\"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "\"}";
+            if (embed != nullptr) {
+                doc.AddMember("embed", *embed->ToJson(), doc.GetAllocator());
+            }
+            data_parameters["payload_json"] = discpp::DumpJson(doc);
 
             std::string multipart_bound = client->generateMultipartBoundary();
             args->multipartBoundary = multipart_bound;
             args->body = client->serializeHttpFormDataParameters(multipart_bound, data_parameters);
             args->logger = [](const std::string& msg) { globals::client_instance->logger->Debug(msg); };
             args->verbose = true;
+            args->extraHeaders = DefaultHeaders();
 
             WaitForRateLimits(id, RateLimitBucketType::CHANNEL);
             //globals::client_instance->logger->Debug("Sending patch request, URL: " + Endpoint("/channels/" + std::to_string(id) + "/messages") + ", body: " + args->body);
 
-            ix::HttpResponsePtr result = client->post("http://localhost:8000", data_parameters, args);
-            //ix::HttpResponsePtr result = client->post(Endpoint("/channels/" + std::to_string(id) + "/messages"), data_parameters, args);
+            ix::HttpResponsePtr result = client->post(Endpoint("/channels/" + std::to_string(id) + "/messages"), data_parameters, args);
 
             globals::client_instance->logger->Debug("Received requested payload: " + result->payload);
 
             rapidjson::Document result_json(rapidjson::kObjectType);
             result_json.Parse(result->payload);
-
-            return discpp::Message(result_json);
-
-
-			/*cpr::Multipart multipart_data{};
-
-			for (int i = 0; i < files.size(); i++) {
-				multipart_data.parts.emplace_back("file" + std::to_string(i), cpr::File(files[i].file_path), "application/octet-stream");
-			}
-
-            for (int i = 0; i < files.size(); i++) {
-                multipart_data.parts.emplace_back("file" + std::to_string(i), cpr::File(files[i].file_path), "application/octet-stream");
-            }
-
-            globals::client_instance->logger->Debug("Sending payload_json inside multipart data for files: " + DumpJson(message_json));
-
-			rapidjson::Document result_json(rapidjson::kObjectType);
-			result_json.Parse(response.text);*/
-
-			//return discpp::Message(result_json);
-		} else {
-			body = cpr::Body(DumpJson(message_json));
-		}
-
-            cpr::Response response = cpr::Post(cpr::Url{ Endpoint("/channels/" + std::to_string(id) + "/messages") }, DefaultHeaders({ {"Content-Type", "multipart/form-data"} }), multipart_data);
-            globals::client_instance->logger->Debug("Received requested payload: " + response.text);
-
-            HandleRateLimits(response.header, id, RateLimitBucketType::CHANNEL);
-
-            rapidjson::Document result_json(rapidjson::kObjectType);
-            result_json.Parse(response.text);
 
             return discpp::Message(result_json);
         }
@@ -230,7 +199,7 @@ namespace discpp {
         }
 
 		cpr::Body body(DumpJson(j_body));
-		rapidjson::Document result = SendPatchRequest(Endpoint("/channels/" + std::to_string(id)), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+		std::unique_ptr<rapidjson::Document> result = SendPatchRequest(Endpoint("/channels/" + std::to_string(id)), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 		
 		*this = discpp::Channel(*result);
 		return *this;
