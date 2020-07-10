@@ -93,7 +93,7 @@ std::unique_ptr<rapidjson::Document> discpp::HandleResponse(cpr::Response& respo
 }
 
 std::string CprBodyToString(const cpr::Body& body) {
-	if (body.empty()) {
+	if (body.str().empty()) {
 		return "Empty";
 	}
 
