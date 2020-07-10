@@ -5,14 +5,16 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #endif
 
-#include <unordered_map>
-
 #include <rapidjson/document.h>
 
-namespace discpp {
-	typedef uint64_t snowflake;
+#include "snowflake.h"
 
-	enum class PermissionType : int {
+#include <unordered_map>
+#include <stdexcept>
+
+namespace discpp {
+
+	enum class PermissionType : unsigned char {
 		ROLE,
 		MEMBER
 	};
@@ -89,17 +91,53 @@ namespace discpp {
 	class PermissionOverwrite {
 	public:
 		PermissionOverwrite() = default;
-		PermissionOverwrite(int value);
 
-		bool HasPermission(Permission permission);
-		void AddPermission(Permission permission);
+        /**
+         * @brief Constructs a discpp::PermissionOverwrite object with its permission value.
+         *
+         * ```cpp
+         *      discpp::PermissionOverwrite permission_overwrite(0);
+         * ```
+         *
+         * @param[in] value The permission overwrite value.
+         *
+         * @return discpp::PermissionOverwrite, this is a constructor.
+         */
+		PermissionOverwrite(const int& value) : value(value) {}
 
-		int value = 0;
+        /**
+         * @brief Checks if the permission overwrites has a permission.
+         *
+         * ```cpp
+         *      bool has_perm = permission_overwrite.HasPermission(permission);
+         * ```
+         *
+         * @param[in] permission The permission to check if this permission overwrite has.
+         *
+         * @return bool
+         */
+		bool HasPermission(const Permission& permission);
+
+        /**
+         * @brief Add a permission.
+         *
+         * ```cpp
+         *      permission_overwrite.AddPermission(permission);
+         * ```
+         *
+         * @param[in] permission The permission add to the permissions overwrite.
+         *
+         * @return void
+         */
+		void AddPermission(const Permission& permission);
+
+		unsigned int value = 0;
 	};
 
 	class NoPermissionException : public std::runtime_error {
-	public: 
-		NoPermissionException (Permission req_perm) : std::runtime_error("Required permission " + PermissionToString(req_perm) + " not met.") {}
+	public:
+        explicit NoPermissionException(const Permission& req_perm) : std::runtime_error("Required permission " + PermissionToString(req_perm) + " not met.") {}
+        explicit NoPermissionException(const std::string& str) : std::runtime_error(str) {}
 	};
 
 	class NotGuildOwnerException : public std::runtime_error {
@@ -110,11 +148,46 @@ namespace discpp {
 	class Permissions {
 	public:
 		Permissions() = default;
-		Permissions(PermissionType permission_type, int byte_set);
+
+        /**
+         * @brief Constructs a discpp::Permission object with its type and byte set.
+         *
+         * ```cpp
+         *      discpp::Permissions perms(type, 0);
+         * ```
+         *
+         * @param[in] permission_type The permission type.
+         * @param[in] byte_set The permissions byte set.
+         *
+         * @return discpp::Permissions, this is a constructor.
+         */
+		Permissions(const PermissionType& permission_type, const int& byte_set);
+
+        /**
+         * @brief Constructs a discpp::Permissions object by parsing json.
+         *
+         * ```cpp
+         *      discpp::Permissions perms(json);
+         * ```
+         *
+         * @param[in] json The json that makes up the Permissions object.
+         *
+         * @return discpp::Permissions, this is a constructor.
+         */
 		Permissions(rapidjson::Document& json);
+
+        /**
+         * @brief Converts this permissions object to json.
+         *
+         * ```cpp
+         *      rapidjson::Document json = permissions.ToJson();
+         * ```
+         *
+         * @return rapidjson::Document
+         */
         rapidjson::Document ToJson();
 
-		snowflake role_user_id;
+		Snowflake role_user_id;
 		PermissionOverwrite allow_perms;
 		PermissionOverwrite deny_perms;
 		PermissionType permission_type;

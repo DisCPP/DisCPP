@@ -7,7 +7,7 @@
 class PingCommand : public discpp::Command {
 public:
 	PingCommand();
-	virtual void CommandBody(discpp::Context ctx) override;
+    void CommandBody(discpp::Context ctx) override;
 };
 
 #endif

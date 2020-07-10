@@ -4,39 +4,11 @@
 #include "client.h"
 
 namespace discpp {
-	std::string GetFileExtension(std::string file_name) {
+	std::string GetFileExtension(const std::string& file_name) {
 		return file_name.substr(file_name.find_last_of('.') + 1);
 	}
 
-	Image::Image(std::ifstream* image, std::string location) : image(image), location(location) {
-		/**
-		 * @brief Constructs a discpp::Image object from the id.
-		 *
-		 * You must supply the location of `*file` due to us needing to find out the file extension.
-		 *
-		 * ```cpp
-		 *      discpp::Image image(&file, "test.png");
-		 * ```
-		 *
-		 * @param[in] image The image.
-		 * @param[in] location The image location.
-		 *
-		 * @return discpp::Image, this is a constructor.
-		 */
-	}
-
 	std::string Image::ToDataURI() {
-		/**
-		 * @brief Converts the image to the Data URI scheme.
-		 *
-		 * ```cpp
-		 *      discpp::Image image(&file, "test.txt");
-		 *		std::string data_uri = image.ToDataURI();
-		 * ```
-		 *
-		 * @return std::string
-		 */
-
 		if (image->is_open()) {
 			std::stringstream buffer;
 			buffer << image->rdbuf();

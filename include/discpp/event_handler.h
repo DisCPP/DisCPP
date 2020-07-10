@@ -4,6 +4,7 @@
 #include "event.h"
 #include "utils.h"
 #include "client.h"
+#include "log.h"
 
 #include <climits>
 
@@ -17,7 +18,7 @@ namespace discpp {
 	public:
 		using IdType = unsigned int;
 
-		static EventListenerHandle RegisterListener(std::function<void(const T&)> listener) {
+		static EventListenerHandle RegisterListener(const std::function<void(const T&)>& listener) {
 			/**
 			 * @brief Registers an event listener.
 			 *
@@ -45,7 +46,7 @@ namespace discpp {
 			return EventListenerHandle{ id };
 		}
 
-		static void RemoveListener(EventListenerHandle handle) {
+		static void RemoveListener(const EventListenerHandle& handle) {
 			/**
 			 * @brief Removes an event listener.
 			 *
@@ -72,7 +73,7 @@ namespace discpp {
 			GetHandlers().erase(handle.id);
 		}
 
-		static void TriggerEvent(T e) {
+		static void TriggerEvent(const T& e) {
 			/**
 			 * @brief Triggers an event.
 			 *

@@ -2,32 +2,99 @@
 #define DISCPP_EMOJI_H
 
 #ifdef WIN32
-#include <winsock2.h>
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#undef WIN32_LEAN_AND_MEAN
 #else
 #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
 #include <codecvt>
 #endif
 
+#include <codecvt>
+
 #include "discord_object.h"
-#include "user.h"
-#include "role.h"
 #include "utils.h"
 
 #include <locale>
 #include <string>
+#include <utility>
 
 namespace discpp {
 	class Guild;
+	class User;
 
 	class Emoji {
 	public:
 		Emoji() = default;
-		Emoji(std::string name, snowflake id);
-		Emoji(discpp::Guild& guild, snowflake id);
-		Emoji(rapidjson::Document& json);
-		Emoji(std::wstring w_unicode);
-		Emoji(std::string s_unicode);
+
+        /**
+         * @brief Constructs a discpp::Emoji object with a name and id.
+         *
+         * ```cpp
+         *      discpp::Emoji emoji("no_x", 657246994997444614);
+         * ```
+         *
+         * @param[in] name The name of the emoji
+         * @param[in] id The id of the emoji
+         *
+         * @return discpp::Emoji, this is a constructor.
+         */
+		Emoji(const std::string& name, const Snowflake& id) : name(EscapeString(name)), id(id) {}
+
+        /**
+         * @brief Constructs a discpp::Emoji object using a guild object and id.
+         *
+         * This constructor searches the emoji cache in the guild object to get an emoji object.
+         *
+         * ```cpp
+         *      discpp::Emoji emoji(guild, 657246994997444614);
+         * ```
+         *
+         * @param[in] guild The guild that has this emoji.
+         * @param[in] id The id of the emoji.
+         *
+         * @return discpp::Emoji, this is a constructor.
+         */
+        Emoji(const discpp::Guild& guild, const Snowflake& id);
+
+        /**
+         * @brief Constructs a discpp::Emoji object by parsing json.
+         *
+         * ```cpp
+         *      discpp::Emoji emoji(json);
+         * ```
+         *
+         * @param[in] json The json that makes up of emoji object.
+         *
+         * @return discpp::Emoji, this is a constructor.
+         */
+        Emoji(rapidjson::Document& json);
+
+        /**
+         * @brief Constructs a discpp::Emoji object with a std::wstring unicode representation.
+         *
+         * ```cpp
+         *      discpp::Emoji emoji( (std::wstring) L"\u0030");
+         * ```
+         *
+         * @param[in] w_unicode The std::wstring unicode representation of this emoji.
+         *
+         * @return discpp::Emoji, this is a constructor.
+         */
+		Emoji(std::wstring w_unicode) : unicode(std::move(w_unicode)) {}
+
+        /**
+         * @brief Constructs a discpp::Emoji object with a std::string unicode representation.
+         *
+         * ```cpp
+         *      discpp::Emoji emoji( (std::string) "\u0030");
+         * ```
+         *
+         * @param[in] s_unicode The std::string unicode representation of this emoji.
+         *
+         * @return discpp::Emoji, this is a constructor.
+         */
+		Emoji(const std::string& s_unicode);
 
         bool operator==(Emoji& other) const {
 #ifndef WIN32
@@ -37,27 +104,27 @@ namespace discpp {
             // If the other's name is empty but mine is not then it must have unicode.
             if (other.name.empty() && !name.empty() && unicode.empty()) {
 #ifdef WIN32
-                char ansi_emoji[MAX_PATH];
-                if (!WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, other.unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
-                    throw std::runtime_error("Failed to convert emoji to string!");
-                } else {
-                    std::cout << "Just processed: " << ansi_emoji << std::endl;
-                    return std::string(ansi_emoji) == name;
-                }
+            char ansi_emoji[MAX_PATH];
+            if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, other.unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
+                throw std::runtime_error("Failed to convert emoji to string!");
+            } else {
+                std::cout << "Just processed: " << ansi_emoji << std::endl;
+                return std::string(ansi_emoji) == name;
+            }
 #else
-                return wstr_converter.to_bytes(other.unicode) == name;
+            return wstr_converter.to_bytes(other.unicode) == name;
 #endif
             } else if (!other.name.empty() && name.empty() && !unicode.empty()) {
 #ifdef WIN32
-                char ansi_emoji[MAX_PATH];
-                if (!WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
-                    throw std::runtime_error("Failed to convert emoji to string!");
-                } else {
-                    std::cout << "Just processed: " << ansi_emoji << std::endl;
-                    return std::string(ansi_emoji) == other.name;
-                }
+            char ansi_emoji[MAX_PATH];
+            if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
+                throw std::runtime_error("Failed to convert emoji to string!");
+            } else {
+                std::cout << "Just processed: " << ansi_emoji << std::endl;
+                return std::string(ansi_emoji) == other.name;
+            }
 #else
-                return wstr_converter.to_bytes(unicode) == other.name;
+            return wstr_converter.to_bytes(unicode) == other.name;
 #endif
             } else if (other.id != 0 && id != 0 && !other.name.empty() && !name.empty()) {
                 return other.id == id && other.name == name;
@@ -80,7 +147,7 @@ namespace discpp {
             if (name.empty() && id == 0) {
 #ifdef WIN32
                 char ansi_emoji[MAX_PATH];
-                if (!WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
+                if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
                     throw std::runtime_error("Failed to convert emoji to string!");
                 } else {
                     std::cout << "Just processed: " << ansi_emoji << std::endl;
@@ -119,7 +186,7 @@ namespace discpp {
 			}
 #ifdef WIN32
 			char ansi_emoji[MAX_PATH];
-			if (!WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, emoji.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
+			if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, emoji.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
 			    throw std::runtime_error("Failed to convert emoji to string!");
 			} else {
 			    std::cout << "Just processed: " << ansi_emoji << std::endl;
@@ -130,11 +197,11 @@ namespace discpp {
 #endif
 		}
 
-		discpp::snowflake id; /**< ID of the current emoji */
+		discpp::Snowflake id; /**< ID of the current emoji */
 		std::string name; /**< Name of the current emoji */
 		std::wstring unicode; /**< Unicode representation of the current emoji */
-		std::vector<discpp::snowflake> roles; /**< Roles */
-		discpp::User creator;
+		std::vector<discpp::Snowflake> roles; /**< Roles */
+		std::shared_ptr<discpp::User> creator;
 		bool require_colons;
 		bool managed;
 		bool animated; /**< Whether or not the current emoji is animated */

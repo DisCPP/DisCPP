@@ -1,12 +1,6 @@
 #ifndef DISCPP_EVENT_DISPATCHER_H
 #define DISCPP_EVENT_DISPATCHER_H
 
-#ifndef RAPIDJSON_HAS_STDSTRING
-#define RAPIDJSON_HAS_STDSTRING 1
-#endif
-
-#include <rapidjson/document.h>
-
 #include "event.h"
 #include "utils.h"
 #include "client.h"
@@ -19,50 +13,48 @@
 namespace discpp {
 	class EventDispatcher {
 	private:
-	    inline static std::unordered_map<std::string, std::function<void(rapidjson::Document &)>> internal_event_map = {};
+	    inline static std::unordered_map<std::string, std::function<void(Shard& shard, rapidjson::Document&)>> internal_event_map = {};
         static std::unordered_map<int, rapidjson::Document> json_docs;
 
-        static void RunEvent(const std::function<void(rapidjson::Document &)>& func, rapidjson::Document& json);
-
-		static void ReadyEvent(rapidjson::Document& result);
-        static void ResumedEvent(rapidjson::Document& result);
-        static void ReconnectEvent(rapidjson::Document& result);
-        static void InvalidSessionEvent(rapidjson::Document& result);
-        static void ChannelCreateEvent(rapidjson::Document& result);
-        static void ChannelUpdateEvent(rapidjson::Document& result);
-        static void ChannelDeleteEvent(rapidjson::Document& result);
-        static void ChannelPinsUpdateEvent(rapidjson::Document& result);
-        static void GuildCreateEvent(rapidjson::Document& result);
-        static void GuildUpdateEvent(rapidjson::Document& result);
-        static void GuildDeleteEvent(rapidjson::Document& result);
-        static void GuildBanAddEvent(rapidjson::Document& result);
-        static void GuildBanRemoveEvent(rapidjson::Document& result);
-        static void GuildEmojisUpdateEvent(rapidjson::Document& result);
-        static void GuildIntegrationsUpdateEvent(rapidjson::Document& result);
-        static void GuildMemberAddEvent(rapidjson::Document& result);
-        static void GuildMemberRemoveEvent(rapidjson::Document& result);
-        static void GuildMemberUpdateEvent(rapidjson::Document& result);
-        static void GuildMembersChunkEvent(rapidjson::Document& result);
-        static void GuildRoleCreateEvent(rapidjson::Document& result);
-        static void GuildRoleUpdateEvent(rapidjson::Document& result);
-        static void GuildRoleDeleteEvent(rapidjson::Document& result);
-        static void MessageCreateEvent(rapidjson::Document& result);
-        static void MessageUpdateEvent(rapidjson::Document& result);
-        static void MessageDeleteEvent(rapidjson::Document& result);
-        static void MessageDeleteBulkEvent(rapidjson::Document& result);
-        static void MessageReactionAddEvent(rapidjson::Document& result);
-        static void MessageReactionRemoveEvent(rapidjson::Document& result);
-        static void MessageReactionRemoveAllEvent(rapidjson::Document& result);
-        static void PresenceUpdateEvent(rapidjson::Document& result);
-        static void TypingStartEvent(rapidjson::Document& result);
-        static void UserUpdateEvent(rapidjson::Document& result);
-        static void VoiceStateUpdateEvent(rapidjson::Document& result);
-        static void VoiceServerUpdateEvent(rapidjson::Document& result);
-        static void WebhooksUpdateEvent(rapidjson::Document& result);
+		static void ReadyEvent(Shard& shard, rapidjson::Document& result);
+        static void ResumedEvent(Shard& shard, rapidjson::Document& result);
+        static void ReconnectEvent(Shard& shard, rapidjson::Document& result);
+        static void InvalidSessionEvent(Shard& shard, rapidjson::Document& result);
+        static void ChannelCreateEvent(Shard& shard, rapidjson::Document& result);
+        static void ChannelUpdateEvent(Shard& shard, rapidjson::Document& result);
+        static void ChannelDeleteEvent(Shard& shard, rapidjson::Document& result);
+        static void ChannelPinsUpdateEvent(Shard& shard, rapidjson::Document& result);
+        static void GuildCreateEvent(Shard& shard, rapidjson::Document& result);
+        static void GuildUpdateEvent(Shard& shard, rapidjson::Document& result);
+        static void GuildDeleteEvent(Shard& shard, rapidjson::Document& result);
+        static void GuildBanAddEvent(Shard& shard, rapidjson::Document& result);
+        static void GuildBanRemoveEvent(Shard& shard, rapidjson::Document& result);
+        static void GuildEmojisUpdateEvent(Shard& shard, rapidjson::Document& result);
+        static void GuildIntegrationsUpdateEvent(Shard& shard, rapidjson::Document& result);
+        static void GuildMemberAddEvent(Shard& shard, rapidjson::Document& result);
+        static void GuildMemberRemoveEvent(Shard& shard, rapidjson::Document& result);
+        static void GuildMemberUpdateEvent(Shard& shard, rapidjson::Document& result);
+        static void GuildMembersChunkEvent(Shard& shard, rapidjson::Document& result);
+        static void GuildRoleCreateEvent(Shard& shard, rapidjson::Document& result);
+        static void GuildRoleUpdateEvent(Shard& shard, rapidjson::Document& result);
+        static void GuildRoleDeleteEvent(Shard& shard, rapidjson::Document& result);
+        static void MessageCreateEvent(Shard& shard, rapidjson::Document& result);
+        static void MessageUpdateEvent(Shard& shard, rapidjson::Document& result);
+        static void MessageDeleteEvent(Shard& shard, rapidjson::Document& result);
+        static void MessageDeleteBulkEvent(Shard& shard, rapidjson::Document& result);
+        static void MessageReactionAddEvent(Shard& shard, rapidjson::Document& result);
+        static void MessageReactionRemoveEvent(Shard& shard, rapidjson::Document& result);
+        static void MessageReactionRemoveAllEvent(Shard& shard, rapidjson::Document& result);
+        static void PresenceUpdateEvent(Shard& shard, rapidjson::Document& result);
+        static void TypingStartEvent(Shard& shard, rapidjson::Document& result);
+        static void UserUpdateEvent(Shard& shard, rapidjson::Document& result);
+        static void VoiceStateUpdateEvent(Shard& shard, rapidjson::Document& result);
+        static void VoiceServerUpdateEvent(Shard& shard, rapidjson::Document& result);
+        static void WebhooksUpdateEvent(Shard& shard, rapidjson::Document& result);
 	public:
         static void BindEvents();
-		static void HandleDiscordEvent(rapidjson::Document& j, std::string event_name);
-        static void RegisterCustomEvent(const char* event_name, std::function<void(const rapidjson::Document&)> func);
+		static void HandleDiscordEvent(Shard& shard, rapidjson::Document& j, const std::string& event_name);
+        static void RegisterGatewayCustomEvent(const char* event_name, const std::function<void(Shard& shard, const rapidjson::Document&)>& func);
 	};
 }
 

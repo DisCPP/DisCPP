@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "message.h"
 #include "client.h"
+#include "guild.h"
 
 #include <fstream>
 
@@ -10,19 +11,21 @@ namespace discpp {
         id = SnowflakeFromString(json["id"].GetString());
         type = static_cast<WebhookType>(json["type"].GetInt());
         guild = std::make_shared<discpp::Guild>(ConstructDiscppObjectFromID(json, "guild_id", discpp::Guild()));
-        channel = std::make_shared<discpp::Channel>(globals::client_instance->GetChannel(SnowflakeFromString(json["guild_id"].GetString())));
+        channel = std::make_shared<discpp::Channel>(globals::client_instance->cache.GetChannel(SnowflakeFromString(json["guild_id"].GetString())));
 		user = std::make_shared<discpp::User>(ConstructDiscppObjectFromJson(json, "user", discpp::User()));
         name = GetDataSafely<std::string>(json, "name");
-        avatar = GetDataSafely<std::string>(json, "avatar");
+        if (ContainsNotNull(json, "avatar")) {
+            SplitAvatarHash(json["avatar"].GetString(), avatar_hex);
+        }
         token = GetDataSafely<std::string>(json, "token");
     }
 
-	Webhook::Webhook(discpp::snowflake id, std::string token) : DiscordObject(id) {
+	Webhook::Webhook(const discpp::Snowflake& id, const std::string& token) : DiscordObject(id) {
 		this->token = token;
 		this->id = id;
 	};
 
-	discpp::Message Webhook::Send(std::string text, bool tts, discpp::EmbedBuilder* embed, std::vector<discpp::File> files) {
+	discpp::Message Webhook::Send(const std::string& text, const bool tts, discpp::EmbedBuilder* embed, const std::vector<discpp::File>& files) {
 
 		std::string escaped_text = EscapeString(text);
         rapidjson::Document message_json = rapidjson::Document(rapidjson::kObjectType);
@@ -57,8 +60,8 @@ namespace discpp {
 
 		cpr::Body body;
 		if (embed != nullptr) {
-		    rapidjson::Document json = embed->ToJson();
-			body = cpr::Body("{\"embed\": " + DumpJson(json) + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
+		    std::unique_ptr<rapidjson::Document> json = embed->ToJson();
+			body = cpr::Body("{\"embed\": " + DumpJson(*json) + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
 		}
 		else if (!files.empty()) {
 		    // @TODO: THIS!
@@ -80,9 +83,9 @@ namespace discpp {
 		} else {
 			body = cpr::Body(DumpJson(message_json));
 		}
-		rapidjson::Document result = SendPostRequest(Endpoint("/webhooks/" + std::to_string(id) + "/" + token), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::WEBHOOK, body);
+		std::unique_ptr<rapidjson::Document> result = SendPostRequest(Endpoint("/webhooks/" + std::to_string(id) + "/" + token), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::WEBHOOK, body);
 
-		return discpp::Message(result);
+		return discpp::Message(*result);
 	}
 
 	void Webhook::EditName(std::string& name) {

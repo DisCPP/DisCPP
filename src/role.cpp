@@ -1,22 +1,8 @@
+#include "role.h"
 #include "guild.h"
 
 namespace discpp {
-	Role::Role(snowflake role_id, discpp::Guild& guild) : DiscordObject(role_id) {
-		/**
-		 * @brief Constructs a discpp::Role object using a role id and a guild.
-		 *
-		 * This constructor searches the roles cache in the guild object to get the role object from.
-		 *
-		 * ```cpp
-		 *      discpp::Role role(657246994997444614, guild);
-		 * ```
-		 *
-		 * @param[in] role_id The role id.
-		 * @param[in] guild The guild that has this role.
-		 *
-		 * @return discpp::Role, this is a constructor.
-		 */
-
+	Role::Role(const Snowflake& role_id, const discpp::Guild& guild) : DiscordObject(role_id) {
 		auto it = guild.roles.find(role_id);
 		if (it != guild.roles.end()) {
 			*this = *it->second;
@@ -24,25 +10,31 @@ namespace discpp {
 	}
 
 	Role::Role(rapidjson::Document& json) {
-		/**
-		 * @brief Constructs a discpp::Role object by parsing json.
-		 *
-		 * ```cpp
-		 *      discpp::Role role(json);
-		 * ```
-		 *
-		 * @param[in] json The json that makes up of role object.
-		 *
-		 * @return discpp::Role, this is a constructor.
-		 */
-
 		id = SnowflakeFromString(json["id"].GetString());
 		name = json["name"].GetString();
 		color = json["color"].GetInt();
-		hoist = json["hoist"].GetBool();
+        if (GetDataSafely<bool>(json, "hoist")) {
+            flags |= 0b1;
+        }
 		position = json["position"].GetInt();
         permissions = Permissions(PermissionType::ROLE, json["permissions"].GetInt());
-		managed = json["managed"].GetBool();
-		mentionable = json["mentionable"].GetBool();
+        if (GetDataSafely<bool>(json, "managed")) {
+            flags |= 0b10;
+        }
+        if (GetDataSafely<bool>(json, "mentionable")) {
+            flags |= 0b100;
+        }
 	}
+
+    bool Role::IsHoistable() const {
+        return (flags & 0b1) == 0b1;
+    }
+
+    bool Role::IsManaged() const {
+        return (flags & 0b10) == 0b10;
+    }
+
+    bool Role::IsMentionable() const {
+        return (flags & 0b100) == 0b100;
+    }
 }
