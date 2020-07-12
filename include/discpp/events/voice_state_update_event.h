@@ -7,9 +7,9 @@
 namespace discpp {
 	class VoiceStateUpdateEvent : public Event {
 	public:
-		inline VoiceStateUpdateEvent(rapidjson::Document& json) : json(json) { }
+		inline VoiceStateUpdateEvent(const discpp::JsonObject& json) : json(json) { }
 
-		rapidjson::Document& json;
+		discpp::JsonObject json;
 	};
 }
 

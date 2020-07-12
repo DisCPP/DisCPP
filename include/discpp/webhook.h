@@ -20,7 +20,7 @@ namespace discpp {
 	class Webhook : public DiscordObject {
 	public:
 	    Webhook() = default;
-	    Webhook(rapidjson::Document& json);
+	    explicit Webhook(const discpp::JsonObject& json);
 		Webhook(const Snowflake& id, const std::string& token);
 
 		discpp::Message Send(const std::string& text, const bool tts = false, discpp::EmbedBuilder* embed = nullptr, const std::vector<discpp::File>& files = {});

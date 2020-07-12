@@ -3,6 +3,7 @@
 
 #include "discord_object.h"
 #include "utils.h"
+#include "json_object.h"
 
 namespace discpp {
 	class Channel;
@@ -40,7 +41,7 @@ namespace discpp {
              *
              * @return discpp::User::Connection, this is a constructor.
              */
-            Connection(rapidjson::Document& json);
+            Connection(const discpp::JsonObject& json);
         };
 
 		User() = default;
@@ -58,7 +59,7 @@ namespace discpp {
          *
          * @return discpp::User, this is a constructor.
          */
-		User(const Snowflake& id);
+		explicit User(const Snowflake& id);
 
         /**
          * @brief Constructs a discpp::User object by parsing json.
@@ -71,7 +72,7 @@ namespace discpp {
          *
          * @return discpp::User, this is a constructor.
          */
-		User(rapidjson::Document& json);
+		explicit User(const discpp::JsonObject& json);
 
         /**
          * @brief Create a DM channel with this user.

@@ -28,16 +28,9 @@ std::string discpp::GetOsName() {
 }
 
 // @TODO: Test if the json document type returned is what its supposed to be, like an array or object.
-std::unique_ptr<rapidjson::Document> discpp::HandleResponse(cpr::Response& response, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
+std::unique_ptr<discpp::JsonObject> discpp::HandleResponse(cpr::Response& response, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Received requested payload: " + response.text);
-    }
-
-    auto tmp = std::make_unique<rapidjson::Document>();
-    if (!response.text.empty() && response.text[0] == '[' && response.text[response.text.size() - 1] == ']') {
-        tmp->SetArray();
-    } else {
-        tmp->SetObject();
     }
 
     if (response.error) {
@@ -81,10 +74,10 @@ std::unique_ptr<rapidjson::Document> discpp::HandleResponse(cpr::Response& respo
     }
 
 	HandleRateLimits(response.header, object, ratelimit_bucket);
-	tmp->Parse((!response.text.empty() ? response.text.c_str() : "{}"));
+    auto tmp = std::make_unique<discpp::JsonObject>((!response.text.empty() ? response.text.c_str() : "{}"));
 
 	// Check if we were returned a json error and throw an exception if so.
-	if (!tmp->IsNull() && tmp->IsObject() && ContainsNotNull(*tmp, "code")) {
+	if (!tmp->ContainsNotNull("code")) {
         discpp::ThrowException(*tmp);
     }
 
@@ -100,7 +93,7 @@ std::string CprBodyToString(const cpr::Body& body) {
 	return body;
 }
 
-std::unique_ptr<rapidjson::Document> discpp::SendGetRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+std::unique_ptr<discpp::JsonObject> discpp::SendGetRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + CprBodyToString(body));
     }
@@ -110,7 +103,7 @@ std::unique_ptr<rapidjson::Document> discpp::SendGetRequest(const std::string& u
     return HandleResponse(result, object, ratelimit_bucket);
 }
 
-std::unique_ptr<rapidjson::Document> discpp::SendPostRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+std::unique_ptr<discpp::JsonObject> discpp::SendPostRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + CprBodyToString(body));
     }
@@ -119,7 +112,7 @@ std::unique_ptr<rapidjson::Document> discpp::SendPostRequest(const std::string& 
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-std::unique_ptr<rapidjson::Document> discpp::SendPutRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+std::unique_ptr<discpp::JsonObject> discpp::SendPutRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("put patch request, URL: " + url + ", body: " + CprBodyToString(body));
     }
@@ -128,7 +121,7 @@ std::unique_ptr<rapidjson::Document> discpp::SendPutRequest(const std::string& u
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-std::unique_ptr<rapidjson::Document> discpp::SendPatchRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
+std::unique_ptr<discpp::JsonObject> discpp::SendPatchRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
 	if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + CprBodyToString(body));
     }
@@ -137,7 +130,7 @@ std::unique_ptr<rapidjson::Document> discpp::SendPatchRequest(const std::string&
 	return HandleResponse(result, object, ratelimit_bucket);
 }
 
-std::unique_ptr<rapidjson::Document> discpp::SendDeleteRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
+std::unique_ptr<discpp::JsonObject> discpp::SendDeleteRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Sending delete request, URL: " + url);
     }
@@ -201,7 +194,18 @@ std::string discpp::CombineStringVector(const std::vector<std::string>& vector, 
 }
 
 std::string discpp::ReadEntireFile(std::ifstream& file) {
-	return std::string((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
+    /*std::ifstream::pos_type file_size = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    std::vector<char> bytes(file_size);
+    file.read(bytes.data(), file_size);
+
+    std::string contents(bytes.data(), file_size);
+    std::cout << "Read file: " << contents << std::endl;
+
+    return std::move(contents);*/
+
+    return std::move(std::string(std::istreambuf_iterator<char>{file}, {}));
 }
 
 static const std::string base64_chars =
@@ -428,51 +432,6 @@ std::string discpp::FormatTime(const time_t& time, const std::string& format) {
     strftime(buffer, sizeof(buffer), format.c_str(), &now);
 
     return buffer;
-}
-
-bool discpp::ContainsNotNull(rapidjson::Document &json, const char *value_name) {
-    rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
-    if (itr != json.MemberEnd()) {
-        return !json[value_name].IsNull();
-    }
-
-    return false;
-}
-
-void discpp::IterateThroughNotNullJson(rapidjson::Document &json, const std::function<void(rapidjson::Document&)>& func) {
-    for (auto const& object : json.GetArray()) {
-        if (!object.IsNull()) {
-            rapidjson::Document object_json;
-            object_json.CopyFrom(object, object_json.GetAllocator());
-
-            func(object_json);
-        }
-    }
-}
-
-std::unique_ptr<rapidjson::Document> discpp::GetDocumentInsideJson(rapidjson::Document &json, const char* value_name) {
-    auto inside_json = std::make_unique<rapidjson::Document>(json.GetType());
-    inside_json->CopyFrom(json[value_name], inside_json->GetAllocator());
-
-	return inside_json;
-}
-
-std::string discpp::DumpJson(rapidjson::Document &json) {
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    json.Accept(writer);
-	std::string tmp = buffer.GetString();
-
-    return tmp;
-}
-
-std::string discpp::DumpJson(rapidjson::Value &json) {
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    json.Accept(writer);
-    std::string tmp = buffer.GetString();
-
-    return tmp;
 }
 
 // Safe characters for URIEncode

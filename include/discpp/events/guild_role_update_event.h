@@ -4,14 +4,13 @@
 #include "../event.h"
 #include "../role.h"
 
-
-
 namespace discpp {
 	class GuildRoleUpdateEvent : public Event {
 	public:
-		inline GuildRoleUpdateEvent(discpp::Role role) : role(role) {}
+		inline GuildRoleUpdateEvent(std::shared_ptr<discpp::Guild> guild, std::shared_ptr<discpp::Role> role) : guild(guild), role(role) {}
 
-		discpp::Role role;
+        std::shared_ptr<discpp::Guild> guild;
+		std::shared_ptr<discpp::Role> role;
 	};
 }
 

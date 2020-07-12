@@ -26,8 +26,8 @@ namespace discpp {
 	class ClientUser : public User {
 	public:
 		ClientUser() = default;
-		ClientUser(const Snowflake& id) : User(id) {}
-		ClientUser(rapidjson::Document & json);
+        explicit ClientUser(const Snowflake& id) : User(id) {}
+		explicit ClientUser(const discpp::JsonObject& json);
 
         /**
          * @brief Get all connections of this user.
@@ -55,7 +55,7 @@ namespace discpp {
 	    int type;
 	public:
         UserRelationship() = default;
-        UserRelationship(rapidjson::Document& json);
+        UserRelationship(const discpp::JsonObject& json);
 
         /**
          * @brief Returns if this relation is a friend.
@@ -291,7 +291,7 @@ namespace discpp {
          *
          * @return void
          */
-        void CreateWebsocketRequest(rapidjson::Document& json, const std::string& message = "");
+        void CreateWebsocketRequest(const discpp::JsonObject& json, const std::string& message = "");
 
         enum Opcode : int {
             DISPATCH = 0,				// Receive
@@ -318,7 +318,7 @@ namespace discpp {
         std::string session_id;
         std::string gateway_endpoint;
 
-        rapidjson::Document hello_packet;
+        discpp::JsonObject hello_packet;
 
         std::thread heartbeat_thread;
 
@@ -335,10 +335,10 @@ namespace discpp {
         void DisconnectWebsocket();
         void WebSocketStart();
         void OnWebSocketListen(ix::WebSocketMessagePtr& msg);
-        void OnWebSocketPacket(rapidjson::Document& result);
+        void OnWebSocketPacket(const discpp::JsonObject& result);
         void HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg);
         void HandleHeartbeat();
-        std::unique_ptr<rapidjson::Document> GetIdentifyPacket();
+        discpp::JsonObject GetIdentifyPacket();
     };
 }
 

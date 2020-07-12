@@ -59,7 +59,7 @@ namespace discpp {
          *
          * @return discpp::GuildInvite, this is a constructor.
          */
-		GuildInvite(rapidjson::Document& json);
+		explicit GuildInvite(const discpp::JsonObject& json);
 
         std::string code; /**< The invite code (unique ID). */
         std::shared_ptr<discpp::Guild> guild; /**< The guild this invite is for. */
@@ -74,7 +74,7 @@ namespace discpp {
 	class IntegrationAccount : public DiscordObject {
 	public:
         IntegrationAccount() = default;
-        IntegrationAccount(rapidjson::Document& json) {
+        IntegrationAccount(const discpp::JsonObject& json) {
 
             /**
              * @brief Constructs a discpp::IntegrationAccount object from json.
@@ -113,7 +113,7 @@ namespace discpp {
          *
          * @return discpp::Integration, this is a constructor.
          */
-        explicit Integration(rapidjson::Document& json);
+        explicit Integration(const discpp::JsonObject& json);
 
         std::string name; /**< Integration name. */
         std::string type; /**< Integration type (twitch, youtube, etc). */
@@ -132,7 +132,7 @@ namespace discpp {
 	class GuildEmbed : public DiscordObject {
 	public:
         GuildEmbed() = default;
-		GuildEmbed(rapidjson::Document& json) {
+		GuildEmbed(const discpp::JsonObject& json) {
             /**
              * @brief Constructs a discpp::GuildEmbed object from json.
              *
@@ -146,8 +146,8 @@ namespace discpp {
              */
 
             enabled = json["enabled"].GetBool();
-			//channel_id = ContainsNotNull(json, "channel_id") ? json["channel_id"].GetString() : "";
-			channel_id = GetIDSafely(json, "channel_id");
+			//channel_id = json.ContainsNotNull("channel_id") ? json["channel_id"].GetString() : "";
+			channel_id = json.GetIDSafely("channel_id");
 		}
 
         bool enabled; /**< Whether the embed is enabled. */
@@ -226,7 +226,7 @@ namespace discpp {
          *
          * @return discpp::Guild, this is a constructor.
          */
-		Guild(rapidjson::Document& json);
+		Guild(const discpp::JsonObject& json);
 
         /**
          * @brief Modify the guild.
@@ -1015,7 +1015,7 @@ namespace discpp {
          *
          * @return discpp::VoiceState, this is a constructor.
          */
-        VoiceState(rapidjson::Document& json);
+        explicit VoiceState(const discpp::JsonObject& json);
 
         Snowflake guild_id; /**< The guild id this voice state is for. */
         Snowflake channel_id; /**< The channel id this user is connected to. */

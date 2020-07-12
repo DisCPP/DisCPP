@@ -9,9 +9,10 @@
 namespace discpp {
 	class GuildRoleCreateEvent : public Event {
 	public:
-		inline GuildRoleCreateEvent(discpp::Role role) : role(role) {}
+		inline GuildRoleCreateEvent(std::shared_ptr<discpp::Guild> guild, std::shared_ptr<discpp::Role> role) : guild(guild), role(role) {}
 
-		discpp::Role role;
+        std::shared_ptr<discpp::Guild> guild;
+        std::shared_ptr<discpp::Role> role;
 	};
 }
 

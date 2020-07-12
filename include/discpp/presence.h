@@ -22,13 +22,22 @@ namespace discpp {
 
         struct Party {
             Party() = default;
-            Party(rapidjson::Document& json) {
-                if (ContainsNotNull(json, "id")) {
+            Party(const discpp::JsonObject& json) {
+                if (json.ContainsNotNull("id")) {
                     id = json["id"].GetString();
                 }
-                if (ContainsNotNull(json, "size")) {
-                    current_size = json["size"].GetArray()[0].GetInt();
-                    max_size = json["size"].GetArray()[1].GetInt();
+                if (json.ContainsNotNull("size")) {
+                    int i = 0;
+                    json["size"].IterateThrough([&](const discpp::JsonObject& json)->bool {
+                        if (i == 0) {
+                            current_size = json.GetInt();
+                        } else if (i == 1) {
+                            max_size = json.GetInt();
+                        }
+
+                        i++;
+                        return true;
+                    });
                 }
             }
 
@@ -39,17 +48,17 @@ namespace discpp {
 
         struct Assets {
             Assets() = default;
-            Assets(rapidjson::Document& json) {
-                if (ContainsNotNull(json, "large_image")) {
+            Assets(const discpp::JsonObject& json) {
+                if (json.ContainsNotNull("large_image")) {
                     large_image = json["large_image"].GetString();
                 }
-                if (ContainsNotNull(json, "large_text")) {
+                if (json.ContainsNotNull("large_text")) {
                     large_text = json["large_text"].GetString();
                 }
-                if (ContainsNotNull(json, "small_image")) {
+                if (json.ContainsNotNull("small_image")) {
                     small_image = json["small_image"].GetString();
                 }
-                if (ContainsNotNull(json, "small_text")) {
+                if (json.ContainsNotNull("small_text")) {
                     small_text = json["small_text"].GetString();
                 }
             }
@@ -62,14 +71,14 @@ namespace discpp {
 
         struct Secrets {
             Secrets() = default;
-            Secrets(rapidjson::Document& json) {
-                if (ContainsNotNull(json, "join")) {
+            Secrets(const discpp::JsonObject& json) {
+                if (json.ContainsNotNull("join")) {
                     join = json["join"].GetString();
                 }
-                if (ContainsNotNull(json, "spectate")) {
+                if (json.ContainsNotNull("spectate")) {
                     spectate = json["spectate"].GetString();
                 }
-                if (ContainsNotNull(json, "match")) {
+                if (json.ContainsNotNull("match")) {
                     match = json["match"].GetString();
                 }
             }
@@ -80,38 +89,32 @@ namespace discpp {
         };
 
         Activity() = default;
-        Activity(rapidjson::Document& json) {
+        Activity(discpp::JsonObject json) {
             name = json["name"].GetString();
             type = static_cast<ActivityType>(json["type"].GetInt());
-            if (ContainsNotNull(json, "url")) {
+            if (json.ContainsNotNull("url")) {
                 url = json["url"].GetString();
             }
             created_at = std::chrono::system_clock::from_time_t(json["created_at"].Get<std::time_t>());
-            if (ContainsNotNull(json, "timestamps")) {
-                rapidjson::Document timestamps_json(rapidjson::kObjectType);
-                timestamps_json.CopyFrom(json["timestamps"], timestamps_json.GetAllocator());
+            if (json.ContainsNotNull("timestamps")) {
+                discpp::JsonObject timestamps_json = json["timestamps"];
 
-                if (ContainsNotNull(timestamps_json, "start")) {
-                    this->timestamps.emplace("start", timestamps_json["start"].Get<std::time_t>());
-                }
-
-                if (ContainsNotNull(timestamps_json, "end")) {
-                    this->timestamps.emplace("end", timestamps_json["end"].Get<std::time_t>());
-                }
+                this->timestamps.emplace("start", timestamps_json["start"].Get<std::time_t>());
+                this->timestamps.emplace("end", timestamps_json["end"].Get<std::time_t>());
             }
             application_id = json["id"].GetString();
-            if (ContainsNotNull(json, "details")) {
+            if (json.ContainsNotNull("details")) {
                 details = json["details"].GetString();
             }
-            if (ContainsNotNull(json, "state")) {
+            if (json.ContainsNotNull("state")) {
                 state = json["state"].GetString();
             }
-            emoji = ConstructDiscppObjectFromJson(json, "emoji", discpp::Emoji());
-            party = ConstructDiscppObjectFromJson(json, "party", discpp::Activity::Party());
-            assets = ConstructDiscppObjectFromJson(json, "assets", discpp::Activity::Assets());
-            secrets = ConstructDiscppObjectFromJson(json, "secrets", discpp::Activity::Secrets());
-            instance = GetDataSafely<bool>(json, "instance");
-            flags = GetDataSafely<int>(json, "flags");
+            emoji = json.ConstructDiscppObjectFromJson("emoji", discpp::Emoji());
+            party = json.ConstructDiscppObjectFromJson("party", discpp::Activity::Party());
+            assets = json.ConstructDiscppObjectFromJson("assets", discpp::Activity::Assets());
+            secrets = json.ConstructDiscppObjectFromJson("secrets", discpp::Activity::Secrets());
+            instance = json.Get<bool>("instance");
+            flags = json.Get<int>("flags");
         }
 
         std::string name;
@@ -133,15 +136,14 @@ namespace discpp {
 	class Presence {
 	public:
 	    Presence() = default;
-		Presence(rapidjson::Document& json) {
+		Presence(const discpp::JsonObject& json) {
 		    status = json["status"].GetString();
-		    game = std::make_shared<discpp::Activity>(ConstructDiscppObjectFromJson(json, "game", discpp::Activity()));
-            for (auto const& activity : json["activities"].GetArray()) {
-                rapidjson::Document activity_json(rapidjson::kObjectType);
-                activity_json.CopyFrom(activity, activity_json.GetAllocator());
+		    game = std::make_shared<discpp::Activity>(json.ConstructDiscppObjectFromJson("game", discpp::Activity()));
 
-                activities.emplace_back(activity_json);
-            }
+		    json["activities"].IterateThrough([&](const discpp::JsonObject& json)->bool {
+                activities.emplace_back(json);
+                return true;
+		    });
 		}
 
 		Presence(const std::string& text, const discpp::Activity::ActivityType& type, const std::string& status = "online", const bool afk = false,
@@ -154,16 +156,13 @@ namespace discpp {
 
 		Presence(std::shared_ptr<discpp::Activity> activity, const bool afk, const std::string& status) : game(activity), afk(afk), status(status) {}
 
-		std::unique_ptr<rapidjson::Document> ToJson() {
+		discpp::JsonObject ToJson() {
 		    std::string str_activity = "{\"status\": \"" + status + "\", \"afk\": " + (afk ? "true" : "false") + ", \"game\": " + \
                 "{\"name\": \"" + game->name + "\", \"type\": " + std::to_string(static_cast<int>(game->type)) + \
                 ((!game->url.empty()) ? ", \"url\": \"" + game->url + "\"" : "") + "}, \"since\": \"" + \
                 std::to_string(time(NULL) - 10) + "\"}";
 
-            auto result = std::make_unique<rapidjson::Document>(rapidjson::kObjectType);
-		    result->Parse(str_activity.c_str());
-
-	        return result;
+	        return discpp::JsonObject(str_activity);
 		}
 
 		std::string status;

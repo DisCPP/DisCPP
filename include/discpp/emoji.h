@@ -68,7 +68,7 @@ namespace discpp {
          *
          * @return discpp::Emoji, this is a constructor.
          */
-        Emoji(rapidjson::Document& json);
+        explicit Emoji(const discpp::JsonObject& json);
 
         /**
          * @brief Constructs a discpp::Emoji object with a std::wstring unicode representation.
@@ -202,9 +202,9 @@ namespace discpp {
 		std::wstring unicode; /**< Unicode representation of the current emoji */
 		std::vector<discpp::Snowflake> roles; /**< Roles */
 		std::shared_ptr<discpp::User> creator;
-		bool require_colons;
-		bool managed;
-		bool animated; /**< Whether or not the current emoji is animated */
+		bool require_colons{};
+		bool managed{};
+		bool animated{}; /**< Whether or not the current emoji is animated */
 	};
 }
 

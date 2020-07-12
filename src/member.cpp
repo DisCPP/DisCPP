@@ -2,6 +2,7 @@
 #include "guild.h"
 #include "client.h"
 #include "role.h"
+#include "exceptions.h"
 
 #include <climits>
 
@@ -10,37 +11,32 @@ namespace discpp {
 		*this = *guild.GetMember(id, can_request);
 	}
 
-	Member::Member(rapidjson::Document& json, const discpp::Guild& guild) : guild_id(guild.id) {
-		user = ConstructDiscppObjectFromJson(json, "user", discpp::User());
-		nick = GetDataSafely<std::string>(json, "nick");
+	Member::Member(const discpp::JsonObject& json, const discpp::Guild& guild) : guild_id(guild.id) {
+		user = json.ConstructDiscppObjectFromJson("user", discpp::User());
+		nick = json.Get<std::string>("nick");
 
         int highest_hiearchy = 0;
-		if (ContainsNotNull(json, "roles")) {
-			for (auto& role : json["roles"].GetArray()) {
-				rapidjson::Document role_json;
-				role_json.CopyFrom(role, role_json.GetAllocator());
+		if (json.ContainsNotNull("roles")) {
+            json.IterateThrough("roles", [&] (const discpp::JsonObject& role_json)->bool {
+                std::shared_ptr<discpp::Role> r = guild.GetRole(SnowflakeFromString(role_json.GetString()));
+                if (r->position > highest_hiearchy) {
+                    highest_hiearchy = r->position;
+                }
+                roles.emplace_back(r->id);
 
-				std::shared_ptr<discpp::Role> r = guild.GetRole(SnowflakeFromString(role_json.GetString()));
-				if (r->position > highest_hiearchy) {
-					highest_hiearchy = r->position;
-				}
-
-				roles.emplace_back(r->id);
-			}
+                return true;
+            });
 		}
-        joined_at = ContainsNotNull(json, "joined_at") ? TimeFromDiscord(json["joined_at"].GetString()) : 0;
-        premium_since = ContainsNotNull(json, "premium_since") ? TimeFromDiscord(json["premium_since"].GetString()) : 0;
-		if (GetDataSafely<bool>(json, "deaf")) {
+        joined_at = json.ContainsNotNull("joined_at") ? TimeFromDiscord(json["joined_at"].GetString()) : 0;
+        premium_since = json.ContainsNotNull("premium_since") ? TimeFromDiscord(json["premium_since"].GetString()) : 0;
+		if (json.Get<bool>("deaf")) {
 		    flags |= 0b1;
 		}
-		if (GetDataSafely<bool>(json, "mute")) {
+		if (json.Get<bool>("mute")) {
             flags |= 0b10;
 		}
-		if (discpp::ContainsNotNull(json, "presence")) {
-            rapidjson::Document json_presence;
-            json_presence.CopyFrom(json["presence"], json_presence.GetAllocator());
-
-            presence = std::make_unique<discpp::Presence>(json_presence);
+		if (json.ContainsNotNull("presence")) {
+            presence = std::make_unique<discpp::Presence>(json["presence"]);
 		}
 	}
 
@@ -90,10 +86,14 @@ namespace discpp {
 	}
 
 	bool Member::IsBanned() {
+	    try {
+            SendGetRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/bans/" + std::to_string(user.id)),
+                           DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/bans/" + std::to_string(user.id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
-		rapidjson::Value::ConstMemberIterator itr = result->FindMember("reason");
-		return itr != result->MemberEnd();
+            return true;
+        } catch (const discpp::exceptions::http::HTTPResponseException&) {
+	        return false;
+	    }
 	}
 
 	bool Member::HasRole(const discpp::Role& role) {

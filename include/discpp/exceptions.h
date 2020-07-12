@@ -16,7 +16,7 @@ namespace discpp {
     namespace exceptions {
         class DiscordObjectNotFound : public std::runtime_error {
         public:
-            explicit DiscordObjectNotFound(rapidjson::Document &json) : std::runtime_error(
+            explicit DiscordObjectNotFound(const discpp::JsonObject& json) : std::runtime_error(
                 std::to_string(json["code"].GetInt()) + ": " + json["message"].GetString()) {}
 
             explicit DiscordObjectNotFound(const std::string &str) : std::runtime_error(str) {}
@@ -24,7 +24,7 @@ namespace discpp {
 
         class MaximumLimitException : public std::runtime_error {
         public:
-            explicit MaximumLimitException(rapidjson::Document &json) : std::runtime_error(
+            explicit MaximumLimitException(const discpp::JsonObject& json) : std::runtime_error(
                 std::to_string(json["code"].GetInt()) + ": " + json["message"].GetString()) {}
 
             explicit MaximumLimitException(const std::string &str) : std::runtime_error(str) {}
@@ -103,7 +103,7 @@ namespace discpp {
         }
     }
 
-    inline void ThrowException(rapidjson::Document& json) {
+    inline void ThrowException(const discpp::JsonObject& json) {
         switch (json["code"].GetInt()) {
             case 10001:
             case 10002:

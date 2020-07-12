@@ -13,12 +13,12 @@ namespace discpp {
 		}
 	}
 
-	User::User(rapidjson::Document& json) {
-		id = GetIDSafely(json, "id");
-		username = GetDataSafely<std::string>(json, "username");
-		discriminator = (unsigned short) strtoul(GetDataSafely<std::string>(json, "discriminator").c_str(), nullptr, 10);
-		if (ContainsNotNull(json, "avatar")) {
-			std::string icon_str = json["avatar"].GetString();
+	User::User(const discpp::JsonObject& json) {
+		id = json.GetIDSafely("id");
+		username = json.Get<std::string>("username");
+		discriminator = (unsigned short) strtoul(json.Get<std::string>("discriminator").c_str(), nullptr, 10);
+		if (json.ContainsNotNull("avatar")) {
+			auto icon_str = json.Get<std::string>("avatar");
 
 			if (StartsWith(icon_str, "a_")) {
 				is_avatar_gif = true;
@@ -27,33 +27,29 @@ namespace discpp {
 				SplitAvatarHash(icon_str, avatar_hex);
 			}
 		}
-		if (GetDataSafely<bool>(json, "bot")) flags |= 0b1;
-        if (GetDataSafely<bool>(json, "system")) flags |= 0b10;
-		//public_flags = GetDataSafely<int>(json, "public_flags");
+		if (json.Get<bool>("bot")) flags |= 0b1;
+        if (json.Get<bool>("system")) flags |= 0b10;
+		//public_flags = json.Get<int>("public_flags");
 	}
 
-	User::Connection::Connection(rapidjson::Document& json) {
+	User::Connection::Connection(const discpp::JsonObject& json) {
 
 		id = json["id"].GetString();
-		name = json["name"].GetString();
-		type = json["type"].GetString();
-		revoked = json["revoked"].GetBool();
+        name = json["name"].GetString();
+        type = json["type"].GetString();
+        revoked = json["revoked"].GetBool();
 
-		rapidjson::Value::ConstMemberIterator itr = json.FindMember("integrations");
-
-		if (itr != json.MemberEnd()) {
-			for (auto& integration : json["integrations"].GetArray()) {
-				rapidjson::Document integration_json;
-				integration_json.CopyFrom(integration, integration_json.GetAllocator());
-				integrations.push_back(discpp::Integration(integration_json));
-			}
+		if (json.ContainsNotNull("integrations")) {
+		    json["integrations"].IterateThrough([&](const discpp::JsonObject& json)->bool {
+                integrations.emplace_back(json);
+                return true;
+		    });
 		}
 		verified = json["verified"].GetBool();
 		friend_sync = json["friend_sync"].GetBool();
 		show_activity = json["show_activity"].GetBool();
-		
-		itr = json.FindMember("visibility");
-		if (itr != json.MemberEnd()){
+
+        if (json.ContainsNotNull("visibility")) {
 			visibility = static_cast<ConnectionVisibility>(json["visibility"].GetInt());
 		} else {
 			visibility = ConnectionVisibility::NONE;
@@ -62,7 +58,7 @@ namespace discpp {
 
 	discpp::Channel User::CreateDM() {
 		cpr::Body body("{\"recipient_id\": \"" + std::to_string(id) + "\"}");
-		std::unique_ptr<rapidjson::Document> result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders({ {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
+		std::unique_ptr<discpp::JsonObject> result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders({ {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
 
 		return discpp::Channel(*result);
 	}

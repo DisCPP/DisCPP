@@ -76,7 +76,7 @@ namespace discpp {
 	private:
     public:
         AuditLogChange() = default;
-        AuditLogChange(rapidjson::Document& json);
+        AuditLogChange(const discpp::JsonObject& json);
 
         std::string key;
 		AuditLogChangeKey new_value;
@@ -162,7 +162,7 @@ namespace discpp {
     class AuditEntryOptions {
     public:
 		AuditEntryOptions() = default;
-		AuditEntryOptions(rapidjson::Document& json);
+		AuditEntryOptions(const discpp::JsonObject& json);
 
         std::string delete_member_days;
         std::string members_removed;
@@ -177,7 +177,7 @@ namespace discpp {
     class AuditLogEntry : public DiscordObject {
     public:
         AuditLogEntry() = default;
-        AuditLogEntry(rapidjson::Document& json);
+        AuditLogEntry(const discpp::JsonObject& json);
 
         std::string target_id;
         std::vector<AuditLogChange> changes;
@@ -190,7 +190,7 @@ namespace discpp {
     class AuditLog {
     public:
         AuditLog() = default;
-        AuditLog(rapidjson::Document& json);
+        AuditLog(const discpp::JsonObject& json);
 
         std::vector<discpp::Webhook> webhooks;
         std::vector<discpp::User> users;

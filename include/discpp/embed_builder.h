@@ -1,11 +1,15 @@
 #ifndef DISCPP_EMBED_BUILDER_H
 #define DISCPP_EMBED_BUILDER_H
 
+#ifdef RAPIDJSON_BACKEND
 #ifndef RAPIDJSON_HAS_STDSTRING
 #define RAPIDJSON_HAS_STDSTRING 1
 #endif
 
 #include <rapidjson/document.h>
+#elif SIMDJSON_BACKEND
+
+#endif
 
 #include <memory>
 #include <vector>
@@ -13,9 +17,11 @@
 
 namespace discpp {
 	class Color;
+	class JsonObject;
 
 	class EmbedBuilder {
     friend class Channel;
+    friend class Webhook;
 	public:
 		EmbedBuilder();
 
@@ -45,7 +51,7 @@ namespace discpp {
          *
          * @return discpp::EmbedBuilder, this is a constructor.
          */
-        EmbedBuilder(rapidjson::Document& json);
+        explicit EmbedBuilder(const discpp::JsonObject& json);
 
         EmbedBuilder(const discpp::EmbedBuilder& embed);
         EmbedBuilder operator=(const EmbedBuilder embed) {
@@ -303,15 +309,17 @@ namespace discpp {
         /**
          * @brief Convert the embed to json.
          *
-         * ``cpp
-         *      embed.ToJson();
-         * ```
-         *
-         * @return rapidjson::Document
+         * @return discpp::JsonObject
          */
-        std::unique_ptr<rapidjson::Document> ToJson() const;
+        discpp::JsonObject ToJson() const;
 	private:
+	    bool ContainsNotNull(const char* value_name) const; // Checks if embed_json contains a value.
+
+#ifdef RAPIDJSON_BACKEND
         rapidjson::Document embed_json;
+#elif SIMDJSON_BACKEND
+
+#endif
 	};
 }
 

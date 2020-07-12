@@ -30,9 +30,9 @@ namespace discpp {
 		std::string party_id;
 
 		MessageActivity() = default;
-		MessageActivity(rapidjson::Document& json) {
+		MessageActivity(const discpp::JsonObject& json) {
 			type = static_cast<ActivityType>(json["type"].GetInt());
-			party_id = GetDataSafely<std::string>(json, "party_id");
+			party_id = json.Get<std::string>("party_id");
 		}
 	};
 
@@ -43,9 +43,9 @@ namespace discpp {
 		std::string name;
 
 		MessageApplication() = default;
-		MessageApplication(rapidjson::Document& json) {
+		MessageApplication(const discpp::JsonObject& json) {
 			id = SnowflakeFromString(json["id"].GetString());
-			cover_image = GetDataSafely<std::string>(json, "cover_image");
+			cover_image = json.Get<std::string>("cover_image");
 			description = json["description"].GetString();
 			icon = json["icon"].GetString();
 			name = json["name"].GetString();
@@ -58,10 +58,10 @@ namespace discpp {
 		Snowflake guild_id;
 
 		MessageReference() = default;
-		MessageReference(rapidjson::Document& json) {
-			message_id = GetIDSafely(json, "message_id");
+		MessageReference(const discpp::JsonObject& json) {
+			message_id = json.GetIDSafely("message_id");
 			channel_id = SnowflakeFromString(json["channel_id"].GetString());
-			guild_id = GetIDSafely(json, "guild_id");
+			guild_id = json.GetIDSafely("guild_id");
 		}
 	};
 
@@ -69,7 +69,7 @@ namespace discpp {
 	public:
 	    class ChannelMention : public DiscordObject {
 	    public:
-            ChannelMention(rapidjson::Document& json) {
+            ChannelMention(const discpp::JsonObject& json) {
                 id = SnowflakeFromString(json["id"].GetString());
                 guild_id = SnowflakeFromString(json["id"].GetString());
                 type = static_cast<discpp::ChannelType>(json["type"].GetInt());
@@ -109,7 +109,7 @@ namespace discpp {
          *
          * @return discpp::Message, this is a constructor.
          */
-		Message(rapidjson::Document& json);
+		Message(const discpp::JsonObject& json);
 
 
         /**
