@@ -79,6 +79,7 @@ namespace discpp {
 	class Shard;
 
 	class Client {
+	    friend class Shard;
 	public:
 		std::string token; /**< Token for the current client. */
 		ClientConfig* config; /**< Configuration for the current bot. */
@@ -273,6 +274,33 @@ namespace discpp {
 
 		// Commands
 		std::function<void(discpp::Client*, discpp::Message)> fire_command_method;
+
+        class HeartbeatWaiter { // For explanation, go to https://stackoverflow.com/a/29775639
+        public:
+            // returns false if killed:
+            template<class R, class P>
+            bool WaitFor( std::chrono::duration<R,P> const& time ) const {
+                std::unique_lock<std::mutex> lock(m);
+                return !cv.wait_for(lock, time, [&]{ return terminate; });
+            }
+
+            void Kill() {
+                std::unique_lock<std::mutex> lock(m);
+                terminate = true; // should be modified inside mutex lock
+                cv.notify_all(); // it is safe, and *sometimes* optimal, to do this outside the lock
+            }
+
+            // I like to explicitly delete/default special member functions:
+            HeartbeatWaiter() = default;
+            HeartbeatWaiter(HeartbeatWaiter&&) = delete;
+            HeartbeatWaiter(HeartbeatWaiter const&) = delete;
+            HeartbeatWaiter& operator=(HeartbeatWaiter&&) = delete;
+            HeartbeatWaiter& operator=(HeartbeatWaiter const&) = delete;
+        private:
+            mutable std::condition_variable cv;
+            mutable std::mutex m;
+            bool terminate = false;
+        };
     };
 
     class Shard {
@@ -323,6 +351,8 @@ namespace discpp {
         std::thread heartbeat_thread;
 
         ix::WebSocket websocket;
+
+        discpp::Client::HeartbeatWaiter heartbeat_waiter;
 
         bool ready = false;
         bool disconnected = true;
