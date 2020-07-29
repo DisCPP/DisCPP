@@ -78,7 +78,7 @@ namespace discpp {
                     shards.emplace_back(shard);
 
                     // We can only start a new shard every 5 seconds.
-                    std::this_thread::sleep_for(std::chrono::milliseconds(5100));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(5050));
                 }
             } else {
 
@@ -307,16 +307,8 @@ namespace discpp {
 
                 // Wait for the required heartbeat interval, while waiting it should be acked from another thread.
                 // This also checks it should stop this thread.
-                long int timer = static_cast<long int>(time(nullptr));
-                double ending_time = timer + heartbeat_interval / 1000.0 - 10;
-
-                while (timer <= ending_time) {
-                    if (!client.run) {
-                        return;
-                    }
-
-                    // Increment the timer
-                    timer += ( ((unsigned int)time(nullptr)) - timer);
+                if (!heartbeat_waiter.WaitFor(std::chrono::milliseconds(heartbeat_interval)) || !client.run) {
+                    break;
                 }
 
                 if (!heartbeat_acked && !reconnecting) {
@@ -326,6 +318,8 @@ namespace discpp {
                     ReconnectToWebsocket();
                 }
             }
+
+            heartbeat_waiter.Kill();
         } catch (std::exception& e) {
             client.logger->Error(LogTextColor::RED + "[SHARD " + std::to_string(id) + "] [HEARTBEAT THREAD] Exception: " + e.what());
         }
