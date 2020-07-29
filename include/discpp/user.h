@@ -96,7 +96,7 @@ namespace discpp {
          *
          * @return std::string
          */
-        std::string GetAvatarURL(const ImageType& img_type = ImageType::AUTO) const;
+        std::string GetAvatarURL(const ImageType& img_type = ImageType::AUTO, const ImageSize img_size = ImageSize::x128) const;
 
         /**
          * @brief Gets the formatted created at time and date for this user.

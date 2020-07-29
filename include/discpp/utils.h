@@ -58,6 +58,8 @@ namespace discpp {
 
     enum ImageType : int { AUTO, WEBP, PNG, JPEG, GIF };
 
+	enum ImageSize : int { x128 = 128, x256 = 256, x512 = 512, x1024 = 1024 };
+
     enum ChannelType : int {
         GUILD_TEXT, DM, GUILD_VOICE, GROUP_DM,
         GROUP_CATEGORY, GROUP_NEWS, GROUP_STORE
