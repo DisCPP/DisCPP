@@ -77,7 +77,7 @@ std::unique_ptr<discpp::JsonObject> discpp::HandleResponse(cpr::Response& respon
     auto tmp = std::make_unique<discpp::JsonObject>((!response.text.empty() ? response.text.c_str() : "{}"));
 
 	// Check if we were returned a json error and throw an exception if so.
-	if (!tmp->ContainsNotNull("code")) {
+	if (tmp->ContainsNotNull("code")) {
         discpp::ThrowException(*tmp);
     }
 

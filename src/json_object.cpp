@@ -128,7 +128,7 @@ bool discpp::JsonObject::ContainsNotNull(const char *value_name) const {
 discpp::JsonObject discpp::JsonObject::operator[](const char *val) const {
 #ifdef RAPIDJSON_BACKEND
     rapidjson::Document doc(rapidjson::kObjectType);
-    doc.CopyFrom(inner["val"], doc.GetAllocator());
+    doc.CopyFrom(inner[val], doc.GetAllocator());
     return JsonObject(doc);
 #elif SIMDJSON_BACKEND
 
