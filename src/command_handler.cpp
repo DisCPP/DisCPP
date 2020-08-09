@@ -32,12 +32,15 @@ void discpp::FireCommand(discpp::Client* bot, const discpp::Message& message) {
 
     std::shared_ptr<discpp::Member> member = message.member;
 
-    std::string remainder = "d";
-    if (!argument_vec.empty()) remainder = CombineStringVector(argument_vec);
+    std::string remainder;
+    if (!argument_vec.empty()) remainder = argument_vec.size() == 1 ? argument_vec[0] : discpp::CombineStringVector(argument_vec, " ", 0);
 
     Context context = Context(bot, message.channel, member, message, remainder, argument_vec);
 
-    if (!found_command->second->CanRun(context)) return;
-
-    found_command->second->CommandBody(context);
+    if (found_command->second->has_sub_commands) {
+        found_command->second->SubCommandHandler(context);
+    } else {
+        if (!found_command->second->CanRun(context)) return;
+        found_command->second->CommandBody(context);
+    }
 }

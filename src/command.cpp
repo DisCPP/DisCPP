@@ -31,3 +31,24 @@ bool discpp::Command::CanRun(discpp::Context ctx) {
 
 	return requires;
 }
+
+void discpp::Command::SubCommandHandler(discpp::Context ctx) {
+    auto argument_vec = ctx.arguments;
+    if (argument_vec.empty()) {
+        if (!this->CanRun(ctx)) return;
+        this->CommandBody(ctx);
+    }
+    auto found_command = registered_commands.find(argument_vec[0]);
+    if (found_command == registered_commands.end()) return;
+    argument_vec.erase(argument_vec.begin()); // Erase the command from the arguments
+    std::shared_ptr<discpp::Member> member = ctx.message.member;
+    std::string remainder = "d";
+    if (!argument_vec.empty()) remainder = CombineStringVector(argument_vec);
+    Context context = Context(ctx.client, ctx.message.channel, member, ctx.message, ctx.remainder, argument_vec);
+    if (!found_command->second->CanRun(context)) return;
+    found_command->second->CommandBody(context);
+}
+
+discpp::SubCommand::SubCommand(const std::string &name) : Command(name) {}
+
+discpp::SubCommand::SubCommand(const std::string &name, const std::string &desc, const std::vector<std::string> &hint_args, const std::function<void(discpp::Context)> &function, const std::vector<std::function<bool(discpp::Context)>> &requirements) : Command(name, desc, hint_args, function, requirements) {}
