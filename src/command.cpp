@@ -49,6 +49,10 @@ void discpp::Command::SubCommandHandler(discpp::Context ctx) {
     found_command->second->CommandBody(context);
 }
 
+void discpp::Command::AddAlias(const std::string& name) {
+    discpp::registered_commands.insert(std::make_pair(name, this));
+}
+
 discpp::SubCommand::SubCommand(const std::string &name) {
     this->name = name;
 }

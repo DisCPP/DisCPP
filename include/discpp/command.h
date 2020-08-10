@@ -59,13 +59,14 @@ namespace discpp {
 
         void SubCommandHandler(discpp::Context ctx);
 
+        void AddAlias(const std::string& name);
+
 		std::function<void(discpp::Context)> function = nullptr;
 		std::string name; /**< Name of the current command. Ex: "ping"*/
 		std::string description; /**< Description of the current command. Ex: "replies pong!" */
 		std::vector<std::string> hint_args; /**< Arguments of the current command. Ex: @user */
 		std::vector<std::function<bool(discpp::Context)>> requirements;
         std::unordered_map<std::string, discpp::SubCommand*> registered_commands;
-		bool has_sub_commands;
 	};
 
     class SubCommand : public discpp::Command {
