@@ -37,7 +37,7 @@ void discpp::FireCommand(discpp::Client* bot, const discpp::Message& message) {
 
     Context context = Context(bot, message.channel, member, message, remainder, argument_vec);
 
-    if (found_command->second->has_sub_commands) {
+    if (!found_command->second->registered_commands.empty()) {
         found_command->second->SubCommandHandler(context);
     } else {
         if (!found_command->second->CanRun(context)) return;
