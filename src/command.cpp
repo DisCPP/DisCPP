@@ -49,6 +49,14 @@ void discpp::Command::SubCommandHandler(discpp::Context ctx) {
     found_command->second->CommandBody(context);
 }
 
-discpp::SubCommand::SubCommand(const std::string &name) : Command(name) {}
+discpp::SubCommand::SubCommand(const std::string &name) {
+    this->name = name;
+}
 
-discpp::SubCommand::SubCommand(const std::string &name, const std::string &desc, const std::vector<std::string> &hint_args, const std::function<void(discpp::Context)> &function, const std::vector<std::function<bool(discpp::Context)>> &requirements) : Command(name, desc, hint_args, function, requirements) {}
+discpp::SubCommand::SubCommand(const std::string &name, const std::string &desc, const std::vector<std::string> &hint_args, const std::function<void(discpp::Context)> &function, const std::vector<std::function<bool(discpp::Context)>> &requirements) {
+    this->name = name;
+    this->description = desc;
+    this->hint_args = hint_args;
+    this->function = function;
+    this->requirements = requirements;
+}
