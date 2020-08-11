@@ -321,10 +321,6 @@ namespace discpp {
             return FormatTime(std::chrono::system_clock::to_time_t(timestamp));
         }
 
-        inline std::string GetMessageLink() const {
-            return "https://discordapp.com/channels/" + std::to_string(this->guild->id) + "/" + std::to_string(this->channel.id) + "/" + std::to_string(this->id);
-        }
-
         discpp::Channel channel;
         std::shared_ptr<discpp::Guild> guild;
         discpp::User author;
