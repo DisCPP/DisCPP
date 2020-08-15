@@ -265,12 +265,16 @@ namespace discpp {
         SendPutRequest(Endpoint("/channels/" + std::to_string(id) + "/permissions/" + std::to_string(permissions.role_user_id)), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(json_payload));
     }
 
-    std::shared_ptr<discpp::Guild> Channel::GetGuild() const {
-        if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            throw exceptions::ProhibitedEndpointException("discpp::Channel::GetGuild only available for guild channels!");
-        }
+    std::optional<std::shared_ptr<discpp::Guild>> Channel::GetGuild() const {
+	    std::optional<std::shared_ptr<discpp::Guild>> tmp;
 
-        std::shared_ptr<Guild> tmp = globals::client_instance->cache.GetGuild(guild_id);
+        if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
+            tmp = std::nullopt;
+            //throw exceptions::ProhibitedEndpointException("discpp::Channel::GetGuild only available for guild channels!");
+        } else {
+            tmp = globals::client_instance->cache.GetGuild(guild_id);
+        }
+        
         return tmp;
     }
 

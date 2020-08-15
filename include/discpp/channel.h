@@ -279,7 +279,7 @@ namespace discpp {
          *
          * @return discpp::Guild
          */
-        std::shared_ptr<discpp::Guild> GetGuild() const;
+        [[nodiscard]] std::optional<std::shared_ptr<discpp::Guild>> GetGuild() const;
 
         /**
          * @brief Create an invite for the channel.
