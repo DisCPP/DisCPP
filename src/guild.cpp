@@ -203,13 +203,17 @@ namespace discpp {
 		return channels;
 	}
 
-    std::unordered_map<discpp::Snowflake, discpp::Channel> Guild::GetCategories() {
-	    std::unordered_map<discpp::Snowflake, discpp::Channel> tmp;
+    std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> Guild::GetCategories() {
+	    std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> tmp;
 
-	    for (auto& chnl : this->GetChannels()) {
-	        if (chnl.second.type == discpp::ChannelType::GROUP_CATEGORY) {
-	            tmp.emplace(chnl.first, chnl.second);
-	        } else continue;
+	    if (this->GetChannels().has_value()) {
+            for (auto& chnl : this->GetChannels()) {
+                if (chnl.second.type == discpp::ChannelType::GROUP_CATEGORY) {
+                    tmp.emplace(chnl.first, chnl.second);
+                } else continue;
+            }
+	    } else {
+	        tmp = std::nullopt;
 	    }
 
 	    return tmp;

@@ -282,7 +282,7 @@ namespace discpp {
          *
          * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
          */
-		std::unordered_map<discpp::Snowflake, discpp::Channel> GetCategories();
+		std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> GetCategories();
 
         /**
          * @brief Gets a list of channel that don't have parents in this guild.
