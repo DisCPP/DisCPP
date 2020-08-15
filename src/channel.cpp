@@ -165,11 +165,8 @@ namespace discpp {
 		return *this;
 	}
 
-	discpp::Channel Channel::Delete() {
+	void Channel::Delete() {
 		std::unique_ptr<rapidjson::Document> result = SendDeleteRequest(Endpoint("/channels/" + std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
-
-		*this = discpp::Channel();
-		return *this;
 	}
 
 	std::vector<discpp::Message> Channel::RequestMessages(int amount, RequestChannelsMessageMethod get_method) const {

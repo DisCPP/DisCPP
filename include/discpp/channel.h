@@ -175,10 +175,10 @@ namespace discpp {
          *      channel.Delete();
          * ```
          *
-         * @return discpp::Channel - Returns a default channel object
+         * @return void
          */
 
-        discpp::Channel Delete();
+        void Delete();
 
         /**
          * @brief Get channel's messages depending on the given method.
