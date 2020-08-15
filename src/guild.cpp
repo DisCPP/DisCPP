@@ -310,35 +310,40 @@ namespace discpp {
 		SendPatchRequest(Endpoint("/guilds/" + std::to_string(id) + "/channels"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::CHANNEL, body);
 	}
 
-	std::shared_ptr<discpp::Member> Guild::GetMember(const Snowflake& id, bool can_request) {
-		if (id == 0) {
-			throw exceptions::DiscordObjectNotFound("Member id: " + std::to_string(id) + " is not valid!");
-		}
+	std::optional<std::shared_ptr<discpp::Member>> Guild::GetMember(const Snowflake& id, bool can_request) {
 
-		auto it = members.find(id);
+	    std::optional<std::shared_ptr<discpp::Member>> member;
+	    if (id == 0) {
+	        member = std::nullopt;
+			//throw exceptions::DiscordObjectNotFound("Member id: " + std::to_string(id) + " is not valid!");
+		} else {
+            auto it = members.find(id);
+            if (it != members.end()) {
+                member = it->second;
+            } else {
+                if (can_request) {
+                    std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/"+ std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 
-        if (it != members.end()) {
-            return it->second;
-        }
-
-        if (can_request) {
-            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/"+ std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
-
-            auto member = std::make_shared<discpp::Member>(*result, this->id);
-            members.emplace(member->user.id, member);
-            return member;
-        } else {
-            throw exceptions::DiscordObjectNotFound("Member not found of id: " + std::to_string(id));
-        }
+                    member = std::make_shared<discpp::Member>(*result, this->id);
+                    members.emplace(member.value()->user.id, member.value());
+                } else {
+                    member = std::nullopt;
+                    //throw exceptions::DiscordObjectNotFound("Member not found of id: " + std::to_string(id));
+                }
+            }
+	    }
+	    return member;
 	}
 
 	void Guild::EnsureBotPermission(const Permission& req_perm) {
-		std::shared_ptr<Member> tmp = GetMember(discpp::globals::client_instance->client_user.id);
-		if (this->owner_id != tmp->user.id && !tmp->HasPermission(req_perm) && !tmp->HasPermission(Permission::ADMINISTRATOR)) {
-			globals::client_instance->logger->Error(LogTextColor::RED + "The bot does not have permission: " + PermissionToString(req_perm) + " (Exceptions like these should be handled)!");
+	    auto tmp = GetMember(discpp::globals::client_instance->client_user.id);
+	    if (tmp.has_value()) {
+            if (this->owner_id != tmp.value()->user.id && !tmp.value()->HasPermission(req_perm) && !tmp.value()->HasPermission(Permission::ADMINISTRATOR)) {
+                globals::client_instance->logger->Error(LogTextColor::RED + "The bot does not have permission: " + PermissionToString(req_perm) + " (Exceptions like these should be handled)!");
 
-			throw NoPermissionException(req_perm);
-		}
+                throw NoPermissionException(req_perm);
+            }
+	    }
 	}
 
 	std::shared_ptr<discpp::Member> Guild::AddMember(const Snowflake& id, const std::string& access_token, const std::string& nick, const std::vector<discpp::Role>& roles, const bool mute, const bool deaf) {

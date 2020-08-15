@@ -351,7 +351,7 @@ namespace discpp {
          *
          * @return std::shared_ptr<discpp::Member>
          */
-        std::shared_ptr<discpp::Member> GetMember(const Snowflake& id, bool can_request = false);
+        std::optional<std::shared_ptr<discpp::Member>> GetMember(const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Ensures the bot has a permission.
