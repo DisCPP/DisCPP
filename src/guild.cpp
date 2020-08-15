@@ -178,21 +178,28 @@ namespace discpp {
 		SendDeleteRequest(Endpoint("/guilds/" + std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-    std::unordered_map<discpp::Snowflake, discpp::Channel> Guild::GetChannels() {
+    std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> Guild::GetChannels() {
 		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/channels"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
-        std::unordered_map<discpp::Snowflake, discpp::Channel> channels;
+		std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> channels;
 
-        for (auto const& channel : result->GetArray()) {
-            if (!channel.IsNull()) {
-                rapidjson::Document channel_json;
-                channel_json.CopyFrom(channel, channel_json.GetAllocator());
+		try {
+            for (auto const &channel : result->GetArray()) {
+                if (!channel.IsNull()) {
+                    rapidjson::Document channel_json;
+                    channel_json.CopyFrom(channel, channel_json.GetAllocator());
 
-                discpp::Channel guild_channel(channel_json);
-                channels.insert({ guild_channel.id, guild_channel });
+                    discpp::Channel guild_channel(channel_json);
+                    channels->insert({guild_channel.id, guild_channel});
+                }
             }
+        } catch (std::exception& e) {
+		    channels = std::nullopt;
+		}
+
+        if (channels.has_value()) {
+            this->channels = channels.value();
         }
 
-        this->channels = channels;
 		return channels;
 	}
 
