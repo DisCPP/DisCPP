@@ -229,7 +229,7 @@ namespace discpp {
          *
          * @return std::vector<discpp::Message>
          */
-		std::vector<discpp::Message> GetPinnedMessages();
+		std::optional<std::vector<discpp::Message>> GetPinnedMessages();
 
         /**
          * @brief Delete several messages (2-100).

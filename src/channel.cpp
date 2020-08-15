@@ -191,19 +191,23 @@ namespace discpp {
 
 		return messages;
 	}
-	
+
 	void Channel::TriggerTypingIndicator() {
 		std::unique_ptr<rapidjson::Document> result = SendPostRequest(Endpoint("/channels/" + std::to_string(id) + "/typing"), DefaultHeaders(), {}, {});
 	}
 
-	std::vector<discpp::Message> Channel::GetPinnedMessages() {
+	std::optional<std::vector<discpp::Message>> Channel::GetPinnedMessages() {
         std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) = "/pins"), DefaultHeaders(), {}, {});
 
-        std::vector<discpp::Message> messages;
-        for (auto &message : result->GetArray()) {
-            rapidjson::Document message_json;
-            message_json.CopyFrom(message, message_json.GetAllocator());
-            messages.push_back(discpp::Message(message_json));
+        std::optional<std::vector<discpp::Message>> messages;
+        try {
+            for (auto &message : result->GetArray()) {
+                rapidjson::Document message_json;
+                message_json.CopyFrom(message, message_json.GetAllocator());
+                messages->push_back(discpp::Message(message_json));
+            }
+        } catch (std::exception& e) {
+            messages = std::nullopt;
         }
 
         return messages;
