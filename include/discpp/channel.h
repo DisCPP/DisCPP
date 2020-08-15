@@ -8,6 +8,7 @@
 
 #include <variant>
 #include <vector>
+#include <optional>
 
 namespace discpp {
 	class Message;
@@ -206,20 +207,7 @@ namespace discpp {
          *
          * @return discpp::Message
          */
-        discpp::Message RequestMessage(discpp::Snowflake id);
-
-        /**
-         * @brief Get a message from the channel from the id.
-         *
-         * ```cpp
-         *      channel.FindMessage(685199299042476075);
-         * ```
-         *
-         * @param[in] message_id The message id.
-         *
-         * @return discpp::Message
-         */
-        discpp::Message FindMessage(const Snowflake& message_id);
+        std::optional<discpp::Message> RequestMessage(discpp::Snowflake id);
 
         /**
          * @brief Triggers a typing indicator.

@@ -191,13 +191,7 @@ namespace discpp {
 
 		return messages;
 	}
-
-	discpp::Message Channel::FindMessage(const Snowflake& message_id) {
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/messages/" + std::to_string(message_id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
-
-		return discpp::Message(*result);
-	}
-
+	
 	void Channel::TriggerTypingIndicator() {
 		std::unique_ptr<rapidjson::Document> result = SendPostRequest(Endpoint("/channels/" + std::to_string(id) + "/typing"), DefaultHeaders(), {}, {});
 	}
@@ -340,10 +334,17 @@ namespace discpp {
         }
 	}
 
-    discpp::Message Channel::RequestMessage(discpp::Snowflake id) {
+    std::optional<discpp::Message> Channel::RequestMessage(discpp::Snowflake id) {
         std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/channels/" + std::to_string(this->id) + "/messages/" + std::to_string(id)), DefaultHeaders(), {}, {});
 
-        return discpp::Message(*result);
+        std::optional<discpp::Message> tmp;
+        try {
+            tmp = discpp::Message(*result);
+        } catch (std::exception& e) {
+            tmp = std::nullopt;
+        }
+
+        return tmp;
     }
 
     std::string Channel::GetIconURL(const ImageType &img_type) const {
