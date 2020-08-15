@@ -207,7 +207,7 @@ namespace discpp {
 	    std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> tmp;
 
 	    if (this->GetChannels().has_value()) {
-            for (auto& chnl : this->GetChannels()) {
+            for (auto& chnl : this->GetChannels().value()) {
                 if (chnl.second.type == discpp::ChannelType::GROUP_CATEGORY) {
                     tmp.emplace(chnl.first, chnl.second);
                 } else continue;
