@@ -40,6 +40,10 @@ std::unique_ptr<rapidjson::Document> discpp::HandleResponse(cpr::Response& respo
         tmp->SetObject();
     }
 
+    if (response.error) {
+        globals::client_instance->logger->Error(LogTextColor::RED + "Hit error: " + response.error.message + " (Code: " + std::to_string((int)response.error.code) + ")");
+    }
+
     // Handle http response codes and throw an exception if it failed.
     if (response.status_code != 200 && response.status_code != 201 && response.status_code != 204) {
         std::string response_msg;
@@ -89,10 +93,10 @@ std::unique_ptr<rapidjson::Document> discpp::HandleResponse(cpr::Response& respo
 }
 
 std::string CprBodyToString(const cpr::Body& body) {
-	if (body.empty()) {
+	if (body.str().empty()) {
 		return "Empty";
 	}
-	
+
 	return body;
 }
 
@@ -103,10 +107,7 @@ std::unique_ptr<rapidjson::Document> discpp::SendGetRequest(const std::string& u
 	WaitForRateLimits(object, ratelimit_bucket);
 	cpr::Response result = cpr::Get(cpr::Url{ url }, headers, body);
 
-    std::unique_ptr<rapidjson::Document> doc = HandleResponse(result, object, ratelimit_bucket);
-
-    // This shows an error in inteliisense for some reason but compiles fine.
-	return doc;
+    return HandleResponse(result, object, ratelimit_bucket);
 }
 
 std::unique_ptr<rapidjson::Document> discpp::SendPostRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body) {
@@ -374,40 +375,10 @@ void discpp::HandleRateLimits(cpr::Header& header, const Snowflake& object, cons
 }
 
 time_t discpp::TimeFromDiscord(const std::string &time) {
-    int year, month, day, hour, minute;
-    int timezone_hr = 0, timezone_min = 0;
-    float second;
-    if (6 < sscanf(time.c_str(), "%d-%d-%dT%d:%d:%f%d:%d", &year, &month, &day, &hour, &minute, &second, &timezone_hr, &timezone_min)) {
-        if (timezone_hr < 0) {
-            timezone_min = -timezone_min;
-        }
-
-        hour += timezone_hr;
-        minute += timezone_hr;
-
-        struct tm t{};
-        t.tm_year = year - 1900;
-        t.tm_mon = month - 1;
-        t.tm_mday = day;
-        t.tm_hour = hour;
-        t.tm_min = minute;
-        t.tm_sec = (int) second;
-
-        time_t utc_time = mktime(&t);
-        struct tm utc_buf;
-
-#ifndef __linux__
-        localtime_s(&utc_buf, &utc_time);
-#else
-        utc_buf = *localtime(&utc_time);
-#endif
-
-        discpp::globals::client_instance->logger->Debug("Parsed time: " + FormatTime(utc_time));
-
-        return utc_time;
-    }
-
-    throw std::runtime_error("Failed to parse time");
+    std::tm tm = {};
+    std::istringstream ss(time);
+    ss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%S");
+    return std::mktime(&tm);
 }
 
 time_t discpp::TimeFromSnowflake(const Snowflake& snow) {

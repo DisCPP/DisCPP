@@ -3,12 +3,6 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-variables:
-  #2020.1
-  vcpkgGitRef: 7aebb481085de7387f8a9975652c26f9053f66df
-  vcpkgArgs: rapidjson cpr openssl
-  vcpkgLocation: '$(Build.SourcesDirectory)/vcpkg'
-
 trigger:
 - master
 - development
@@ -18,57 +12,21 @@ jobs:
     pool:
       vmImage: 'windows-latest'
     steps:
-    - script: git submodule update --init
-      displayName: Checkout IXWebsocket submodule.
-    - task: Cache@2
-      displayName: Cache vcpkg
-      inputs:
-        key: 'version2 | $(vcpkgArgs) | "$(vcpkgGitRef)"" | "$(Agent.OS)"'
-        path: '$(vcpkgLocation)'
-    - task: run-vcpkg@0
-      displayName: 'Run vcpkg'
-      inputs:
-        vcpkgDirectory: '$(vcpkgLocation)'
-        vcpkgArguments: $(vcpkgArgs) --triplet x64-windows
-        vcpkgGitCommitId: $(vcpkgGitRef)
-        vcpkgTriplet: 'x64-windows'
-        vcpkgGitURL: https://github.com/microsoft/vcpkg.git
-    - task: run-cmake@0
+    - script: git submodule update --init --recursive
+      displayName: Update submodules.
+    - task: CMake@1
       displayName: 'Run CMake with Ninja'
-      enabled: true
       inputs:
-        cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-        cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
-        useVcpkgToolchainFile: true
-        vcpkgTriplet: 'x64-windows'
-        buildDirectory: '$(Build.ArtifactStagingDirectory)'
-        buildWithCMakeArgs: '-- -v'
+        workingDirectory: 'build'
+        cmakeArgs: ..
   - job: Linux_Latest
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - script: git submodule update --init
-      displayName: Checkout IXWebsocket submodule.
-    - task: Cache@2
-      displayName: Cache vcpkg
-      inputs:
-        key: 'version2 | $(vcpkgArgs) | "$(vcpkgGitRef)"" | "$(Agent.OS)"'
-        path: '$(vcpkgLocation)'
-    - task: run-vcpkg@0
-      displayName: 'Run vcpkg'
-      inputs:
-        vcpkgDirectory: '$(vcpkgLocation)'
-        vcpkgArguments: $(vcpkgArgs) --triplet x64-linux
-        vcpkgGitCommitId: $(vcpkgGitRef)
-        vcpkgTriplet: 'x64-linux'
-        vcpkgGitURL: https://github.com/microsoft/vcpkg.git
-    - task: run-cmake@0
+    - script: git submodule update --init --recursive
+      displayName: Update submodules.
+    - task: CMake@1
       displayName: 'Run CMake'
-      enabled: true
       inputs:
-        cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-        cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
-        useVcpkgToolchainFile: true
-        vcpkgTriplet: 'x64-linux'
-        buildDirectory: '$(Build.ArtifactStagingDirectory)'
-        buildWithCMakeArgs: '-- -v'
+        workingDirectory: 'build'
+        cmakeArgs: ..
