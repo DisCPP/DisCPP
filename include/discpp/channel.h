@@ -297,7 +297,16 @@ namespace discpp {
          */
         GuildInvite CreateInvite(const int& max_age, const int& max_uses, const bool temporary, const bool unique);
 
-        std::vector<GuildInvite> GetInvites();
+        /**
+         * @brief Lists all active invites for this channel
+         * ```cpp
+         *      std::optional<std::vector<GuildInvite>> invites = channel.GetInvites();
+         * ```
+         *
+         * @return std::optional<std::vector<GuildInvite>>
+         */
+
+        std::optional<std::vector<GuildInvite>> GetInvites();
 
         /**
          * @brief Lists children channels for this category.
@@ -307,7 +316,7 @@ namespace discpp {
          *
          * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
          */
-        std::unordered_map<discpp::Snowflake, discpp::Channel> GetChildren();
+        std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> GetChildren();
 
         /**
         * @brief Add a recipient to the group dm.

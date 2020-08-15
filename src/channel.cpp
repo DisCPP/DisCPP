@@ -274,7 +274,7 @@ namespace discpp {
         } else {
             tmp = globals::client_instance->cache.GetGuild(guild_id);
         }
-        
+
         return tmp;
     }
 
@@ -290,36 +290,44 @@ namespace discpp {
         return invite;
     }
 
-	std::vector<discpp::GuildInvite> Channel::GetInvites() {
+	std::optional<std::vector<discpp::GuildInvite>> Channel::GetInvites() {
+	    std::optional<std::vector<discpp::GuildInvite>> tmp;
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            throw std::runtime_error("discpp::Channel::GetInvites only available for guild channels!");
+            tmp = std::nullopt;
+            //throw std::runtime_error("discpp::Channel::GetInvites only available for guild channels!");
+        } else {
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/invites"), DefaultHeaders(), {}, {});
+            for (auto& invite : result->GetArray()) {
+                rapidjson::Document invite_json;
+                invite_json.CopyFrom(invite, invite_json.GetAllocator());
+                tmp->push_back(discpp::GuildInvite(invite_json));
+            }
         }
 
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/invites"), DefaultHeaders(), {}, {});
-		std::vector<discpp::GuildInvite> invites;
-		for (auto& invite : result->GetArray()) {
-			rapidjson::Document invite_json;
-			invite_json.CopyFrom(invite, invite_json.GetAllocator());
-			invites.push_back(discpp::GuildInvite(invite_json));
-		}
-
-		return invites;
+		return tmp;
 	}
 
-	std::unordered_map<discpp::Snowflake, discpp::Channel> Channel::GetChildren() {
+	std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> Channel::GetChildren() {
+	    std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> tmp;
         if (type != ChannelType::GROUP_CATEGORY) {
+            tmp = std::nullopt;
+            /*
             globals::client_instance->logger->Debug(LogTextColor::RED + "discpp::Channel::GetChildren only available for category channels!");
             throw std::runtime_error("discpp::Channel::GetChildren only available for category channels!");
+             */
+        } else {
+            if (this->GetGuild().has_value()) {
+                for (auto const chnl : this->GetGuild()->get()->channels) {
+                    if (chnl.second.category_id == this->id) {
+                        tmp->insert({ chnl.first, chnl.second });
+                    } else {
+                        continue;
+                    }
+                }
+            } else {
+                tmp = std::nullopt;
+            }
         }
-
-	    std::unordered_map<discpp::Snowflake, discpp::Channel> tmp;
-	    for (auto const chnl : this->GetGuild()->channels) {
-	        if (chnl.second.category_id == this->id) {
-                tmp.insert({ chnl.first, chnl.second });
-	        } else {
-	            continue;
-	        }
-	    }
 
 	    return tmp;
 	}
