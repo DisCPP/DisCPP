@@ -209,7 +209,7 @@ namespace discpp {
 	    if (this->GetChannels().has_value()) {
             for (auto& chnl : this->GetChannels().value()) {
                 if (chnl.second.type == discpp::ChannelType::GROUP_CATEGORY) {
-                    tmp.emplace(chnl.first, chnl.second);
+                    tmp->emplace(chnl.first, chnl.second);
                 } else continue;
             }
 	    } else {
@@ -219,13 +219,17 @@ namespace discpp {
 	    return tmp;
 	}
 
-	std::unordered_map<discpp::Snowflake, discpp::Channel> Guild::GetParentlessChannels() {
-	    std::unordered_map<discpp::Snowflake, discpp::Channel> tmp;
+	std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> Guild::GetParentlessChannels() {
+	    std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> tmp;
 
-	    for (auto& chnl : this->GetChannels()) {
-	        if (chnl.second.category_id == 0) {
-	            tmp.emplace(std::pair(chnl.first, chnl.second));
-	        }
+	    if (this->GetChannels().has_value()) {
+            for (auto& chnl : this->GetChannels().value()) {
+                if (chnl.second.category_id == 0) {
+                    tmp->emplace(std::pair(chnl.first, chnl.second));
+                }
+            }
+	    } else {
+	        tmp = std::nullopt;
 	    }
 
 	    return tmp;
