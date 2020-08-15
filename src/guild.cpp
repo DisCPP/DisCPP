@@ -235,13 +235,16 @@ namespace discpp {
 	    return tmp;
 	}
 
-    discpp::Channel Guild::GetChannel(const Snowflake& id) const {
+    std::optional<discpp::Channel> Guild::GetChannel(const Snowflake& id) const {
+	    std::optional<discpp::Channel> channel;
 	    auto it = channels.find(id);
 	    if (it != channels.end()) {
-	        return it->second;
+            channel = it->second;
+	    } else {
+	        channel = std::nullopt;
 	    }
 
-		return discpp::Channel();
+		return channel;
 	}
 
     discpp::Channel Guild::CreateChannel(const std::string& name, const std::string& topic, const ChannelType& type, const int& bitrate, const int& user_limit, const int& rate_limit_per_user, const int& position, const std::vector<discpp::Permissions>& permission_overwrites, const discpp::Snowflake& parent_id, const bool nsfw) {

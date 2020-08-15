@@ -301,7 +301,7 @@ namespace discpp {
          *
          * @return discpp::Channel
          */
-        discpp::Channel GetChannel(const Snowflake& id) const;
+        [[nodiscard]] std::optional<discpp::Channel> GetChannel(const Snowflake& id) const;
 
         /**
          * @brief Creates a channel for this Guild.
