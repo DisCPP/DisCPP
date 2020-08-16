@@ -743,7 +743,7 @@ namespace discpp {
          *
          * @return std::unordered_map<Snowflake, std::shared_ptr<Emoji>>
          */
-		std::unordered_map<Snowflake, discpp::Emoji> GetEmojis();
+		std::optional<std::unordered_map<Snowflake, discpp::Emoji>> GetEmojis();
 
         /**
          * @brief Get a guild emoji.

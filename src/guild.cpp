@@ -639,22 +639,29 @@ namespace discpp {
 		return result->GetString();
 	}
 
-	std::unordered_map<Snowflake, Emoji> Guild::GetEmojis() {
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/emojis"), DefaultHeaders(), {}, {});
+	std::optional<std::unordered_map<Snowflake, Emoji>> Guild::GetEmojis() {
+	    std::optional<std::unordered_map<Snowflake, Emoji>> tmp;
+	    try {
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/emojis"), DefaultHeaders(), {}, {});
 
-		std::unordered_map<Snowflake, Emoji> emojis;
-        for (auto const& emoji : result->GetArray()) {
-            if (!emoji.IsNull()) {
-                rapidjson::Document emoji_json;
-                emoji_json.CopyFrom(emoji, emoji_json.GetAllocator());
+            std::unordered_map<Snowflake, Emoji> emojis;
+            for (auto const& emoji : result->GetArray()) {
+                if (!emoji.IsNull()) {
+                    rapidjson::Document emoji_json;
+                    emoji_json.CopyFrom(emoji, emoji_json.GetAllocator());
 
-                discpp::Emoji tmp = discpp::Emoji(emoji_json);
-                emojis.insert({ tmp.id, tmp });
+                    discpp::Emoji tmp = discpp::Emoji(emoji_json);
+                    emojis.insert({ tmp.id, tmp });
+                }
             }
-        }
 
-        this->emojis = emojis;
-		return emojis;
+            this->emojis = emojis;
+            tmp = emojis;
+	    } catch (std::exception& e) {
+	        tmp = std::nullopt;
+	    }
+
+	    return tmp;
 	}
 
     Emoji Guild::GetEmoji(const Snowflake& id) const {
