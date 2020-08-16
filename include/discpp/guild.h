@@ -756,7 +756,7 @@ namespace discpp {
          *
          * @return Emoji
          */
-        discpp::Emoji GetEmoji(const Snowflake& id) const;
+        [[nodiscard]] std::optional<discpp::Emoji> GetEmoji(const Snowflake& id) const;
 
         /**
          * @brief Create a guild emoji.

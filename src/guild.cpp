@@ -664,10 +664,16 @@ namespace discpp {
 	    return tmp;
 	}
 
-    Emoji Guild::GetEmoji(const Snowflake& id) const {
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/emojis/" + std::to_string(id)), DefaultHeaders(), {}, {});
+    std::optional<Emoji> Guild::GetEmoji(const Snowflake& id) const {
+	    std::optional<Emoji> tmp;
+	    try {
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/emojis/" + std::to_string(id)), DefaultHeaders(), {}, {});
+            tmp = discpp::Emoji(*result);
+        } catch (std::exception& e) {
+	        tmp = std::nullopt;
+	    }
 
-		return discpp::Emoji(*result);
+		return tmp;
 	}
 
     Emoji Guild::CreateEmoji(const std::string& name, discpp::Image& image, const std::vector<discpp::Role>& roles) {
