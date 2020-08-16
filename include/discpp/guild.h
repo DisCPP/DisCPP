@@ -610,7 +610,7 @@ namespace discpp {
          *
          * @return std::vector<discpp::GuildInvite>
          */
-		std::optional<std::vector<discpp::GuildInvite>> GetInvites() const;
+		[[nodiscard]] std::optional<std::vector<discpp::GuildInvite>> GetInvites() const;
 
         /**
          * @brief Get guild integrations.
@@ -621,7 +621,7 @@ namespace discpp {
          *
          * @return std::vector<discpp::Integration>
          */
-		std::vector<discpp::Integration> GetIntegrations() const;
+		[[nodiscard]] std::optional<std::vector<discpp::Integration>> GetIntegrations() const;
 
         /**
          * @brief Create a guild integration.

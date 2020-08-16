@@ -550,20 +550,27 @@ namespace discpp {
 		return tmp;
 	}
 
-	std::vector<discpp::Integration> Guild::GetIntegrations() const {
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/integrations"), DefaultHeaders(), {}, {});
+	std::optional<std::vector<discpp::Integration>> Guild::GetIntegrations() const {
+		std::optional<std::vector<discpp::Integration>> tmp;
 
-		std::vector<discpp::Integration> guild_integrations;
-		for (auto const& guild_integration : result->GetArray()) {
-            if (!guild_integration.IsNull()) {
-                rapidjson::Document guild_integration_json;
-                guild_integration_json.CopyFrom(guild_integration, guild_integration_json.GetAllocator());
+		try {
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/integrations"), DefaultHeaders(), {}, {});
 
-                guild_integrations.push_back(discpp::Integration(guild_integration_json));
+            std::vector<discpp::Integration> guild_integrations;
+            for (auto const& guild_integration : result->GetArray()) {
+                if (!guild_integration.IsNull()) {
+                    rapidjson::Document guild_integration_json;
+                    guild_integration_json.CopyFrom(guild_integration, guild_integration_json.GetAllocator());
+
+                    guild_integrations.push_back(discpp::Integration(guild_integration_json));
+                }
             }
-        }
+            tmp = guild_integrations;
+		} catch (std::exception& e) {
+		    tmp = std::nullopt;
+		}
 
-		return guild_integrations;
+		return tmp;
 	}
 
 	void Guild::CreateIntegration(const Snowflake& id, const std::string& type) {
