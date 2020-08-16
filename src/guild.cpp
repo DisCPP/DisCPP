@@ -528,20 +528,26 @@ namespace discpp {
 		SendPostRequest(Endpoint("/guilds/" + std::to_string(id) + "/prune"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::GUILD, body);
 	}
 
-	std::vector<discpp::GuildInvite> Guild::GetInvites() const {
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/invites"), DefaultHeaders(), {}, {});
+	std::optional<std::vector<discpp::GuildInvite>> Guild::GetInvites() const {
+		std::optional<std::vector<discpp::GuildInvite>> tmp;
+		try {
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/invites"), DefaultHeaders(), {}, {});
 
-		std::vector<discpp::GuildInvite> guild_invites;
-        for (auto const& guild_invite : result->GetArray()) {
-            if (!guild_invite.IsNull()) {
-                rapidjson::Document guild_invite_json;
-                guild_invite_json.CopyFrom(guild_invite, guild_invite_json.GetAllocator());
+            std::vector<discpp::GuildInvite> guild_invites;
+            for (auto const& guild_invite : result->GetArray()) {
+                if (!guild_invite.IsNull()) {
+                    rapidjson::Document guild_invite_json;
+                    guild_invite_json.CopyFrom(guild_invite, guild_invite_json.GetAllocator());
 
-                guild_invites.push_back(discpp::GuildInvite(guild_invite_json));
+                    guild_invites.push_back(discpp::GuildInvite(guild_invite_json));
+                }
             }
-        }
+            tmp = guild_invites;
+        } catch (std::exception& e) {
+		    tmp = std::nullopt;
+		}
 
-		return guild_invites;
+		return tmp;
 	}
 
 	std::vector<discpp::Integration> Guild::GetIntegrations() const {

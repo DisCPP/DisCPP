@@ -610,7 +610,7 @@ namespace discpp {
          *
          * @return std::vector<discpp::GuildInvite>
          */
-		std::vector<discpp::GuildInvite> GetInvites() const;
+		std::optional<std::vector<discpp::GuildInvite>> GetInvites() const;
 
         /**
          * @brief Get guild integrations.
