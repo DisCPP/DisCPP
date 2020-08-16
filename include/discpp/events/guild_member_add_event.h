@@ -10,7 +10,7 @@
 namespace discpp {
 	class GuildMemberAddEvent : public Event {
 	public:
-		inline GuildMemberAddEvent(std::shared_ptr<discpp::Guild> guild, std::shared_ptr<discpp::Member> member) : guild(guild), member(member) {}
+		inline GuildMemberAddEvent(Shard& shard, std::shared_ptr<discpp::Guild> guild, std::shared_ptr<discpp::Member> member) : Event(shard), guild(guild), member(member) {}
 
         std::shared_ptr<discpp::Guild> guild;
         std::shared_ptr<discpp::Member> member;

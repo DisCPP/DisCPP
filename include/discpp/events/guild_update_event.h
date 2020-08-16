@@ -9,7 +9,7 @@
 namespace discpp {
 	class GuildUpdateEvent : public Event {
 	public:
-		inline GuildUpdateEvent(std::shared_ptr<discpp::Guild> guild) : guild(guild) {}
+		inline GuildUpdateEvent(Shard& shard, std::shared_ptr<discpp::Guild> guild) : Event(shard), guild(guild) {}
 
         std::shared_ptr<discpp::Guild> guild;
 

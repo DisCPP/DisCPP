@@ -9,7 +9,7 @@
 namespace discpp {
 	class GuildRoleDeleteEvent : public Event {
 	public:
-		inline GuildRoleDeleteEvent(discpp::Role role) : role(role) {}
+		inline GuildRoleDeleteEvent(Shard& shard, discpp::Role role) : Event(shard), role(role) {}
 
 		discpp::Role role;
 

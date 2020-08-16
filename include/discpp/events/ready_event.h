@@ -6,12 +6,12 @@
 namespace discpp {
 	class ReadyEvent : public Event {
 	public:
-        ReadyEvent(const discpp::ReadyEvent& ready_event) {
-            /*payload.SetObject();
-            payload.CopyFrom(ready_event.payload, payload.GetAllocator());*/
-        }
+        /*ReadyEvent(const discpp::ReadyEvent& ready_event) : Event(ready_event) {
+            payload.SetObject();
+            payload.CopyFrom(ready_event.payload, payload.GetAllocator());
+        }*/
 
-		inline ReadyEvent(rapidjson::Document& json) {
+		inline ReadyEvent(Shard& shard, rapidjson::Document& json) : Event(shard) {
 		    payload.SetObject();
             payload.CopyFrom(json, payload.GetAllocator());
 		}

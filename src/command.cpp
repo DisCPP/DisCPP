@@ -38,13 +38,20 @@ void discpp::Command::SubCommandHandler(discpp::Context ctx) {
         if (!this->CanRun(ctx)) return;
         this->CommandBody(ctx);
     }
+
     auto found_command = registered_commands.find(argument_vec[0]);
+
     if (found_command == registered_commands.end()) return;
     argument_vec.erase(argument_vec.begin()); // Erase the command from the arguments
+
     std::shared_ptr<discpp::Member> member = ctx.message.member;
-    std::string remainder = "d";
+
+    std::string remainder = "";
     if (!argument_vec.empty()) remainder = CombineStringVector(argument_vec);
-    Context context = Context(ctx.client, ctx.message.channel, member, ctx.message, ctx.remainder, argument_vec);
+
+    Context context = Context(ctx.shard, ctx.message.channel, member, ctx.message, ctx.remainder, argument_vec);
+
+    // Check if the command can run
     if (!found_command->second->CanRun(context)) return;
     found_command->second->CommandBody(context);
 }

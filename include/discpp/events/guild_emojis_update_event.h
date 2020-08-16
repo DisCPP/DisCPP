@@ -9,7 +9,7 @@
 namespace discpp {
 	class GuildEmojisUpdateEvent : public Event {
 	public:
-		inline GuildEmojisUpdateEvent(std::shared_ptr<discpp::Guild> guild) : guild(guild) {}
+		inline GuildEmojisUpdateEvent(Shard& shard, std::shared_ptr<discpp::Guild> guild) : Event(shard), guild(guild) {}
 
         std::shared_ptr<discpp::Guild> guild;
 

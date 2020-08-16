@@ -9,7 +9,7 @@
 namespace discpp {
 	class ChannelUpdateEvent : public Event {
 	public:
-		inline ChannelUpdateEvent(discpp::Channel channel) : channel(channel) {}
+		inline ChannelUpdateEvent(Shard& shard, discpp::Channel channel) : Event(shard), channel(channel) {}
 
         discpp::Channel channel;
 

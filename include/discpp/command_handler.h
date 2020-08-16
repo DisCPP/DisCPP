@@ -19,7 +19,7 @@ namespace discpp {
      *
      * @return void
      */
-	void FireCommand(discpp::Client* bot, const discpp::Message& message);
+	void FireCommand(discpp::Shard& shard, const discpp::Message& message);
 }
 
 #endif

@@ -9,7 +9,7 @@
 namespace discpp {
 	class MessageReactionRemoveAllEvent : public Event {
 	public:
-		inline MessageReactionRemoveAllEvent(discpp::Message message) {}
+		inline MessageReactionRemoveAllEvent(Shard& shard, discpp::Message message) : Event(shard), message(message) {}
 
 		discpp::Message message;
 

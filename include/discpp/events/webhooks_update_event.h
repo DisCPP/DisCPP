@@ -9,7 +9,7 @@
 namespace discpp {
 	class WebhooksUpdateEvent : public Event {
 	public:
-		inline WebhooksUpdateEvent(discpp::Channel channel) : channel(channel) {}
+		inline WebhooksUpdateEvent(Shard& shard, discpp::Channel channel) : Event(shard), channel(channel) {}
 
 		discpp::Channel channel;
 

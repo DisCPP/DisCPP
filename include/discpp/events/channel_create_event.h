@@ -4,12 +4,10 @@
 #include "../event.h"
 #include "../channel.h"
 
-
-
 namespace discpp {
 	class ChannelCreateEvent : public Event {
 	public:
-		inline ChannelCreateEvent(discpp::Channel channel) : channel(channel) {}
+		inline ChannelCreateEvent(Shard& shard, discpp::Channel channel) : Event(shard), channel(channel) {}
 
         discpp::Channel channel;
 

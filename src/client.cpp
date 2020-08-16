@@ -110,8 +110,8 @@ namespace discpp {
         websocket.sendText(json_payload);
     }
 
-    void Client::SetCommandHandler(const std::function<void(discpp::Client*, discpp::Message)>& command_handler) {
-        fire_command_method = command_handler;
+    void Client::SetCommandHandler(const std::function<void(discpp::Shard&, discpp::Message&)>& command_handler) {
+        fire_command_method = std::bind(command_handler, std::placeholders::_1, std::placeholders::_2);
     }
 
     void Shard::DisconnectWebsocket() {
@@ -211,7 +211,7 @@ namespace discpp {
                     heartbeat_acked = true;
                     reconnecting = false;
 
-                    client.event_handler->TriggerEvent<discpp::ReconnectEvent>(discpp::ReconnectEvent());
+                    client.event_handler->TriggerEvent<discpp::ReconnectEvent>(discpp::ReconnectEvent(*this));
                 } else {
                     hello_packet.SetObject();
                     hello_packet.CopyFrom(result, hello_packet.GetAllocator());

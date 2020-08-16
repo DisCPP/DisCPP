@@ -126,14 +126,14 @@ namespace discpp {
          * This is used in case you wanted to add functionality to the command handler.
          *
          * ```cpp
-         *      bot.SetCommandHandler(std::bind(&my_discpp_bot::command_handler::HandleCommands, std::placeholders::_1, std::placeholders::_2));
+         *      client->SetCommandHandler([](discpp::Shard& shard, discpp::Message& message) { my_discpp_bot::command_handler::FireCommand(shard, message); });
          * ```
          *
          * @param[in] command_handler The method that will handle commands from a user.
          *
          * @return void
          */
-		void SetCommandHandler(const std::function<void(discpp::Client*, discpp::Message)>& command_handler);
+		void SetCommandHandler(const std::function<void(discpp::Shard&, discpp::Message&)>& command_handler);
 
 		void StopClient();
 
@@ -271,11 +271,8 @@ namespace discpp {
 
 		int message_cache_count;
 
-		// Websocket Methods
-
-
-		// Commands
-		std::function<void(discpp::Client*, discpp::Message)> fire_command_method;
+		// The method to run to fire commands.
+		std::function<void(discpp::Shard&, discpp::Message&)> fire_command_method;
 
         class HeartbeatWaiter { // For explanation, go to https://stackoverflow.com/a/29775639
         public:

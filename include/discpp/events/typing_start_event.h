@@ -10,7 +10,7 @@
 namespace discpp {
 	class TypingStartEvent : public Event {
 	public:
-		inline TypingStartEvent(discpp::User user, discpp::Channel channel, int timestamp) : user(user), channel(channel), timestamp(timestamp) {}
+		inline TypingStartEvent(Shard& shard, discpp::User user, discpp::Channel channel, int timestamp) : Event(shard), user(user), channel(channel), timestamp(timestamp) {}
 
 		discpp::User user;
         discpp::Channel channel;

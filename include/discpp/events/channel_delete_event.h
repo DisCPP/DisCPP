@@ -9,7 +9,7 @@
 namespace discpp {
 	class ChannelDeleteEvent : public Event {
 	public:
-		inline ChannelDeleteEvent(discpp::Channel channel) : channel(channel) {}
+		inline ChannelDeleteEvent(Shard& shard, discpp::Channel channel) : Event(shard), channel(channel) {}
 
 		discpp::Channel channel;
 

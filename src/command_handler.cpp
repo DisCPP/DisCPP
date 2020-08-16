@@ -2,10 +2,10 @@
 #include "command_handler.h"
 #include "client_config.h"
 
-void discpp::FireCommand(discpp::Client* bot, const discpp::Message& message) {
+void discpp::FireCommand(discpp::Shard& shard, const discpp::Message& message) {
     size_t prefixSize = 0;
     bool trigger = false;
-    for (std::string const& prefix : bot->config->prefixes) {
+    for (std::string const& prefix : shard.client.config->prefixes) {
         prefixSize = prefix.size();
         if (message.author.IsBot()) {
             return;
@@ -35,7 +35,7 @@ void discpp::FireCommand(discpp::Client* bot, const discpp::Message& message) {
     std::string remainder;
     if (!argument_vec.empty()) remainder = argument_vec.size() == 1 ? argument_vec[0] : discpp::CombineStringVector(argument_vec, " ", 0);
 
-    Context context = Context(bot, message.channel, member, message, remainder, argument_vec);
+    Context context = Context(shard, message.channel, member, message, remainder, argument_vec);
 
     if (!found_command->second->registered_commands.empty()) {
         found_command->second->SubCommandHandler(context);

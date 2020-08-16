@@ -48,19 +48,19 @@ namespace discpp {
             }
         }
 
-        shard.client.event_handler->TriggerEvent<discpp::ReadyEvent>(discpp::ReadyEvent(result));
+        shard.client.event_handler->TriggerEvent<discpp::ReadyEvent>(discpp::ReadyEvent(shard, result));
     }
 
     void EventDispatcher::ResumedEvent(Shard& shard, rapidjson::Document& result) {
-        shard.client.event_handler->TriggerEvent<discpp::ResumedEvent>(discpp::ResumedEvent());
+        shard.client.event_handler->TriggerEvent<discpp::ResumedEvent>(discpp::ResumedEvent(shard));
     }
 
     void EventDispatcher::ReconnectEvent(Shard& shard, rapidjson::Document& result) {
-        shard.client.event_handler->TriggerEvent<discpp::ReconnectEvent>(discpp::ReconnectEvent());
+        shard.client.event_handler->TriggerEvent<discpp::ReconnectEvent>(discpp::ReconnectEvent(shard));
     }
 
     void EventDispatcher::InvalidSessionEvent(Shard& shard, rapidjson::Document& result) {
-        shard.client.event_handler->TriggerEvent<discpp::InvalidSessionEvent>(discpp::InvalidSessionEvent());
+        shard.client.event_handler->TriggerEvent<discpp::InvalidSessionEvent>(discpp::InvalidSessionEvent(shard));
     }
 
     void EventDispatcher::ChannelCreateEvent(Shard& shard, rapidjson::Document& result) {
@@ -70,12 +70,12 @@ namespace discpp {
 
             guild->channels.insert({ new_channel.id, new_channel });
 
-            shard.client.event_handler->TriggerEvent<discpp::ChannelCreateEvent>(discpp::ChannelCreateEvent(new_channel));
+            shard.client.event_handler->TriggerEvent<discpp::ChannelCreateEvent>(discpp::ChannelCreateEvent(shard, new_channel));
         } else {
             discpp::Channel new_channel(&shard.client, result);
 
             shard.client.cache.private_channels.insert({ new_channel.id, new_channel });
-            shard.client.event_handler->TriggerEvent<discpp::ChannelCreateEvent>(discpp::ChannelCreateEvent(new_channel));
+            shard.client.event_handler->TriggerEvent<discpp::ChannelCreateEvent>(discpp::ChannelCreateEvent(shard, new_channel));
         }
     }
 
@@ -89,14 +89,14 @@ namespace discpp {
                 guild_chan_it->second = updated_channel;
             }
 
-            shard.client.event_handler->TriggerEvent<discpp::ChannelUpdateEvent>(discpp::ChannelUpdateEvent(updated_channel));
+            shard.client.event_handler->TriggerEvent<discpp::ChannelUpdateEvent>(discpp::ChannelUpdateEvent(shard, updated_channel));
         } else {
             discpp::Channel updated_channel(&shard.client, result);
 
             auto client_chan_it = shard.client.cache.private_channels.find(updated_channel.id);
             client_chan_it->second = updated_channel;
 
-            shard.client.event_handler->TriggerEvent<discpp::ChannelUpdateEvent>(discpp::ChannelUpdateEvent(updated_channel));
+            shard.client.event_handler->TriggerEvent<discpp::ChannelUpdateEvent>(discpp::ChannelUpdateEvent(shard, updated_channel));
         }
     }
 
@@ -105,11 +105,11 @@ namespace discpp {
             discpp::Channel deleted_channel(&shard.client, result);
             std::shared_ptr<discpp::Guild> guild = shard.client.cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
-            shard.client.event_handler->TriggerEvent<discpp::ChannelDeleteEvent>(discpp::ChannelDeleteEvent(deleted_channel));
+            shard.client.event_handler->TriggerEvent<discpp::ChannelDeleteEvent>(discpp::ChannelDeleteEvent(shard, deleted_channel));
         } else {
             discpp::Channel deleted_channel(&shard.client, result);
 
-            shard.client.event_handler->TriggerEvent<discpp::ChannelDeleteEvent>(discpp::ChannelDeleteEvent(deleted_channel));
+            shard.client.event_handler->TriggerEvent<discpp::ChannelDeleteEvent>(discpp::ChannelDeleteEvent(shard, deleted_channel));
         }
     }
 
@@ -123,7 +123,7 @@ namespace discpp {
                 it->second.last_pin_timestamp = TimeFromDiscord(result["last_pin_timestamp"].GetString());
             }
 
-            shard.client.event_handler->TriggerEvent<discpp::ChannelPinsUpdateEvent>(discpp::ChannelPinsUpdateEvent(pin_update_channel));
+            shard.client.event_handler->TriggerEvent<discpp::ChannelPinsUpdateEvent>(discpp::ChannelPinsUpdateEvent(shard, pin_update_channel));
         } else {
             discpp::Channel pin_update_channel = discpp::Channel(&shard.client, SnowflakeFromString(result["channel_id"].GetString()));
 
@@ -132,7 +132,7 @@ namespace discpp {
                 it->second.last_pin_timestamp = TimeFromDiscord(result["last_pin_timestamp"].GetString());
             }
 
-            shard.client.event_handler->TriggerEvent<discpp::ChannelPinsUpdateEvent>(discpp::ChannelPinsUpdateEvent(pin_update_channel));
+            shard.client.event_handler->TriggerEvent<discpp::ChannelPinsUpdateEvent>(discpp::ChannelPinsUpdateEvent(shard, pin_update_channel));
         }
     }
 
@@ -143,7 +143,7 @@ namespace discpp {
         shard.client.cache.guilds.emplace(guild_id, guild);
         shard.client.cache.members.insert(guild->members.begin(), guild->members.end());
 
-        shard.client.event_handler->TriggerEvent<discpp::GuildCreateEvent>(discpp::GuildCreateEvent(guild));
+        shard.client.event_handler->TriggerEvent<discpp::GuildCreateEvent>(discpp::GuildCreateEvent(shard, guild));
     }
 
     void EventDispatcher::GuildUpdateEvent(Shard& shard, rapidjson::Document& result) {
@@ -154,14 +154,14 @@ namespace discpp {
             it->second = guild;
         }
 
-        shard.client.event_handler->TriggerEvent<discpp::GuildUpdateEvent>(discpp::GuildUpdateEvent(guild));
+        shard.client.event_handler->TriggerEvent<discpp::GuildUpdateEvent>(discpp::GuildUpdateEvent(shard, guild));
     }
 
     void EventDispatcher::GuildDeleteEvent(Shard& shard, rapidjson::Document& result) {
         std::shared_ptr<discpp::Guild> guild = std::make_shared<discpp::Guild>(&shard.client, SnowflakeFromString(result["id"].GetString()));
 
         shard.client.cache.guilds.erase(guild->id);
-        shard.client.event_handler->TriggerEvent<discpp::GuildDeleteEvent>(discpp::GuildDeleteEvent(guild));
+        shard.client.event_handler->TriggerEvent<discpp::GuildDeleteEvent>(discpp::GuildDeleteEvent(shard, guild));
     }
 
     void EventDispatcher::GuildBanAddEvent(Shard& shard, rapidjson::Document& result) {
@@ -170,7 +170,7 @@ namespace discpp {
         user_json.CopyFrom(result["user"], user_json.GetAllocator());
         discpp::User user(&shard.client, user_json);
 
-        shard.client.event_handler->TriggerEvent<discpp::GuildBanAddEvent>(discpp::GuildBanAddEvent(guild, user));
+        shard.client.event_handler->TriggerEvent<discpp::GuildBanAddEvent>(discpp::GuildBanAddEvent(shard, guild, user));
     }
 
     void EventDispatcher::GuildBanRemoveEvent(Shard& shard, rapidjson::Document& result) {
@@ -179,7 +179,7 @@ namespace discpp {
         user_json.CopyFrom(result["user"], user_json.GetAllocator());
         discpp::User user(&shard.client, user_json);
 
-        shard.client.event_handler->TriggerEvent<discpp::GuildBanRemoveEvent>(discpp::GuildBanRemoveEvent(guild, user));
+        shard.client.event_handler->TriggerEvent<discpp::GuildBanRemoveEvent>(discpp::GuildBanRemoveEvent(shard, guild, user));
     }
 
     void EventDispatcher::GuildEmojisUpdateEvent(Shard& shard, rapidjson::Document& result) {
@@ -200,11 +200,11 @@ namespace discpp {
             it->second = guild;
         }
 
-        shard.client.event_handler->TriggerEvent<discpp::GuildEmojisUpdateEvent>(discpp::GuildEmojisUpdateEvent(guild));
+        shard.client.event_handler->TriggerEvent<discpp::GuildEmojisUpdateEvent>(discpp::GuildEmojisUpdateEvent(shard, guild));
     }
 
     void EventDispatcher::GuildIntegrationsUpdateEvent(Shard& shard, rapidjson::Document& result) {
-        shard.client.event_handler->TriggerEvent<discpp::GuildIntegrationsUpdateEvent>(discpp::GuildIntegrationsUpdateEvent(discpp::Guild(&shard.client, SnowflakeFromString(result["guild_id"].GetString()))));
+        shard.client.event_handler->TriggerEvent<discpp::GuildIntegrationsUpdateEvent>(discpp::GuildIntegrationsUpdateEvent(shard, discpp::Guild(&shard.client, SnowflakeFromString(result["guild_id"].GetString()))));
     }
 
     void EventDispatcher::GuildMemberAddEvent(Shard& shard, rapidjson::Document& result) {
@@ -212,7 +212,7 @@ namespace discpp {
         std::shared_ptr<discpp::Member> member = std::make_shared<discpp::Member>(&shard.client, result, *guild);
         shard.client.cache.members.insert({ member->user.id, member });
 
-        shard.client.event_handler->TriggerEvent<discpp::GuildMemberAddEvent>(discpp::GuildMemberAddEvent(guild, member));
+        shard.client.event_handler->TriggerEvent<discpp::GuildMemberAddEvent>(discpp::GuildMemberAddEvent(shard, guild, member));
     }
 
     void EventDispatcher::GuildMemberRemoveEvent(Shard& shard, rapidjson::Document& result) {
@@ -220,7 +220,7 @@ namespace discpp {
         std::shared_ptr<discpp::Member> member = std::make_shared<discpp::Member>(&shard.client, SnowflakeFromString(result["user"]["id"].GetString()), *guild);
         shard.client.cache.members.erase(member->user.id);
 
-        shard.client.event_handler->TriggerEvent<discpp::GuildMemberRemoveEvent>(discpp::GuildMemberRemoveEvent(guild, member));
+        shard.client.event_handler->TriggerEvent<discpp::GuildMemberRemoveEvent>(discpp::GuildMemberRemoveEvent(shard, guild, member));
     }
 
     void EventDispatcher::GuildMemberUpdateEvent(Shard& shard, rapidjson::Document& result) {
@@ -247,7 +247,7 @@ namespace discpp {
             member->nick = result["nick"].GetString();
         }
 
-        shard.client.event_handler->TriggerEvent<discpp::GuildMemberUpdateEvent>(discpp::GuildMemberUpdateEvent(guild, member));
+        shard.client.event_handler->TriggerEvent<discpp::GuildMemberUpdateEvent>(discpp::GuildMemberUpdateEvent(shard, guild, member));
     }
 
     void EventDispatcher::GuildMembersChunkEvent(Shard& shard, rapidjson::Document& result) {
@@ -276,21 +276,21 @@ namespace discpp {
         }
         std::string nonce = GetDataSafely<std::string>(result, "nonce");
 
-        shard.client.event_handler->TriggerEvent<discpp::GuildMembersChunkEvent>(discpp::GuildMembersChunkEvent(guild, members, chunk_index, chunk_count, presences, nonce));
+        shard.client.event_handler->TriggerEvent<discpp::GuildMembersChunkEvent>(discpp::GuildMembersChunkEvent(shard, guild, members, chunk_index, chunk_count, presences, nonce));
     }
 
     void EventDispatcher::GuildRoleCreateEvent(Shard& shard, rapidjson::Document& result) {
         std::unique_ptr<rapidjson::Document> role_json = GetDocumentInsideJson(result, "role");
         discpp::Role role(&shard.client, *role_json);
 
-        shard.client.event_handler->TriggerEvent<discpp::GuildRoleCreateEvent>(discpp::GuildRoleCreateEvent(role));
+        shard.client.event_handler->TriggerEvent<discpp::GuildRoleCreateEvent>(discpp::GuildRoleCreateEvent(shard, role));
     }
 
     void EventDispatcher::GuildRoleUpdateEvent(Shard& shard, rapidjson::Document& result) {
         std::unique_ptr<rapidjson::Document> role_json = GetDocumentInsideJson(result, "role");
         discpp::Role role(&shard.client, *role_json);
 
-        shard.client.event_handler->TriggerEvent<discpp::GuildRoleUpdateEvent>(discpp::GuildRoleUpdateEvent(role));
+        shard.client.event_handler->TriggerEvent<discpp::GuildRoleUpdateEvent>(discpp::GuildRoleUpdateEvent(shard, role));
     }
 
     void EventDispatcher::GuildRoleDeleteEvent(Shard& shard, rapidjson::Document& result) {
@@ -299,7 +299,7 @@ namespace discpp {
 
         guild.roles.erase(role.id);
 
-        shard.client.event_handler->TriggerEvent<discpp::GuildRoleDeleteEvent>(discpp::GuildRoleDeleteEvent(role));
+        shard.client.event_handler->TriggerEvent<discpp::GuildRoleDeleteEvent>(discpp::GuildRoleDeleteEvent(shard, role));
     }
 
     void EventDispatcher::MessageCreateEvent(Shard& shard, rapidjson::Document& result) {
@@ -313,10 +313,10 @@ namespace discpp {
         }
 
         if (shard.client.config->type == discpp::TokenType::BOT) {
-            shard.client.DoFunctionLater(shard.client.fire_command_method, &shard.client, *message);
+            shard.client.DoFunctionLater([message, &shard]() { shard.client.fire_command_method(shard, *message); });
         }
 
-        shard.client.event_handler->TriggerEvent<discpp::MessageCreateEvent>(discpp::MessageCreateEvent(*message));
+        shard.client.event_handler->TriggerEvent<discpp::MessageCreateEvent>(discpp::MessageCreateEvent(shard, *message));
     }
 
     void EventDispatcher::MessageUpdateEvent(Shard& shard, rapidjson::Document& result) {
@@ -333,14 +333,14 @@ namespace discpp {
             old_message = *message_it->second;
         }
 
-        shard.client.event_handler->TriggerEvent<discpp::MessageUpdateEvent>(discpp::MessageUpdateEvent(edited_message, old_message, is_edited));
+        shard.client.event_handler->TriggerEvent<discpp::MessageUpdateEvent>(discpp::MessageUpdateEvent(shard, edited_message, old_message, is_edited));
     }
 
     void EventDispatcher::MessageDeleteEvent(Shard& shard, rapidjson::Document& result) {
         auto message = shard.client.cache.messages.find(SnowflakeFromString(result["id"].GetString()));
 
         if (message != shard.client.cache.messages.end()) {
-            shard.client.event_handler->TriggerEvent<discpp::MessageDeleteEvent>(discpp::MessageDeleteEvent(*message->second));
+            shard.client.event_handler->TriggerEvent<discpp::MessageDeleteEvent>(discpp::MessageDeleteEvent(shard, *message->second));
 
             shard.client.cache.messages.erase(message);
         }
@@ -379,7 +379,7 @@ namespace discpp {
             shard.client.cache.messages.erase(message.id);
         }
 
-        shard.client.event_handler->TriggerEvent<discpp::MessageBulkDeleteEvent>(discpp::MessageBulkDeleteEvent(msgs));
+        shard.client.event_handler->TriggerEvent<discpp::MessageBulkDeleteEvent>(discpp::MessageBulkDeleteEvent(shard, msgs));
     }
 
     void EventDispatcher::MessageReactionAddEvent(Shard& shard, rapidjson::Document& result) {
@@ -425,7 +425,7 @@ namespace discpp {
                 message->second->reactions.push_back(r);
             }
 
-            shard.client.event_handler->TriggerEvent<discpp::MessageReactionAddEvent>(discpp::MessageReactionAddEvent(*message->second, emoji, user));
+            shard.client.event_handler->TriggerEvent<discpp::MessageReactionAddEvent>(discpp::MessageReactionAddEvent(shard, *message->second, emoji, user));
         } else {
             discpp::Channel channel = shard.client.cache.GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
             auto tmp = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
@@ -445,7 +445,7 @@ namespace discpp {
 
             discpp::User user(&shard.client, SnowflakeFromString(result["user_id"].GetString()));
 
-            shard.client.event_handler->TriggerEvent<discpp::MessageReactionAddEvent>(discpp::MessageReactionAddEvent(message, emoji, user));
+            shard.client.event_handler->TriggerEvent<discpp::MessageReactionAddEvent>(discpp::MessageReactionAddEvent(shard, message, emoji, user));
         }
     }
 
@@ -490,7 +490,7 @@ namespace discpp {
                 }
             }
 
-            shard.client.event_handler->TriggerEvent<discpp::MessageReactionRemoveEvent>(discpp::MessageReactionRemoveEvent(*message->second, emoji, user));
+            shard.client.event_handler->TriggerEvent<discpp::MessageReactionRemoveEvent>(discpp::MessageReactionRemoveEvent(shard, *message->second, emoji, user));
         } else {
             discpp::Channel channel = shard.client.cache.GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
             auto tmp = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
@@ -510,7 +510,7 @@ namespace discpp {
 
             discpp::User user(&shard.client, SnowflakeFromString(result["user_id"].GetString()));
 
-            shard.client.event_handler->TriggerEvent<discpp::MessageReactionRemoveEvent>(discpp::MessageReactionRemoveEvent(message, emoji, user));
+            shard.client.event_handler->TriggerEvent<discpp::MessageReactionRemoveEvent>(discpp::MessageReactionRemoveEvent(shard, message, emoji, user));
         }
     }
 
@@ -533,7 +533,7 @@ namespace discpp {
             }
             message->second->channel = channel;
 
-            shard.client.event_handler->TriggerEvent<discpp::MessageReactionRemoveAllEvent>(discpp::MessageReactionRemoveAllEvent(*message->second));
+            shard.client.event_handler->TriggerEvent<discpp::MessageReactionRemoveAllEvent>(discpp::MessageReactionRemoveAllEvent(shard, *message->second));
         } else {
             discpp::Channel channel = shard.client.cache.GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
             auto tmp = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
@@ -547,7 +547,7 @@ namespace discpp {
                 message.guild = shard.client.cache.GetGuild(Snowflake(result["guild_id"].GetString()));
             }
 
-            shard.client.event_handler->TriggerEvent<discpp::MessageReactionRemoveAllEvent>(discpp::MessageReactionRemoveAllEvent(message));
+            shard.client.event_handler->TriggerEvent<discpp::MessageReactionRemoveAllEvent>(discpp::MessageReactionRemoveAllEvent(shard, message));
         }
     }
 
@@ -555,7 +555,7 @@ namespace discpp {
         rapidjson::Document user_json;
         user_json.CopyFrom(result["user"], user_json.GetAllocator());
 
-        shard.client.event_handler->TriggerEvent<discpp::PresenseUpdateEvent>(discpp::PresenseUpdateEvent(discpp::User(&shard.client, user_json)));
+        shard.client.event_handler->TriggerEvent<discpp::PresenseUpdateEvent>(discpp::PresenseUpdateEvent(shard, discpp::User(&shard.client, user_json)));
     }
 
     void EventDispatcher::TypingStartEvent(Shard& shard, rapidjson::Document& result) {
@@ -571,28 +571,28 @@ namespace discpp {
 
         int timestamp = result["timestamp"].GetInt();
 
-        shard.client.event_handler->TriggerEvent<discpp::TypingStartEvent>(discpp::TypingStartEvent(user, channel, timestamp));
+        shard.client.event_handler->TriggerEvent<discpp::TypingStartEvent>(discpp::TypingStartEvent(shard, user, channel, timestamp));
     }
 
     void EventDispatcher::UserUpdateEvent(Shard& shard, rapidjson::Document& result) {
         discpp::User user(&shard.client, result);
 
-        shard.client.event_handler->TriggerEvent<discpp::UserUpdateEvent>(discpp::UserUpdateEvent(user));
+        shard.client.event_handler->TriggerEvent<discpp::UserUpdateEvent>(discpp::UserUpdateEvent(shard, user));
     }
 
     void EventDispatcher::VoiceStateUpdateEvent(Shard& shard, rapidjson::Document& result) {
-        shard.client.event_handler->TriggerEvent<discpp::VoiceStateUpdateEvent>(discpp::VoiceStateUpdateEvent(result));
+        shard.client.event_handler->TriggerEvent<discpp::VoiceStateUpdateEvent>(discpp::VoiceStateUpdateEvent(shard, result));
     }
 
     void EventDispatcher::VoiceServerUpdateEvent(Shard& shard, rapidjson::Document& result) {
-        shard.client.event_handler->TriggerEvent<discpp::VoiceServerUpdateEvent>(discpp::VoiceServerUpdateEvent(result));
+        shard.client.event_handler->TriggerEvent<discpp::VoiceServerUpdateEvent>(discpp::VoiceServerUpdateEvent(shard, result));
     }
 
     void EventDispatcher::WebhooksUpdateEvent(Shard& shard, rapidjson::Document& result) {
         discpp::Channel channel(&shard.client, Snowflake(result["channel_id"].GetString()));
         channel.guild_id = SnowflakeFromString(result["guild_id"].GetString());
 
-        shard.client.event_handler->TriggerEvent<discpp::WebhooksUpdateEvent>(discpp::WebhooksUpdateEvent(channel));
+        shard.client.event_handler->TriggerEvent<discpp::WebhooksUpdateEvent>(discpp::WebhooksUpdateEvent(shard, channel));
     }
 
     void EventDispatcher::BindEvents() {

@@ -11,7 +11,7 @@
 namespace discpp {
 	class MessageReactionRemoveEvent : public Event {
 	public:
-		inline MessageReactionRemoveEvent(discpp::Message message, discpp::Emoji emoji, discpp::User user) : message(message), emoji(emoji), user(user) {}
+		inline MessageReactionRemoveEvent(Shard& shard, discpp::Message message, discpp::Emoji emoji, discpp::User user) : Event(shard), message(message), emoji(emoji), user(user) {}
 
 		discpp::Message message;
 		discpp::Emoji emoji;

@@ -9,7 +9,7 @@
 namespace discpp {
 	class PresenseUpdateEvent : public Event {
 	public:
-		inline PresenseUpdateEvent(discpp::User user) : user(user) {}
+		inline PresenseUpdateEvent(Shard& shard, discpp::User user) : Event(shard), user(user) {}
 
 		discpp::User user;
 

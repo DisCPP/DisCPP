@@ -10,7 +10,7 @@
 namespace discpp {
 	class GuildBanAddEvent : public Event {
 	public:
-		inline GuildBanAddEvent(discpp::Guild guild, discpp::User user) : guild(guild), user(user) {}
+		inline GuildBanAddEvent(Shard& shard, discpp::Guild guild, discpp::User user) : Event(shard), guild(guild), user(user) {}
 
 		discpp::Guild guild;
 		discpp::User user;
