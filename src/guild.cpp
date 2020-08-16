@@ -830,11 +830,16 @@ namespace discpp {
         return *this;
     }
 
-    discpp::GuildInvite Guild::GetVanityURL() const {
+    std::optional<discpp::GuildInvite> Guild::GetVanityURL() const {
+        std::optional<discpp::GuildInvite> tmp;
+        try {
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/vanity-url"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
+            tmp = discpp::GuildInvite(*result);
+        } catch (std::exception& e) {
+            tmp = std::nullopt;
+        }
 
-	    std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/vanity-url"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
-
-        return discpp::GuildInvite(*result);
+        return tmp;
     }
 
     discpp::AuditLog Guild::GetAuditLog() const {

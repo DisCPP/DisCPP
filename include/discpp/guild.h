@@ -688,7 +688,7 @@ namespace discpp {
          *
          * @return discpp::GuildEmbed
          */
-		std::optional<GuildEmbed> GetGuildEmbed() const;
+		[[nodiscard]] std::optional<GuildEmbed> GetGuildEmbed() const;
 
         /**
          * @brief Modify a guild embed.
@@ -712,7 +712,7 @@ namespace discpp {
          *
          * @return discpp::GuildInvite
          */
-		discpp::GuildInvite GetVanityURL() const;
+		[[nodiscard]] std::optional<discpp::GuildInvite> GetVanityURL() const;
 
         /**
          * @brief Get a widget image url.
