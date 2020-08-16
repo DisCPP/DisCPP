@@ -178,55 +178,73 @@ namespace discpp {
 		SendDeleteRequest(Endpoint("/guilds/" + std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-    std::unordered_map<discpp::Snowflake, discpp::Channel> Guild::GetChannels() {
+    std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> Guild::GetChannels() {
 		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/channels"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
-        std::unordered_map<discpp::Snowflake, discpp::Channel> channels;
+		std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> channels;
 
-        for (auto const& channel : result->GetArray()) {
-            if (!channel.IsNull()) {
-                rapidjson::Document channel_json;
-                channel_json.CopyFrom(channel, channel_json.GetAllocator());
+		try {
+            for (auto const &channel : result->GetArray()) {
+                if (!channel.IsNull()) {
+                    rapidjson::Document channel_json;
+                    channel_json.CopyFrom(channel, channel_json.GetAllocator());
 
-                discpp::Channel guild_channel(channel_json);
-                channels.insert({ guild_channel.id, guild_channel });
+                    discpp::Channel guild_channel(channel_json);
+                    channels->insert({guild_channel.id, guild_channel});
+                }
             }
+        } catch (std::exception& e) {
+		    channels = std::nullopt;
+		}
+
+        if (channels.has_value()) {
+            this->channels = channels.value();
         }
 
-        this->channels = channels;
 		return channels;
 	}
 
-    std::unordered_map<discpp::Snowflake, discpp::Channel> Guild::GetCategories() {
-	    std::unordered_map<discpp::Snowflake, discpp::Channel> tmp;
+    std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> Guild::GetCategories() {
+	    std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> tmp;
 
-	    for (auto& chnl : this->GetChannels()) {
-	        if (chnl.second.type == discpp::ChannelType::GROUP_CATEGORY) {
-	            tmp.emplace(chnl.first, chnl.second);
-	        } else continue;
+	    if (this->GetChannels().has_value()) {
+            for (auto& chnl : this->GetChannels().value()) {
+                if (chnl.second.type == discpp::ChannelType::GROUP_CATEGORY) {
+                    tmp->emplace(chnl.first, chnl.second);
+                } else continue;
+            }
+	    } else {
+	        tmp = std::nullopt;
 	    }
 
 	    return tmp;
 	}
 
-	std::unordered_map<discpp::Snowflake, discpp::Channel> Guild::GetParentlessChannels() {
-	    std::unordered_map<discpp::Snowflake, discpp::Channel> tmp;
+	std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> Guild::GetParentlessChannels() {
+	    std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> tmp;
 
-	    for (auto& chnl : this->GetChannels()) {
-	        if (chnl.second.category_id == 0) {
-	            tmp.emplace(std::pair(chnl.first, chnl.second));
-	        }
+	    if (this->GetChannels().has_value()) {
+            for (auto& chnl : this->GetChannels().value()) {
+                if (chnl.second.category_id == 0) {
+                    tmp->emplace(std::pair(chnl.first, chnl.second));
+                }
+            }
+	    } else {
+	        tmp = std::nullopt;
 	    }
 
 	    return tmp;
 	}
 
-    discpp::Channel Guild::GetChannel(const Snowflake& id) const {
+    std::optional<discpp::Channel> Guild::GetChannel(const Snowflake& id) const {
+	    std::optional<discpp::Channel> channel;
 	    auto it = channels.find(id);
 	    if (it != channels.end()) {
-	        return it->second;
+            channel = it->second;
+	    } else {
+	        channel = std::nullopt;
 	    }
 
-		return discpp::Channel();
+		return channel;
 	}
 
     discpp::Channel Guild::CreateChannel(const std::string& name, const std::string& topic, const ChannelType& type, const int& bitrate, const int& user_limit, const int& rate_limit_per_user, const int& position, const std::vector<discpp::Permissions>& permission_overwrites, const discpp::Snowflake& parent_id, const bool nsfw) {
@@ -292,35 +310,40 @@ namespace discpp {
 		SendPatchRequest(Endpoint("/guilds/" + std::to_string(id) + "/channels"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::CHANNEL, body);
 	}
 
-	std::shared_ptr<discpp::Member> Guild::GetMember(const Snowflake& id, bool can_request) {
-		if (id == 0) {
-			throw exceptions::DiscordObjectNotFound("Member id: " + std::to_string(id) + " is not valid!");
-		}
+	std::optional<std::shared_ptr<discpp::Member>> Guild::GetMember(const Snowflake& id, bool can_request) {
 
-		auto it = members.find(id);
+	    std::optional<std::shared_ptr<discpp::Member>> member;
+	    if (id == 0) {
+	        member = std::nullopt;
+			//throw exceptions::DiscordObjectNotFound("Member id: " + std::to_string(id) + " is not valid!");
+		} else {
+            auto it = members.find(id);
+            if (it != members.end()) {
+                member = it->second;
+            } else {
+                if (can_request) {
+                    std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/"+ std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 
-        if (it != members.end()) {
-            return it->second;
-        }
-
-        if (can_request) {
-            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/"+ std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
-
-            auto member = std::make_shared<discpp::Member>(*result, this->id);
-            members.emplace(member->user.id, member);
-            return member;
-        } else {
-            throw exceptions::DiscordObjectNotFound("Member not found of id: " + std::to_string(id));
-        }
+                    member = std::make_shared<discpp::Member>(*result, this->id);
+                    members.emplace(member.value()->user.id, member.value());
+                } else {
+                    member = std::nullopt;
+                    //throw exceptions::DiscordObjectNotFound("Member not found of id: " + std::to_string(id));
+                }
+            }
+	    }
+	    return member;
 	}
 
 	void Guild::EnsureBotPermission(const Permission& req_perm) {
-		std::shared_ptr<Member> tmp = GetMember(discpp::globals::client_instance->client_user.id);
-		if (this->owner_id != tmp->user.id && !tmp->HasPermission(req_perm) && !tmp->HasPermission(Permission::ADMINISTRATOR)) {
-			globals::client_instance->logger->Error(LogTextColor::RED + "The bot does not have permission: " + PermissionToString(req_perm) + " (Exceptions like these should be handled)!");
+	    auto tmp = GetMember(discpp::globals::client_instance->client_user.id);
+	    if (tmp.has_value()) {
+            if (this->owner_id != tmp.value()->user.id && !tmp.value()->HasPermission(req_perm) && !tmp.value()->HasPermission(Permission::ADMINISTRATOR)) {
+                globals::client_instance->logger->Error(LogTextColor::RED + "The bot does not have permission: " + PermissionToString(req_perm) + " (Exceptions like these should be handled)!");
 
-			throw NoPermissionException(req_perm);
-		}
+                throw NoPermissionException(req_perm);
+            }
+	    }
 	}
 
 	std::shared_ptr<discpp::Member> Guild::AddMember(const Snowflake& id, const std::string& access_token, const std::string& nick, const std::vector<discpp::Role>& roles, const bool mute, const bool deaf) {
@@ -410,13 +433,18 @@ namespace discpp {
         SendDeleteRequest(url, DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-	std::shared_ptr<discpp::Role> Guild::GetRole(const Snowflake& id) const {
-		auto it = roles.find(id);
+	std::optional<std::shared_ptr<discpp::Role>> Guild::GetRole(const Snowflake& id) const {
+		std::optional<std::shared_ptr<discpp::Role>> tmp;
+
+	    auto it = roles.find(id);
 		if (it != roles.end()) {
-			return it->second;
+            tmp = it->second;
+		} else {
+		    tmp = std::nullopt;
 		}
 
-		throw std::runtime_error("Role not found!");
+		return tmp;
+		//throw std::runtime_error("Role not found!");
 	}
 
     std::shared_ptr<discpp::Role> Guild::CreateRole(const std::string& name, const Permissions& permissions, const int& color, const bool hoist, const bool mentionable) {
@@ -500,36 +528,49 @@ namespace discpp {
 		SendPostRequest(Endpoint("/guilds/" + std::to_string(id) + "/prune"), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::GUILD, body);
 	}
 
-	std::vector<discpp::GuildInvite> Guild::GetInvites() const {
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/invites"), DefaultHeaders(), {}, {});
+	std::optional<std::vector<discpp::GuildInvite>> Guild::GetInvites() const {
+		std::optional<std::vector<discpp::GuildInvite>> tmp;
+		try {
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/invites"), DefaultHeaders(), {}, {});
 
-		std::vector<discpp::GuildInvite> guild_invites;
-        for (auto const& guild_invite : result->GetArray()) {
-            if (!guild_invite.IsNull()) {
-                rapidjson::Document guild_invite_json;
-                guild_invite_json.CopyFrom(guild_invite, guild_invite_json.GetAllocator());
+            std::vector<discpp::GuildInvite> guild_invites;
+            for (auto const& guild_invite : result->GetArray()) {
+                if (!guild_invite.IsNull()) {
+                    rapidjson::Document guild_invite_json;
+                    guild_invite_json.CopyFrom(guild_invite, guild_invite_json.GetAllocator());
 
-                guild_invites.push_back(discpp::GuildInvite(guild_invite_json));
+                    guild_invites.push_back(discpp::GuildInvite(guild_invite_json));
+                }
             }
-        }
+            tmp = guild_invites;
+        } catch (std::exception& e) {
+		    tmp = std::nullopt;
+		}
 
-		return guild_invites;
+		return tmp;
 	}
 
-	std::vector<discpp::Integration> Guild::GetIntegrations() const {
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/integrations"), DefaultHeaders(), {}, {});
+	std::optional<std::vector<discpp::Integration>> Guild::GetIntegrations() const {
+		std::optional<std::vector<discpp::Integration>> tmp;
 
-		std::vector<discpp::Integration> guild_integrations;
-		for (auto const& guild_integration : result->GetArray()) {
-            if (!guild_integration.IsNull()) {
-                rapidjson::Document guild_integration_json;
-                guild_integration_json.CopyFrom(guild_integration, guild_integration_json.GetAllocator());
+		try {
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/integrations"), DefaultHeaders(), {}, {});
 
-                guild_integrations.push_back(discpp::Integration(guild_integration_json));
+            std::vector<discpp::Integration> guild_integrations;
+            for (auto const& guild_integration : result->GetArray()) {
+                if (!guild_integration.IsNull()) {
+                    rapidjson::Document guild_integration_json;
+                    guild_integration_json.CopyFrom(guild_integration, guild_integration_json.GetAllocator());
+
+                    guild_integrations.push_back(discpp::Integration(guild_integration_json));
+                }
             }
-        }
+            tmp = guild_integrations;
+		} catch (std::exception& e) {
+		    tmp = std::nullopt;
+		}
 
-		return guild_integrations;
+		return tmp;
 	}
 
 	void Guild::CreateIntegration(const Snowflake& id, const std::string& type) {
@@ -554,9 +595,15 @@ namespace discpp {
 		SendPostRequest(Endpoint("/guilds/" + std::to_string(id) + "/integrations/" + std::to_string(guild_integration.id) + "/sync"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-	discpp::GuildEmbed Guild::GetGuildEmbed() const {
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/embed"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
-		return discpp::GuildEmbed(*result);
+	std::optional<discpp::GuildEmbed> Guild::GetGuildEmbed() const {
+		std::optional<discpp::GuildEmbed> tmp;
+	    try {
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/embed"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
+            tmp = discpp::GuildEmbed(*result);
+	    } catch (std::exception& e) {
+	        tmp = std::nullopt;
+	    }
+		return tmp;
 	}
 
 	discpp::GuildEmbed Guild::ModifyGuildEmbed(const Snowflake& channel_id, const bool enabled) {
@@ -592,28 +639,41 @@ namespace discpp {
 		return result->GetString();
 	}
 
-	std::unordered_map<Snowflake, Emoji> Guild::GetEmojis() {
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/emojis"), DefaultHeaders(), {}, {});
+	std::optional<std::unordered_map<Snowflake, Emoji>> Guild::GetEmojis() {
+	    std::optional<std::unordered_map<Snowflake, Emoji>> tmp;
+	    try {
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/emojis"), DefaultHeaders(), {}, {});
 
-		std::unordered_map<Snowflake, Emoji> emojis;
-        for (auto const& emoji : result->GetArray()) {
-            if (!emoji.IsNull()) {
-                rapidjson::Document emoji_json;
-                emoji_json.CopyFrom(emoji, emoji_json.GetAllocator());
+            std::unordered_map<Snowflake, Emoji> emojis;
+            for (auto const& emoji : result->GetArray()) {
+                if (!emoji.IsNull()) {
+                    rapidjson::Document emoji_json;
+                    emoji_json.CopyFrom(emoji, emoji_json.GetAllocator());
 
-                discpp::Emoji tmp = discpp::Emoji(emoji_json);
-                emojis.insert({ tmp.id, tmp });
+                    discpp::Emoji tmp = discpp::Emoji(emoji_json);
+                    emojis.insert({ tmp.id, tmp });
+                }
             }
-        }
 
-        this->emojis = emojis;
-		return emojis;
+            this->emojis = emojis;
+            tmp = emojis;
+	    } catch (std::exception& e) {
+	        tmp = std::nullopt;
+	    }
+
+	    return tmp;
 	}
 
-    Emoji Guild::GetEmoji(const Snowflake& id) const {
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/emojis/" + std::to_string(id)), DefaultHeaders(), {}, {});
+    std::optional<Emoji> Guild::GetEmoji(const Snowflake& id) const {
+	    std::optional<Emoji> tmp;
+	    try {
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/emojis/" + std::to_string(id)), DefaultHeaders(), {}, {});
+            tmp = discpp::Emoji(*result);
+        } catch (std::exception& e) {
+	        tmp = std::nullopt;
+	    }
 
-		return discpp::Emoji(*result);
+		return tmp;
 	}
 
     Emoji Guild::CreateEmoji(const std::string& name, discpp::Image& image, const std::vector<discpp::Role>& roles) {
@@ -717,7 +777,7 @@ namespace discpp {
     }
 
 	inline std::shared_ptr<discpp::Member> Guild::GetOwnerMember() {
-		return this->GetMember(this->owner_id);
+		return this->GetMember(this->owner_id).value();
 	}
 
     std::string GuildPropertyToString(GuildProperty prop) {
@@ -783,11 +843,16 @@ namespace discpp {
         return *this;
     }
 
-    discpp::GuildInvite Guild::GetVanityURL() const {
+    std::optional<discpp::GuildInvite> Guild::GetVanityURL() const {
+        std::optional<discpp::GuildInvite> tmp;
+        try {
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/vanity-url"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
+            tmp = discpp::GuildInvite(*result);
+        } catch (std::exception& e) {
+            tmp = std::nullopt;
+        }
 
-	    std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/vanity-url"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
-
-        return discpp::GuildInvite(*result);
+        return tmp;
     }
 
     discpp::AuditLog Guild::GetAuditLog() const {
@@ -816,18 +881,25 @@ namespace discpp {
         return (flags & 0b10000) == 0b10000;
     }
 
-    std::shared_ptr<discpp::Member> Guild::RequestMemberIfNotExist(const discpp::Snowflake& member_id) {
-        auto it = members.find(member_id);
-        if (it != members.end()) {
-            return it->second;
-        } else {
-            std::unique_ptr<rapidjson::Document> result = discpp::SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/members/" + std::to_string(member_id)), DefaultHeaders(), id, RateLimitBucketType::GUILD);
+    std::optional<std::shared_ptr<discpp::Member>> Guild::RequestMemberIfNotExist(const discpp::Snowflake& member_id) {
+        std::optional<std::shared_ptr<discpp::Member>> tmp;
+        try {
+            auto it = members.find(member_id);
+            if (it != members.end()) {
+                tmp = it->second;
+            } else {
+                std::unique_ptr<rapidjson::Document> result = discpp::SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/members/" + std::to_string(member_id)), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 
-            std::shared_ptr<discpp::Member> member = std::make_shared<discpp::Member>(*result, *this);
-            members.insert({ member_id, member });
+                std::shared_ptr<discpp::Member> member = std::make_shared<discpp::Member>(*result, *this);
+                members.insert({ member_id, member });
 
-            return member;
+                tmp = member;
+            }
+        } catch (std::exception& e) {
+            tmp = std::nullopt;
         }
+
+        return tmp;
     }
 
     std::string Guild::GetBannerURL(const ImageType &img_type) const {
@@ -914,7 +986,7 @@ namespace discpp {
         if (ContainsNotNull(json, "guild")) {
             guild = discpp::globals::client_instance->cache.GetGuild(discpp::Snowflake(json["guild"]["id"].GetString()));
         }
-        channel = discpp::Channel(guild->GetChannel(Snowflake(json["channel"]["id"].GetString())));
+        channel = discpp::Channel(guild->GetChannel(Snowflake(json["channel"]["id"].GetString())).value());
         if (ContainsNotNull(json, "inviter")) {
             rapidjson::Document inviter_json;
             inviter_json.CopyFrom(json["inviter"], inviter_json.GetAllocator());

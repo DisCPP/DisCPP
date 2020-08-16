@@ -392,7 +392,7 @@ namespace discpp {
 
                 message->second->channel.guild_id = guild->id;
                 message->second->guild = guild;
-                channel = guild->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
+                channel = guild->GetChannel(SnowflakeFromString(result["channel_id"].GetString())).value();
             } else {
                 auto it = globals::client_instance->cache.private_channels.find(SnowflakeFromString(result["channel_id"].GetString()));
 
@@ -457,7 +457,7 @@ namespace discpp {
                 std::shared_ptr<discpp::Guild> guild = globals::client_instance->cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
                 message->second->guild = guild;
-                channel = guild->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
+                channel = guild->GetChannel(SnowflakeFromString(result["channel_id"].GetString())).value();
             } else {
                 auto it = globals::client_instance->cache.private_channels.find(SnowflakeFromString(result["channel_id"].GetString()));
 
@@ -520,7 +520,7 @@ namespace discpp {
                 std::shared_ptr<discpp::Guild> guild = globals::client_instance->cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
                 message->second->guild = guild;
-                channel = guild->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
+                channel = guild->GetChannel(SnowflakeFromString(result["channel_id"].GetString())).value();
             } else {
                 auto it = globals::client_instance->cache.private_channels.find(SnowflakeFromString(result["channel_id"].GetString()));
 
@@ -560,7 +560,7 @@ namespace discpp {
         discpp::Channel channel;
         if (ContainsNotNull(result, "guild_id")) {
             discpp::Guild guild(SnowflakeFromString(result["guild_id"].GetString()));
-            channel = guild.GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
+            channel = guild.GetChannel(SnowflakeFromString(result["channel_id"].GetString())).value();
         } else {
             channel = discpp::Channel(SnowflakeFromString(result["channel_id"].GetString()));
         }
