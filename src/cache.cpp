@@ -29,7 +29,7 @@ discpp::Channel discpp::Cache::GetChannel(const discpp::Snowflake &id, bool can_
         return GetDMChannel(id, can_request);
     } catch (exceptions::DiscordObjectNotFound) {
         for (const auto &guild : guilds) {
-            discpp::Channel channel = guild.second->GetChannel(id);
+            discpp::Channel channel = guild.second->GetChannel(id).value();
 
             if (channel.id != 0) return channel;
         }

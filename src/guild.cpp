@@ -777,7 +777,7 @@ namespace discpp {
     }
 
 	inline std::shared_ptr<discpp::Member> Guild::GetOwnerMember() {
-		return this->GetMember(this->owner_id);
+		return this->GetMember(this->owner_id).value();
 	}
 
     std::string GuildPropertyToString(GuildProperty prop) {
@@ -986,7 +986,7 @@ namespace discpp {
         if (ContainsNotNull(json, "guild")) {
             guild = discpp::globals::client_instance->cache.GetGuild(discpp::Snowflake(json["guild"]["id"].GetString()));
         }
-        channel = discpp::Channel(guild->GetChannel(Snowflake(json["channel"]["id"].GetString())));
+        channel = discpp::Channel(guild->GetChannel(Snowflake(json["channel"]["id"].GetString())).value());
         if (ContainsNotNull(json, "inviter")) {
             rapidjson::Document inviter_json;
             inviter_json.CopyFrom(json["inviter"], inviter_json.GetAllocator());
