@@ -433,13 +433,18 @@ namespace discpp {
         SendDeleteRequest(url, DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-	std::shared_ptr<discpp::Role> Guild::GetRole(const Snowflake& id) const {
-		auto it = roles.find(id);
+	std::optional<std::shared_ptr<discpp::Role>> Guild::GetRole(const Snowflake& id) const {
+		std::optional<std::shared_ptr<discpp::Role>> tmp;
+
+	    auto it = roles.find(id);
 		if (it != roles.end()) {
-			return it->second;
+            tmp = it->second;
+		} else {
+		    tmp = std::nullopt;
 		}
 
-		throw std::runtime_error("Role not found!");
+		return tmp;
+		//throw std::runtime_error("Role not found!");
 	}
 
     std::shared_ptr<discpp::Role> Guild::CreateRole(const std::string& name, const Permissions& permissions, const int& color, const bool hoist, const bool mentionable) {

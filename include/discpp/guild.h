@@ -513,7 +513,7 @@ namespace discpp {
          *
          * @return std::shared_ptr<discpp::Role>
          */
-        std::shared_ptr<discpp::Role> GetRole(const Snowflake& id) const;
+        [[nodiscard]] std::optional<std::shared_ptr<discpp::Role>> GetRole(const Snowflake& id) const;
 
         /**
          * @brief Create a guild role.
