@@ -868,18 +868,25 @@ namespace discpp {
         return (flags & 0b10000) == 0b10000;
     }
 
-    std::shared_ptr<discpp::Member> Guild::RequestMemberIfNotExist(const discpp::Snowflake& member_id) {
-        auto it = members.find(member_id);
-        if (it != members.end()) {
-            return it->second;
-        } else {
-            std::unique_ptr<rapidjson::Document> result = discpp::SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/members/" + std::to_string(member_id)), DefaultHeaders(), id, RateLimitBucketType::GUILD);
+    std::optional<std::shared_ptr<discpp::Member>> Guild::RequestMemberIfNotExist(const discpp::Snowflake& member_id) {
+        std::optional<std::shared_ptr<discpp::Member>> tmp;
+        try {
+            auto it = members.find(member_id);
+            if (it != members.end()) {
+                tmp = it->second;
+            } else {
+                std::unique_ptr<rapidjson::Document> result = discpp::SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/members/" + std::to_string(member_id)), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 
-            std::shared_ptr<discpp::Member> member = std::make_shared<discpp::Member>(*result, *this);
-            members.insert({ member_id, member });
+                std::shared_ptr<discpp::Member> member = std::make_shared<discpp::Member>(*result, *this);
+                members.insert({ member_id, member });
 
-            return member;
+                tmp = member;
+            }
+        } catch (std::exception& e) {
+            tmp = std::nullopt;
         }
+
+        return tmp;
     }
 
     std::string Guild::GetBannerURL(const ImageType &img_type) const {

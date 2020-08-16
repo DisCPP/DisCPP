@@ -732,7 +732,7 @@ namespace discpp {
          *
          * @return std::shared_ptr<discpp::Member>
          */
-        std::shared_ptr<discpp::Member> RequestMemberIfNotExist(const Snowflake& member_id);
+        std::optional<std::shared_ptr<discpp::Member>> RequestMemberIfNotExist(const Snowflake& member_id);
 
         /**
          * @brief Get all guild emojis.
