@@ -28,20 +28,13 @@ set(BUILD_CURL_EXE OFF CACHE BOOL "")
 if(WIN32) # Use MBedTLS for Windows
 	set(USE_WINSSL ON CACHE BOOL "")
 	set(USE_OPENSSL OFF CACHE BOOL "")
-	#[[set(CMAKE_USE_WINSSL OFF)
-	set(CMAKE_USE_OPENSSL OFF)
-	set(CMAKE_USE_MBEDTLS ON)
-
-	set(SSL_ENABLED ON CACHE INTERNAL "" FORCE)
-	set(CURL_CA_PATH "auto" CACHE INTERNAL "" FORCE)]]
 
 	# For IXWebsocket
-	set(USE_MBED_TLS ON CACHE BOOL "")
-	set(USE_OPEN_SSL OFF CACHE BOOL "")
+	set(USE_MBED_TLS OFF)
+	set(USE_OPEN_SSL ON)
 elseif(APPLE) # Use secure transport for Apple
 	set(CMAKE_USE_SECTRANSP ON CACHE BOOL "")
 	set(CMAKE_USE_OPENSSL OFF CACHE BOOL "")
-	set(USE_OPENSSL OFF CACHE BOOL "")
 
 	# For IXWebsocket
 	set(USE_SECURE_TRANSPORT ON CACHE BOOL "")
@@ -51,6 +44,7 @@ else() # Use OpenSSL for anything else.
 
 	set(USE_OPEN_SSL ON CACHE BOOL "") # For IXWebsocket
 
+	# Set ssl certificate.
 	set(CURL_CA_PATH "${CMAKE_CURRENT_SOURCE_DIR}/ca-chain.cert.pem" CACHE INTERNAL "" FORCE)
 	set(CURL_CA_BUNDLE "${CMAKE_CURRENT_SOURCE_DIR}/ca-chain.cert.pem" CACHE INTERNAL "" FORCE)
 endif()
