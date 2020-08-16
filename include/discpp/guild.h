@@ -688,7 +688,7 @@ namespace discpp {
          *
          * @return discpp::GuildEmbed
          */
-		GuildEmbed GetGuildEmbed() const;
+		std::optional<GuildEmbed> GetGuildEmbed() const;
 
         /**
          * @brief Modify a guild embed.

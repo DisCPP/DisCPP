@@ -595,9 +595,15 @@ namespace discpp {
 		SendPostRequest(Endpoint("/guilds/" + std::to_string(id) + "/integrations/" + std::to_string(guild_integration.id) + "/sync"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-	discpp::GuildEmbed Guild::GetGuildEmbed() const {
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/embed"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
-		return discpp::GuildEmbed(*result);
+	std::optional<discpp::GuildEmbed> Guild::GetGuildEmbed() const {
+		std::optional<discpp::GuildEmbed> tmp;
+	    try {
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/embed"), DefaultHeaders(), id, RateLimitBucketType::GUILD);
+            tmp = discpp::GuildEmbed(*result);
+	    } catch (std::exception& e) {
+	        tmp = std::nullopt;
+	    }
+		return tmp;
 	}
 
 	discpp::GuildEmbed Guild::ModifyGuildEmbed(const Snowflake& channel_id, const bool enabled) {
