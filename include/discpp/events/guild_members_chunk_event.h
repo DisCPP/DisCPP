@@ -17,6 +17,10 @@ namespace discpp {
 		int chunk_count;
 		std::vector<discpp::Presence> presences;
 		std::string nonce;
+
+        virtual int GetEventType() const override {
+            return 15;
+        }
 	};
 }
 

@@ -3,7 +3,10 @@
 
 namespace discpp {
 	class Event {
-	
+	public:
+	    virtual int GetEventType() const {
+	        return 0;
+	    }
 	};
 }
 

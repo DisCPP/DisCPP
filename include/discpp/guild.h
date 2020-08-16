@@ -59,7 +59,7 @@ namespace discpp {
          *
          * @return discpp::GuildInvite, this is a constructor.
          */
-		GuildInvite(rapidjson::Document& json);
+		GuildInvite(discpp::Client* client, rapidjson::Document& json);
 
         std::string code; /**< The invite code (unique ID). */
         std::shared_ptr<discpp::Guild> guild; /**< The guild this invite is for. */
@@ -197,7 +197,8 @@ namespace discpp {
 
 	class Guild : public DiscordObject {
 	public:
-		Guild() = default;
+	    Guild() = default;
+		Guild(discpp::Client* client);
 
         /**
          * @brief Constructs a discpp::Guild object from an id.
@@ -213,7 +214,7 @@ namespace discpp {
          *
          * @return discpp::Guild, this is a constructor.
          */
-		Guild(const Snowflake& id, bool can_request = false);
+		Guild(discpp::Client* client, const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Constructs a discpp::Guild object by parsing json
@@ -226,7 +227,7 @@ namespace discpp {
          *
          * @return discpp::Guild, this is a constructor.
          */
-		Guild(rapidjson::Document& json);
+		Guild(discpp::Client* client, rapidjson::Document& json);
 
         /**
          * @brief Modify the guild.
@@ -1002,7 +1003,7 @@ namespace discpp {
 
     class VoiceState {
     public:
-        VoiceState() = default;
+        VoiceState(discpp::Client* client);
 
         /**
          * @brief Constructs a discpp::VoiceState object from json.
@@ -1015,7 +1016,7 @@ namespace discpp {
          *
          * @return discpp::VoiceState, this is a constructor.
          */
-        VoiceState(rapidjson::Document& json);
+        VoiceState(discpp::Client* client, rapidjson::Document& json);
 
         Snowflake guild_id; /**< The guild id this voice state is for. */
         Snowflake channel_id; /**< The channel id this user is connected to. */
@@ -1028,6 +1029,8 @@ namespace discpp {
         bool self_mute; /**< Whether this user is locally muted. */
         bool self_stream; /**< Whether this user is streaming using "Go Live". */
         bool suppress; /**< Whether this user is muted by the current user. */
+    private:
+        discpp::Client* client;
     };
 }
 

@@ -7,6 +7,10 @@ namespace discpp {
 	class ReconnectEvent : public Event {
 	public:
 		ReconnectEvent() = default;
+
+        virtual int GetEventType() const override {
+            return 29;
+        }
 	};
 }
 

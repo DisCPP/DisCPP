@@ -14,6 +14,10 @@ namespace discpp {
 		discpp::Message message;
 		discpp::Message old_message;
 		bool triggered_from_edit;
+
+        virtual int GetEventType() const override {
+            return 27;
+        }
 	};
 }
 

@@ -1,7 +1,12 @@
 #include "discord_object.h"
+#include "client.h"
 
 namespace discpp {
-	DiscordObject::DiscordObject(const Snowflake& id) : id(id) {
+    DiscordObject::DiscordObject(discpp::Client *client) : client(client) {
+
+    }
+
+	DiscordObject::DiscordObject(discpp::Client *client, const Snowflake& id) : client(client), id(id) {
 
 	}
 

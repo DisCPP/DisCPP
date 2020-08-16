@@ -12,6 +12,10 @@ namespace discpp {
 		inline ChannelPinsUpdateEvent(discpp::Channel channel) : channel(channel) {}
 
 		discpp::Channel channel;
+
+        virtual int GetEventType() const override {
+            return 4;
+        }
 	};
 }
 

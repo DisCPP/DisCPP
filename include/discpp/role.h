@@ -25,7 +25,7 @@ namespace discpp {
          *
          * @return discpp::Role, this is a constructor.
          */
-		Role(const Snowflake& role_id, const discpp::Guild& guild);
+		Role(discpp::Client* client, const Snowflake& role_id, const discpp::Guild& guild);
 
         /**
          * @brief Constructs a discpp::Role object by parsing json.
@@ -38,7 +38,7 @@ namespace discpp {
          *
          * @return discpp::Role, this is a constructor.
          */
-        Role(rapidjson::Document& json);
+        Role(discpp::Client* client, rapidjson::Document& json);
 
         /**
          * @brief Returns if the role is hoist-able or not. Which means the role displays in member list.

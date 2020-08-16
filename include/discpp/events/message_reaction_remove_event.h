@@ -16,6 +16,10 @@ namespace discpp {
 		discpp::Message message;
 		discpp::Emoji emoji;
 		discpp::User user;
+
+        virtual int GetEventType() const override {
+            return 26;
+        }
 	};
 }
 

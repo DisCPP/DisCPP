@@ -2,14 +2,14 @@
 #include "guild.h"
 
 namespace discpp {
-	Role::Role(const Snowflake& role_id, const discpp::Guild& guild) : DiscordObject(role_id) {
+	Role::Role(discpp::Client* client, const Snowflake& role_id, const discpp::Guild& guild) : DiscordObject(client, role_id) {
 		auto it = guild.roles.find(role_id);
 		if (it != guild.roles.end()) {
 			*this = *it->second;
 		}
 	}
 
-	Role::Role(rapidjson::Document& json) {
+	Role::Role(discpp::Client* client, rapidjson::Document& json) : DiscordObject(client) {
 		id = SnowflakeFromString(json["id"].GetString());
 		name = json["name"].GetString();
 		color = json["color"].GetInt();

@@ -58,7 +58,7 @@ namespace discpp {
          *
          * @return discpp::User, this is a constructor.
          */
-		User(const Snowflake& id);
+		User(discpp::Client* client, const Snowflake& id);
 
         /**
          * @brief Constructs a discpp::User object by parsing json.
@@ -71,7 +71,7 @@ namespace discpp {
          *
          * @return discpp::User, this is a constructor.
          */
-		User(rapidjson::Document& json);
+		User(discpp::Client* client, rapidjson::Document& json);
 
         /**
          * @brief Create a DM channel with this user.

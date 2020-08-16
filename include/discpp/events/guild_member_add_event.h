@@ -14,6 +14,10 @@ namespace discpp {
 
         std::shared_ptr<discpp::Guild> guild;
         std::shared_ptr<discpp::Member> member;
+
+        virtual int GetEventType() const override {
+            return 12;
+        }
 	};
 }
 

@@ -12,6 +12,10 @@ namespace discpp {
 		inline MessageCreateEvent(discpp::Message message) : message(message) {}
 
 		discpp::Message message;
+
+        virtual int GetEventType() const override {
+            return 22;
+        }
 	};
 }
 

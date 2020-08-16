@@ -12,6 +12,10 @@ namespace discpp {
 		inline UserUpdateEvent(discpp::User user) : user(user) {}
 
 		discpp::User user;
+
+        virtual int GetEventType() const override {
+            return 32;
+        }
 	};
 }
 

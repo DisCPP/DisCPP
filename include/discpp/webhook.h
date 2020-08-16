@@ -5,11 +5,10 @@
 
 #include "channel.h"
 #include "embed_builder.h"
+#include "guild.h"
+#include "user.h"
 
 namespace discpp {
-	class Guild;
-	class Channel;
-	class User;
 
     enum WebhookType : int {
         INCOMING = 1,
@@ -17,7 +16,7 @@ namespace discpp {
     };
 
     // @TODO: Add more endpoints: https://discordapp.com/developers/docs/resources/webhook
-	class Webhook : public DiscordObject {
+	class Webhook {
 	public:
 	    Webhook() = default;
 	    Webhook(rapidjson::Document& json);
@@ -27,14 +26,17 @@ namespace discpp {
 		void EditName(std::string& name);
 		void Remove();
 
+        discpp::Snowflake id = 0;
         WebhookType type;
-        std::shared_ptr<discpp::Guild> guild;
-        std::shared_ptr<discpp::Channel> channel;
-        std::shared_ptr<discpp::User> user;
+        discpp::Snowflake guild_id;
+        discpp::Snowflake channel_id;
+        discpp::User user;
         std::string name;
         std::string token;
 	private:
         uint64_t avatar_hex[2] = {0, 0};
+
+        cpr::Header Headers(const cpr::Header& add = {});
 	};
 }
 

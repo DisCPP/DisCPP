@@ -10,6 +10,10 @@ namespace discpp {
 		inline VoiceStateUpdateEvent(rapidjson::Document& json) : json(json) { }
 
 		rapidjson::Document& json;
+
+        virtual int GetEventType() const override {
+            return 34;
+        }
 	};
 }
 

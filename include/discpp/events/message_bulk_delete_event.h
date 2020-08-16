@@ -15,6 +15,10 @@ namespace discpp {
 		inline MessageBulkDeleteEvent(std::vector<discpp::Message> messages) : messages(messages) {}
 
 		std::vector<discpp::Message> messages;
+
+        virtual int GetEventType() const override {
+            return 21;
+        }
 	};
 }
 

@@ -22,12 +22,13 @@ namespace discpp {
 	class Message;
 	class Logger;
 	class Image;
+	class EventHandler;
 
 	class ClientUser : public User {
 	public:
 		ClientUser() = default;
-		ClientUser(const Snowflake& id) : User(id) {}
-		ClientUser(rapidjson::Document & json);
+		ClientUser(discpp::Client* client, const Snowflake& id) : User(client, id) {}
+		ClientUser(discpp::Client* client, rapidjson::Document & json);
 
         /**
          * @brief Get all connections of this user.
@@ -55,7 +56,7 @@ namespace discpp {
 	    int type;
 	public:
         UserRelationship() = default;
-        UserRelationship(rapidjson::Document& json);
+        UserRelationship(discpp::Client* client, rapidjson::Document& json);
 
         /**
          * @brief Returns if this relation is a friend.
@@ -89,6 +90,7 @@ namespace discpp {
 
 		//std::unordered_map<Snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
         discpp::Cache cache; /**< Bot cache. Stores members, channels, guilds, etc. */
+		EventHandler* event_handler;
 
         /**
          * @brief Constructs a discpp::Bot object.

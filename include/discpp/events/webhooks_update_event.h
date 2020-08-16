@@ -12,6 +12,10 @@ namespace discpp {
 		inline WebhooksUpdateEvent(discpp::Channel channel) : channel(channel) {}
 
 		discpp::Channel channel;
+
+        virtual int GetEventType() const override {
+            return 35;
+        }
 	};
 }
 

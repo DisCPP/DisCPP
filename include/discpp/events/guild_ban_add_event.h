@@ -14,6 +14,10 @@ namespace discpp {
 
 		discpp::Guild guild;
 		discpp::User user;
+
+        virtual int GetEventType() const override {
+            return 6;
+        }
 	};
 }
 

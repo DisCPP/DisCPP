@@ -12,6 +12,10 @@ namespace discpp {
 		inline GuildEmojisUpdateEvent(std::shared_ptr<discpp::Guild> guild) : guild(guild) {}
 
         std::shared_ptr<discpp::Guild> guild;
+
+        virtual int GetEventType() const override {
+            return 10;
+        }
 	};
 }
 

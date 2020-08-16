@@ -20,6 +20,8 @@ int main(int argc, const char* argv[]) {
 	std::string token;
 	std::getline(token_file, token);
 
+	std::cout << "Read token: " << token << std::endl;
+
 	discpp::ClientConfig* config = new discpp::ClientConfig({"!"});
 	discpp::Client bot{ token, config }; // Token, config
 
@@ -32,7 +34,7 @@ int main(int argc, const char* argv[]) {
 	}, {});
 
 	// New event system
-	discpp::EventHandler<discpp::ReadyEvent>::RegisterListener([&bot](discpp::ReadyEvent event) {
+	bot.event_handler->RegisterListener<discpp::ReadyEvent>([&bot](discpp::ReadyEvent event) {
 		std::cout << "Ready!" << std::endl
 			<< "Logged in as: " << bot.client_user.username << "#" << bot.client_user.GetDiscriminator() << std::endl
 			<< "ID: " << bot.client_user.id << std::endl << "-----------------------------" << std::endl;
@@ -40,18 +42,6 @@ int main(int argc, const char* argv[]) {
 		// Will show "Playing With Crashes!"
 		discpp::Presence activity("With DisC++!", discpp::Activity::ActivityType::GAME, "online");
 		bot.UpdatePresence(activity);
-	});
-
-	discpp::EventHandler<discpp::GuildMemberAddEvent>::RegisterListener([](discpp::GuildMemberAddEvent event) {
-		discpp::Channel channel((discpp::Snowflake) "638156895953223714");
-
-		channel.Send("Welcome <@" + std::to_string(event.member->user.id) + ">, hope you enjoy!");
-	});
-
-	discpp::EventHandler<discpp::ChannelPinsUpdateEvent>::RegisterListener([](discpp::ChannelPinsUpdateEvent event)->bool {
-		event.channel.Send("Detected a pin update!");
-
-		return false;
 	});
 
 	return bot.Run();

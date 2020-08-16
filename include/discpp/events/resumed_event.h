@@ -7,6 +7,10 @@ namespace discpp {
 	class ResumedEvent : public Event {
 	public:
 		ResumedEvent() = default;
+
+        virtual int GetEventType() const override {
+            return 30;
+        }
 	};
 }
 

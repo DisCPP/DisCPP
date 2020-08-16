@@ -8,13 +8,16 @@
 
 
 namespace discpp {
+    class Client;
 
 	class DiscordObject {
 	public:
-		DiscordObject() = default;
-		DiscordObject(const discpp::Snowflake& id);
+        DiscordObject() = default;
+		DiscordObject(discpp::Client* client);
+		DiscordObject(discpp::Client* client, const discpp::Snowflake& id);
 
 		discpp::Snowflake id = 0;
+		discpp::Client* client;
 
 		bool operator==(DiscordObject& other) const;
 		bool operator==(discpp::Snowflake& other) const;

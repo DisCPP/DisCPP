@@ -15,6 +15,10 @@ namespace discpp {
 		discpp::User user;
         discpp::Channel channel;
 		int timestamp;
+
+        virtual int GetEventType() const override {
+            return 31;
+        }
 	};
 }
 

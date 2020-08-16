@@ -12,6 +12,10 @@ namespace discpp {
 		inline GuildIntegrationsUpdateEvent(discpp::Guild guild) : guild(guild) {}
 
 		discpp::Guild guild;
+
+        virtual int GetEventType() const override {
+            return 11;
+        }
 	};
 }
 

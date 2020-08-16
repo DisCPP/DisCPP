@@ -80,7 +80,7 @@ namespace discpp {
         };
 
         Activity() = default;
-        Activity(rapidjson::Document& json) {
+        Activity(discpp::Client* client, rapidjson::Document& json) {
             name = json["name"].GetString();
             type = static_cast<ActivityType>(json["type"].GetInt());
             if (ContainsNotNull(json, "url")) {
@@ -106,7 +106,7 @@ namespace discpp {
             if (ContainsNotNull(json, "state")) {
                 state = json["state"].GetString();
             }
-            emoji = ConstructDiscppObjectFromJson(json, "emoji", discpp::Emoji());
+            emoji = ConstructDiscppObjectFromJson(client, json, "emoji", discpp::Emoji());
             party = ConstructDiscppObjectFromJson(json, "party", discpp::Activity::Party());
             assets = ConstructDiscppObjectFromJson(json, "assets", discpp::Activity::Assets());
             secrets = ConstructDiscppObjectFromJson(json, "secrets", discpp::Activity::Secrets());
@@ -133,14 +133,14 @@ namespace discpp {
 	class Presence {
 	public:
 	    Presence() = default;
-		Presence(rapidjson::Document& json) {
+		Presence(discpp::Client* client, rapidjson::Document& json) {
 		    status = json["status"].GetString();
-		    game = std::make_shared<discpp::Activity>(ConstructDiscppObjectFromJson(json, "game", discpp::Activity()));
+		    game = std::make_shared<discpp::Activity>(ConstructDiscppObjectFromJson(client, json, "game", discpp::Activity()));
             for (auto const& activity : json["activities"].GetArray()) {
                 rapidjson::Document activity_json(rapidjson::kObjectType);
                 activity_json.CopyFrom(activity, activity_json.GetAllocator());
 
-                activities.emplace_back(activity_json);
+                activities.emplace_back(client, activity_json);
             }
 		}
 

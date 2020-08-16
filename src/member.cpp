@@ -6,12 +6,16 @@
 #include <climits>
 
 namespace discpp {
-	Member::Member(const Snowflake& id, discpp::Guild& guild, bool can_request) {
+    Member::Member(discpp::Client* client) : client(client) {
+
+    }
+
+	Member::Member(discpp::Client* client, const Snowflake& id, discpp::Guild& guild, bool can_request) : client(client) {
 		*this = *guild.GetMember(id, can_request);
 	}
 
-	Member::Member(rapidjson::Document& json, const discpp::Guild& guild) : guild_id(guild.id) {
-		user = ConstructDiscppObjectFromJson(json, "user", discpp::User());
+	Member::Member(discpp::Client* client, rapidjson::Document& json, const discpp::Guild& guild) : guild_id(guild.id) {
+		user = ConstructDiscppObjectFromJson(client, json, "user", discpp::User());
 		nick = GetDataSafely<std::string>(json, "nick");
 
         int highest_hiearchy = 0;
@@ -40,7 +44,7 @@ namespace discpp {
             rapidjson::Document json_presence;
             json_presence.CopyFrom(json["presence"], json_presence.GetAllocator());
 
-            presence = std::make_unique<discpp::Presence>(json_presence);
+            presence = std::make_unique<discpp::Presence>(client, json_presence);
 		}
 	}
 
@@ -78,20 +82,20 @@ namespace discpp {
 		}
 
 		cpr::Body body("{\"nick\": \"" + EscapeString(nick) + "\", \"roles\": " + json_roles + ", \"mute\": " + std::to_string(mute) + ", \"deaf\": " + std::to_string(deaf) + "\"channel_id\": \"" + std::to_string(channel_id) + "\"" + "}");
-		SendPatchRequest(Endpoint("/guilds/" + std::to_string(this->user.id) + "/members/" + std::to_string(user.id)), DefaultHeaders({ { "Content-Type", "application/json" } }), guild_id, RateLimitBucketType::GUILD, body);
+		SendPatchRequest(client, Endpoint("/guilds/" + std::to_string(this->user.id) + "/members/" + std::to_string(user.id)), DefaultHeaders(client, { { "Content-Type", "application/json" } }), guild_id, RateLimitBucketType::GUILD, body);
 	}
 
 	void Member::AddRole(const discpp::Role& role) {
-		SendPutRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(user.id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
+		SendPutRequest(client, Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(user.id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(client), guild_id, RateLimitBucketType::GUILD);
 	}
 
 	void Member::RemoveRole(const discpp::Role& role) {
-		SendDeleteRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(user.id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
+		SendDeleteRequest(client, Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(user.id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(client), guild_id, RateLimitBucketType::GUILD);
 	}
 
 	bool Member::IsBanned() {
 
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/bans/" + std::to_string(user.id)), DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
+		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(guild_id) + "/bans/" + std::to_string(user.id)), DefaultHeaders(client), guild_id, RateLimitBucketType::GUILD);
 		rapidjson::Value::ConstMemberIterator itr = result->FindMember("reason");
 		return itr != result->MemberEnd();
 	}
@@ -112,7 +116,7 @@ namespace discpp {
 		// Check if the member has the permission, has the admin permission, or is the guild owner.
 		bool has_perm = permissions.allow_perms.HasPermission(perm) && !permissions.deny_perms.HasPermission(perm);
 		has_perm = has_perm || (permissions.allow_perms.HasPermission(Permission::ADMINISTRATOR) && !permissions.deny_perms.HasPermission(Permission::ADMINISTRATOR));
-		has_perm = has_perm || discpp::Guild(guild_id).owner_id == user.id;
+		has_perm = has_perm || discpp::Guild(client, guild_id).owner_id == user.id;
 
 		return has_perm;
 	}
@@ -153,6 +157,7 @@ namespace discpp {
     }
 
     Member::Member(const Member &member) {
+	    this->client = member.client;
         this->user = member.user;
         this->guild_id = member.guild_id;
         this->nick = member.nick;
@@ -217,6 +222,8 @@ namespace discpp {
 	}
 
     std::shared_ptr<discpp::Guild> Member::GetGuild() {
-        return discpp::globals::client_instance->cache.GetGuild(guild_id);
+        return client->cache.GetGuild(guild_id);
     }
+
+
 }

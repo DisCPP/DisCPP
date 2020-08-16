@@ -12,6 +12,10 @@ namespace discpp {
 		inline GuildRoleCreateEvent(discpp::Role role) : role(role) {}
 
 		discpp::Role role;
+
+        virtual int GetEventType() const override {
+            return 16;
+        }
 	};
 }
 

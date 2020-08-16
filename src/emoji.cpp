@@ -10,7 +10,7 @@ namespace discpp {
 		}
 	}
 
-	Emoji::Emoji(rapidjson::Document& json) {
+	Emoji::Emoji(discpp::Client* client, rapidjson::Document& json) {
 		id = GetIDSafely(json, "id");
 		name = GetDataSafely<std::string>(json, "name");
 		if (ContainsNotNull(json, "roles")) {
@@ -23,7 +23,7 @@ namespace discpp {
 		if (ContainsNotNull(json, "user")) {
 			rapidjson::Document user_json;
 			user_json.CopyFrom(json["user"], user_json.GetAllocator());
-			creator = std::make_shared<discpp::User>(discpp::User(user_json));
+			creator = std::make_shared<discpp::User>(discpp::User(client, user_json));
 		}
 		require_colons = GetDataSafely<bool>(json, "require_colons");
         managed = GetDataSafely<bool>(json, "managed");
