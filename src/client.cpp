@@ -17,6 +17,9 @@
 #include <ixwebsocket/IXNetSystem.h>
 
 namespace discpp {
+    uint8_t Client::next_instance_id = 0;
+    std::map<uint8_t, Client*> Client::client_instances;
+
     Client::Client(const std::string& token, ClientConfig* config) : token(token), config(config), cache(discpp::Cache(this)), event_handler(new discpp::EventHandler(this)) {
         fire_command_method = std::bind(discpp::FireCommand, std::placeholders::_1, std::placeholders::_2);
 
@@ -27,6 +30,11 @@ namespace discpp {
         } else {
             logger = new discpp::Logger(config->logger_path, config->logger_flags);
         }
+
+        this->my_instance_id = next_instance_id;
+        next_instance_id++;
+
+        client_instances.emplace(my_instance_id, this);
     }
 
     int Client::Run() {
@@ -376,6 +384,7 @@ namespace discpp {
     }
 
     std::vector<discpp::User::Connection> ClientUser::GetUserConnections() {
+        discpp::Client* client = GetClient();
         std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/users/@me/connections"), DefaultHeaders(client), id, RateLimitBucketType::GLOBAL);
 
         std::vector<Connection> connections;
@@ -398,8 +407,8 @@ namespace discpp {
     ClientUserSettings ClientUser::GetSettings() {
         if (IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/settings is a user only endpoint");
-        }
-        else {
+        } else {
+            discpp::Client* client = GetClient();
             std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("users/@me/settings/"), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL);
             ClientUserSettings user_settings(*result);
             this->settings = user_settings;
@@ -454,6 +463,7 @@ namespace discpp {
             if (user_settings.GetShowCurrentGame() != old_settings.GetShowCurrentGame()) new_settings.AddMember("show_current_game", user_settings.GetShowCurrentGame(), allocator);
             if (user_settings.GetStreamNotificationsEnabled() != old_settings.GetStreamNotificationsEnabled()) new_settings.AddMember("stream_notifications_enabled", user_settings.GetStreamNotificationsEnabled(), allocator);
 
+            discpp::Client* client = GetClient();
             std::unique_ptr<rapidjson::Document> result = SendPatchRequest(client, Endpoint("users/@me/settings/"), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL, cpr::Body(DumpJson(new_settings)));
         }
     }
@@ -536,6 +546,20 @@ namespace discpp {
         }
 
         return connections;
+    }
+
+    Client* Client::GetInstance(uint8_t id) {
+        auto it = client_instances.find(id);
+
+        if (it != client_instances.end()) {
+            return it->second;
+        } else {
+            throw std::runtime_error("Failed to find client instance with id: " + std::to_string(id));
+        }
+    }
+
+    uint8_t Client::GetInstanceID() {
+        return my_instance_id;
     }
 
     UserRelationship::UserRelationship(discpp::Client* client, rapidjson::Document& json) {

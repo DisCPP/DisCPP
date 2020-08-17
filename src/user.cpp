@@ -63,6 +63,7 @@ namespace discpp {
 
 	discpp::Channel User::CreateDM() {
 		cpr::Body body("{\"recipient_id\": \"" + std::to_string(id) + "\"}");
+        discpp::Client* client = GetClient();
 		std::unique_ptr<rapidjson::Document> result = SendPostRequest(client, Endpoint("/users/@me/channels"), DefaultHeaders(client, { {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
 
 		return discpp::Channel(client, *result);
@@ -120,7 +121,8 @@ namespace discpp {
     }
 
     void User::Block() {
-        if (!client->client_user.IsBot()) {
+        discpp::Client* client = GetClient();
+        if (client->client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
             std::unique_ptr<rapidjson::Document> result = SendPutRequest(client, Endpoint("users/@me/relationships/" + std::to_string(this->id)), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL, "{\"type\":2}");
@@ -128,6 +130,7 @@ namespace discpp {
     }
 
     void User::Unblock() {
+        discpp::Client* client = GetClient();
         if(client->client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
@@ -136,6 +139,7 @@ namespace discpp {
 	}
 
     void User::AddFriend() {
+        discpp::Client* client = GetClient();
         if (!client->client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
@@ -144,6 +148,7 @@ namespace discpp {
     }
 
     void User::RemoveFriend() {
+        discpp::Client* client = GetClient();
         if(client->client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {

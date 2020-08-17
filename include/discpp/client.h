@@ -259,6 +259,22 @@ namespace discpp {
                 futures.push_back(std::async(std::launch::async, func, std::forward<T>(args)...));
             }
 		}
+
+        /**
+         * @brief Get an instance of Client. Mainly used internally.
+         *
+         * @param[in] id The instance id of the client you're looking for.
+         *
+         * @return Client*
+         */
+		static Client* GetInstance(uint8_t id);
+
+        /**
+         * @brief Get the instance id of the client. Mainly used internally.
+         *
+         * @return uint8_t
+         */
+		uint8_t GetInstanceID();
 	private:
 		friend class Shard;
         friend class EventDispatcher;
@@ -270,6 +286,11 @@ namespace discpp {
 		std::mutex futures_mutex;
 
 		int message_cache_count;
+
+		static uint8_t next_instance_id;
+		static std::map<uint8_t, Client*> client_instances;
+
+		uint8_t my_instance_id;
 
 		// The method to run to fire commands.
 		std::function<void(discpp::Shard&, discpp::Message&)> fire_command_method;

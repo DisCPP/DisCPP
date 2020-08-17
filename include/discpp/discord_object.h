@@ -17,13 +17,16 @@ namespace discpp {
 		DiscordObject(discpp::Client* client, const discpp::Snowflake& id);
 
 		discpp::Snowflake id = 0;
-		discpp::Client* client;
 
 		bool operator==(DiscordObject& other) const;
 		bool operator==(discpp::Snowflake& other) const;
 
 		bool operator!=(DiscordObject& other) const;
 		bool operator!=(discpp::Snowflake& other) const;
+	private:
+	    uint8_t client_instance_id;
+    protected:
+        discpp::Client* GetClient() const;
 	};
 }
 
