@@ -7,7 +7,7 @@
 
 namespace discpp {
 	Member::Member(const Snowflake& id, discpp::Guild& guild, bool can_request) {
-		*this = *guild.GetMember(id, can_request).value();
+		*this = *guild.GetMember(id, can_request);
 	}
 
 	Member::Member(rapidjson::Document& json, const discpp::Guild& guild) : guild_id(guild.id) {
@@ -20,15 +20,12 @@ namespace discpp {
 				rapidjson::Document role_json;
 				role_json.CopyFrom(role, role_json.GetAllocator());
 
-				auto tmp = guild.GetRole(SnowflakeFromString(role_json.GetString()));
-				if (tmp.has_value()) {
-                    std::shared_ptr<discpp::Role> r = tmp.value();
-                    if (r->position > highest_hiearchy) {
-                        highest_hiearchy = r->position;
-                    }
-
-                    roles.emplace_back(r->id);
+				std::shared_ptr<discpp::Role> r = guild.GetRole(SnowflakeFromString(role_json.GetString()));
+				if (r->position > highest_hiearchy) {
+					highest_hiearchy = r->position;
 				}
+
+				roles.emplace_back(r->id);
 			}
 		}
         joined_at = ContainsNotNull(json, "joined_at") ? TimeFromDiscord(json["joined_at"].GetString()) : 0;
@@ -127,11 +124,11 @@ namespace discpp {
         for (auto const& role : roles) {
             auto role_ptr = guild->GetRole(role);
             if (role == roles.front()) {
-                permissions.allow_perms.value = role_ptr.value()->permissions.allow_perms.value;
-                permissions.deny_perms.value = role_ptr.value()->permissions.deny_perms.value;
+                permissions.allow_perms.value = role_ptr->permissions.allow_perms.value;
+                permissions.deny_perms.value = role_ptr->permissions.deny_perms.value;
             } else {
-                permissions.allow_perms.value |= role_ptr.value()->permissions.allow_perms.value;
-                permissions.deny_perms.value |= role_ptr.value()->permissions.deny_perms.value;
+                permissions.allow_perms.value |= role_ptr->permissions.allow_perms.value;
+                permissions.deny_perms.value |= role_ptr->permissions.deny_perms.value;
             }
         }
 
@@ -146,8 +143,8 @@ namespace discpp {
             int highest_hiearchy = 0;
             for (auto& role : roles) {
                 auto r_ptr = guild->GetRole(role);
-                if (r_ptr.value()->position > highest_hiearchy) {
-                    highest_hiearchy = r_ptr.value()->position;
+                if (r_ptr->position > highest_hiearchy) {
+                    highest_hiearchy = r_ptr->position;
                 }
             }
 
@@ -181,7 +178,7 @@ namespace discpp {
         std::shared_ptr<discpp::Guild> guild = GetGuild();
 	    for (auto const& role : roles) {
 	        auto r_ptr = guild->GetRole(role);
-            r.emplace(role, r_ptr.value());
+            r.emplace(role, r_ptr);
 	    }
 
         return r;
@@ -193,7 +190,7 @@ namespace discpp {
         std::shared_ptr<discpp::Guild> guild = GetGuild();
         for (auto const& role : roles) {
             auto r_ptr = guild->GetRole(role);
-            tmp.push_back(r_ptr.value());
+            tmp.push_back(r_ptr);
         }
 
         std::sort(tmp.begin(), tmp.end(), [](std::shared_ptr<discpp::Role> x, std::shared_ptr<discpp::Role> y) {

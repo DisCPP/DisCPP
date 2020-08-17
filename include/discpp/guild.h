@@ -268,7 +268,7 @@ namespace discpp {
          *
          * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
          */
-		std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> GetChannels();
+		std::unordered_map<discpp::Snowflake, discpp::Channel> GetChannels();
 
         /**
          * @brief Gets a list of channel categories in this guild.
@@ -282,7 +282,7 @@ namespace discpp {
          *
          * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
          */
-		std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> GetCategories();
+		std::unordered_map<discpp::Snowflake, discpp::Channel> GetCategories();
 
         /**
          * @brief Gets a list of channel that don't have parents in this guild.
@@ -292,7 +292,7 @@ namespace discpp {
          *
          * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
          */
-        std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> GetParentlessChannels();
+        std::unordered_map<Snowflake, Channel> GetParentlessChannels();
 
         /**
          * @brief Gets a channel in this guild.
@@ -301,7 +301,7 @@ namespace discpp {
          *
          * @return discpp::Channel
          */
-        [[nodiscard]] std::optional<discpp::Channel> GetChannel(const Snowflake& id) const;
+        discpp::Channel GetChannel(const Snowflake& id) const;
 
         /**
          * @brief Creates a channel for this Guild.
@@ -351,7 +351,7 @@ namespace discpp {
          *
          * @return std::shared_ptr<discpp::Member>
          */
-        std::optional<std::shared_ptr<discpp::Member>> GetMember(const Snowflake& id, bool can_request = false);
+        std::shared_ptr<discpp::Member> GetMember(const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Ensures the bot has a permission.
@@ -513,7 +513,7 @@ namespace discpp {
          *
          * @return std::shared_ptr<discpp::Role>
          */
-        [[nodiscard]] std::optional<std::shared_ptr<discpp::Role>> GetRole(const Snowflake& id) const;
+        std::shared_ptr<discpp::Role> GetRole(const Snowflake& id) const;
 
         /**
          * @brief Create a guild role.
@@ -610,7 +610,7 @@ namespace discpp {
          *
          * @return std::vector<discpp::GuildInvite>
          */
-		[[nodiscard]] std::optional<std::vector<discpp::GuildInvite>> GetInvites() const;
+		std::vector<discpp::GuildInvite> GetInvites() const;
 
         /**
          * @brief Get guild integrations.
@@ -621,7 +621,7 @@ namespace discpp {
          *
          * @return std::vector<discpp::Integration>
          */
-		[[nodiscard]] std::optional<std::vector<discpp::Integration>> GetIntegrations() const;
+		std::vector<discpp::Integration> GetIntegrations() const;
 
         /**
          * @brief Create a guild integration.
@@ -688,7 +688,7 @@ namespace discpp {
          *
          * @return discpp::GuildEmbed
          */
-		[[nodiscard]] std::optional<GuildEmbed> GetGuildEmbed() const;
+		GuildEmbed GetGuildEmbed() const;
 
         /**
          * @brief Modify a guild embed.
@@ -712,7 +712,7 @@ namespace discpp {
          *
          * @return discpp::GuildInvite
          */
-		[[nodiscard]] std::optional<discpp::GuildInvite> GetVanityURL() const;
+		discpp::GuildInvite GetVanityURL() const;
 
         /**
          * @brief Get a widget image url.
@@ -732,7 +732,7 @@ namespace discpp {
          *
          * @return std::shared_ptr<discpp::Member>
          */
-        std::optional<std::shared_ptr<discpp::Member>> RequestMemberIfNotExist(const Snowflake& member_id);
+        std::shared_ptr<discpp::Member> RequestMemberIfNotExist(const Snowflake& member_id);
 
         /**
          * @brief Get all guild emojis.
@@ -743,7 +743,7 @@ namespace discpp {
          *
          * @return std::unordered_map<Snowflake, std::shared_ptr<Emoji>>
          */
-		std::optional<std::unordered_map<Snowflake, discpp::Emoji>> GetEmojis();
+		std::unordered_map<Snowflake, discpp::Emoji> GetEmojis();
 
         /**
          * @brief Get a guild emoji.
@@ -756,7 +756,7 @@ namespace discpp {
          *
          * @return Emoji
          */
-        [[nodiscard]] std::optional<discpp::Emoji> GetEmoji(const Snowflake& id) const;
+        discpp::Emoji GetEmoji(const Snowflake& id) const;
 
         /**
          * @brief Create a guild emoji.
