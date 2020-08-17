@@ -196,18 +196,14 @@ namespace discpp {
 		std::unique_ptr<rapidjson::Document> result = SendPostRequest(Endpoint("/channels/" + std::to_string(id) + "/typing"), DefaultHeaders(), {}, {});
 	}
 
-	std::optional<std::vector<discpp::Message>> Channel::GetPinnedMessages() {
+	std::vector<discpp::Message> Channel::GetPinnedMessages() {
         std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) = "/pins"), DefaultHeaders(), {}, {});
 
-        std::optional<std::vector<discpp::Message>> messages;
-        try {
-            for (auto &message : result->GetArray()) {
-                rapidjson::Document message_json;
-                message_json.CopyFrom(message, message_json.GetAllocator());
-                messages->push_back(discpp::Message(message_json));
-            }
-        } catch (std::exception& e) {
-            messages = std::nullopt;
+        std::vector<discpp::Message> messages;
+        for (auto &message : result->GetArray()) {
+            rapidjson::Document message_json;
+            message_json.CopyFrom(message, message_json.GetAllocator());
+            messages.emplace_back(message_json);
         }
 
         return messages;
@@ -265,12 +261,11 @@ namespace discpp {
         SendPutRequest(Endpoint("/channels/" + std::to_string(id) + "/permissions/" + std::to_string(permissions.role_user_id)), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(json_payload));
     }
 
-    std::optional<std::shared_ptr<discpp::Guild>> Channel::GetGuild() const {
-	    std::optional<std::shared_ptr<discpp::Guild>> tmp;
+    std::shared_ptr<discpp::Guild> Channel::GetGuild() const {
+	    std::shared_ptr<discpp::Guild> tmp;
 
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            tmp = std::nullopt;
-            //throw exceptions::ProhibitedEndpointException("discpp::Channel::GetGuild only available for guild channels!");
+            throw exceptions::ProhibitedEndpointException("discpp::Channel::GetGuild only available for guild channels!");
         } else {
             tmp = globals::client_instance->cache.GetGuild(guild_id);
         }
@@ -290,17 +285,16 @@ namespace discpp {
         return invite;
     }
 
-	std::optional<std::vector<discpp::GuildInvite>> Channel::GetInvites() {
-	    std::optional<std::vector<discpp::GuildInvite>> tmp;
+	std::vector<discpp::GuildInvite> Channel::GetInvites() {
+	    std::vector<discpp::GuildInvite> tmp;
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            tmp = std::nullopt;
-            //throw std::runtime_error("discpp::Channel::GetInvites only available for guild channels!");
+            throw discpp::exceptions::ProhibitedEndpointException("discpp::Channel::GetInvites only available for guild channels!");
         } else {
             std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/invites"), DefaultHeaders(), {}, {});
             for (auto& invite : result->GetArray()) {
                 rapidjson::Document invite_json;
                 invite_json.CopyFrom(invite, invite_json.GetAllocator());
-                tmp->push_back(discpp::GuildInvite(invite_json));
+                tmp.emplace_back(invite_json);
             }
         }
 
