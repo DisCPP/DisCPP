@@ -108,6 +108,8 @@ namespace discpp {
          */
 		Client(const std::string& token, ClientConfig* config);
 
+		~Client();
+
         /**
          * @brief Executes the discpp bot.
          *
