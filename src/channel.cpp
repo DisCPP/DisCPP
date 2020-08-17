@@ -194,11 +194,8 @@ namespace discpp {
 		return *this;
 	}
 
-	discpp::Channel Channel::Delete() {
-		std::unique_ptr<discpp::JsonObject> result = SendDeleteRequest(Endpoint("/channels/" + std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
-
-		*this = discpp::Channel();
-		return *this;
+	void Channel::Delete() {
+		std::unique_ptr<rapidjson::Document> result = SendDeleteRequest(Endpoint("/channels/" + std::to_string(id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 	}
 
 	std::vector<discpp::Message> Channel::RequestMessages(int amount, RequestChannelsMessageMethod get_method) const {
@@ -223,24 +220,23 @@ namespace discpp {
 		return messages;
 	}
 
-	discpp::Message Channel::FindMessage(const Snowflake& message_id) {
-		std::unique_ptr<discpp::JsonObject> result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/messages/" + std::to_string(message_id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
-
-		return discpp::Message(*result);
-	}
-
 	void Channel::TriggerTypingIndicator() {
 		std::unique_ptr<discpp::JsonObject> result = SendPostRequest(Endpoint("/channels/" + std::to_string(id) + "/typing"), DefaultHeaders(), {}, {});
 	}
 
-	std::vector<discpp::Message> Channel::GetPinnedMessages() {
-        std::unique_ptr<discpp::JsonObject> result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) = "/pins"), DefaultHeaders(), {}, {});
+	std::optional<std::vector<discpp::Message>> Channel::GetPinnedMessages() {
+        std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) = "/pins"), DefaultHeaders(), {}, {});
 
-        std::vector<discpp::Message> messages;
-        result->IterateThrough([&] (const discpp::JsonObject& message_json)->bool {
-            messages.emplace_back(message_json);
-            return true;
-        });
+        std::optional<std::vector<discpp::Message>> messages;
+        try {
+            for (auto &message : result->GetArray()) {
+                rapidjson::Document message_json;
+                message_json.CopyFrom(message, message_json.GetAllocator());
+                messages->push_back(discpp::Message(message_json));
+            }
+        } catch (std::exception& e) {
+            messages = std::nullopt;
+        }
 
         return messages;
     }
@@ -303,12 +299,16 @@ namespace discpp {
         SendPutRequest(Endpoint("/channels/" + std::to_string(id) + "/permissions/" + std::to_string(permissions.role_user_id)), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(json_payload));
     }
 
-    std::shared_ptr<discpp::Guild> Channel::GetGuild() const {
+    std::optional<std::shared_ptr<discpp::Guild>> Channel::GetGuild() const {
+	    std::optional<std::shared_ptr<discpp::Guild>> tmp;
+
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            throw exceptions::ProhibitedEndpointException("discpp::Channel::GetGuild only available for guild channels!");
+            tmp = std::nullopt;
+            //throw exceptions::ProhibitedEndpointException("discpp::Channel::GetGuild only available for guild channels!");
+        } else {
+            tmp = globals::client_instance->cache.GetGuild(guild_id);
         }
 
-        std::shared_ptr<Guild> tmp = globals::client_instance->cache.GetGuild(guild_id);
         return tmp;
     }
 
@@ -324,36 +324,44 @@ namespace discpp {
         return invite;
     }
 
-	std::vector<discpp::GuildInvite> Channel::GetInvites() {
+	std::optional<std::vector<discpp::GuildInvite>> Channel::GetInvites() {
+	    std::optional<std::vector<discpp::GuildInvite>> tmp;
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            throw std::runtime_error("discpp::Channel::GetInvites only available for guild channels!");
+            tmp = std::nullopt;
+            //throw std::runtime_error("discpp::Channel::GetInvites only available for guild channels!");
+        } else {
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/invites"), DefaultHeaders(), {}, {});
+            for (auto& invite : result->GetArray()) {
+                rapidjson::Document invite_json;
+                invite_json.CopyFrom(invite, invite_json.GetAllocator());
+                tmp->push_back(discpp::GuildInvite(invite_json));
+            }
         }
 
-		std::unique_ptr<discpp::JsonObject> result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/invites"), DefaultHeaders(), {}, {});
-
-        std::vector<discpp::GuildInvite> invites;
-        result->IterateThrough([&] (const discpp::JsonObject& invite_json)->bool {
-            invites.emplace_back(invite_json);
-            return true;
-        });
-
-		return invites;
+		return tmp;
 	}
 
-	std::unordered_map<discpp::Snowflake, discpp::Channel> Channel::GetChildren() {
+	std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> Channel::GetChildren() {
+	    std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> tmp;
         if (type != ChannelType::GROUP_CATEGORY) {
+            tmp = std::nullopt;
+            /*
             globals::client_instance->logger->Debug(LogTextColor::RED + "discpp::Channel::GetChildren only available for category channels!");
             throw std::runtime_error("discpp::Channel::GetChildren only available for category channels!");
+             */
+        } else {
+            if (this->GetGuild().has_value()) {
+                for (auto const chnl : this->GetGuild()->get()->channels) {
+                    if (chnl.second.category_id == this->id) {
+                        tmp->insert({ chnl.first, chnl.second });
+                    } else {
+                        continue;
+                    }
+                }
+            } else {
+                tmp = std::nullopt;
+            }
         }
-
-	    std::unordered_map<discpp::Snowflake, discpp::Channel> tmp;
-	    for (auto const chnl : this->GetGuild()->channels) {
-	        if (chnl.second.category_id == this->id) {
-                tmp.insert({ chnl.first, chnl.second });
-	        } else {
-	            continue;
-	        }
-	    }
 
 	    return tmp;
 	}
@@ -376,10 +384,17 @@ namespace discpp {
         }
 	}
 
-    discpp::Message Channel::RequestMessage(discpp::Snowflake id) {
-        std::unique_ptr<discpp::JsonObject> result = SendGetRequest(Endpoint("/channels/" + std::to_string(this->id) + "/messages/" + std::to_string(id)), DefaultHeaders(), {}, {});
+    std::optional<discpp::Message> Channel::RequestMessage(discpp::Snowflake id) {
+        std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/channels/" + std::to_string(this->id) + "/messages/" + std::to_string(id)), DefaultHeaders(), {}, {});
 
-        return discpp::Message(*result);
+        std::optional<discpp::Message> tmp;
+        try {
+            tmp = discpp::Message(*result);
+        } catch (std::exception& e) {
+            tmp = std::nullopt;
+        }
+
+        return tmp;
     }
 
     std::string Channel::GetIconURL(const ImageType &img_type) const {

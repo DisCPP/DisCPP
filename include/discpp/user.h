@@ -146,6 +146,11 @@ namespace discpp {
          */
 		bool IsSystemUser();
 
+		void Block();
+		void Unblock();
+		void AddFriend();
+		void RemoveFriend();
+
 		std::string username; /**< The user's username, not unique across the platform. */
 		// int public_flags; // Is this ever needed?
     private:

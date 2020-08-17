@@ -62,7 +62,7 @@ namespace discpp {
             discpp::Channel new_channel(result);
             std::shared_ptr<discpp::Guild> guild = globals::client_instance->cache.GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
 
-            guild->channels.insert({ guild->id, new_channel });
+            guild->channels.insert({ new_channel.id, new_channel });
             discpp::DispatchEvent(discpp::ChannelCreateEvent(new_channel));
         } else {
             discpp::Channel new_channel(result);
@@ -416,7 +416,11 @@ namespace discpp {
             discpp::DispatchEvent(discpp::MessageReactionAddEvent(*message->second, emoji, user));
         } else {
             discpp::Channel channel = globals::client_instance->cache.GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
-            discpp::Message message = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
+            auto tmp = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
+            if (!tmp.has_value()) {
+                throw std::runtime_error("couldn't find message");
+            }
+            discpp::Message message = tmp.value();
 
             if (result.ContainsNotNull("guild_id")) {
                 channel.guild_id = Snowflake(result["guild_id"].GetString());
@@ -472,7 +476,11 @@ namespace discpp {
             discpp::DispatchEvent(discpp::MessageReactionRemoveEvent(*message->second, emoji, user));
         } else {
             discpp::Channel channel = globals::client_instance->cache.GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
-            discpp::Message message = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
+            auto tmp = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
+            if (!tmp.has_value()) {
+                throw std::runtime_error("error finding message");
+            }
+            discpp::Message message = tmp.value();
 
             if (result.ContainsNotNull("guild_id")) {
                 channel.guild_id = Snowflake(result["guild_id"].GetString());
@@ -508,7 +516,11 @@ namespace discpp {
             discpp::DispatchEvent(discpp::MessageReactionRemoveAllEvent(*message->second));
         } else {
             discpp::Channel channel = globals::client_instance->cache.GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
-            discpp::Message message = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
+            auto tmp = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
+            if (!tmp.has_value()) {
+                throw std::runtime_error("error can't find message");
+            }
+            discpp::Message message = tmp.value();
 
             if (result.ContainsNotNull("guild_id")) {
                 channel.guild_id = Snowflake(result["guild_id"].GetString());

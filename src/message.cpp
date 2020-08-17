@@ -15,7 +15,7 @@ namespace discpp {
 		id = json.GetIDSafely("id");
 		channel = globals::client_instance->cache.GetChannel(SnowflakeFromString(json["channel_id"].GetString()));
 		try {
-            guild = channel.GetGuild();
+            guild = channel.GetGuild().value();
         } catch (const exceptions::DiscordObjectNotFound&) {
 		} catch (const exceptions::ProhibitedEndpointException&) {}
 

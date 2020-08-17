@@ -379,40 +379,10 @@ void discpp::HandleRateLimits(cpr::Header& header, const Snowflake& object, cons
 }
 
 time_t discpp::TimeFromDiscord(const std::string &time) {
-    int year, month, day, hour, minute;
-    int timezone_hr = 0, timezone_min = 0;
-    float second;
-    if (6 < sscanf(time.c_str(), "%d-%d-%dT%d:%d:%f%d:%d", &year, &month, &day, &hour, &minute, &second, &timezone_hr, &timezone_min)) {
-        if (timezone_hr < 0) {
-            timezone_min = -timezone_min;
-        }
-
-        hour += timezone_hr;
-        minute += timezone_hr;
-
-        struct tm t{};
-        t.tm_year = year - 1900;
-        t.tm_mon = month - 1;
-        t.tm_mday = day;
-        t.tm_hour = hour;
-        t.tm_min = minute;
-        t.tm_sec = (int) second;
-
-        time_t utc_time = mktime(&t);
-        struct tm utc_buf;
-
-#ifndef __linux__
-        localtime_s(&utc_buf, &utc_time);
-#else
-        utc_buf = *localtime(&utc_time);
-#endif
-
-        discpp::globals::client_instance->logger->Debug("Parsed time: " + FormatTime(utc_time));
-
-        return utc_time;
-    }
-
-    throw std::runtime_error("Failed to parse time");
+    std::tm tm = {};
+    std::istringstream ss(time);
+    ss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%S");
+    return std::mktime(&tm);
 }
 
 time_t discpp::TimeFromSnowflake(const Snowflake& snow) {

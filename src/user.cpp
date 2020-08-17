@@ -4,6 +4,7 @@
 #include "member.h"
 
 #include <iomanip>
+#include <discpp/exceptions.h>
 
 namespace discpp {
 	User::User(const Snowflake& id) : discpp::DiscordObject(id) {
@@ -119,11 +120,11 @@ namespace discpp {
     }
 
     bool User::IsBot() const {
-	    return (flags & 0b1) == 0b1;
+	    return flags & 1;
     }
 
     bool User::IsSystemUser() {
-        return (flags & 0b10) == 0b10;
+        return flags & 2;
     }
 
     std::string User::GetDiscriminator() const {
@@ -131,5 +132,37 @@ namespace discpp {
         stream << std::setfill('0') << std::setw(4) << discriminator;
 
         return stream.str();
+    }
+
+    void User::Block() {
+        if (!discpp::globals::client_instance->client_user.IsBot()) {
+            throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+        } else {
+            std::unique_ptr<rapidjson::Document> result = SendPutRequest(Endpoint("users/@me/relationships/" + std::to_string(this->id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL, "{\"type\":2}");
+        }
+    }
+
+    void User::Unblock() {
+        if(discpp::globals::client_instance->client_user.IsBot()) {
+            throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+        } else {
+            std::unique_ptr<rapidjson::Document> result = SendDeleteRequest(Endpoint("users/@me/relationships/" + std::to_string(this->id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+        }
+	}
+
+    void User::AddFriend() {
+        if (!discpp::globals::client_instance->client_user.IsBot()) {
+            throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+        } else {
+            std::unique_ptr<rapidjson::Document> result = SendPutRequest(Endpoint("users/@me/relationships/" + std::to_string(this->id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+        }
+    }
+
+    void User::RemoveFriend() {
+        if(discpp::globals::client_instance->client_user.IsBot()) {
+            throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+        } else {
+            std::unique_ptr<rapidjson::Document> result = SendDeleteRequest(Endpoint("users/@me/relationships/" + std::to_string(this->id)), DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+        }
     }
 }
