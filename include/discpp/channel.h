@@ -229,7 +229,7 @@ namespace discpp {
          *
          * @return std::vector<discpp::Message>
          */
-		std::vector<discpp::Message> GetPinnedMessages();
+		std::optional<std::vector<discpp::Message>> GetPinnedMessages();
 
         /**
          * @brief Delete several messages (2-100).
@@ -279,7 +279,7 @@ namespace discpp {
          *
          * @return discpp::Guild
          */
-        [[nodiscard]] std::shared_ptr<discpp::Guild> GetGuild() const;
+        [[nodiscard]] std::optional<std::shared_ptr<discpp::Guild>> GetGuild() const;
 
         /**
          * @brief Create an invite for the channel.
@@ -299,17 +299,14 @@ namespace discpp {
 
         /**
          * @brief Lists all active invites for this channel
-         *
-         * If you use it on a non-guild channel it will through a discpp::exceptions::ProhibitedEndpointException.
-         *
          * ```cpp
-         *     std::vector<GuildInvite> invites = channel.GetInvites();
+         *      std::optional<std::vector<GuildInvite>> invites = channel.GetInvites();
          * ```
          *
-         * @return std::vector<GuildInvite>
+         * @return std::optional<std::vector<GuildInvite>>
          */
 
-        std::vector<GuildInvite> GetInvites();
+        std::optional<std::vector<GuildInvite>> GetInvites();
 
         /**
          * @brief Lists children channels for this category.
