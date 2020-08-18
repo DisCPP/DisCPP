@@ -24,7 +24,7 @@ namespace discpp {
             if (guild != nullptr) {
                 try {
                     auto mbr = guild->GetMember(author.id);
-                    member = mbr;
+                    member = mbr.value();
                 } catch (const exceptions::DiscordObjectNotFound&) {
                     rapidjson::Document doc(rapidjson::kObjectType);
                     doc.CopyFrom(json["member"], doc.GetAllocator());
