@@ -5,9 +5,7 @@
 #include <utility>
 
 #ifndef __STDC_LIB_EXT1__
-#ifndef __STDC_WANT_LIB_EXT1__
 #define __STDC_WANT_LIB_EXT1__ 1
-#endif
 #endif
 
 #include <ctime>

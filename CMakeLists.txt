@@ -7,50 +7,17 @@ set(EXTERNAL_INSTALL_LOCATION "${PROJECT_SOURCE_DIR}/thirdparty")
 project(discpp)
 
 # Set options for IXWebsocket
-set(USE_TLS TRUE CACHE BOOL "")
+set(USE_TLS TRUE)
+set(USE_OPEN_SSL TRUE)
 
-# Set options for RapidJSON
-set(RAPIDJSON_BUILD_DOC OFF CACHE BOOL "")
-set(RAPIDJSON_BUILD_EXAMPLES OFF CACHE BOOL "")
-set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "")
-set(RAPIDJSON_BUILD_THIRDPARTY_GTEST OFF CACHE BOOL "")
-set(RAPIDJSON_HAS_STDSTRING ON CACHE BOOL "")
+# Set options for RapidJson
+set(RAPIDJSON_HAS_STDSTRING 1)
 
-# Build static libs
-set(CURL_STATICLIB ON CACHE BOOL "")
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
-
-# Set options for CPR/Curl
-set(BUILD_CPR_TESTS OFF CACHE BOOL "")
-set(BUILD_CURL_EXE OFF CACHE BOOL "")
-
-# Set TLS library for CPR and also IXWebsocket
-if(WIN32) # Use MBedTLS for Windows
-	set(USE_WINSSL ON CACHE BOOL "")
-	set(USE_OPENSSL OFF CACHE BOOL "")
-
-	# For IXWebsocket
-	set(USE_MBED_TLS OFF)
-	set(USE_OPEN_SSL ON)
-elseif(APPLE) # Use secure transport for Apple
-	set(CMAKE_USE_SECTRANSP ON CACHE BOOL "")
-	set(CMAKE_USE_OPENSSL OFF CACHE BOOL "")
-
-	# For IXWebsocket
-	set(USE_SECURE_TRANSPORT ON CACHE BOOL "")
-	set(USE_OPEN_SSL OFF CACHE BOOL "")
-else() # Use OpenSSL for anything else.
-	set(USE_OPENSSL ON CACHE BOOL "")
-
-	set(USE_OPEN_SSL ON CACHE BOOL "") # For IXWebsocket
-
-	# Set ssl certificate.
-	set(CURL_CA_PATH "${CMAKE_CURRENT_SOURCE_DIR}/ca-chain.cert.pem" CACHE INTERNAL "" FORCE)
-	set(CURL_CA_BUNDLE "${CMAKE_CURRENT_SOURCE_DIR}/ca-chain.cert.pem" CACHE INTERNAL "" FORCE)
-endif()
+# Set options for C++ standard lib.
+set(__STDC_WANT_LIB_EXT1__ 1)
 
 # Set default options
-option(USE_RAPID "Uses RapidJSON for json parsing." ON)
+option(USE_RAPID "Uses rapidjson for json parsing." ON)
 option(USE_SIMD "Uses simdjson for json parsing. - NOT YET SUPPORTED" OFF)
 option(USE_FMT "Uses fmt for logger - NOT YET SUPPORTED" OFF)
 option(BUILD_EXAMPLES "Build example bots." OFF)
@@ -59,17 +26,23 @@ option(BUILD_TESTS "Build unit tests." OFF)
 # Find dependencies
 if (USE_FMT)
 	find_package(fmt REQUIRED)
+	add_compile_definitions(FMT_SUPPORT)
+else()
+	add_compile_definitions(IOSTREAM_SUPPORT)
 endif()
 
 if (USE_RAPID)
-	add_subdirectory(thirdparty/rapidjson)
+	find_package(RapidJSON CONFIG REQUIRED)
 	add_compile_definitions(RAPIDJSON_BACKEND)
 elseif(USE_SIMD)
 	find_package(simdjson CONFIG REQUIRED)
 	add_compile_definitions(SIMDJSON_BACKEND)
 endif()
 
-add_subdirectory(thirdparty/cpr)
+find_package(OpenSSL REQUIRED)
+find_package(cpr REQUIRED)
+find_package(CURL CONFIG REQUIRED)
+find_package(ZLIB REQUIRED)
 add_subdirectory(thirdparty/IXWebSocket)
 
 # Link sources
@@ -91,10 +64,6 @@ endif()
 # Link dependencies
 if (FMT_ENABLED)
 	target_link_libraries(discpp PUBLIC fmt)
-
-	target_compile_definitions(discpp PUBLIC FMT_SUPPORT)
-else()
-	target_compile_definitions(discpp PUBLIC IOSTREAM_SUPPORT)
 endif()
 
 if (USE_RAPID)
@@ -103,19 +72,16 @@ elseif(USE_SIMD)
 	target_link_libraries(discpp PUBLIC simdjson)
 endif()
 
-# Set options for C++ standard lib.
-target_compile_definitions(discpp PUBLIC __STDC_WANT_LIB_EXT1__)
-
-# I have to do some weird stuff to get Cpr to link
-target_compile_definitions(${CPR_LIBRARIES} PUBLIC CURL_STATICLIB)
-target_include_directories(discpp PUBLIC ${CPR_INCLUDE_DIRS})
-target_link_libraries(discpp PUBLIC ${CPR_LIBRARIES})
-
+target_link_libraries(discpp PUBLIC ZLIB::ZLIB)
+target_link_libraries(discpp PUBLIC CURL::libcurl)
+target_link_libraries(discpp PUBLIC OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(discpp PUBLIC $<BUILD_INTERFACE:ixwebsocket>)
+#target_include_directories(discpp PUBLIC $<BUILD_INTERFACE:${IXWEBSOCKET_HEADERS}>)
+target_link_libraries(discpp PUBLIC cpr)
 
 # Build unit tests
 if (BUILD_TESTS)
-	add_subdirectory(tests)
+    add_subdirectory(tests)
 endif()
 
 # Build examples

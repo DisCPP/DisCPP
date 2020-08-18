@@ -8,7 +8,6 @@
 
 #include <variant>
 #include <vector>
-#include <optional>
 
 namespace discpp {
 	class Message;
@@ -176,10 +175,10 @@ namespace discpp {
          *      channel.Delete();
          * ```
          *
-         * @return void
+         * @return discpp::Channel - Returns a default channel object
          */
 
-        void Delete();
+        discpp::Channel Delete();
 
         /**
          * @brief Get channel's messages depending on the given method.
@@ -207,7 +206,20 @@ namespace discpp {
          *
          * @return discpp::Message
          */
-        std::optional<discpp::Message> RequestMessage(discpp::Snowflake id);
+        discpp::Message RequestMessage(discpp::Snowflake id);
+
+        /**
+         * @brief Get a message from the channel from the id.
+         *
+         * ```cpp
+         *      channel.FindMessage(685199299042476075);
+         * ```
+         *
+         * @param[in] message_id The message id.
+         *
+         * @return discpp::Message
+         */
+        discpp::Message FindMessage(const Snowflake& message_id);
 
         /**
          * @brief Triggers a typing indicator.
@@ -229,7 +241,7 @@ namespace discpp {
          *
          * @return std::vector<discpp::Message>
          */
-		std::optional<std::vector<discpp::Message>> GetPinnedMessages();
+		std::vector<discpp::Message> GetPinnedMessages();
 
         /**
          * @brief Delete several messages (2-100).
@@ -279,7 +291,7 @@ namespace discpp {
          *
          * @return discpp::Guild
          */
-        [[nodiscard]] std::optional<std::shared_ptr<discpp::Guild>> GetGuild() const;
+        std::shared_ptr<discpp::Guild> GetGuild() const;
 
         /**
          * @brief Create an invite for the channel.
@@ -297,16 +309,7 @@ namespace discpp {
          */
         GuildInvite CreateInvite(const int& max_age, const int& max_uses, const bool temporary, const bool unique);
 
-        /**
-         * @brief Lists all active invites for this channel
-         * ```cpp
-         *      std::optional<std::vector<GuildInvite>> invites = channel.GetInvites();
-         * ```
-         *
-         * @return std::optional<std::vector<GuildInvite>>
-         */
-
-        std::optional<std::vector<GuildInvite>> GetInvites();
+        std::vector<GuildInvite> GetInvites();
 
         /**
          * @brief Lists children channels for this category.
@@ -316,7 +319,7 @@ namespace discpp {
          *
          * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
          */
-        std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> GetChildren();
+        std::unordered_map<discpp::Snowflake, discpp::Channel> GetChildren();
 
         /**
         * @brief Add a recipient to the group dm.
