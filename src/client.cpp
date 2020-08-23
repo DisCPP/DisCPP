@@ -37,10 +37,6 @@ namespace discpp {
         client_instances.emplace(my_instance_id, this);
     }
 
-    Client::~Client() {
-        client_instances.erase(std::remove(client_instances.begin(), client_instances.end(), my_instance_id), client_instances.end());
-    }
-
     int Client::Run() {
         EventDispatcher::BindEvents();
 
