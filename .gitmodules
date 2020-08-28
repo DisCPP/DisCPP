@@ -1,3 +1,11 @@
 [submodule "thirdparty/IXWebSocket"]
 	path = thirdparty/IXWebSocket
 	url = https://github.com/machinezone/IXWebSocket
+
+[submodule "thirdparty/cpr"]
+	path = thirdparty/cpr
+	url = https://github.com/whoshuu/cpr
+
+[submodule "rapidjson"]
+	path = thirdparty/rapidjson
+	url = https://github.com/Tencent/rapidjson
