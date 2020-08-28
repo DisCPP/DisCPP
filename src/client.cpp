@@ -541,7 +541,7 @@ namespace discpp {
     }
 
     UserRelationship::UserRelationship(rapidjson::Document& json) {
-        id = SnowflakeFromString(json["id"].GetString());
+        id = discpp::Snowflake(json["id"].GetString());
         nickname = GetDataSafely<std::string>(json, "nickname");
         type = json["type"].GetInt();
         user = ConstructDiscppObjectFromJson(json, "user", discpp::User());

@@ -8,10 +8,10 @@
 
 namespace discpp {
     Webhook::Webhook(rapidjson::Document& json) {
-        id = SnowflakeFromString(json["id"].GetString());
+        id = discpp::Snowflake(json["id"].GetString());
         type = static_cast<WebhookType>(json["type"].GetInt());
         guild = std::make_shared<discpp::Guild>(ConstructDiscppObjectFromID(json, "guild_id", discpp::Guild()));
-        channel = std::make_shared<discpp::Channel>(globals::client_instance->cache.GetChannel(SnowflakeFromString(json["guild_id"].GetString())));
+        channel = std::make_shared<discpp::Channel>(globals::client_instance->cache.GetChannel(discpp::Snowflake(json["guild_id"].GetString())));
 		user = std::make_shared<discpp::User>(ConstructDiscppObjectFromJson(json, "user", discpp::User()));
         name = GetDataSafely<std::string>(json, "name");
         if (ContainsNotNull(json, "avatar")) {

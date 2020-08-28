@@ -53,7 +53,7 @@ namespace discpp {
 
 		if (ContainsNotNull(json, "guild_positions")) {
 			for (auto const& guild : json["guild_positions"].GetArray()) {
-				guild_positions.push_back(SnowflakeFromString(guild.GetString()));
+				guild_positions.push_back(discpp::Snowflake(guild.GetString()));
 			}
 		}
 

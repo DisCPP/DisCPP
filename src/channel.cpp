@@ -12,7 +12,7 @@ namespace discpp {
 	}
 
 	Channel::Channel(rapidjson::Document& json) {
-	    id = SnowflakeFromString(json["id"].GetString());
+	    id = discpp::Snowflake(json["id"].GetString());
 		type = static_cast<ChannelType>(json["type"].GetInt());
 		name = GetDataSafely<std::string>(json, "name");
 		topic = GetDataSafely<std::string>(json, "topic");

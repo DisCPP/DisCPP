@@ -16,7 +16,7 @@ namespace discpp {
 	}
 
 	Guild::Guild(rapidjson::Document& json) {
-		id = SnowflakeFromString(json["id"].GetString());
+		id = discpp::Snowflake(json["id"].GetString());
         name = json["name"].GetString();
 
         if (ContainsNotNull(json, "icon")) {
@@ -156,7 +156,7 @@ namespace discpp {
                 rapidjson::Document presence_json;
                 presence_json.CopyFrom(presence, presence_json.GetAllocator());
 
-                auto it = members.find(SnowflakeFromString(presence_json["user"]["id"].GetString()));
+                auto it = members.find(discpp::Snowflake(presence_json["user"]["id"].GetString()));
 
                 if (it != members.end()) {
                     rapidjson::Document activity_json;
@@ -1005,7 +1005,7 @@ namespace discpp {
     VoiceState::VoiceState(rapidjson::Document &json) {
 		guild_id = GetIDSafely(json, "guild_id");
 		channel_id = GetIDSafely(json, "channel_id");
-		user_id = SnowflakeFromString(json["user_id"].GetString());
+		user_id = discpp::Snowflake(json["user_id"].GetString());
 		if (ContainsNotNull(json, "member")) {
 			rapidjson::Document member_json;
 			member_json.CopyFrom(json["member"], member_json.GetAllocator());

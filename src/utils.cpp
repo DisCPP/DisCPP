@@ -522,7 +522,7 @@ std::string discpp::URIEncode(const std::string& str) {
     return sResult;
 }
 
-discpp::Snowflake discpp::SnowflakeFromString(const std::string& str) {
+discpp::Snowflake discpp::Snowflake(const std::string& str) {
     return std::stoll(str, nullptr, 10);
 }
 

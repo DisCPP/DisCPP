@@ -10,7 +10,7 @@ namespace discpp {
 	}
 
 	Role::Role(rapidjson::Document& json) {
-		id = SnowflakeFromString(json["id"].GetString());
+		id = discpp::Snowflake(json["id"].GetString());
 		name = json["name"].GetString();
 		color = json["color"].GetInt();
         if (GetDataSafely<bool>(json, "hoist")) {
