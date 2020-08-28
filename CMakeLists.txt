@@ -67,7 +67,7 @@ if (FMT_ENABLED)
 endif()
 
 if (USE_RAPID)
-	target_include_directories(discpp PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
+	target_include_directories(discpp PUBLIC $<BUILD_INTERFACE:${RAPIDJSON_INCLUDE_DIRS}>)
 elseif(USE_SIMD)
 	target_link_libraries(discpp PUBLIC simdjson)
 endif()
