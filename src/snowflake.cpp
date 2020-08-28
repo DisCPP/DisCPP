@@ -11,13 +11,34 @@ namespace discpp {
                 time_format = "%Y-%m-%dT%H:%M:%SZ";
                 break;
             case CommonTimeFormat::DEFAULT:
-                time_format = "%F @ %r %Z";
+                time_format = (localtime ? "%F @ %r %Z" : "%F @ %r");
                 break;
             default:
                 time_format = format_str;
                 break;
         }
-        return discpp::FormatTime(this->GetRawTime(), time_format);
+
+        time_t time = this->GetRawTime();
+
+        struct tm now{};
+#ifndef __linux__
+        if (localtime) {
+            localtime_s(&now, &time);
+        } else {
+            gmtime_s(&now, &time);
+        }
+#else
+        if (localtime) {
+            now = *localtime(&time);
+        } else {
+            now = *gmtime(&time);
+        }
+#endif
+
+        char buffer[256];
+        strftime(buffer, sizeof(buffer), time_format.c_str(), &now);
+
+        return buffer;
     }
 
     time_t Snowflake::GetRawTime() const {
