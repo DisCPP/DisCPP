@@ -27,19 +27,12 @@ namespace discpp {
         time_t time = this->GetRawTime();
 
         struct tm now{};
-#ifndef __linux__
+
         if (localtime) {
             localtime_s(&now, &time);
         } else {
             gmtime_s(&now, &time);
         }
-#else
-        if (localtime) {
-            now = *localtime(&time);
-        } else {
-            now = *gmtime(&time);
-        }
-#endif
 
         char buffer[256];
         strftime(buffer, sizeof(buffer), time_format.c_str(), &now);
