@@ -20,9 +20,9 @@ namespace discpp {
     public:
         Cache(discpp::Client* client);
 
-        std::unordered_map<Snowflake, std::shared_ptr<Member>> members; /**< List of members the current bot can access. */
-        std::unordered_map<Snowflake, std::shared_ptr<Guild>> guilds; /**< List of guilds the current bot can access. */
-        std::unordered_map<Snowflake, std::shared_ptr<Message>> messages; /**< List of messages the current bot can access. */
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Member>> members; /**< List of members the current bot can access. */
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> guilds; /**< List of guilds the current bot can access. */
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Message>> messages; /**< List of messages the current bot can access. */
         std::unordered_map<discpp::Snowflake, discpp::Channel> private_channels; /**< List of dm channels the current client can access. */
 
         /**

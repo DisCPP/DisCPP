@@ -17,7 +17,7 @@ namespace discpp {
 		std::string str_type = (permission_type == PermissionType::ROLE) ? "role" : "member";
 
         rapidjson::Document json;
-        json.AddMember("id", role_user_id, json.GetAllocator());
+        json.AddMember("id", (uint64_t) role_user_id, json.GetAllocator());
         json.AddMember("type", str_type, json.GetAllocator());
         json.AddMember("allow", allow_perms.value, json.GetAllocator());
         json.AddMember("deny", deny_perms.value, json.GetAllocator());

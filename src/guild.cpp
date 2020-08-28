@@ -7,6 +7,7 @@
 #include "channel.h"
 #include "audit_log.h"
 #include "user.h"
+#include "cache.h"
 
 #include <memory>
 
@@ -16,7 +17,7 @@ namespace discpp {
     }
 
 	Guild::Guild(discpp::Client* client, const Snowflake& id, bool can_request) : DiscordObject(client, id) {
-        *this = *client->cache.GetGuild(id, can_request);
+        *this = *client->cache->GetGuild(id, can_request);
 	}
 
 	Guild::Guild(discpp::Client* client, rapidjson::Document& json) : DiscordObject(client) {
@@ -267,7 +268,7 @@ namespace discpp {
 		}
 
 		if (parent_id != 0) {
-            channel_json.AddMember("parent_id", parent_id, allocator);
+            channel_json.AddMember("parent_id", (uint64_t) parent_id, allocator);
 		}
 
 
@@ -290,7 +291,7 @@ namespace discpp {
 
 		for (int i = 0; i < new_channel_positions.size(); i++) {
 		    rapidjson::Document channel_pos_json(rapidjson::kObjectType);
-		    channel_pos_json.AddMember("id", new_channel_positions[i].id, channel_pos_json.GetAllocator());
+		    channel_pos_json.AddMember("id", (uint64_t) new_channel_positions[i].id, channel_pos_json.GetAllocator());
             channel_pos_json.AddMember("position", i, channel_pos_json.GetAllocator());
 
 			json_raw.PushBack(channel_pos_json, json_raw.GetAllocator());
@@ -466,7 +467,7 @@ namespace discpp {
         rapidjson::Document json_raw(rapidjson::kArrayType);
 		for (int i = 0; i < new_role_positions.size(); i++) {
             rapidjson::Document role_pos_json(rapidjson::kObjectType);
-            role_pos_json.AddMember("id", new_role_positions[i].id, role_pos_json.GetAllocator());
+            role_pos_json.AddMember("id", (uint64_t) new_role_positions[i].id, role_pos_json.GetAllocator());
             role_pos_json.AddMember("position", i, role_pos_json.GetAllocator());
 
             json_raw.PushBack(role_pos_json, json_raw.GetAllocator());
@@ -659,7 +660,7 @@ namespace discpp {
 
 		rapidjson::Document role_json(rapidjson::kObjectType);
 		for (discpp::Role role : roles) {
-			role_json.PushBack(role.id, role_json.GetAllocator());
+			role_json.PushBack((uint64_t) role.id, role_json.GetAllocator());
 		}
 
         rapidjson::Document body_raw(rapidjson::kObjectType);
@@ -956,7 +957,7 @@ namespace discpp {
     GuildInvite::GuildInvite(discpp::Client* client, rapidjson::Document &json) {
         code = json["code"].GetString();
         if (ContainsNotNull(json, "guild")) {
-            guild = client->cache.GetGuild(discpp::Snowflake(json["guild"]["id"].GetString()));
+            guild = client->cache->GetGuild(discpp::Snowflake(json["guild"]["id"].GetString()));
         }
         channel = discpp::Channel(guild->GetChannel(Snowflake(json["channel"]["id"].GetString())));
         if (ContainsNotNull(json, "inviter")) {

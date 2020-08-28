@@ -11,7 +11,6 @@
 #include "user.h"
 #include "settings.h"
 #include "channel.h"
-#include "cache.h"
 
 namespace discpp {
 	class Role;
@@ -23,6 +22,7 @@ namespace discpp {
 	class Logger;
 	class Image;
 	class EventHandler;
+	class Cache;
 
 	class ClientUser : public User {
 	public:
@@ -89,7 +89,7 @@ namespace discpp {
 		discpp::Logger* logger; /**< discpp::Logger object representing current logger. */
 
 		//std::unordered_map<Snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
-        discpp::Cache cache; /**< Bot cache. Stores members, channels, guilds, etc. */
+        discpp::Cache* cache; /**< Bot cache. Stores members, channels, guilds, etc. */
 		EventHandler* event_handler;
 
         /**

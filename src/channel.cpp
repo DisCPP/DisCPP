@@ -5,6 +5,7 @@
 #include "log.h"
 #include "guild.h"
 #include "exceptions.h"
+#include "cache.h"
 
 namespace discpp {
     Channel::Channel(discpp::Client* client) : discpp::DiscordObject(client) {
@@ -12,7 +13,7 @@ namespace discpp {
     }
 
 	Channel::Channel(discpp::Client* client, const Snowflake& id, bool can_request) : discpp::DiscordObject(client, id) {
-		*this = client->cache.GetChannel(id, can_request);
+		*this = client->cache->GetChannel(id, can_request);
 	}
 
 	Channel::Channel(discpp::Client* client, rapidjson::Document& json) : discpp::DiscordObject(client) {
@@ -281,17 +282,12 @@ namespace discpp {
         SendPutRequest(client, Endpoint("/channels/" + std::to_string(id) + "/permissions/" + std::to_string(permissions.role_user_id)), DefaultHeaders(client, { {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(json_payload));
     }
 
-    std::optional<std::shared_ptr<discpp::Guild>> Channel::GetGuild() const {
-	    std::optional<std::shared_ptr<discpp::Guild>> tmp;
-
-        if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
-            tmp = std::nullopt;
-            //throw exceptions::ProhibitedEndpointException("discpp::Channel::GetGuild only available for guild channels!");
+    std::shared_ptr<discpp::Guild> Channel::GetGuild() const {
+	    if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
+            throw exceptions::ProhibitedEndpointException("discpp::Channel::GetGuild only available for guild channels!");
         } else {
-            tmp = GetClient()->cache.GetGuild(guild_id);
+            return GetClient()->cache->GetGuild(guild_id);
         }
-
-        return tmp;
     }
 
     discpp::GuildInvite Channel::CreateInvite(const int& max_age, const int& max_uses, const bool temporary, const bool unique) {
@@ -326,29 +322,24 @@ namespace discpp {
 		return tmp;
 	}
 
-	std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> Channel::GetChildren() {
-	    std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> tmp;
+	std::unordered_map<discpp::Snowflake, discpp::Channel> Channel::GetChildren() {
+        std::unordered_map<discpp::Snowflake, discpp::Channel> children;
         if (type != ChannelType::GROUP_CATEGORY) {
-            tmp = std::nullopt;
-            /*
-            client->logger->Debug(LogTextColor::RED + "discpp::Channel::GetChildren only available for category channels!");
+            GetClient()->logger->Debug(LogTextColor::RED + "discpp::Channel::GetChildren only available for category channels!");
             throw std::runtime_error("discpp::Channel::GetChildren only available for category channels!");
-             */
         } else {
-            if (this->GetGuild().has_value()) {
-                for (auto const chnl : this->GetGuild()->get()->channels) {
+            if (this->GetGuild()) {
+                for (auto const chnl : this->GetGuild()->channels) {
                     if (chnl.second.category_id == this->id) {
-                        tmp->insert({ chnl.first, chnl.second });
+                        children.insert({ chnl.first, chnl.second });
                     } else {
                         continue;
                     }
                 }
-            } else {
-                tmp = std::nullopt;
             }
         }
 
-	    return tmp;
+	    return children;
 	}
 
 	void Channel::GroupDMAddRecipient(const discpp::User& user) {

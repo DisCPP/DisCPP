@@ -9,6 +9,7 @@ namespace discpp {
 	class Integration;
 
 	class User : public DiscordObject {
+	    friend class Member; // We need this so discpp::Member can use the client instance.
 	public:
         enum class ConnectionVisibility : int {
             NONE = 0,

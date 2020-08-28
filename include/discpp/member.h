@@ -5,6 +5,7 @@
 #include "user.h"
 #include "presence.h"
 #include "permission.h"
+#include "snowflake.h"
 
 #include <vector>
 
@@ -232,7 +233,6 @@ namespace discpp {
         std::vector<discpp::Snowflake> roles;
 	private:
 	    unsigned char flags = 0b0;
-	    discpp::Client* client;
 	};
 }
 

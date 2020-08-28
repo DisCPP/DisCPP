@@ -381,7 +381,7 @@ time_t discpp::TimeFromDiscord(const std::string &time) {
 
 time_t discpp::TimeFromSnowflake(const Snowflake& snow) {
     constexpr static uint64_t discord_epoch = 1420070400000;
-    return ((snow >> 22) + discord_epoch) / 1000;
+    return (( (uint64_t) snow >> (unsigned int) 22) + discord_epoch) / 1000;
 }
 
 std::string discpp::FormatTime(const time_t& time, const std::string& format) {

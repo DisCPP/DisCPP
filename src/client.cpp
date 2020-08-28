@@ -13,6 +13,7 @@
 #include "settings.h"
 #include "events/reconnect_event.h"
 #include "event_handler.h"
+#include "cache.h"
 
 #include <ixwebsocket/IXNetSystem.h>
 
@@ -20,7 +21,7 @@ namespace discpp {
     uint8_t Client::next_instance_id = 0;
     std::map<uint8_t, Client*> Client::client_instances;
 
-    Client::Client(const std::string& token, ClientConfig* config) : token(token), config(config), cache(discpp::Cache(this)), event_handler(new discpp::EventHandler(this)) {
+    Client::Client(const std::string& token, ClientConfig* config) : token(token), config(config), cache(new discpp::Cache(this)), event_handler(new discpp::EventHandler(this)) {
         fire_command_method = std::bind(discpp::FireCommand, std::placeholders::_1, std::placeholders::_2);
 
         message_cache_count = config->message_cache_size;

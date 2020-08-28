@@ -5,6 +5,7 @@
 #include "member.h"
 #include "embed_builder.h"
 #include "exceptions.h"
+#include "cache.h"
 
 namespace discpp {
     Message::Message(discpp::Client *client) : DiscordObject(client) {
@@ -12,14 +13,14 @@ namespace discpp {
     }
 
 	Message::Message(discpp::Client* client, const Snowflake& channel_id, const Snowflake& id, bool can_request) : discpp::DiscordObject(client, id) {
-        *this = client->cache.GetDiscordMessage(channel_id, id, can_request);
+        *this = client->cache->GetDiscordMessage(channel_id, id, can_request);
 	}
 
 	Message::Message(discpp::Client* client, rapidjson::Document& json) : discpp::DiscordObject(client) {
 		id = GetIDSafely(json, "id");
-		channel = client->cache.GetChannel(SnowflakeFromString(json["channel_id"].GetString()));
+		channel = client->cache->GetChannel(SnowflakeFromString(json["channel_id"].GetString()));
 		try {
-            guild = channel.GetGuild().value();
+            guild = channel.GetGuild();
         } catch (const exceptions::DiscordObjectNotFound&) {
 		} catch (const exceptions::ProhibitedEndpointException&) {}
 

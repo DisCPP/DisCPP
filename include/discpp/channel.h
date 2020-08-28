@@ -279,9 +279,9 @@ namespace discpp {
          *      discpp::Guild = channel.GetGuild();
          * ```
          *
-         * @return discpp::Guild
+         * @return std::shared_ptr<discpp::Guild>
          */
-        [[nodiscard]] std::optional<std::shared_ptr<discpp::Guild>> GetGuild() const;
+        [[nodiscard]] std::shared_ptr<discpp::Guild> GetGuild() const;
 
         /**
          * @brief Create an invite for the channel.
@@ -313,12 +313,12 @@ namespace discpp {
         /**
          * @brief Lists children channels for this category.
          * ```cpp
-         *      std::unordered_map<discpp::Snowflake, discpp::Channel> children = category.GetChildren();
+         *      auto children = category.GetChildren();
          * ```
          *
          * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
          */
-        std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> GetChildren();
+        std::unordered_map<discpp::Snowflake, discpp::Channel> GetChildren();
 
         /**
         * @brief Add a recipient to the group dm.

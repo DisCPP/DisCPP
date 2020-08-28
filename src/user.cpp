@@ -2,14 +2,15 @@
 #include "client.h"
 #include "guild.h"
 #include "member.h"
+#include "cache.h"
 
 #include <iomanip>
 #include <discpp/exceptions.h>
 
 namespace discpp {
 	User::User(discpp::Client* client, const Snowflake& id) : discpp::DiscordObject(client, id) {
-		auto it = client->cache.members.find(id);
-		if (it != client->cache.members.end()) {
+		auto it = client->cache->members.find(id);
+		if (it != client->cache->members.end()) {
 			*this = it->second->user;
 		}
 	}
