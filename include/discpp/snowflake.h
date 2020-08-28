@@ -8,6 +8,8 @@ namespace discpp {
         CUSTOM, DEFAULT, ISO8601
     };
 
+
+
     class Snowflake {
     private:
         uint64_t id;
