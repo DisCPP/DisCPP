@@ -10,6 +10,12 @@ namespace discpp {
             case CommonTimeFormat::ISO8601:
                 time_format = "%Y-%m-%dT%H:%M:%SZ";
                 break;
+            case CommonTimeFormat::AMERICAN:
+                time_format = "%m-%d-%Y %I:%M:%S %p";
+                break;
+            case CommonTimeFormat::EUROPEAN:
+                time_format = "%d-%m-%Y %H:%M:%S";
+                break;
             case CommonTimeFormat::DEFAULT:
                 time_format = (localtime ? "%F @ %r %Z" : "%F @ %r");
                 break;

@@ -5,7 +5,7 @@
 
 namespace discpp {
     enum class CommonTimeFormat : int {
-        CUSTOM, DEFAULT, ISO8601
+        CUSTOM, DEFAULT, ISO8601, EUROPEAN, AMERICAN
     };
 
 
