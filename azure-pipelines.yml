@@ -24,8 +24,6 @@ jobs:
       inputs:
         key: 'version2 | $(vcpkgArgs) | "$(vcpkgGitRef)"" | "$(Agent.OS)"'
         path: '$(vcpkgLocation)'
-    - script: $(vcpkgLocation)/vcpkg remove ixwebsocket
-      displayName: Make sure IXWebsocket is uninstalled from vcpkg
     - task: run-vcpkg@0
       displayName: 'Run vcpkg'
       inputs:
@@ -34,6 +32,8 @@ jobs:
         vcpkgGitCommitId: $(vcpkgGitRef)
         vcpkgTriplet: 'x64-windows'
         vcpkgGitURL: https://github.com/microsoft/vcpkg.git
+    - script: $(vcpkgLocation)/vcpkg remove ixwebsocket
+      displayName: Make sure IXWebsocket is uninstalled from vcpkg
     - task: run-cmake@0
       displayName: 'Run CMake with Ninja'
       enabled: true
@@ -55,8 +55,6 @@ jobs:
       inputs:
         key: 'version2 | $(vcpkgArgs) | "$(vcpkgGitRef)"" | "$(Agent.OS)"'
         path: '$(vcpkgLocation)'
-    - script: $(vcpkgLocation)/vcpkg remove ixwebsocket
-      displayName: Make sure IXWebsocket is uninstalled from vcpkg
     - task: run-vcpkg@0
       displayName: 'Run vcpkg'
       inputs:
@@ -65,6 +63,8 @@ jobs:
         vcpkgGitCommitId: $(vcpkgGitRef)
         vcpkgTriplet: 'x64-linux'
         vcpkgGitURL: https://github.com/microsoft/vcpkg.git
+    - script: $(vcpkgLocation)/vcpkg remove ixwebsocket
+      displayName: Make sure IXWebsocket is uninstalled from vcpkg
     - task: run-cmake@0
       displayName: 'Run CMake'
       enabled: true
