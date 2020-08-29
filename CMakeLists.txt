@@ -70,6 +70,7 @@ elseif(USE_SIMD)
 endif()
 
 add_subdirectory(thirdparty/cpr)
+set(USE_ZLIB FALSE)
 add_subdirectory(thirdparty/IXWebSocket)
 
 # Link sources
@@ -98,7 +99,7 @@ else()
 endif()
 
 if (USE_RAPID)
-	target_include_directories(discpp PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
+	target_include_directories(discpp PUBLIC thirdparty/rapidjson/include)
 elseif(USE_SIMD)
 	target_link_libraries(discpp PUBLIC simdjson)
 endif()

@@ -207,7 +207,7 @@ namespace discpp {
          *
          * @return discpp::Message
          */
-        std::optional<discpp::Message> RequestMessage(discpp::Snowflake id);
+        discpp::Message RequestMessage(const discpp::Snowflake& message_id);
 
         /**
          * @brief Triggers a typing indicator.
@@ -229,7 +229,7 @@ namespace discpp {
          *
          * @return std::vector<discpp::Message>
          */
-		std::optional<std::vector<discpp::Message>> GetPinnedMessages();
+		std::vector<discpp::Message> GetPinnedMessages();
 
         /**
          * @brief Delete several messages (2-100).

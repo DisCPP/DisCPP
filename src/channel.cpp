@@ -192,7 +192,7 @@ namespace discpp {
 		return messages;
 	}
 
-	discpp::Message Channel::FindMessage(const Snowflake& message_id) {
+	discpp::Message Channel::RequestMessage(const discpp::Snowflake& message_id) {
 		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/messages/" + std::to_string(message_id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 
 		return discpp::Message(*result);
@@ -359,19 +359,6 @@ namespace discpp {
             throw std::runtime_error("discpp::Channel::GroupDMRemoveRecipient only available for DM/Group DM channels!");
         }
 	}
-
-    discpp::Message Channel::RequestMessage(discpp::Snowflake id) {
-        std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/channels/" + std::to_string(this->id) + "/messages/" + std::to_string(id)), DefaultHeaders(), {}, {});
-
-        std::optional<discpp::Message> tmp;
-        try {
-            tmp = discpp::Message(*result);
-        } catch (std::exception& e) {
-            tmp = std::nullopt;
-        }
-
-        return tmp;
-    }
 
     std::string Channel::GetIconURL(const ImageType &img_type) const {
         std::string icon_str = CombineAvatarHash(icon_hex);
