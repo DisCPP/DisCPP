@@ -38,7 +38,7 @@ namespace discpp {
          *
          * @return discpp::Role, this is a constructor.
          */
-        explicit Role(const discpp::JsonObject& json);
+        Role(rapidjson::Document& json);
 
         /**
          * @brief Returns if the role is hoist-able or not. Which means the role displays in member list.

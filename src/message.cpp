@@ -11,24 +11,26 @@ namespace discpp {
         *this = globals::client_instance->cache.GetDiscordMessage(channel_id, id, can_request);
 	}
 
-	Message::Message(const discpp::JsonObject& json) {
-		id = json.GetIDSafely("id");
+	Message::Message(rapidjson::Document& json) {
+		id = GetIDSafely(json, "id");
 		channel = globals::client_instance->cache.GetChannel(SnowflakeFromString(json["channel_id"].GetString()));
 		try {
             guild = channel.GetGuild().value();
         } catch (const exceptions::DiscordObjectNotFound&) {
 		} catch (const exceptions::ProhibitedEndpointException&) {}
 
-		author = json.ConstructDiscppObjectFromJson("author", discpp::User());
-        if (json.ContainsNotNull("member")) {
+		author = ConstructDiscppObjectFromJson(json, "author", discpp::User());
+        if (ContainsNotNull(json, "member")) {
             if (guild != nullptr) {
                 try {
                     auto mbr = guild->GetMember(author.id);
                     member = mbr;
                 } catch (const exceptions::DiscordObjectNotFound&) {
+                    rapidjson::Document doc(rapidjson::kObjectType);
+                    doc.CopyFrom(json["member"], doc.GetAllocator());
 
                     // Since the member isn't cached, create it.
-                    auto mbr = std::make_shared<discpp::Member>(json["member"], *guild);
+                    auto mbr = std::make_shared<discpp::Member>(discpp::Member(doc, *guild));
                     mbr->user = author;
                     member = mbr;
 
@@ -37,74 +39,84 @@ namespace discpp {
                 }
             }
         }
-		content = json.Get<std::string>("content");
-        if (json.ContainsNotNull("timestamp")) {
+		content = GetDataSafely<std::string>(json, "content");
+        if (discpp::ContainsNotNull(json, "timestamp")) {
             timestamp = std::chrono::system_clock::from_time_t(TimeFromDiscord(json["timestamp"].GetString()));
         }
-		if (json.ContainsNotNull("edited_timestamp")) {
+		if (discpp::ContainsNotNull(json, "edited_timestamp")) {
 		    edited_timestamp = std::chrono::system_clock::from_time_t(TimeFromDiscord(json["edited_timestamp"].GetString()));
 		}
-		if (json.Get<bool>("tts")) {
+		if (GetDataSafely<bool>(json, "tts")) {
 		    bit_flags |= 0b1;
 		}
-		if (json.Get<bool>("mention_everyone")) {
+		if (GetDataSafely<bool>(json, "mention_everyone")) {
 		    bit_flags |= 0b10;
 		}
-		if (json.ContainsNotNull("mentions")) {
-		    json.IterateThrough("mentions", [&] (const discpp::JsonObject& mention_json)->bool {
+		if (ContainsNotNull(json, "mentions")) {
+            for (auto const& mention : json["mentions"].GetArray()) {
+                rapidjson::Document mention_json(rapidjson::kObjectType);
+                mention_json.CopyFrom(mention, mention_json.GetAllocator());
+
                 discpp::User tmp = discpp::User(mention_json);
                 mentions.insert({ tmp.id, tmp });
-
-                return true;
-		    });
+            }
         }
 
-        if (json.ContainsNotNull("mention_roles")) {
-            json.IterateThrough("mention_roles", [&] (const discpp::JsonObject& mentioned_role_json)->bool {
-                mentioned_roles.emplace_back(mentioned_role_json.GetString());
+        if (ContainsNotNull(json, "mention_roles")) {
+            for (auto const& mentioned_role : json["mention_roles"].GetArray()) {
+                rapidjson::Document mentioned_role_json;
+                mentioned_role_json.CopyFrom(mentioned_role, mentioned_role_json.GetAllocator());
 
-                return true;
-            });
+                mentioned_roles.push_back(SnowflakeFromString(mentioned_role_json.GetString()));
+            }
         }
 
-        if (json.ContainsNotNull("mention_channels")) {
-            json.IterateThrough("mention_channels", [&] (const discpp::JsonObject& mention_channel_json) ->bool {
+        if (ContainsNotNull(json, "mention_channels")) {
+            for (auto const& mention_channel : json["mention_channels"].GetArray()) {
+                rapidjson::Document mention_channel_json;
+                mention_channel_json.CopyFrom(mention_channel, mention_channel_json.GetAllocator());
+
                 discpp::Message::ChannelMention channel_mention(mention_channel_json);
                 mention_channels.emplace(channel_mention.id, mention_channel_json);
-                return true;
-            });
+            }
         }
 
-        if (json.ContainsNotNull("attachments")) {
-            json.IterateThrough("attachments", [&] (const discpp::JsonObject& attachment_json)->bool {
-                attachments.emplace_back(attachment_json);
+        if (ContainsNotNull(json, "attachments")) {
+            for (auto const& attachment : json["attachments"].GetArray()) {
+                rapidjson::Document attachment_json;
+                attachment_json.CopyFrom(attachment, attachment_json.GetAllocator());
 
-                return true;
-            });
+                attachments.push_back(discpp::Attachment(attachment_json));
+            }
         }
 
-        if (json.ContainsNotNull("embeds")) {
-            json.IterateThrough("embeds", [&] (const discpp::JsonObject& embed_json)->bool {
-                embeds.emplace_back(embed_json);
-                return true;
-            });
+        if (ContainsNotNull(json, "embeds")) {
+            for (auto const& embed : json["embeds"].GetArray()) {
+                rapidjson::Document embed_json;
+                embed_json.CopyFrom(embed, embed_json.GetAllocator());
+
+                embeds.push_back(discpp::EmbedBuilder(embed_json));
+            }
         }
 
-        if (json.ContainsNotNull("reactions")) {
-            json.IterateThrough("reactions", [&] (const discpp::JsonObject& reaction_json)->bool {
-                reactions.emplace_back(reaction_json);
-                return true;
-            });
+        if (ContainsNotNull(json, "reactions")) {
+            for (auto const& reaction : json["reactions"].GetArray()) {
+                rapidjson::Document reaction_json;
+                reaction_json.CopyFrom(reaction, reaction_json.GetAllocator());
+
+                discpp::Reaction tmp(reaction_json);
+                reactions.push_back(tmp);
+            }
         }
-        if (json.Get<bool>("pinned")) {
+        if (GetDataSafely<bool>(json, "pinned")) {
             bit_flags |= 0b100;
         }
-		webhook_id = json.GetIDSafely("webhook_id");
-		type = json.Get<int>("type");
-		activity = std::make_shared<discpp::MessageActivity>(json.ConstructDiscppObjectFromJson("activity", discpp::MessageActivity()));
-        application = std::make_shared<discpp::MessageApplication>(json.ConstructDiscppObjectFromJson("application", discpp::MessageApplication()));
-        message_reference = std::make_shared<discpp::MessageReference>(json.ConstructDiscppObjectFromJson("message_reference", discpp::MessageReference()));
-		flags = json.Get<int>("flags");
+		webhook_id = GetIDSafely(json, "webhook_id");
+		type = GetDataSafely<int>(json, "type");
+		activity = std::make_shared<discpp::MessageActivity>(ConstructDiscppObjectFromJson(json, "activity", discpp::MessageActivity()));
+        application = std::make_shared<discpp::MessageApplication>(ConstructDiscppObjectFromJson(json, "application", discpp::MessageApplication()));
+        message_reference = std::make_shared<discpp::MessageReference>(ConstructDiscppObjectFromJson(json, "message_reference", discpp::MessageReference()));
+		flags = GetDataSafely<int>(json, "flags");
 	}
 
     inline bool Message::IsTTS() {
@@ -142,14 +154,12 @@ namespace discpp {
         discpp::Emoji tmp = emoji;
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + tmp.ToURL());
 		cpr::Body body("{\"limit\": " + std::to_string(amount) + "}");
-
-		std::unique_ptr<discpp::JsonObject> result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
+		std::unique_ptr<rapidjson::Document> result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
 		
 		std::unordered_map<discpp::Snowflake, discpp::User> users;
-        result->IterateThrough([&](discpp::JsonObject& user_json)->bool {
+		IterateThroughNotNullJson(*result, [&](rapidjson::Document& user_json) {
 		    discpp::User tmp(user_json);
-		    users.emplace(tmp.id, tmp);
-		    return true;
+		    users.insert({ tmp.id, tmp });
 		});
 
 		return users;
@@ -160,15 +170,13 @@ namespace discpp {
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + tmp.ToURL());
 		std::string method_str = (method == GetReactionsMethod::BEFORE_USER) ? "before" : "after";
 		cpr::Body body("{\"" + method_str + "\": " + std::to_string(user.id) + "}");
-		std::unique_ptr<discpp::JsonObject> result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
+		std::unique_ptr<rapidjson::Document> result = SendGetRequest(endpoint, DefaultHeaders(), channel.id, RateLimitBucketType::CHANNEL, body);
 
         std::unordered_map<discpp::Snowflake, discpp::User> users;
-        result->IterateThrough([&](discpp::JsonObject& user_json)->bool {
+        IterateThroughNotNullJson(*result, [&](rapidjson::Document& user_json) {
             discpp::User tmp(user_json);
-            users.emplace(tmp.id, tmp);
-            return true;
+            users.insert({ tmp.id, tmp });
         });
-
 
 		return users;
 	}
@@ -181,17 +189,18 @@ namespace discpp {
 	discpp::Message Message::EditMessage(const std::string& text) {
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id));
 		cpr::Body body("{\"content\": \"" + EscapeString(text) + "\"}");
-		std::unique_ptr<discpp::JsonObject> result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL);
+		std::unique_ptr<rapidjson::Document> result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL);
 
 		*this = discpp::Message(*result);
 		return *this;
 	}
 
 	discpp::Message Message::EditMessage(const discpp::EmbedBuilder& embed) {
-		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id));
 
-		cpr::Body body("{\"embed\": " + embed.ToJson().DumpJson() + "}");
-		std::unique_ptr<discpp::JsonObject> result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id));
+		std::unique_ptr<rapidjson::Document> json = embed.ToJson();
+		cpr::Body body("{\"embed\": " + DumpJson(*json) + "}");
+		std::unique_ptr<rapidjson::Document> result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
         *this = discpp::Message(*result);
 		return *this;
@@ -200,7 +209,7 @@ namespace discpp {
 	discpp::Message Message::EditMessage(const int& flags) {
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id));
 		cpr::Body body("{\"flags\": " + std::to_string(flags) + "}");
-        std::unique_ptr<discpp::JsonObject> result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+        std::unique_ptr<rapidjson::Document> result = SendPatchRequest(endpoint, DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
         *this = discpp::Message(*result);
 		return *this;

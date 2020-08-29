@@ -10,21 +10,24 @@ namespace discpp {
 		}
 	}
 
-	Emoji::Emoji(const discpp::JsonObject& json) {
-		id = json.GetIDSafely("id");
-		name = json.Get<std::string>("name");
-		if (json.ContainsNotNull("roles")) {
-		    json["roles"].IterateThrough([&](const discpp::JsonObject& role_json)->bool {
-                roles.emplace_back(Snowflake(role_json.GetString()));
-                return true;
-		    });
+	Emoji::Emoji(rapidjson::Document& json) {
+		id = GetIDSafely(json, "id");
+		name = GetDataSafely<std::string>(json, "name");
+		if (ContainsNotNull(json, "roles")) {
+			for (auto& role : json["roles"].GetArray()) {
+				rapidjson::Document role_json;
+				role_json.CopyFrom(role, role_json.GetAllocator());
+				roles.emplace_back(SnowflakeFromString(role.GetString()));
+			}
 		}
-		if (json.ContainsNotNull("user")) {
-			creator = std::make_shared<discpp::User>(json["user"]);
+		if (ContainsNotNull(json, "user")) {
+			rapidjson::Document user_json;
+			user_json.CopyFrom(json["user"], user_json.GetAllocator());
+			creator = std::make_shared<discpp::User>(discpp::User(user_json));
 		}
-		require_colons = json.Get<bool>("require_colons");
-        managed = json.Get<bool>("managed");
-        animated = json.Get<bool>("animated");
+		require_colons = GetDataSafely<bool>(json, "require_colons");
+        managed = GetDataSafely<bool>(json, "managed");
+        animated = GetDataSafely<bool>(json, "animated");
 	}
 
     Emoji::Emoji(const std::string& s_unicode) {

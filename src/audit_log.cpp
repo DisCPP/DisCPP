@@ -11,7 +11,7 @@
 #include "role.h"
 
 // This is extremely ugly and probably slow, maybe theres a way we could trim this down?
-discpp::AuditLogChangeKey GetKey(const std::string& key, discpp::JsonObject& j) {
+discpp::AuditLogChangeKey GetKey(const std::string& key, rapidjson::Document& j) {
 	discpp::AuditLogChangeKey a_key;
 
 	discpp::AuditLogKey keyval = discpp::StrToKey(key);
@@ -54,16 +54,20 @@ discpp::AuditLogChangeKey GetKey(const std::string& key, discpp::JsonObject& j) 
             a_key.vanity_url_code = j.GetString();
 	        break;
 	    case discpp::AuditLogKey::ADD:
-	        j.IterateThrough([&](const discpp::JsonObject& role_json)->bool {
-                a_key.roles_add.emplace_back(role_json);
-                return true;
-	        });
+            for (auto const& role : j.GetArray()) {
+                rapidjson::Document role_json(rapidjson::kObjectType);
+                role_json.CopyFrom(role, role_json.GetAllocator());
+
+                a_key.roles_add.push_back(discpp::Role(role_json));
+            }
 	        break;
 	    case discpp::AuditLogKey::REMOVE:
-            j.IterateThrough([&](const discpp::JsonObject& role_json)->bool {
-                a_key.roles_remove.emplace_back(role_json);
-                return true;
-            });
+            for (auto const& role : j.GetArray()) {
+                rapidjson::Document role_json(rapidjson::kObjectType);
+                role_json.CopyFrom(role, role_json.GetAllocator());
+
+                a_key.roles_remove.push_back(discpp::Role(role_json));
+            }
 	        break;
 	    case discpp::AuditLogKey::PRUNE_DELETE_DAYS:
             a_key.prune_delete_days = j.GetInt();
@@ -87,10 +91,12 @@ discpp::AuditLogChangeKey GetKey(const std::string& key, discpp::JsonObject& j) 
             a_key.bitrate = j.GetInt();
 	        break;
 	    case discpp::AuditLogKey::PERMISSION_OVERWRITES:
-            j.IterateThrough([&](const discpp::JsonObject& perm_json)->bool {
-                a_key.permission_overwrites.emplace_back(perm_json);
-                return true;
-            });
+            for (auto const& perm : j.GetArray()) {
+                rapidjson::Document perm_json(rapidjson::kObjectType);
+                perm_json.CopyFrom(perm, perm_json.GetAllocator());
+
+                a_key.permission_overwrites.push_back(discpp::Permissions(perm_json));
+            }
 	        break;
 	    case discpp::AuditLogKey::NSFW:
             a_key.nsfw = j.GetBool();
@@ -171,69 +177,79 @@ discpp::AuditLogChangeKey GetKey(const std::string& key, discpp::JsonObject& j) 
 	return a_key;
 }
 
-discpp::AuditLogChange::AuditLogChange(const discpp::JsonObject& json) {
+discpp::AuditLogChange::AuditLogChange(rapidjson::Document& json) {
 	key = json["key"].GetString();
 
-	if (json.ContainsNotNull("new_value")) {
-	    discpp::JsonObject new_value_json = json["new_value"];
-		new_value = GetKey(key, new_value_json);
+	if (ContainsNotNull(json, "new_value")) {
+	    std::unique_ptr<rapidjson::Document> new_value_json = GetDocumentInsideJson(json, "new_value");
+		new_value = GetKey(key, *new_value_json);
 	}
 
-    if (json.ContainsNotNull("old_value")) {
-        discpp::JsonObject old_value_json = json["old_value"];
-        old_value = GetKey(key, old_value_json);
+    if (ContainsNotNull(json, "old_value")) {
+        std::unique_ptr<rapidjson::Document> old_value_json = GetDocumentInsideJson(json, "old_value");
+        old_value = GetKey(key, *old_value_json);
     }
 }
 
-discpp::AuditEntryOptions::AuditEntryOptions(const discpp::JsonObject& json) {
-	delete_member_days = json.Get<std::string>("delete_member_days");
-	members_removed = json.Get<std::string>("members_removed");
+discpp::AuditEntryOptions::AuditEntryOptions(rapidjson::Document& json) {
+	delete_member_days = GetDataSafely<std::string>(json, "delete_member_days");
+	members_removed = GetDataSafely<std::string>(json, "members_removed");
 	// @TODO: Make channel valid.
-	if (json.ContainsNotNull("channel_id")) {
+	if (ContainsNotNull(json, "channel_id")) {
         channel_id = discpp::SnowflakeFromString(json["channel_id"].GetString());
 	}
-    if (json.ContainsNotNull("message_id")) {
+    if (ContainsNotNull(json, "message_id")) {
         message_id = discpp::SnowflakeFromString(json["message_id"].GetString());
     }
-	count = json.Get<std::string>("count");
-	id = json.GetIDSafely("id");
-	type = json.Get<std::string>("type");
-	role_name = json.Get<std::string>("role_name");
+	count = GetDataSafely<std::string>(json, "count");
+	id = GetIDSafely(json, "id");
+	type = GetDataSafely<std::string>(json, "type");
+	role_name = GetDataSafely<std::string>(json, "role_name");
 }
 
-discpp::AuditLogEntry::AuditLogEntry(const discpp::JsonObject& json) {
-    target_id = json.Get<std::string>("target_id");
-    if (json.ContainsNotNull("changes")) {
-        json.IterateThrough([&] (const discpp::JsonObject& change_json)->bool {
-            changes.emplace_back(change_json);
-            return true;
-        });
+discpp::AuditLogEntry::AuditLogEntry(rapidjson::Document& json) {
+    target_id = GetDataSafely<std::string>(json, "target_id");
+    if (ContainsNotNull(json, "changes")) {
+        for (auto const& change : json["changes"].GetArray()) {
+            rapidjson::Document change_json(rapidjson::kObjectType);
+            change_json.CopyFrom(change, change_json.GetAllocator());
+
+            changes.push_back(discpp::AuditLogChange(change_json));
+        }
     }
     user = discpp::User(SnowflakeFromString(json["user_id"].GetString()));
     id = SnowflakeFromString(json["id"].GetString());
     action_type = static_cast<discpp::AuditLogEvent>(json["action_type"].GetInt());
-    options = json.ConstructDiscppObjectFromJson("options", discpp::AuditEntryOptions());
-    reason = json.Get<std::string>("reason");
+    options = ConstructDiscppObjectFromJson(json, "options", discpp::AuditEntryOptions());
+    reason = GetDataSafely<std::string>(json, "reason");
 }
 
-discpp::AuditLog::AuditLog(const discpp::JsonObject& json) {
-    json["webhooks"].IterateThrough([&] (const discpp::JsonObject& webhook_json)->bool {
-        webhooks.emplace_back(webhook_json);
-        return true;
-    });
+discpp::AuditLog::AuditLog(rapidjson::Document& json) {
+    for (auto const& webhook : json["webhooks"].GetArray()) {
+        rapidjson::Document webhook_json(rapidjson::kObjectType);
+        webhook_json.CopyFrom(webhook, webhook_json.GetAllocator());
 
-    json["user"].IterateThrough([&] (const discpp::JsonObject& user_json)->bool {
-        users.emplace_back(user_json);
-        return true;
-    });
+        webhooks.push_back(discpp::Webhook(webhook_json));
+    }
 
-    json["audit_log_entries"].IterateThrough([&] (const discpp::JsonObject& audit_log_entry_json)->bool {
-        audit_log_entries.emplace_back(audit_log_entry_json);
-        return true;
-    });
+    for (auto const& user : json["user"].GetArray()) {
+        rapidjson::Document user_json(rapidjson::kObjectType);
+        user_json.CopyFrom(user, user_json.GetAllocator());
 
-    json["integrations"].IterateThrough([&] (const discpp::JsonObject& integration_json)->bool {
-        integrations.emplace_back(integration_json);
-        return true;
-    });
+        users.push_back(discpp::User(user_json));
+    }
+
+    for (auto const& audit_log_entry : json["audit_log_entries"].GetArray()) {
+        rapidjson::Document audit_log_entry_json(rapidjson::kObjectType);
+        audit_log_entry_json.CopyFrom(audit_log_entry, audit_log_entry_json.GetAllocator());
+
+        audit_log_entries.push_back(discpp::AuditLogEntry(audit_log_entry_json));
+    }
+
+    for (auto const& integration : json["integrations"].GetArray()) {
+        rapidjson::Document integration_json(rapidjson::kObjectType);
+        integration_json.CopyFrom(integration, integration_json.GetAllocator());
+
+        integrations.push_back(discpp::Integration(integration_json));
+    }
 }

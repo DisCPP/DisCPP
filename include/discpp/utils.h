@@ -1,6 +1,12 @@
 #ifndef DISCPP_UTILS_H
 #define DISCPP_UTILS_H
 
+#ifndef RAPIDJSON_HAS_STDSTRING
+#define RAPIDJSON_HAS_STDSTRING 1
+#endif
+
+#include <rapidjson/document.h>
+
 #include "discord_object.h"
 
 #include <cpr/cpr.h>
@@ -11,7 +17,6 @@
 namespace discpp {
 	class Client;
 	class Role;
-	class JsonObject;
 
 	namespace globals {
 		inline discpp::Client* client_instance;
@@ -91,6 +96,71 @@ namespace discpp {
 
     discpp::Snowflake SnowflakeFromString(const std::string& str);
 
+	inline discpp::Snowflake GetIDSafely(rapidjson::Document& json, const char* value_name) {
+        rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
+        if (itr != json.MemberEnd()) {
+            if (!json[value_name].IsNull()) {
+                rapidjson::Document t_doc;
+                t_doc.CopyFrom(json[value_name], t_doc.GetAllocator());
+
+                return SnowflakeFromString(std::string(t_doc.GetString()));
+            }
+        }
+
+        return 0;
+	}
+
+    template<typename T>
+    inline T GetDataSafely(const rapidjson::Document & json, const char* value_name) {
+        rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
+        if (itr != json.MemberEnd()) {
+            if (!json[value_name].IsNull()) {
+                rapidjson::Document t_doc;
+                t_doc.CopyFrom(json[value_name], t_doc.GetAllocator());
+
+                return t_doc.Get<T>();
+            }
+        }
+
+        return T();
+    }
+
+    template<class T>
+    inline T ConstructDiscppObjectFromID(const rapidjson::Document& doc, const char* value_name, T default_val) {
+        rapidjson::Value::ConstMemberIterator itr = doc.FindMember(value_name);
+        if (itr != doc.MemberEnd()) {
+            if (!doc[value_name].IsNull()) {
+                rapidjson::Document t_doc;
+                t_doc.CopyFrom(doc[value_name], t_doc.GetAllocator());
+
+                return T(SnowflakeFromString(t_doc.GetString()));
+            }
+        }
+
+        return default_val;
+    }
+
+	template<class T>
+	inline T ConstructDiscppObjectFromJson(const rapidjson::Document& doc, const char* value_name, T default_val) {
+        rapidjson::Value::ConstMemberIterator itr = doc.FindMember(value_name);
+        if (itr != doc.MemberEnd()) {
+            if (!doc[value_name].IsNull()) {
+                rapidjson::Document t_doc;
+                t_doc.CopyFrom(doc[value_name], t_doc.GetAllocator());
+
+                return T(t_doc);
+            }
+        }
+
+        return default_val;
+	}
+
+	void IterateThroughNotNullJson(rapidjson::Document& json, const std::function<void(rapidjson::Document&)>& func);
+    bool ContainsNotNull(rapidjson::Document& json, const char * value_name);
+    std::string DumpJson(rapidjson::Document& json);
+    std::string DumpJson(rapidjson::Value& json);
+    std::unique_ptr<rapidjson::Document> GetDocumentInsideJson(rapidjson::Document &json, const char* value_name);
+
 	// Rate limits
 	struct RateLimit {
 		int limit = 500;
@@ -144,22 +214,22 @@ namespace discpp {
      * @brief Handles a response from the discpp servers.
      *
      * ```cpp
-     *      discpp::JsonObject response = discpp::HandleResponse(cpr_response, object, discpp::RateLimitBucketType::CHANNEL);
+     *      rapidjson::Document response = discpp::HandleResponse(cpr_response, object, discpp::RateLimitBucketType::CHANNEL);
      * ```
      *
      * @param[in] reponse The cpr response from the servers.
      * @param[in] object The object id to handle the ratelimits for.
      * @param[in] ratelimit_bucket The rate limit bucket.
      *
-     * @return discpp::JsonObject
+     * @return rapidjson::Document
      */
-	extern std::unique_ptr<discpp::JsonObject> HandleResponse(cpr::Response& response, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket);
+	extern std::unique_ptr<rapidjson::Document> HandleResponse(cpr::Response& response, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket);
 
     /**
      * @brief Sends a get request to a url.
      *
      * ```cpp
-     *      discpp::JsonObject response = discpp::SendGetRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+     *      rapidjson::Document response = discpp::SendGetRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
      * ```
      *
      * @param[in] url The url to create a request to.
@@ -168,15 +238,15 @@ namespace discpp {
      * @param[in] ratelimit_bucket The rate limit bucket.
      * @param[in] The cpr response body.
      *
-     * @return discpp::JsonObject
+     * @return rapidjson::Document
      */
-	extern std::unique_ptr<discpp::JsonObject> SendGetRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+	extern std::unique_ptr<rapidjson::Document> SendGetRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
 
     /**
      * @brief Sends a post request to a url.
      *
      * ```cpp
-     *      discpp::JsonObject response = discpp::SendPostRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+     *      rapidjson::Document response = discpp::SendPostRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
      * ```
      *
      * @param[in] url The url to create a request to.
@@ -185,15 +255,15 @@ namespace discpp {
      * @param[in] ratelimit_bucket The rate limit bucket.
      * @param[in] The cpr response body.
      *
-     * @return discpp::JsonObject
+     * @return rapidjson::Document
      */
-	extern std::unique_ptr<discpp::JsonObject> SendPostRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+	extern std::unique_ptr<rapidjson::Document> SendPostRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
 
     /**
      * @brief Sends a put request to a url.
      *
      * ```cpp
-     *      discpp::JsonObject response = discpp::SendPutRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+     *      rapidjson::Document response = discpp::SendPutRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
      * ```
      *
      * @param[in] url The url to create a request to.
@@ -202,15 +272,15 @@ namespace discpp {
      * @param[in] ratelimit_bucket The rate limit bucket.
      * @param[in] The cpr response body.
      *
-     * @return discpp::JsonObject
+     * @return rapidjson::Document
      */
-	extern std::unique_ptr<discpp::JsonObject> SendPutRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+	extern std::unique_ptr<rapidjson::Document> SendPutRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
 
     /**
      * @brief Sends a patch request to a url.
      *
      * ```cpp
-     *      discpp::JsonObject response = discpp::SendPatchRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
+     *      rapidjson::Document response = discpp::SendPatchRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL, {});
      * ```
      *
      * @param[in] url The url to create a request to.
@@ -219,15 +289,15 @@ namespace discpp {
      * @param[in] ratelimit_bucket The rate limit bucket.
      * @param[in] The cpr response body.
      *
-     * @return discpp::JsonObject
+     * @return rapidjson::Document
      */
-	extern std::unique_ptr<discpp::JsonObject> SendPatchRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
+	extern std::unique_ptr<rapidjson::Document> SendPatchRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket, const cpr::Body& body = {});
 
     /**
      * @brief Sends a delete request to a url.
      *
      * ```cpp
-     *      discpp::JsonObject response = discpp::SendDeleteRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL);
+     *      rapidjson::Document response = discpp::SendDeleteRequest(url, discpp::DefaultHeaders(), object, discpp::RateLimitBucketType::CHANNEL);
      * ```
      *
      * @param[in] url The url to create a request to.
@@ -235,9 +305,9 @@ namespace discpp {
      * @param[in] object The object id to handle the ratelimits for.
      * @param[in] ratelimit_bucket The rate limit bucket.
      *
-     * @return discpp::JsonObject
+     * @return rapidjson::Document
      */
-	extern std::unique_ptr<discpp::JsonObject> SendDeleteRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket);
+	extern std::unique_ptr<rapidjson::Document> SendDeleteRequest(const std::string& url, const cpr::Header& headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket);
 
     /**
      * @brief Gets the default headers to communicate with the discpp servers.
@@ -248,7 +318,7 @@ namespace discpp {
      *
      * @param[in] add The headers to add to the default ones.
      *
-     * @return discpp::JsonObject
+     * @return rapidjson::Document
      */
     cpr::Header DefaultHeaders(const cpr::Header& add = {});
 
@@ -340,7 +410,7 @@ namespace discpp {
      * ```cpp
      *      std::string raw_text = "{\"content\":\"" + EscapeString(text) + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
      *		cpr::Body body = cpr::Body(raw_text);
-     *		std::unique_ptr<discpp::JsonObject> result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+     *		std::unique_ptr<rapidjson::Document> result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
      * ```
      *
      * @param[in] string The string to escape.

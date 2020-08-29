@@ -119,7 +119,7 @@ namespace discpp {
          *
          * @return discpp::Channel, this is a constructor.
          */
-		Channel(const discpp::JsonObject& json);
+		Channel(rapidjson::Document& json);
 
         /**
          * @brief Requests a channel from discord's api.

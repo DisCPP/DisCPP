@@ -17,8 +17,6 @@
 #endif
 
 #include <rapidjson/document.h>
-
-//typedef rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> RapidJsonDocument;
 #elif SIMDJSON_BACKEND
 
 #endif
@@ -26,7 +24,7 @@
 namespace discpp {
     class JsonObject {
     public:
-        JsonObject();
+        JsonObject() = default;
         explicit JsonObject(const std::string& json_str);
 
 #ifdef RAPIDJSON_BACKEND
@@ -221,17 +219,6 @@ namespace discpp {
          * @return bool
          */
         bool ContainsNotNull(const char* value_name) const;
-
-        /**
-         * @brief Parse json.
-         *
-         * If you already have json contained in this object, it will be emptied.
-         *
-         * @param[in] json_str The json to parse into this object.
-         *
-         * @return void
-         */
-        void Parse(const std::string& json_str);
 
 #ifdef RAPIDJSON_BACKEND
         /**

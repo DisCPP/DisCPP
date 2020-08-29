@@ -45,7 +45,7 @@ namespace discpp {
          *
          * @return discpp::Member, this is a constructor.
          */
-		Member(const discpp::JsonObject& json, const discpp::Guild& guild);
+		Member(rapidjson::Document& json, const discpp::Guild& guild);
 
         Member(const discpp::Member& member);
         Member operator=(const discpp::Member& mbr);

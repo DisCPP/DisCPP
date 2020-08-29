@@ -1,11 +1,10 @@
 #include "settings.h"
-#include "json_object.h"
 
 namespace discpp {
-	FriendSource::FriendSource(const discpp::JsonObject& json) {
-		if (json.Get<bool>("all")) flags |= (unsigned int) FriendSourceFlags::ALL;
-		if (json.Get<bool>("mutual_friends")) flags |= (unsigned int) FriendSourceFlags::MUTUAL_FRIENDS;
-		if (json.Get<bool>("mutual_guilds")) flags |= (unsigned int) FriendSourceFlags::MUTUAL_GUILDS;
+	FriendSource::FriendSource(rapidjson::Document& json) {
+		if (GetDataSafely<bool>(json, "all")) flags |= (unsigned int) FriendSourceFlags::ALL;
+		if (GetDataSafely<bool>(json, "mutual_friends")) flags |= (unsigned int) FriendSourceFlags::MUTUAL_FRIENDS;
+		if (GetDataSafely<bool>(json, "mutual_guilds")) flags |= (unsigned int) FriendSourceFlags::MUTUAL_GUILDS;
 	}
 
 	void FriendSource::ModifyAll(const bool all) {
@@ -44,43 +43,43 @@ namespace discpp {
 		return (this->flags & (unsigned int)FriendSourceFlags::MUTUAL_GUILDS) == (unsigned int)FriendSourceFlags::MUTUAL_GUILDS;
 	}
 
-	ClientUserSettings::ClientUserSettings(const discpp::JsonObject& json) {
-		locale = StringToLocale(json.Get<std::string>("locale"));
-		status = json.Get<std::string>("status");
-		custom_status = json.Get<std::string>("custom_status");
-		afk_timeout = json.Get<int>("afk_timeout");
-		timezone_offset = json.Get<int>("timezone_offset");
-		theme = static_cast<Theme>(json.Get<int>("theme"));
+	ClientUserSettings::ClientUserSettings(rapidjson::Document& json) {
+		locale = StringToLocale(GetDataSafely<std::string>(json, "locale"));
+		status = GetDataSafely<std::string>(json, "status");
+		custom_status = GetDataSafely<std::string>(json, "custom_status");
+		afk_timeout = GetDataSafely<int>(json, "afk_timeout");
+		timezone_offset = GetDataSafely<int>(json, "timezone_offset");
+		theme = static_cast<Theme>(GetDataSafely<int>(json, "theme"));
 
-		if (json.ContainsNotNull("guild_positions")) {
-		    json.IterateThrough("guild_positions", [&] (const discpp::JsonObject& guild)->bool {
-                guild_positions.emplace_back(guild.GetString());
-
-                return true;
-		    });
+		if (ContainsNotNull(json, "guild_positions")) {
+			for (auto const& guild : json["guild_positions"].GetArray()) {
+				guild_positions.push_back(SnowflakeFromString(guild.GetString()));
+			}
 		}
 
 		explicit_content_filter = static_cast<discpp::ExplicitContentFilter>(json["explicit_content_filter"].GetInt());
-		friend_source_flags = FriendSource(json["friend_source_flags"]);
+		rapidjson::Document friend_source_flags_json;
+		friend_source_flags_json.CopyFrom(json["friend_source_flags"], friend_source_flags_json.GetAllocator());
+		friend_source_flags = FriendSource(friend_source_flags_json);
 
-		if (json.Get<bool>("show_current_game")) flags |= (unsigned int) ClientUserSettingsFlags::SHOW_CURRENT_GAME;
-		if (json.Get<bool>("default_guilds_restricted")) flags |= (unsigned int) ClientUserSettingsFlags::DEFAULT_GUILDS_RESTRICTED;
-		if (json.Get<bool>("inline_attachment_media")) flags |= (unsigned int) ClientUserSettingsFlags::INLINE_ATTACHMENT_MEDIA;
-		if (json.Get<bool>("inline_embed_media")) flags |= (unsigned int) ClientUserSettingsFlags::INLINE_EMBED_MEDIA;
-		if (json.Get<bool>("gif_auto_play")) flags |= (unsigned int) ClientUserSettingsFlags::GIF_AUTO_PLAY;
-		if (json.Get<bool>("render_embeds")) flags |= (unsigned int) ClientUserSettingsFlags::RENDER_EMBEDS;
-		if (json.Get<bool>("render_reactions")) flags |= (unsigned int) ClientUserSettingsFlags::RENDER_REACTIONS;
-		if (json.Get<bool>("animate_emoji")) flags |= (unsigned int) ClientUserSettingsFlags::ANIMATE_EMOJI;
-		if (json.Get<bool>("enable_tts_command")) flags |= (unsigned int) ClientUserSettingsFlags::ENABLE_TTS_COMMAND;
-		if (json.Get<bool>("message_display_compact")) flags |= (unsigned int) ClientUserSettingsFlags::MESSAGE_DISPLAY_COMPACT;
-		if (json.Get<bool>("convert_emoticons")) flags |= (unsigned int) ClientUserSettingsFlags::CONVERT_EMOTICONS;
-		if (json.Get<bool>("disable_games_tab")) flags |= (unsigned int) ClientUserSettingsFlags::DISABLE_GAMES_TAB;
-		if (json.Get<bool>("developer_mode")) flags |= (unsigned int) ClientUserSettingsFlags::DEVELOPER_MODE;
-		if (json.Get<bool>("detect_platform_accounts")) flags |= (unsigned int) ClientUserSettingsFlags::DETECT_PLATFORM_ACCOUNTS;
-		if (json.Get<bool>("stream_notifications_enabled")) flags |= (unsigned int) ClientUserSettingsFlags::STREAM_NOTIFICATIONS_ENABLED;
-		if (json.Get<bool>("allow_accessibility_detection")) flags |= (unsigned int) ClientUserSettingsFlags::ALLOW_ACCESSIBILITY_DETECTION;
-		if (json.Get<bool>("contact_sync_enabled")) flags |= (unsigned int) ClientUserSettingsFlags::CONTACT_SYNC_ENABLED;
-		if (json.Get<bool>("native_phone_integration_enabled")) flags |= (unsigned int) ClientUserSettingsFlags::NATIVE_PHONE_INTEGRATION_ENABLED;
+		if (GetDataSafely<bool>(json, "show_current_game")) flags |= (unsigned int) ClientUserSettingsFlags::SHOW_CURRENT_GAME;
+		if (GetDataSafely<bool>(json, "default_guilds_restricted")) flags |= (unsigned int) ClientUserSettingsFlags::DEFAULT_GUILDS_RESTRICTED;
+		if (GetDataSafely<bool>(json, "inline_attachment_media")) flags |= (unsigned int) ClientUserSettingsFlags::INLINE_ATTACHMENT_MEDIA;
+		if (GetDataSafely<bool>(json, "inline_embed_media")) flags |= (unsigned int) ClientUserSettingsFlags::INLINE_EMBED_MEDIA;
+		if (GetDataSafely<bool>(json, "gif_auto_play")) flags |= (unsigned int) ClientUserSettingsFlags::GIF_AUTO_PLAY;
+		if (GetDataSafely<bool>(json, "render_embeds")) flags |= (unsigned int) ClientUserSettingsFlags::RENDER_EMBEDS;
+		if (GetDataSafely<bool>(json, "render_reactions")) flags |= (unsigned int) ClientUserSettingsFlags::RENDER_REACTIONS;
+		if (GetDataSafely<bool>(json, "animate_emoji")) flags |= (unsigned int) ClientUserSettingsFlags::ANIMATE_EMOJI;
+		if (GetDataSafely<bool>(json, "enable_tts_command")) flags |= (unsigned int) ClientUserSettingsFlags::ENABLE_TTS_COMMAND;
+		if (GetDataSafely<bool>(json, "message_display_compact")) flags |= (unsigned int) ClientUserSettingsFlags::MESSAGE_DISPLAY_COMPACT;
+		if (GetDataSafely<bool>(json, "convert_emoticons")) flags |= (unsigned int) ClientUserSettingsFlags::CONVERT_EMOTICONS;
+		if (GetDataSafely<bool>(json, "disable_games_tab")) flags |= (unsigned int) ClientUserSettingsFlags::DISABLE_GAMES_TAB;
+		if (GetDataSafely<bool>(json, "developer_mode")) flags |= (unsigned int) ClientUserSettingsFlags::DEVELOPER_MODE;
+		if (GetDataSafely<bool>(json, "detect_platform_accounts")) flags |= (unsigned int) ClientUserSettingsFlags::DETECT_PLATFORM_ACCOUNTS;
+		if (GetDataSafely<bool>(json, "stream_notifications_enabled")) flags |= (unsigned int) ClientUserSettingsFlags::STREAM_NOTIFICATIONS_ENABLED;
+		if (GetDataSafely<bool>(json, "allow_accessibility_detection")) flags |= (unsigned int) ClientUserSettingsFlags::ALLOW_ACCESSIBILITY_DETECTION;
+		if (GetDataSafely<bool>(json, "contact_sync_enabled")) flags |= (unsigned int) ClientUserSettingsFlags::CONTACT_SYNC_ENABLED;
+		if (GetDataSafely<bool>(json, "native_phone_integration_enabled")) flags |= (unsigned int) ClientUserSettingsFlags::NATIVE_PHONE_INTEGRATION_ENABLED;
 	}
 
 	void ClientUserSettings::ModifyShowCurrentGame(const bool show_current_game) {

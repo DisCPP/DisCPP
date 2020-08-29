@@ -1,17 +1,21 @@
 #ifndef DISCPP_RATELIMIT_H
 #define DISCPP_RATELIMIT_H
 
+#ifndef RAPIDJSON_HAS_STDSTRING
+#define RAPIDJSON_HAS_STDSTRING 1
+#endif
+
+#include <rapidjson/document.h>
+
 #include <string>
 #include <vector>
 #include <unordered_map>
 
 namespace discpp {
-    class JsonObject;
-
     class Ratelimit {
     public:
         Ratelimit() = default;
-        explicit Ratelimit(const discpp::JsonObject& json);
+        Ratelimit(const rapidjson::Document& json);
 
         bool global;
         std::string message;

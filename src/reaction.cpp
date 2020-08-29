@@ -1,11 +1,10 @@
 #include "reaction.h"
-#include "json_object.h"
 
 namespace discpp {
-	Reaction::Reaction(const discpp::JsonObject& json) {
+	Reaction::Reaction(rapidjson::Document& json) {
 		count = json["count"].GetInt();
 		from_bot = json["me"].GetBool();
 
-		emoji = discpp::Emoji(json["emoji"]);
+		emoji = discpp::Emoji(*GetDocumentInsideJson(json, "emoji"));
 	}
 }

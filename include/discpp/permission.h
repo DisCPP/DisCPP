@@ -1,8 +1,13 @@
 #ifndef DISCPP_PERMISSION_H
 #define DISCPP_PERMISSION_H
 
+#ifndef RAPIDJSON_HAS_STDSTRING
+#define RAPIDJSON_HAS_STDSTRING 1
+#endif
+
+#include <rapidjson/document.h>
+
 #include "snowflake.h"
-#include "json_object.h"
 
 #include <unordered_map>
 #include <stdexcept>
@@ -169,14 +174,18 @@ namespace discpp {
          *
          * @return discpp::Permissions, this is a constructor.
          */
-        explicit Permissions(const discpp::JsonObject& json);
+		Permissions(rapidjson::Document& json);
 
         /**
          * @brief Converts this permissions object to json.
          *
-         * @return discpp::JsonObject
+         * ```cpp
+         *      rapidjson::Document json = permissions.ToJson();
+         * ```
+         *
+         * @return rapidjson::Document
          */
-        discpp::JsonObject ToJson();
+        rapidjson::Document ToJson();
 
 		Snowflake role_user_id;
 		PermissionOverwrite allow_perms;

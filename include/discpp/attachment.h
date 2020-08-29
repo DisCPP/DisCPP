@@ -1,15 +1,20 @@
 #ifndef DISCPP_ATTACHMENT_H
 #define DISCPP_ATTACHMENT_H
 
+#ifndef RAPIDJSON_HAS_STDSTRING
+#define RAPIDJSON_HAS_STDSTRING 1
+#endif
+
+#include <rapidjson/document.h>
+
 #include "discord_object.h"
-#include "json_object.h"
 
 namespace discpp {
 	class Attachment : DiscordObject {
 	public:
 		Attachment() = default;
         /**
-         * @brief Constructs a discpp::Attachment object from json.
+         * @brief Contructs a discpp::Attachment object from json.
          *
          * ```cpp
          *		discpp::Attachment attachment(json);
@@ -20,7 +25,7 @@ namespace discpp {
          * @return discord::Attachment, this is a constructor.
          *
          .*/
-		Attachment(const discpp::JsonObject& json);
+		Attachment(rapidjson::Document& json);
 
 		Snowflake id; /**< id for the current attachment. .*/
 		std::string filename; /**< filename for the current attachment. .*/

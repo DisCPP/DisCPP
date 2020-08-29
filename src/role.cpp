@@ -9,19 +9,19 @@ namespace discpp {
 		}
 	}
 
-	Role::Role(const discpp::JsonObject& json) {
+	Role::Role(rapidjson::Document& json) {
 		id = SnowflakeFromString(json["id"].GetString());
 		name = json["name"].GetString();
 		color = json["color"].GetInt();
-        if (json.Get<bool>("hoist")) {
+        if (GetDataSafely<bool>(json, "hoist")) {
             flags |= 0b1;
         }
 		position = json["position"].GetInt();
         permissions = Permissions(PermissionType::ROLE, json["permissions"].GetInt());
-        if (json.Get<bool>("managed")) {
+        if (GetDataSafely<bool>(json, "managed")) {
             flags |= 0b10;
         }
-        if (json.Get<bool>("mentionable")) {
+        if (GetDataSafely<bool>(json, "mentionable")) {
             flags |= 0b100;
         }
 	}

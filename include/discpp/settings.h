@@ -97,7 +97,7 @@ namespace discpp {
          *
          * @return discpp::FriendSource, this is a constructor.
          */
-		FriendSource(const discpp::JsonObject& json);
+		FriendSource(rapidjson::Document& json);
 
         /**
          * @brief Modifies All bool value
@@ -211,7 +211,7 @@ namespace discpp {
          *
          * @return discpp::ClientUserSettings, this is a constructor.
          */
-		ClientUserSettings(const discpp::JsonObject& json);
+		ClientUserSettings(rapidjson::Document& json);
 
         /**
          * @brief Modifies ShowCurrentGame bool value
