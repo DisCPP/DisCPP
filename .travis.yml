@@ -4,11 +4,12 @@ git:
   submodules: true
   depth: 5
 
+dist: trusty
+
 jobs:
   include:
     - os: linux
       name: linux
-      dist: bionic
       script:
         - mkdir build
         - cd build
