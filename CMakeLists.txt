@@ -73,6 +73,12 @@ add_subdirectory(thirdparty/cpr)
 set(USE_ZLIB FALSE)
 add_subdirectory(thirdparty/IXWebSocket)
 
+# Remove the install in IXWebSocket
+file(READ thirdparty/ixwebsocket/CMakeLists.txt IXWebCMake)
+string(REPLACE "install(EXPORT ixwebsocket\n        FILE ixwebsocket-config.cmake\n        NAMESPACE ixwebsocket::\n        DESTINATION lib/cmake/ixwebsocket)" "" IXWebCMakeOut "${IXWebCMake}")
+file(WRITE thirdparty/ixwebsocket/CMakeLists.txt "${IXWebCMakeOut}")
+message(STATUS "Removed \"install(EXPORT...\" from IXWebsockets CMake")
+
 # Link sources
 file(GLOB_RECURSE source_list src/*.cpp)
 add_library(discpp STATIC ${source_list})
@@ -111,8 +117,7 @@ target_compile_definitions(discpp PUBLIC __STDC_WANT_LIB_EXT1__)
 target_compile_definitions(${CPR_LIBRARIES} PUBLIC CURL_STATICLIB)
 target_include_directories(discpp PUBLIC ${CPR_INCLUDE_DIRS})
 target_link_libraries(discpp PUBLIC ${CPR_LIBRARIES})
-
-target_link_libraries(discpp PUBLIC $<BUILD_INTERFACE:ixwebsocket>)
+target_link_libraries(discpp PUBLIC ixwebsocket)
 
 # Build unit tests
 if (BUILD_TESTS)
