@@ -4,51 +4,36 @@
 # https://aka.ms/yaml
 
 trigger:
-  - master
-  - development
+- master
+- development
 
 jobs:
   - job: Windows_VS2019_x64
     pool:
       vmImage: 'windows-latest'
     steps:
-      - script: git submodule update --recursive --init
-        displayName: Checkout submodules recursively
-      #- task: Cache@2
-      #  displayName: Cache vcpkg
-      #  inputs:
-      #    key: 'version_3 | "$(Agent.OS)"'
-      #    path: '$(vcpkgLocation)'
-      - task: ChocolateyCommand@0
-        inputs:
-          command: 'install'
-          installPackageId: 'openssl'
-          installInstallArgs: '-y'
-      - task: run-cmake@0
-        displayName: 'Run CMake with Ninja'
-        enabled: true
-        inputs:
-          cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-          cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
-          useVcpkgToolchainFile: false
-          buildDirectory: '$(Build.ArtifactStagingDirectory)'
+    - script: git submodule update --recursive --init
+      displayName: Recursively checkout submodules
+    - task: ChocolateyCommand@0
+      inputs:
+        command: 'install'
+        installPackageId: 'openssl'
+        installInstallArgs: '-y'
+    - task: run-cmake@0
+      inputs:
+        cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
+        cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
+        cmakeGenerator: 'Ninja'
+        buildWithCMakeArgs: '-DCMAKE_BUILD_TYPE=Release'
   - job: Linux_Latest
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-      - script: git submodule update --recursive --init
-        displayName: Checkout submodules recursively
-      #- task: Cache@2
-      #  displayName: Cache vcpkg
-      #  inputs:
-      #    key: 'version_3 | "$(Agent.OS)"'
-      #    path: '$(vcpkgLocation)'
-
-      - task: run-cmake@0
-        displayName: 'Run CMake'
-        enabled: true
-        inputs:
-          cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-          cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
-          useVcpkgToolchainFile: false
-          buildDirectory: '$(Build.ArtifactStagingDirectory)'
+    - script: git submodule update --recursive --init
+      displayName: Recursively checkout submodules
+    - task: run-cmake@0
+      inputs:
+        cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
+        cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
+        cmakeGenerator: 'Ninja'
+        buildWithCMakeArgs: '-DCMAKE_BUILD_TYPE=Release'
