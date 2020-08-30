@@ -10,11 +10,7 @@ jobs:
     - os: linux
       name: Linux Bionic
       dist: bionic
-      addons:
-        apt:
-          packages:
-            - cmake
-      install:
+      script:
         - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
         - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
         - travis_retry wget --no-check-certificate https://cmake.org/files/v3.16/cmake-3.16.0-Linux-x86_64.tar.gz
@@ -22,10 +18,9 @@ jobs:
         - mv cmake-3.16.0-Linux-x86_64 cmake-install
         - PATH=${DEPS_DIR}/cmake-install:${DEPS_DIR}/cmake-install/bin:$PATH
         - cd ${TRAVIS_BUILD_DIR}
-      script:
         - mkdir build
         - cd build
-        - cmake ..
+        - cmake .. -DCMAKE_BUILD_TYPE=Release
         - make
     - os: windows
       name: Windows
@@ -35,5 +30,5 @@ jobs:
       script:
         - mkdir build
         - cd build
-        - cmake ..
+        - cmake .. -DCMAKE_BUILD_TYPE=Release
         - make
