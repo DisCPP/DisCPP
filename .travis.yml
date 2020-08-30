@@ -4,12 +4,15 @@ git:
   submodules: true
   depth: 5
 
-dist: trusty
-
 jobs:
   include:
     - os: linux
       name: linux
+      dist: bionic
+      addons:
+        apt:
+          packages:
+            - cmake
       script:
         - mkdir build
         - cd build
@@ -17,8 +20,10 @@ jobs:
         - make
     - os: windows
       name: Windows
+      install:
+        - choco upgrade cmake.install
+        - choco install openssl ninja visualstudio2019-workload-vctools -y
       script:
-        - chocolately install openssl
         - mkdir build
         - cd build
         - cmake ..
