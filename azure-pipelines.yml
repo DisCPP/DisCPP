@@ -32,7 +32,6 @@ jobs:
           cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
           useVcpkgToolchainFile: false
           buildDirectory: '$(Build.ArtifactStagingDirectory)'
-          buildWithCMakeArgs: '-- -v'
   - job: Linux_Latest
     pool:
       vmImage: 'ubuntu-latest'
@@ -53,4 +52,3 @@ jobs:
           cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
           useVcpkgToolchainFile: false
           buildDirectory: '$(Build.ArtifactStagingDirectory)'
-          buildWithCMakeArgs: '-- -v'
