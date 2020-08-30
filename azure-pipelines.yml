@@ -24,7 +24,9 @@ jobs:
         workingDirectory: 'build'
         cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release'
     - script: |
+        ls
         cd build
+        ls
         make
   - job: Linux_Latest
     pool:
