@@ -25,8 +25,8 @@ jobs:
     - os: windows
       name: Windows
       install:
-        - choco upgrade cmake.install
-        - choco install openssl ninja visualstudio2019-workload-vctools -y
+        - choco upgrade cmake.install openssl make -y
+        #- choco install openssl ninja visualstudio2019-workload-vctools -y
       script:
         - mkdir build
         - cd build
