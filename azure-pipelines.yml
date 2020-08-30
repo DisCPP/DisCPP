@@ -24,7 +24,7 @@ jobs:
         cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
         cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
         cmakeGenerator: 'Ninja'
-        buildWithCMakeArgs: '-DCMAKE_BUILD_TYPE=Release'
+        cmakeBuildType: 'Release'
   - job: Linux_Latest
     pool:
       vmImage: 'ubuntu-latest'
@@ -36,4 +36,4 @@ jobs:
         cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
         cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
         cmakeGenerator: 'Ninja'
-        buildWithCMakeArgs: '-DCMAKE_BUILD_TYPE=Release'
+        cmakeBuildType: 'Release'
