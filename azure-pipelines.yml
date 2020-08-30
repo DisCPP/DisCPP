@@ -26,6 +26,7 @@ jobs:
     - script: |
         ls
         cd build
+        echo In build
         ls
         make
   - job: Linux_Latest
