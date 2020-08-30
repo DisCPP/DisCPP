@@ -8,7 +8,7 @@ git:
 jobs:
   include:
     - os: linux
-      name: linux
+      name: Linux Bionic
       dist: bionic
       addons:
         apt:

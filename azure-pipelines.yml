@@ -30,8 +30,7 @@ jobs:
         inputs:
           cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
           cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
-          useVcpkgToolchainFile: true
-          vcpkgTriplet: 'x64-windows'
+          useVcpkgToolchainFile: false
           buildDirectory: '$(Build.ArtifactStagingDirectory)'
           buildWithCMakeArgs: '-- -v'
   - job: Linux_Latest

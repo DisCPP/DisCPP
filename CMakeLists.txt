@@ -74,10 +74,10 @@ set(USE_ZLIB FALSE)
 add_subdirectory(thirdparty/IXWebSocket)
 
 # Remove the install in IXWebSocket
-file(READ thirdparty/ixwebsocket/CMakeLists.txt IXWebCMake)
+#[[file(READ thirdparty/ixwebsocket/CMakeLists.txt IXWebCMake)
 string(REPLACE "install(EXPORT ixwebsocket\n        FILE ixwebsocket-config.cmake\n        NAMESPACE ixwebsocket::\n        DESTINATION lib/cmake/ixwebsocket)" "" IXWebCMakeOut "${IXWebCMake}")
 file(WRITE thirdparty/ixwebsocket/CMakeLists.txt "${IXWebCMakeOut}")
-message(STATUS "Removed \"install(EXPORT...\" from IXWebsockets CMake")
+message(STATUS "Removed \"install(EXPORT...\" from IXWebsockets CMake")]]
 
 # Link sources
 file(GLOB_RECURSE source_list src/*.cpp)
