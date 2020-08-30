@@ -1,0 +1,24 @@
+sudo: required
+
+git:
+  submodules: true
+  depth: 5
+
+jobs:
+  include:
+    - os: linux
+      name: linux
+      dist: bionic
+      script:
+        - mkdir build
+        - cd build
+        - cmake ..
+        - make
+    - os: windows
+      name: Windows
+      script:
+        - chocolately install openssl
+        - mkdir build
+        - cd build
+        - cmake ..
+        - make
