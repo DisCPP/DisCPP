@@ -32,4 +32,4 @@ jobs:
         - mkdir build
         - cd build
         - cmake -DCMAKE_BUILD_TYPE=Release .. -G "Unix Makefiles"
-        - cmake --build / --target discpp
+        - cmake --build . --target discpp
