@@ -36,4 +36,4 @@ jobs:
         workingDirectory: 'build'
         cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release'
     - script: |
-        cmake --build / --target discpp
+        cmake --build . --target discpp
