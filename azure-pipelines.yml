@@ -22,13 +22,9 @@ jobs:
     - task: CMake@1
       inputs:
         workingDirectory: 'build'
-        cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"'
+        cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "CodeBlocks - NMake Makefiles"'
     - script: |
-        ls
-        cd build
-        echo In build
-        ls
-        make
+        cmake --build ../ --target discpp
   - job: Linux_Latest
     pool:
       vmImage: 'ubuntu-latest'
@@ -40,5 +36,4 @@ jobs:
         workingDirectory: 'build'
         cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release'
     - script: |
-        cd build
-        make
+        cmake --build ../ --target discpp

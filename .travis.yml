@@ -31,5 +31,5 @@ jobs:
       script:
         - mkdir build
         - cd build
-        - cmake -DCMAKE_BUILD_TYPE=Release ..  -G "Unix Makefiles"
-        - make
+        - cmake -DCMAKE_BUILD_TYPE=Release .. -G "CodeBlocks - NMake Makefiles"
+        - cmake --build ../ --target discpp
