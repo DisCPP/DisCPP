@@ -21,7 +21,7 @@ jobs:
         - mkdir build
         - cd build
         - cmake -DCMAKE_BUILD_TYPE=Release ..
-        - make
+        - cmake --build . --target discpp
     - os: windows
       name: Windows
       install:

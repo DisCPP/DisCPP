@@ -24,7 +24,7 @@ jobs:
         workingDirectory: 'build'
         cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"'
     - script: |
-        cmake --build . --target discpp
+        cmake --build build/ --target discpp
   - job: Linux_Latest
     pool:
       vmImage: 'ubuntu-latest'
@@ -36,5 +36,4 @@ jobs:
         workingDirectory: 'build'
         cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"'
     - script: |
-        cd build
-        make
+        cmake --build build/ --target discpp
