@@ -27,9 +27,8 @@ jobs:
       install:
         - choco upgrade cmake.install -y
         - choco install make openssl -y
-        #- choco install openssl ninja visualstudio2019-workload-vctools -y
       script:
         - mkdir build
         - cd build
-        - cmake -DCMAKE_BUILD_TYPE=Release .. -G "Unix Makefiles" -D_WIN32 -DWIN32 -D_WIN64 -DWIN64
+        - cmake -DCMAKE_BUILD_TYPE=Release .. -G "Unix Makefiles"
         - cmake --build . --target discpp
