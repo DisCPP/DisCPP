@@ -51,7 +51,7 @@ jobs:
           - choco install make visualstudio2017buildtools openssl -y
           - cd "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
           - ls
-          - vcvarsall.bat x86_amd64
+          - .\vcvarsall x86_amd64
           - cd ${TRAVIS_BUILD_DIR}
     - os: windows
       name: Windows VS2019 Build Tools (v16.7.2.0)
@@ -62,7 +62,7 @@ jobs:
           - choco install make visualstudio2019buildtools openssl -y
           - cd "C:\Program Files (x86)\Microsoft Visual Studio\BuildTools\VC\Auxiliary\Build"
           - ls
-          - vcvarsall.bat x86_amd64
+          - .\vcvarsall x86_amd64
           - cd ${TRAVIS_BUILD_DIR}
 
 script:
