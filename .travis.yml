@@ -33,7 +33,7 @@ jobs:
         - MATRIX_EVAL="CC=gcc && CXX=c++"
       install:
         - choco upgrade cmake.install -y
-        - choco install openssl -y
+        - choco install make openssl -y
     - os: windows
       name: Windows LLVM (Clang) (v10.0.0)
       compiler: clang
@@ -41,14 +41,14 @@ jobs:
         - MATRIX_EVAL="CC=clang && CXX=clang++"
       install:
         - choco upgrade cmake.install -y
-        - choco install llvm openssl -y
+        - choco install make llvm openssl -y
     - os: windows
       name: Windows VS2017 Build Tools (v15.9.26.0)
       env:
         - MATRIX_EVAL="CC=cl && CXX=cl"
       install:
           - choco upgrade cmake.install -y
-          - choco install visualstudio2017buildtools openssl -y
+          - choco install make visualstudio2017buildtools openssl -y
       script:
         - cd "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build"
         - vcvarsall.bat x86_amd64
@@ -59,7 +59,7 @@ jobs:
         - MATRIX_EVAL="CC=cl && CXX=cl"
       install:
           - choco upgrade cmake.install -y
-          - choco install visualstudio2019buildtools openssl -y
+          - choco install make visualstudio2019buildtools openssl -y
       script:
         - cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build"
         - vcvarsall.bat x86_amd64
