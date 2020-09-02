@@ -37,10 +37,16 @@ jobs:
       - script: git submodule update --recursive --init
         displayName: Recursively checkout submodules
       - task: ChocolateyCommand@0
-        displayName: Install OpenSSL and Clang via Chocolatey
+        displayName: Install Clang via Chocolatey
         inputs:
           command: 'install'
-          installPackageId: 'openssl llvm'
+          installPackageId: 'llvm'
+          installInstallArgs: '-y'
+      - task: ChocolateyCommand@0
+        displayName: Install OpenSSL via Chocolatey
+        inputs:
+          command: 'install'
+          installPackageId: 'openssl'
           installInstallArgs: '-y'
       - task: CMake@1
         displayName: CMake Configure
