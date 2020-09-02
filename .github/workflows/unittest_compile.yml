@@ -64,17 +64,7 @@ jobs:
 
       - uses: seanmiddleditch/gha-setup-vsdevenv@master
 
-      - name: Configure CMake
-        # Use a bash shell so we can use the same syntax for environment variable
-        # access regardless of the host operating system
-        shell: bash
-        working-directory: ${{runner.workspace}}/build
-        # Note the current convention is to use the -S and -B options here to specify source 
-        # and build directories, but this is only available with CMake 3.13 and higher.  
-        # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
-        
-      - name: Compile with CMake
+      - name: CMake Configure and Compile
         # You may pin to the exact commit or the version.
         # uses: ashutoshvarma/action-cmake-build@0fbeeac8b1f9c8aef99e9eae9d78529ed3b0364b
         uses: ashutoshvarma/action-cmake-build@v1
@@ -108,6 +98,7 @@ jobs:
         with:
           # Arguments to pass to Chocolatey
           args: install llvm --version 10.0.0 -y
+        
       - name: Install OpenSSL from Chocolatey
         # You may pin to the exact commit or the version.
         # uses: crazy-max/ghaction-chocolatey@b6061d587628735be315d74358228b83a7dba9a7
@@ -115,26 +106,8 @@ jobs:
         with:
           # Arguments to pass to Chocolatey
           args: install openssl -y
-          
-      #- name: Install OpenSSL from Chocolatey
-        # You may pin to the exact commit or the version.
-        # uses: crazy-max/ghaction-chocolatey@b6061d587628735be315d74358228b83a7dba9a7
-      #  uses: crazy-max/ghaction-chocolatey@v1.3.0
-      #  with:
-          # Arguments to pass to Chocolatey
-      #    args: install llvm --version 10.0.0 openssl -y
 
-      - name: Configure CMake
-        # Use a bash shell so we can use the same syntax for environment variable
-        # access regardless of the host operating system
-        shell: bash
-        working-directory: ${{runner.workspace}}/build
-        # Note the current convention is to use the -S and -B options here to specify source 
-        # and build directories, but this is only available with CMake 3.13 and higher.  
-        # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
-        
-      - name: Compile with CMake
+      - name: CMake Configure and Compile
         # You may pin to the exact commit or the version.
         # uses: ashutoshvarma/action-cmake-build@0fbeeac8b1f9c8aef99e9eae9d78529ed3b0364b
         uses: ashutoshvarma/action-cmake-build@v1
