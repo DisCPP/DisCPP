@@ -68,6 +68,9 @@ jobs:
         # You may pin to the exact commit or the version.
         # uses: ashutoshvarma/action-cmake-build@0fbeeac8b1f9c8aef99e9eae9d78529ed3b0364b
         uses: ashutoshvarma/action-cmake-build@v1
+        env:
+          CC: cl.exe
+          CXX: cl.exe
         with:
           build-dir: ${{runner.workspace}}/build
           build-type: $BUILD_TYPE
@@ -76,9 +79,6 @@ jobs:
   windows-clang:
     name: Windows Clang (v10.0.0)
     runs-on: windows-2019
-    env:
-      CC: clang
-      CXX: clang++
     
     steps:
       - name: Checkout submodules and DisC++
@@ -111,8 +111,11 @@ jobs:
         # You may pin to the exact commit or the version.
         # uses: ashutoshvarma/action-cmake-build@0fbeeac8b1f9c8aef99e9eae9d78529ed3b0364b
         uses: ashutoshvarma/action-cmake-build@v1
+        env:
+          CC: C:\Program Files\LLVM\bin\clang
+          CXX: C:\Program Files\LLVM\bin\clang++
         with:
           build-dir: ${{runner.workspace}}/build
           build-type: $BUILD_TYPE
-          cc: clang
-          cxx: clang++
+          cc: C:\Program Files\LLVM\bin\clang
+          cxx: C:\Program Files\LLVM\bin\clang++
