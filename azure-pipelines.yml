@@ -30,22 +30,31 @@ jobs:
     - task: CmdLine@2
       inputs:
         script: |
-          cd "C:\Program Files (x86)\Microsoft Visual Studio"
+          cd 'C:\'
           ls
           echo -----------------------------------------------------------------------
-          cd "C:\Program Files (x86)\Microsoft Visual Studio\BuildTools"
+          cd 'C:\Program Files (x86)'
           ls
           echo -----------------------------------------------------------------------
-          cd "C:\Program Files (x86)\Microsoft Visual Studio\BuildTools\VC"
+          cd 'C:\Program Files (x86)\Microsoft Visual Studio'
           ls
           echo -----------------------------------------------------------------------
-          cd "C:\Program Files (x86)\Microsoft Visual Studio\BuildTools\VC\Auxiliary"
+          cd 'C:\Program Files (x86)\Microsoft Visual Studio\2019'
           ls
           echo -----------------------------------------------------------------------
-          cd "C:\Program Files (x86)\Microsoft Visual Studio\BuildTools\VC\Auxiliary\Build"
+          cd 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools'
           ls
           echo -----------------------------------------------------------------------
-          cd "C:\Program Files (x86)\Microsoft Visual Studio\BuildTools\VC\Auxiliary\Build"
+          cd 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC'
+          ls
+          echo -----------------------------------------------------------------------
+          cd 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary'
+          ls
+          echo -----------------------------------------------------------------------
+          cd 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build'
+          ls
+          echo -----------------------------------------------------------------------
+          cd 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build'
           ls
           echo -----------------------------------------------------------------------
     - task: BatchScript@1
