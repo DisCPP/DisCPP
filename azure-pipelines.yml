@@ -8,32 +8,63 @@ trigger:
 - development
 
 jobs:
-  - job: Windows_VS2019_x64
+  - job: Windows MSVC
     pool:
-      vmImage: 'windows-latest'
+      vmImage: 'windows-2019'
     steps:
     - script: git submodule update --recursive --init
       displayName: Recursively checkout submodules
     - task: ChocolateyCommand@0
+      displayName: Install OpenSSL via Chocolatey
       inputs:
         command: 'install'
         installPackageId: 'openssl'
         installInstallArgs: '-y'
     - task: CMake@1
+      displayName: CMake Configure
       inputs:
         workingDirectory: 'build'
-        cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"'
-    - script: |
-        cmake --build build/ --target discpp
-  - job: Linux_Latest
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - script: git submodule update --recursive --init
-      displayName: Recursively checkout submodules
+        cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=cl.exe -DCMAKE_C_COMPILER=cl.exe'
     - task: CMake@1
+      displayName: CMake Compile
       inputs:
         workingDirectory: 'build'
-        cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"'
-    - script: |
-        cmake --build build/ --target discpp
+        cmakeArgs: '--build . --target discpp'
+  - job: Windows Clang (v10.0.0)
+    pool:
+      vmImage: 'windows-2019'
+    steps:
+      - script: git submodule update --recursive --init
+        displayName: Recursively checkout submodules
+      - task: ChocolateyCommand@0
+        displayName: Install OpenSSL and Clang via Chocolatey
+        inputs:
+          command: 'install'
+          installPackageId: 'openssl llvm'
+          installInstallArgs: '-y'
+      - task: CMake@1
+        displayName: CMake Configure
+        inputs:
+          workingDirectory: 'build'
+          cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=clang++.exe -DCMAKE_C_COMPILER=clang.exe'
+      - task: CMake@1
+        displayName: CMake Compile
+        inputs:
+          workingDirectory: 'build'
+          cmakeArgs: '--build . --target discpp'
+  - job: Linux GCC (v7.5.0)
+    pool:
+      vmImage: 'ubuntu-18.04'
+    steps:
+      - script: git submodule update --recursive --init
+        displayName: Recursively checkout submodules
+      - task: CMake@1
+        displayName: CMake Configure
+        inputs:
+          workingDirectory: 'build'
+          cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"'
+      - task: CMake@1
+        displayName: CMake Compile
+        inputs:
+          workingDirectory: 'build'
+          cmakeArgs: '--build . --target discpp'
