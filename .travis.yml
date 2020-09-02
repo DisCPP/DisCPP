@@ -50,7 +50,7 @@ jobs:
           - choco upgrade cmake.install -y
           - choco install make visualstudio2017buildtools openssl -y
       script:
-        - cd "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build"
+        - cd "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
         - vcvarsall.bat x86_amd64
         - cd ${TRAVIS_BUILD_DIR}
     - os: windows
@@ -61,7 +61,7 @@ jobs:
           - choco upgrade cmake.install -y
           - choco install make visualstudio2019buildtools openssl -y
       script:
-        - cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build"
+        - cd "C:\Program Files (x86)\Microsoft Visual Studio\BuildTools\VC\Auxiliary\Build"
         - vcvarsall.bat x86_amd64
         - cd ${TRAVIS_BUILD_DIR}
 
