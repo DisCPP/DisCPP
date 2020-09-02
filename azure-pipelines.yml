@@ -28,10 +28,10 @@ jobs:
         installInstallArgs: '-y'
         extraArguments: '--version 16.7.2.0'
     - task: CmdLine@2
-        displayName: Refresh Environment Variables
-        inputs:
-          script: refreshenv
-          failOnStderr: true
+      displayName: Refresh Environment Variables
+      inputs:
+        script: refreshenv
+        fialOnStderr: true
     - task: CmdLine@2
       inputs:
         script: |
