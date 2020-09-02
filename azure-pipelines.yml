@@ -24,7 +24,7 @@ jobs:
       displayName: CMake Configure
       inputs:
         workingDirectory: 'build'
-        cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=cl.exe -DCMAKE_C_COMPILER=cl.exe'
+        cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=cl -DCMAKE_C_COMPILER=cl'
     - task: CMake@1
       displayName: CMake Compile
       inputs:
@@ -52,7 +52,7 @@ jobs:
         displayName: CMake Configure
         inputs:
           workingDirectory: 'build'
-          cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=clang++.exe -DCMAKE_C_COMPILER=clang.exe'
+          cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang'
       - task: CMake@1
         displayName: CMake Compile
         inputs:
