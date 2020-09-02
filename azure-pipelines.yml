@@ -8,7 +8,7 @@ trigger:
 - development
 
 jobs:
-  - job: Windows MSVC
+  - job: Windows_MSVC
     pool:
       vmImage: 'windows-2019'
     steps:
@@ -30,7 +30,7 @@ jobs:
       inputs:
         workingDirectory: 'build'
         cmakeArgs: '--build . --target discpp'
-  - job: Windows Clang (v10.0.0)
+  - job: Windows_Clang__v10_0_0
     pool:
       vmImage: 'windows-2019'
     steps:
@@ -52,7 +52,7 @@ jobs:
         inputs:
           workingDirectory: 'build'
           cmakeArgs: '--build . --target discpp'
-  - job: Linux GCC (v7.5.0)
+  - job: Linux_GCC_v7_5_0
     pool:
       vmImage: 'ubuntu-18.04'
     steps:
