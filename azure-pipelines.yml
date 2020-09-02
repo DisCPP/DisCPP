@@ -27,6 +27,27 @@ jobs:
         installPackageId: 'visualstudio2019buildtools'
         installInstallArgs: '-y'
         extraArguments: '--version 16.7.2.0'
+    - task: CmdLine@2
+      inputs:
+        script: |
+          cd "C:\Program Files (x86)\Microsoft Visual Studio"
+          ls
+          echo -----------------------------------------------------------------------
+          cd "C:\Program Files (x86)\Microsoft Visual Studio\BuildTools"
+          ls
+          echo -----------------------------------------------------------------------
+          cd "C:\Program Files (x86)\Microsoft Visual Studio\BuildTools\VC"
+          ls
+          echo -----------------------------------------------------------------------
+          cd "C:\Program Files (x86)\Microsoft Visual Studio\BuildTools\VC\Auxiliary"
+          ls
+          echo -----------------------------------------------------------------------
+          cd "C:\Program Files (x86)\Microsoft Visual Studio\BuildTools\VC\Auxiliary\Build"
+          ls
+          echo -----------------------------------------------------------------------
+          cd "C:\Program Files (x86)\Microsoft Visual Studio\BuildTools\VC\Auxiliary\Build"
+          ls
+          echo -----------------------------------------------------------------------
     - task: BatchScript@1
       displayName: Setup VS Build Tools Environment
       inputs:
