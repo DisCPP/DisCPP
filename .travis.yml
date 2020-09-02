@@ -15,7 +15,9 @@ jobs:
         - MATRIX_EVAL="CC=gcc-10 && CXX=g++-10"
       addons:
         apt:
-          packages: g++-10
+          packages: 
+            - g++-10
+            - libcrypto++-dev
       script: # Install CMake v3.16.0
         - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
         - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
@@ -41,29 +43,27 @@ jobs:
         - choco upgrade cmake.install -y
         - choco install llvm openssl -y
     - os: windows
-        name: Windows VS2017 Build Tools (v15.9.26.0)
-        compiler: msvc
-        env:
-          - MATRIX_EVAL="CC=cl && CXX=cl"
-        install:
+      name: Windows VS2017 Build Tools (v15.9.26.0)
+      env:
+        - MATRIX_EVAL="CC=cl && CXX=cl"
+      install:
           - choco upgrade cmake.install -y
           - choco install visualstudio2017buildtools openssl -y
-        script:
-          - cd "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build"
-          - vcvarsall.bat x86_amd64
-          - cd ${TRAVIS_BUILD_DIR}
+      script:
+        - cd "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build"
+        - vcvarsall.bat x86_amd64
+        - cd ${TRAVIS_BUILD_DIR}
     - os: windows
-        name: Windows VS2019 Build Tools (v15.9.26.0)
-        compiler: msvc
-        env:
-          - MATRIX_EVAL="CC=cl && CXX=cl"
-        install:
+      name: Windows VS2019 Build Tools (v16.7.2.0)
+      env:
+        - MATRIX_EVAL="CC=cl && CXX=cl"
+      install:
           - choco upgrade cmake.install -y
           - choco install visualstudio2019buildtools openssl -y
-        script:
-          - cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build"
-          - vcvarsall.bat x86_amd64
-          - cd ${TRAVIS_BUILD_DIR}
+      script:
+        - cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build"
+        - vcvarsall.bat x86_amd64
+        - cd ${TRAVIS_BUILD_DIR}
 
 script:
   - mkdir build
