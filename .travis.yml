@@ -18,7 +18,7 @@ jobs:
           packages: 
             - g++-10
             - libcrypto++-dev
-      script: # Install CMake v3.16.0
+      install: # Install CMake v3.16.0
         - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
         - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
         - travis_retry wget --no-check-certificate https://cmake.org/files/v3.16/cmake-3.16.0-Linux-x86_64.tar.gz
@@ -49,10 +49,10 @@ jobs:
       install:
           - choco upgrade cmake.install -y
           - choco install make visualstudio2017buildtools openssl -y
-      script:
-        - cd "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
-        - vcvarsall.bat x86_amd64
-        - cd ${TRAVIS_BUILD_DIR}
+          - cd "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
+          - ls
+          - vcvarsall.bat x86_amd64
+          - cd ${TRAVIS_BUILD_DIR}
     - os: windows
       name: Windows VS2019 Build Tools (v16.7.2.0)
       env:
@@ -60,13 +60,13 @@ jobs:
       install:
           - choco upgrade cmake.install -y
           - choco install make visualstudio2019buildtools openssl -y
-      script:
-        - cd "C:\Program Files (x86)\Microsoft Visual Studio\BuildTools\VC\Auxiliary\Build"
-        - vcvarsall.bat x86_amd64
-        - cd ${TRAVIS_BUILD_DIR}
+          - cd "C:\Program Files (x86)\Microsoft Visual Studio\BuildTools\VC\Auxiliary\Build"
+          - ls
+          - vcvarsall.bat x86_amd64
+          - cd ${TRAVIS_BUILD_DIR}
 
 script:
   - mkdir build
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=Release .. -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=${CXX}
-  - cmake --build . --target discpp -DCMAKE_CXX_COMPILER=${CXX}
+  - cmake --build . --target discpp
