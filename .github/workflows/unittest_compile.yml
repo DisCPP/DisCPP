@@ -73,12 +73,16 @@ jobs:
         # and build directories, but this is only available with CMake 3.13 and higher.  
         # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
         run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
-
-      - name: Build
-        working-directory: ${{runner.workspace}}/build
-        shell: bash
-        # Execute the build.  You can specify a specific target with "--target <NAME>"
-        run: cmake --build . --config $BUILD_TYPE
+        
+      - name: Compile with CMake
+        # You may pin to the exact commit or the version.
+        # uses: ashutoshvarma/action-cmake-build@0fbeeac8b1f9c8aef99e9eae9d78529ed3b0364b
+        uses: ashutoshvarma/action-cmake-build@v1
+        with:
+          build-dir: ${{runner.workspace}}/build
+          build-type: $BUILD_TYPE
+          cc: cl.exe
+          cxx: cl.exe
   windows-clang:
     name: Windows Clang (v10.0.0)
     runs-on: windows-2019
@@ -103,7 +107,7 @@ jobs:
         uses: crazy-max/ghaction-chocolatey@v1.3.0
         with:
           # Arguments to pass to Chocolatey
-          args: install openssl llvm -y
+          args: install openssl llvm --version 10.0.0 -y
 
       - name: Configure CMake
         # Use a bash shell so we can use the same syntax for environment variable
@@ -114,9 +118,13 @@ jobs:
         # and build directories, but this is only available with CMake 3.13 and higher.  
         # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
         run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
-
-      - name: Build
-        working-directory: ${{runner.workspace}}/build
-        shell: bash
-        # Execute the build.  You can specify a specific target with "--target <NAME>"
-        run: cmake --build . --config $BUILD_TYPE
+        
+      - name: Compile with CMake
+        # You may pin to the exact commit or the version.
+        # uses: ashutoshvarma/action-cmake-build@0fbeeac8b1f9c8aef99e9eae9d78529ed3b0364b
+        uses: ashutoshvarma/action-cmake-build@v1
+        with:
+          build-dir: ${{runner.workspace}}/build
+          build-type: $BUILD_TYPE
+          cc: clang
+          cxx: clang++
