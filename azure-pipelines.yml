@@ -30,32 +30,23 @@ jobs:
     - task: CmdLine@2
       inputs:
         script: |
-          cd 'C:\'
-          ls
+          ls 'C:\'
           echo -----------------------------------------------------------------------
-          cd 'C:\Program Files (x86)'
-          ls
+          ls 'C:\Program Files (x86)'
           echo -----------------------------------------------------------------------
-          cd 'C:\Program Files (x86)\Microsoft Visual Studio'
-          ls
+          ls 'C:\Program Files (x86)\Microsoft Visual Studio'
           echo -----------------------------------------------------------------------
-          cd 'C:\Program Files (x86)\Microsoft Visual Studio\2019'
-          ls
+          ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019'
           echo -----------------------------------------------------------------------
-          cd 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools'
-          ls
+          ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools'
           echo -----------------------------------------------------------------------
-          cd 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC'
-          ls
+          ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC'
           echo -----------------------------------------------------------------------
-          cd 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary'
-          ls
+          ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary'
           echo -----------------------------------------------------------------------
-          cd 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build'
-          ls
+          ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build'
           echo -----------------------------------------------------------------------
-          cd 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build'
-          ls
+          ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build'
           echo -----------------------------------------------------------------------
     - task: BatchScript@1
       displayName: Setup VS Build Tools Environment
