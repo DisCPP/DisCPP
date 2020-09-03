@@ -1,14 +1,9 @@
 on: [push, pull_request]
 
 env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
 
 jobs:
-    # The CMake configure and build commands are platform agnostic and should work equally
-    # well on Windows or Mac.  You can convert this to a matrix build if you need
-    # cross-platform coverage.
-    # See: https://docs.github.com/en/actions/configuring-and-managing-workflows/configuring-a-workflow#configuring-a-build-matrix
   ubuntu:
     name: Ubuntu 18.04 GCC v7.5.0
     runs-on: ubuntu-18.04
@@ -20,14 +15,10 @@ jobs:
           submodules: 'recursive'
 
       - name: Create Build Environment
-        # Some projects don't allow in-source building, so create a separate build directory
-        # We'll use this as our working directory for all subsequent commands
         shell: bash
         run: cmake -E make_directory ${{runner.workspace}}/build
 
       - name: Configure CMake
-        # Use a bash shell so we can use the same syntax for environment variable
-        # access regardless of the host operating system
         shell: bash
         working-directory: ${{runner.workspace}}/build
         run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
@@ -35,7 +26,6 @@ jobs:
       - name: Build
         working-directory: ${{runner.workspace}}/build
         shell: bash
-        # Execute the build.  You can specify a specific target with "--target <NAME>"
         run: cmake --build ${{runner.workspace}}/build
   windows-vs2019-msvc:
     name: Windows VS2019 MSVC (v19.27.29111.0)
@@ -52,23 +42,18 @@ jobs:
           submodules: 'recursive'
         
       - name: Create Build Environment
-      # Some projects don't allow in-source building, so create a separate build directory
-      # We'll use this as our working directory for all subsequent commands
         run: cmake -E make_directory ${{runner.workspace}}/DisCPP/build
 
-      - name: Install VS2019 Build Tools (v16.7.2.0) via Chocolatey
-        uses: crazy-max/ghaction-chocolatey@v1.3.0
-        with:
-          # Arguments to pass to Chocolatey
-          args: install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --passive" --version 16.7.2.0 -y
-
-      - name: Setup VS Build Tools Environment
-        run: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsx86_amd64.bat"'
+      #- name: Install VS2019 Build Tools (v16.7.2.0) via Chocolatey
+      #  uses: crazy-max/ghaction-chocolatey@v1.3.0
+      #  with:
+      #    args: install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --passive" --version 16.7.2.0 -y
+      #- name: Setup VS Build Tools Environment
+      #  run: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsx86_amd64.bat"'
 
       - name: Install OpenSSL from Chocolatey
         uses: crazy-max/ghaction-chocolatey@v1.3.0
         with:
-          # Arguments to pass to Chocolatey
           args: install openssl -y
 
       - uses: seanmiddleditch/gha-setup-vsdevenv@master
@@ -80,33 +65,19 @@ jobs:
       - name: CMake Compile
         working-directory: ${{runner.workspace}}/DisCPP/build
         run: cmake --build .
-
-      #- name: CMake Configure and Compile
-        # You may pin to the exact commit or the version.
-        # uses: ashutoshvarma/action-cmake-build@0fbeeac8b1f9c8aef99e9eae9d78529ed3b0364b
-      #  uses: ashutoshvarma/action-cmake-build@v1
-      #  env:
-      #    CC: cl
-      #    CXX: cl
-      #  with:
-      #    build-dir: ${{runner.workspace}}/build
-      #    cc: cl
-      #    cxx: cl
   windows-clang:
     name: Windows Clang (v10.0.0)
     runs-on: windows-2019
+    
+    defaults:
+      run:
+        shell: cmd
     
     steps:
       - name: Checkout submodules and DisC++
         uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-          
-      - name: Try to figure out directory
-        run: |
-          ls ${{runner.workspace}}
-          ls ${{runner.workspace}}/DisCPP
-          
         
       - name: Create Build Folder
       # Some projects don't allow in-source building, so create a separate build directory
@@ -129,6 +100,10 @@ jobs:
           # Arguments to pass to Chocolatey
           args: install openssl -y
         
+      - env:
+          CC: clang
+          CXX: clang++  
+        
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/DisCPP/build
         run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
@@ -136,16 +111,3 @@ jobs:
       - name: CMake Compile
         working-directory: ${{github.workspace}}/DisCPP/build
         run: cmake --build ${{runner.workspace}}/DisCPP/build
-        
-      #- name: CMake Configure and Compile
-        # You may pin to the exact commit or the version.
-        # uses: ashutoshvarma/action-cmake-build@0fbeeac8b1f9c8aef99e9eae9d78529ed3b0364b
-      #  uses: ashutoshvarma/action-cmake-build@v1
-      #  env:
-      #    CC: 'C:\Program Files\LLVM\bin\clang'
-      #    CXX: 'C:\Program Files\LLVM\bin\clang++'
-      #  with:
-      #    build-dir: ${{runner.workspace}}/build
-      #    build-type: $BUILD_TYPE
-      #    cc: 'C:\Program Files\LLVM\bin\clang'
-      #    cxx: 'C:\Program Files\LLVM\bin\clang++'
