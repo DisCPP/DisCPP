@@ -29,6 +29,14 @@ jobs:
       #- name: Setup VS Build Tools Environment
       #  run: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsx86_amd64.bat"'
 
+      - name: Cache Clang and OpenSSL
+        uses: actions/cache@v2
+        with:
+          path: |
+            "C:\ProgramData\Chocolatey"
+            "C:\Program Files\OpenSSL-Win64"
+          key: ${{ runner.os }}-choco-clang10-opensslx64
+
       - name: Install OpenSSL from Chocolatey
         uses: crazy-max/ghaction-chocolatey@v1.3.0
         with:
@@ -60,6 +68,15 @@ jobs:
       - name: Create Build Folder
         run: cmake -E make_directory ${{runner.workspace}}/DisCPP/build
 
+      - name: Cache Clang and OpenSSL
+        uses: actions/cache@v2
+        with:
+          path: |
+            "C:\ProgramData\Chocolatey"
+            "C:\Program Files\OpenSSL-Win64"
+            "C:\Program Files\LLVM"
+          key: ${{ runner.os }}-choco-clang10-opensslx64
+
       - name: Install Clang from Chocolatey
         uses: crazy-max/ghaction-chocolatey@v1.3.0
         with:
@@ -73,45 +90,6 @@ jobs:
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/DisCPP/build
         run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER="C:/Program Files/LLVM/bin/clang.exe" -DCMAKE_CXX_COMPILER="C:/Program Files/LLVM/bin/clang++.exe" -G "MinGW Makefiles
-      
-      - name: CMake Compile
-        working-directory: ${{runner.workspace}}/DisCPP/build
-        run: cmake --build . --parallel 10
-  windows-clang-cl-10:
-    name: Clang CL v10.0.0
-    runs-on: windows-2019
-    
-    defaults:
-      run:
-        shell: cmd
-    
-    steps:
-      - name: Checkout submodules and DisC++
-        uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-        
-      - name: Create Build Folder
-        run: cmake -E make_directory ${{runner.workspace}}/DisCPP/build
-        
-      - name: Install Clang CL via Chocolatey
-        uses: crazy-max/ghaction-chocolatey@v1.3.0
-        with:
-          args: install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.Llvm.ClangToolset --passive" --version 16.7.2.0 -y
-      
-      - name: Setup VS Build Tools Environment
-        run: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsx86_amd64.bat"'
-
-      - name: Install OpenSSL from Chocolatey
-        uses: crazy-max/ghaction-chocolatey@v1.3.0
-        with:
-          args: install openssl -y
-        
-      #- uses: seanmiddleditch/gha-setup-vsdevenv@master
-
-      - name: CMake Configure
-        working-directory: ${{runner.workspace}}/DisCPP/build
-        run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -G "MinGW Makefiles
       
       - name: CMake Compile
         working-directory: ${{runner.workspace}}/DisCPP/build
