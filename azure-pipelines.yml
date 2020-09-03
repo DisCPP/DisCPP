@@ -20,11 +20,16 @@ jobs:
         command: 'install'
         installPackageId: 'openssl'
         installInstallArgs: '-y'
-    - task: CmdLine@2
+    - task: ChocolateyCommand@0
       displayName: Install VS2019 Build Tools (v16.7.2.0) via Chocolatey
       inputs:
-        script: chocolatey install visualstudio2019buildtools --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --version 16.7.2.0 -y
-        failOnStderr: true
+        command: 'install'
+        installPackageId: 'visualstudio2019buildtools'
+        installInstallArgs: '-y'
+        installParams: '--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64'
+        installPackageVersion: '16.7.2.0'
+
+        #extraArguments: '--package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64" --version '
     - task: CmdLine@2
       displayName: Refresh Environment Variables
       inputs:
@@ -79,7 +84,7 @@ jobs:
           command: 'install'
           installPackageId: 'llvm'
           installInstallArgs: '-y'
-          extraArguments: '--version 10.0.0'
+          installPackageVersion: '10.0.0'
       - task: ChocolateyCommand@0
         displayName: Install OpenSSL via Chocolatey
         inputs:
@@ -95,7 +100,7 @@ jobs:
         displayName: CMake Configure
         inputs:
           workingDirectory: 'build'
-          cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_CXX_COMPILER="C:\Program Files\LLVM\bin\clang++" -DCMAKE_C_COMPILER="C:\Program Files\LLVM\bin\clang"'
+          cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_CXX_COMPILER="C:/Program Files/LLVM/bin/clang++" -DCMAKE_C_COMPILER="C:/Program Files/LLVM/bin/clang"'
       - task: CMake@1
         displayName: CMake Compile
         inputs:
