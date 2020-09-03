@@ -77,8 +77,8 @@ jobs:
       - name: CMake Compile
         working-directory: ${{runner.workspace}}/DisCPP/build
         run: cmake --build . --parallel 10
-  windows-clang-cl-10-x64:
-    name: Clang CL v10.0.0 x64
+  windows-clang-cl-10:
+    name: Clang CL v10.0.0
     runs-on: windows-2019
     
     defaults:
@@ -103,38 +103,7 @@ jobs:
 
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/DisCPP/build
-        run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G "Visual Studio 16 2019" -A x64 -T ClangCL
-      
-      - name: CMake Compile
-        working-directory: ${{runner.workspace}}/DisCPP/build
-        run: cmake --build . --parallel 10
-  windows-clang-cl-10-x86:
-    name: Clang CL v10.0.0 x86
-    runs-on: windows-2019
-    
-    defaults:
-      run:
-        shell: cmd
-    
-    steps:
-      - name: Checkout submodules and DisC++
-        uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-        
-      - name: Create Build Folder
-        run: cmake -E make_directory ${{runner.workspace}}/DisCPP/build
-        
-      - name: Install OpenSSL from Chocolatey
-        uses: crazy-max/ghaction-chocolatey@v1.3.0
-        with:
-          args: install openssl -y
-        
-      - uses: seanmiddleditch/gha-setup-vsdevenv@master
-
-      - name: CMake Configure
-        working-directory: ${{runner.workspace}}/DisCPP/build
-        run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G "Visual Studio 16 2019" -A Win32 -T ClangCL
+        run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -G "MinGW Makefiles
       
       - name: CMake Compile
         working-directory: ${{runner.workspace}}/DisCPP/build
