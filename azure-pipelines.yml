@@ -20,18 +20,16 @@ jobs:
         command: 'install'
         installPackageId: 'openssl'
         installInstallArgs: '-y'
-    - task: ChocolateyCommand@0
+    - task: CmdLine@2
       displayName: Install VS2019 Build Tools (v16.7.2.0) via Chocolatey
       inputs:
-        command: 'install'
-        installPackageId: 'visualstudio2019buildtools'
-        installInstallArgs: '-y'
-        extraArguments: '--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --version 16.7.2.0'
+        script: chocolatey install visualstudio2019buildtools --add Microsoft.VisualStudio.Workload.VCTools;includeRecommended --version 16.7.2.0 -y
+        failOnStderr: true
     - task: CmdLine@2
       displayName: Refresh Environment Variables
       inputs:
         script: refreshenv
-        fialOnStderr: true
+        failOnStderr: true
     - task: CmdLine@2
       inputs:
         script: |
@@ -97,7 +95,7 @@ jobs:
         displayName: CMake Configure
         inputs:
           workingDirectory: 'build'
-          cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang'
+          cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_CXX_COMPILER="C:\Program Files\LLVM\bin\clang++" -DCMAKE_C_COMPILER="C:\Program Files\LLVM\bin\clang"'
       - task: CMake@1
         displayName: CMake Compile
         inputs:
