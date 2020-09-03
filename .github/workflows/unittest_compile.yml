@@ -50,7 +50,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-          path: ${{runner.workspace}}/DisCPP
         
       - name: Create Build Environment
       # Some projects don't allow in-source building, so create a separate build directory
@@ -102,7 +101,12 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-          path: ${{runner.workspace}}/DisCPP
+          
+      - name: Try to figure out directory
+        run: |
+          ls ${{runner.workspace}}
+          ls ${{runner.workspace}}/DisCPP
+          
         
       - name: Create Build Folder
       # Some projects don't allow in-source building, so create a separate build directory
