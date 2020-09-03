@@ -110,4 +110,4 @@ jobs:
       
       - name: CMake Compile
         working-directory: ${{github.workspace}}/DisCPP/build
-        run: cmake --build ${{runner.workspace}}/DisCPP/build
+        run: cmake --build .
