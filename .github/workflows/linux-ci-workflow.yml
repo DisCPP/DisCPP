@@ -41,11 +41,10 @@ jobs:
       - name: Create Build Environment
         shell: bash
         run: cmake -E make_directory ${{runner.workspace}}/build
-
+      
       - name: Install GCC 9.0.0 from apt
-        uses: ryankurte/action-apt@v0.1.0
-        with:
-          packages: g++-9
+        shell: bash
+        run: apt-get install g++-9 -y
 
       - name: CMake Configure
         shell: bash
@@ -71,9 +70,8 @@ jobs:
         run: cmake -E make_directory ${{runner.workspace}}/build
 
       - name: Install GCC 10.0.0 from apt
-        uses: ryankurte/action-apt@v0.1.0
-        with:
-          packages: g++-10
+        shell: bash
+        run: apt-get install g++-10 -y
 
       - name: CMake Configure
         shell: bash
@@ -145,9 +143,8 @@ jobs:
         run: cmake -E make_directory ${{runner.workspace}}/build
 
       - name: Install Clang 10.0.0 from apt
-        uses: ryankurte/action-apt@v0.1.0
-        with:
-          packages: clang-10
+        shell: bash
+        run: apt-get install clang-10 -y
 
       - name: Cmake Configure
         shell: bash
