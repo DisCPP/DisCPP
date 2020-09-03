@@ -73,6 +73,10 @@ jobs:
       run:
         shell: cmd
     
+    env:
+      CC: clang
+      CXX: clang++
+    
     steps:
       - name: Checkout submodules and DisC++
         uses: actions/checkout@v2
@@ -99,10 +103,6 @@ jobs:
         with:
           # Arguments to pass to Chocolatey
           args: install openssl -y
-        
-      - env:
-          CC: clang
-          CXX: clang++  
         
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/DisCPP/build
