@@ -46,7 +46,7 @@ jobs:
         shell: bash
         run: |
           sudo apt update
-          sudo apt install g++-10
+          sudo apt install g++-10 -y
 
       - name: CMake Configure
         shell: bash
@@ -95,17 +95,16 @@ jobs:
         shell: bash
         run: cmake -E make_directory ${{runner.workspace}}/build
 
-      - name: Install Clang 10
+      - name: Install Clang 10 From apt
         shell: bash
-        working-directory: ${{runner.workspace}}/clang-10
         run: |
-          wget https://github-production-release-asset-2e65be.s3.amazonaws.com/75821432/d29efb80-d69f-11ea-9679-5bf0d3e74f55?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20200903%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20200903T222934Z&X-Amz-Expires=300&X-Amz-Signature=6c83773faf304ae20b649e830e827cb8605ca62c218b0847ab4d333c1c520be4&X-Amz-SignedHeaders=host&actor_id=19315457&key_id=0&repo_id=75821432&response-content-disposition=attachment%3B%20filename%3Dclang%2Bllvm-10.0.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz&response-content-type=application%2Foctet-stream
-          tar -xf clang+llvm-10.0.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz
+          sudo apt update
+          sudo apt install clang-10 -y
 
       - name: CMake Configure
         shell: bash
         working-directory: ${{runner.workspace}}/build
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=${{runner.workspace}}/clang-10/clang+llvm-10.0.1-x86_64-linux-gnu-ubuntu-16.04/bin/clang -DCMAKE_CXX_COMPILER=${{runner.workspace}}/clang-10/clang+llvm-10.0.1-x86_64-linux-gnu-ubuntu-16.04/bin/clang++
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang-10 -DCMAKE_CXX_COMPILER=clang++-10
 
       - name: CMake Build
         working-directory: ${{runner.workspace}}/build
