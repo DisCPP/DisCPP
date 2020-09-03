@@ -29,7 +29,7 @@ jobs:
       #- name: Setup VS Build Tools Environment
       #  run: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsx86_amd64.bat"'
 
-      - name: Cache Clang and OpenSSL
+      - name: Cache OpenSSL
         uses: actions/cache@v2
         with:
           path: |
