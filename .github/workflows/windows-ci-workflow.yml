@@ -6,7 +6,7 @@ env:
 
 jobs:
   windows-vs2019-msvc:
-    name: Windows VS2019 MSVC (v19.27.29111.0)
+    name: VS2019 MSVC (v19.27.29111.0)
     runs-on: windows-2019
     
     defaults:
@@ -44,7 +44,7 @@ jobs:
         working-directory: ${{runner.workspace}}/DisCPP/build
         run: cmake --build . --parallel 10
   windows-clang10:
-    name: Windows Clang v10.0.0
+    name: Clang v10.0.0
     runs-on: windows-2019
     
     defaults:
@@ -73,6 +73,68 @@ jobs:
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/DisCPP/build
         run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER="C:/Program Files/LLVM/bin/clang.exe" -DCMAKE_CXX_COMPILER="C:/Program Files/LLVM/bin/clang++.exe" -G "MinGW Makefiles
+      
+      - name: CMake Compile
+        working-directory: ${{runner.workspace}}/DisCPP/build
+        run: cmake --build . --parallel 10
+  windows-clang-cl-10-x64:
+    name: Clang CL v10.0.0 x64
+    runs-on: windows-2019
+    
+    defaults:
+      run:
+        shell: cmd
+    
+    steps:
+      - name: Checkout submodules and DisC++
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+        
+      - name: Create Build Folder
+        run: cmake -E make_directory ${{runner.workspace}}/DisCPP/build
+        
+      - name: Install OpenSSL from Chocolatey
+        uses: crazy-max/ghaction-chocolatey@v1.3.0
+        with:
+          args: install openssl -y
+        
+      - uses: seanmiddleditch/gha-setup-vsdevenv@master
+
+      - name: CMake Configure
+        working-directory: ${{runner.workspace}}/DisCPP/build
+        run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G "Visual Studio 16 2019" -A x64 -T ClangCL
+      
+      - name: CMake Compile
+        working-directory: ${{runner.workspace}}/DisCPP/build
+        run: cmake --build . --parallel 10
+  windows-clang-cl-10-x86:
+    name: Clang CL v10.0.0 x86
+    runs-on: windows-2019
+    
+    defaults:
+      run:
+        shell: cmd
+    
+    steps:
+      - name: Checkout submodules and DisC++
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+        
+      - name: Create Build Folder
+        run: cmake -E make_directory ${{runner.workspace}}/DisCPP/build
+        
+      - name: Install OpenSSL from Chocolatey
+        uses: crazy-max/ghaction-chocolatey@v1.3.0
+        with:
+          args: install openssl -y
+        
+      - uses: seanmiddleditch/gha-setup-vsdevenv@master
+
+      - name: CMake Configure
+        working-directory: ${{runner.workspace}}/DisCPP/build
+        run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G "Visual Studio 16 2019" -A Win32 -T ClangCL
       
       - name: CMake Compile
         working-directory: ${{runner.workspace}}/DisCPP/build

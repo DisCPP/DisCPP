@@ -6,7 +6,7 @@ env:
 
 jobs:
   ubuntu-gcc-9-3:
-    name: Ubuntu 18.04 GCC v9.3.0
+    name: 18.04 GCC v9.3.0
     runs-on: ubuntu-18.04
 
     steps:
@@ -29,7 +29,7 @@ jobs:
         shell: bash
         run: cmake --build ${{runner.workspace}}/build
   ubuntu-gcc-10-0:
-    name: Ubuntu 18.04 GCC v10.0.0
+    name: 18.04 GCC v10.0.0
     runs-on: ubuntu-18.04
 
     steps:
@@ -59,7 +59,7 @@ jobs:
         run: cmake --build ${{runner.workspace}}/build
 
   ubuntu-clang-9:
-    name: Ubuntu 18.04 Clang v9.0.0
+    name: 18.04 Clang v9.0.0
     runs-on: ubuntu-18.04
 
     steps:
@@ -82,7 +82,7 @@ jobs:
         shell: bash
         run: cmake --build ${{runner.workspace}}/build
   ubuntu-clang-10:
-    name: Ubuntu 18.04 Clang v10.0.0
+    name: 18.04 Clang v10.0.0
     runs-on: ubuntu-18.04
 
     steps:
