@@ -91,7 +91,7 @@ jobs:
         with:
           submodules: 'recursive'
 
-      - name: Create Build Environment
+      - name: Create Build Folder
         shell: bash
         run: cmake -E make_directory ${{runner.workspace}}/build
 

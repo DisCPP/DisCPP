@@ -19,7 +19,7 @@ jobs:
         with:
           submodules: 'recursive'
         
-      - name: Create Build Environment
+      - name: Create Build Folder
         run: cmake -E make_directory ${{runner.workspace}}/DisCPP/build
 
       #- name: Install VS2019 Build Tools (v16.7.2.0) via Chocolatey
@@ -35,7 +35,7 @@ jobs:
           path: |
             "C:\ProgramData\Chocolatey"
             "C:\Program Files\OpenSSL-Win64"
-          key: ${{ runner.os }}-choco-clang10-opensslx64
+          key: ${{ runner.os }}-choco-msvc-opensslx64
 
       - name: Install OpenSSL from Chocolatey
         uses: crazy-max/ghaction-chocolatey@v1.3.0
