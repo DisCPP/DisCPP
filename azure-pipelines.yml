@@ -26,40 +26,40 @@ jobs:
         command: 'install'
         installPackageId: 'visualstudio2019buildtools'
         installInstallArgs: '-y'
-        installParams: '--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64'
+        installParams: '--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --passive'
         installPackageVersion: '16.7.2.0'
 
         #extraArguments: '--package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64" --version '
-    - task: CmdLine@2
-      displayName: Refresh Environment Variables
-      inputs:
-        script: refreshenv
-        failOnStderr: true
-    - task: CmdLine@2
-      inputs:
-        script: |
-          ls 'C:\'
-          echo -----------------------------------------------------------------------
-          ls 'C:\Program Files (x86)'
-          echo -----------------------------------------------------------------------
-          ls 'C:\Program Files (x86)\Microsoft Visual Studio'
-          echo -----------------------------------------------------------------------
-          ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019'
-          echo -----------------------------------------------------------------------
-          ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools'
-          echo -----------------------------------------------------------------------
-          ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC'
-          echo -----------------------------------------------------------------------
-          ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary'
-          echo -----------------------------------------------------------------------
-          ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build'
-          echo -----------------------------------------------------------------------
-          ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build'
-          echo -----------------------------------------------------------------------
+    #- task: CmdLine@2
+    #  displayName: Refresh Environment Variables
+    #  inputs:
+    #    script: refreshenv
+    #    failOnStderr: true
+    #- task: CmdLine@2
+    #  inputs:
+    #    script: |
+    #      ls 'C:\'
+    #      echo -----------------------------------------------------------------------
+    #      ls 'C:\Program Files (x86)'
+    #      echo -----------------------------------------------------------------------
+    #      ls 'C:\Program Files (x86)\Microsoft Visual Studio'
+    #      echo -----------------------------------------------------------------------
+    #      ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019'
+    #      echo -----------------------------------------------------------------------
+    #      ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools'
+    #      echo -----------------------------------------------------------------------
+    #      ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC'
+    #      echo -----------------------------------------------------------------------
+    #      ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary'
+    #      echo -----------------------------------------------------------------------
+    #      ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build'
+    #      echo -----------------------------------------------------------------------
+    #      ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build'
+    #      echo -----------------------------------------------------------------------
     - task: BatchScript@1
       displayName: Setup VS Build Tools Environment
       inputs:
-        filename: 'C:\Program Files (x86)\Microsoft Visual Studio\BuildTools\VC\Auxiliary\Build\vcvarsx86_amd64.bat'
+        filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsx86_amd64.bat'
         modifyEnvironment: true
         failOnStandardError: true
     - task: CMake@1
@@ -91,16 +91,16 @@ jobs:
           command: 'install'
           installPackageId: 'openssl'
           installInstallArgs: '-y'
-      - task: CmdLine@2
-        displayName: Refresh Environment Variables
-        inputs:
-          script: refreshenv
-          failOnStderr: true
+      #- task: CmdLine@2
+      #  displayName: Refresh Environment Variables
+      #  inputs:
+      #    script: refreshenv
+      #    failOnStderr: true
       - task: CMake@1
         displayName: CMake Configure
         inputs:
           workingDirectory: 'build'
-          cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_CXX_COMPILER="C:/Program Files/LLVM/bin/clang++" -DCMAKE_C_COMPILER="C:/Program Files/LLVM/bin/clang"'
+          cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_CXX_COMPILER="C:/Program Files/LLVM/bin/clang++.exe" -DCMAKE_C_COMPILER="C:/Program Files/LLVM/bin/clang.exe"'
       - task: CMake@1
         displayName: CMake Compile
         inputs:
