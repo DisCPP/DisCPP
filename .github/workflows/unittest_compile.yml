@@ -66,7 +66,7 @@ jobs:
 
       - name: Setup VS Build Tools Environment  
         shell: cmd
-        run: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsx86_amd64.bat'
+        run: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsx86_amd64.bat"'
 
       - name: Install OpenSSL from Chocolatey
         uses: crazy-max/ghaction-chocolatey@v1.3.0
@@ -78,7 +78,7 @@ jobs:
 
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/build
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
       
       - name: CMake Compile
         working-directory: ${{runner.workspace}}/build
@@ -128,7 +128,7 @@ jobs:
         
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/build
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=cl.exe -DCMAKE_CXX_COMPILER=cl.exe
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
       
       - name: CMake Compile
         working-directory: ${{runner.workspace}}/build
