@@ -1,0 +1,53 @@
+on: [push, pull_request]
+name: Linux
+
+env:
+  BUILD_TYPE: Debug
+
+jobs:
+  ubuntu-gcc-7-5:
+    name: Ubuntu 18.04 GCC v7.5.0
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout submodules and DisC++
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: Create Build Environment
+        shell: bash
+        run: cmake -E make_directory ${{runner.workspace}}/build
+
+      - name: CMake Configure
+        shell: bash
+        working-directory: ${{runner.workspace}}/build
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+      - name: CMake Build
+        working-directory: ${{runner.workspace}}/build
+        shell: bash
+        run: cmake --build ${{runner.workspace}}/build
+  ubuntu-clang-9:
+    name: Ubuntu 18.04 Clang (v9.0.0)
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout submodules and DisC++
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: Create Build Environment
+        shell: bash
+        run: cmake -E make_directory ${{runner.workspace}}/build
+
+      - name: Cmake Configure
+        shell: bash
+        working-directory: ${{runner.workspace}}/build
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang-9 -DCMAKE_CXX_COMPILER=clang++-9
+
+      - name: CMake Build
+        working-directory: ${{runner.workspace}}/build
+        shell: bash
+        run: cmake --build ${{runner.workspace}}/build
