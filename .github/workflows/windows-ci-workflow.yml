@@ -107,7 +107,7 @@ jobs:
         with:
           args: install openssl -y
         
-      - uses: seanmiddleditch/gha-setup-vsdevenv@master
+      #- uses: seanmiddleditch/gha-setup-vsdevenv@master
 
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/DisCPP/build
