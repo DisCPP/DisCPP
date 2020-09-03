@@ -23,7 +23,7 @@ jobs:
     - task: CmdLine@2
       displayName: Install VS2019 Build Tools (v16.7.2.0) via Chocolatey
       inputs:
-        script: chocolatey install visualstudio2019buildtools --add Microsoft.VisualStudio.Workload.VCTools;includeRecommended --version 16.7.2.0 -y
+        script: chocolatey install visualstudio2019buildtools --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --version 16.7.2.0 -y
         failOnStderr: true
     - task: CmdLine@2
       displayName: Refresh Environment Variables
