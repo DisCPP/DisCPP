@@ -2,7 +2,7 @@ on: [push, pull_request]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
+  BUILD_TYPE: 
 
 jobs:
     # The CMake configure and build commands are platform agnostic and should work equally
@@ -29,16 +29,13 @@ jobs:
         # access regardless of the host operating system
         shell: bash
         working-directory: ${{runner.workspace}}/build
-        # Note the current convention is to use the -S and -B options here to specify source 
-        # and build directories, but this is only available with CMake 3.13 and higher.  
-        # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        run: cmake ${{runner.workspace}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
       - name: Build
         working-directory: ${{runner.workspace}}/build
         shell: bash
         # Execute the build.  You can specify a specific target with "--target <NAME>"
-        run: cmake --build . --config $BUILD_TYPE
+        run: cmake --build ${{runner.workspace}}/build --config $BUILD_TYPE
   windows-vs2019-msvc:
     name: Windows VS2019 MSVC (v19.27.29111.0)
     runs-on: windows-2019
@@ -78,11 +75,11 @@ jobs:
 
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/build
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
+        run: cmake ${{runner.workspace}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
       
       - name: CMake Compile
         working-directory: ${{runner.workspace}}/build
-        run: cmake --build .
+        run: cmake --build ${{runner.workspace}}/build
 
       #- name: CMake Configure and Compile
         # You may pin to the exact commit or the version.
@@ -128,11 +125,11 @@ jobs:
         
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/build
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+        run: cmake ${{runner.workspace}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
       
       - name: CMake Compile
         working-directory: ${{runner.workspace}}/build
-        run: cmake --build .
+        run: cmake --build ${{runner.workspace}}/build
         
       #- name: CMake Configure and Compile
         # You may pin to the exact commit or the version.
