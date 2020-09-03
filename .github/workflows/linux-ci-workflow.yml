@@ -1,5 +1,5 @@
 on: [push, pull_request]
-name: Linux
+name: Linux CI
 
 env:
   BUILD_TYPE: Debug
@@ -28,8 +28,87 @@ jobs:
         working-directory: ${{runner.workspace}}/build
         shell: bash
         run: cmake --build ${{runner.workspace}}/build
+  ubuntu-gcc-9-0:
+    name: Ubuntu 18.04 GCC v9.0.0
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout submodules and DisC++
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: Create Build Environment
+        shell: bash
+        run: cmake -E make_directory ${{runner.workspace}}/build
+
+      - name: Install GCC 9.0.0 from apt
+        uses: ryankurte/action-apt@v0.1.0
+        with:
+          packages: g++-9
+
+      - name: CMake Configure
+        shell: bash
+        working-directory: ${{runner.workspace}}/build
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=gcc-9 -DCMAKE_CXX_COMPILER=g++-9
+
+      - name: CMake Build
+        working-directory: ${{runner.workspace}}/build
+        shell: bash
+        run: cmake --build ${{runner.workspace}}/build
+  ubuntu-gcc-10-0:
+    name: Ubuntu 18.04 GCC v10.0.0
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout submodules and DisC++
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: Create Build Environment
+        shell: bash
+        run: cmake -E make_directory ${{runner.workspace}}/build
+
+      - name: Install GCC 10.0.0 from apt
+        uses: ryankurte/action-apt@v0.1.0
+        with:
+          packages: g++-10
+
+      - name: CMake Configure
+        shell: bash
+        working-directory: ${{runner.workspace}}/build
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
+
+      - name: CMake Build
+        working-directory: ${{runner.workspace}}/build
+        shell: bash
+        run: cmake --build ${{runner.workspace}}/build
+  ubuntu-clang-8:
+    name: Ubuntu 18.04 Clang v8.0.0
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout submodules and DisC++
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: Create Build Environment
+        shell: bash
+        run: cmake -E make_directory ${{runner.workspace}}/build
+
+      - name: Cmake Configure
+        shell: bash
+        working-directory: ${{runner.workspace}}/build
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang-8 -DCMAKE_CXX_COMPILER=clang++-8
+
+      - name: CMake Build
+        working-directory: ${{runner.workspace}}/build
+        shell: bash
+        run: cmake --build ${{runner.workspace}}/build
   ubuntu-clang-9:
-    name: Ubuntu 18.04 Clang (v9.0.0)
+    name: Ubuntu 18.04 Clang v9.0.0
     runs-on: ubuntu-18.04
 
     steps:
@@ -46,6 +125,34 @@ jobs:
         shell: bash
         working-directory: ${{runner.workspace}}/build
         run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang-9 -DCMAKE_CXX_COMPILER=clang++-9
+
+      - name: CMake Build
+        working-directory: ${{runner.workspace}}/build
+        shell: bash
+        run: cmake --build ${{runner.workspace}}/build
+  ubuntu-clang-10:
+    name: Ubuntu 18.04 Clang v10.0.0
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout submodules and DisC++
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: Create Build Environment
+        shell: bash
+        run: cmake -E make_directory ${{runner.workspace}}/build
+
+      - name: Install Clang 10.0.0 from apt
+        uses: ryankurte/action-apt@v0.1.0
+        with:
+          packages: clang-10
+
+      - name: Cmake Configure
+        shell: bash
+        working-directory: ${{runner.workspace}}/build
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang-10 -DCMAKE_CXX_COMPILER=clang++-10
 
       - name: CMake Build
         working-directory: ${{runner.workspace}}/build

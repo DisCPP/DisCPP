@@ -1,5 +1,5 @@
 on: [push, pull_request]
-name: Windows
+name: Windows CI
 
 env:
   BUILD_TYPE: Debug
@@ -43,8 +43,8 @@ jobs:
       - name: CMake Compile
         working-directory: ${{runner.workspace}}/DisCPP/build
         run: cmake --build . --parallel 10
-  windows-clang:
-    name: Windows Clang (v10.0.0)
+  windows-clang10:
+    name: Windows Clang v10.0.0
     runs-on: windows-2019
     
     defaults:
@@ -73,6 +73,98 @@ jobs:
         with:
           # Arguments to pass to Chocolatey
           args: install llvm --version 10.0.0 -y
+        
+      - name: Install OpenSSL from Chocolatey
+        # You may pin to the exact commit or the version.
+        # uses: crazy-max/ghaction-chocolatey@b6061d587628735be315d74358228b83a7dba9a7
+        uses: crazy-max/ghaction-chocolatey@v1.3.0
+        with:
+          # Arguments to pass to Chocolatey
+          args: install openssl -y
+        
+      - name: CMake Configure
+        working-directory: ${{runner.workspace}}/DisCPP/build
+        run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER="C:/Program Files/LLVM/bin/clang.exe" -DCMAKE_CXX_COMPILER="C:/Program Files/LLVM/bin/clang++.exe" -G "MinGW Makefiles
+      
+      - name: CMake Compile
+        working-directory: ${{runner.workspace}}/DisCPP/build
+        run: cmake --build . --parallel 10
+  windows-clang9:
+    name: Windows Clang v9.0.0
+    runs-on: windows-2019
+    
+    defaults:
+      run:
+        shell: cmd
+    
+    env:
+      CC: clang
+      CXX: clang++
+    
+    steps:
+      - name: Checkout submodules and DisC++
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+        
+      - name: Create Build Folder
+      # Some projects don't allow in-source building, so create a separate build directory
+      # We'll use this as our working directory for all subsequent commands
+        run: cmake -E make_directory ${{runner.workspace}}/DisCPP/build
+
+      - name: Install Clang from Chocolatey
+        # You may pin to the exact commit or the version.
+        # uses: crazy-max/ghaction-chocolatey@b6061d587628735be315d74358228b83a7dba9a7
+        uses: crazy-max/ghaction-chocolatey@v1.3.0
+        with:
+          # Arguments to pass to Chocolatey
+          args: install llvm --version 9.0.0 -y
+        
+      - name: Install OpenSSL from Chocolatey
+        # You may pin to the exact commit or the version.
+        # uses: crazy-max/ghaction-chocolatey@b6061d587628735be315d74358228b83a7dba9a7
+        uses: crazy-max/ghaction-chocolatey@v1.3.0
+        with:
+          # Arguments to pass to Chocolatey
+          args: install openssl -y
+        
+      - name: CMake Configure
+        working-directory: ${{runner.workspace}}/DisCPP/build
+        run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER="C:/Program Files/LLVM/bin/clang.exe" -DCMAKE_CXX_COMPILER="C:/Program Files/LLVM/bin/clang++.exe" -G "MinGW Makefiles
+      
+      - name: CMake Compile
+        working-directory: ${{runner.workspace}}/DisCPP/build
+        run: cmake --build . --parallel 10
+  windows-clang8:
+    name: Windows Clang v8.0.0
+    runs-on: windows-2019
+    
+    defaults:
+      run:
+        shell: cmd
+    
+    env:
+      CC: clang
+      CXX: clang++
+    
+    steps:
+      - name: Checkout submodules and DisC++
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+        
+      - name: Create Build Folder
+      # Some projects don't allow in-source building, so create a separate build directory
+      # We'll use this as our working directory for all subsequent commands
+        run: cmake -E make_directory ${{runner.workspace}}/DisCPP/build
+
+      - name: Install Clang from Chocolatey
+        # You may pin to the exact commit or the version.
+        # uses: crazy-max/ghaction-chocolatey@b6061d587628735be315d74358228b83a7dba9a7
+        uses: crazy-max/ghaction-chocolatey@v1.3.0
+        with:
+          # Arguments to pass to Chocolatey
+          args: install llvm --version 8.0.0 -y
         
       - name: Install OpenSSL from Chocolatey
         # You may pin to the exact commit or the version.
