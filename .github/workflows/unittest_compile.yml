@@ -1,7 +1,7 @@
 on: [push, pull_request]
 
 env:
-  BUILD_TYPE: Release
+  BUILD_TYPE: Debug
 
 jobs:
   ubuntu:
@@ -64,7 +64,7 @@ jobs:
       
       - name: CMake Compile
         working-directory: ${{runner.workspace}}/DisCPP/build
-        run: cmake --build .
+        run: cmake --build . --parallel 10
   windows-clang:
     name: Windows Clang (v10.0.0)
     runs-on: windows-2019
@@ -106,8 +106,8 @@ jobs:
         
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/DisCPP/build
-        run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+        run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER="C:/Program Files/LLVM/bin/clang.exe" -DCMAKE_CXX_COMPILER="C:/Program Files/LLVM/bin/clang++.exe"
       
       - name: CMake Compile
-        working-directory: ${{github.workspace}}/DisCPP/build
-        run: cmake --build .
+        working-directory: ${{runner.workspace}}/DisCPP/build
+        run: cmake --build . --parallel 10
