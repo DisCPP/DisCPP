@@ -2,7 +2,7 @@ on: [push, pull_request]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: 
+  BUILD_TYPE: Release
 
 jobs:
     # The CMake configure and build commands are platform agnostic and should work equally
@@ -22,6 +22,7 @@ jobs:
       - name: Create Build Environment
         # Some projects don't allow in-source building, so create a separate build directory
         # We'll use this as our working directory for all subsequent commands
+        shell: bash
         run: cmake -E make_directory ${{runner.workspace}}/build
 
       - name: Configure CMake
@@ -29,13 +30,13 @@ jobs:
         # access regardless of the host operating system
         shell: bash
         working-directory: ${{runner.workspace}}/build
-        run: cmake ${{runner.workspace}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
       - name: Build
         working-directory: ${{runner.workspace}}/build
         shell: bash
         # Execute the build.  You can specify a specific target with "--target <NAME>"
-        run: cmake --build ${{runner.workspace}}/build --config $BUILD_TYPE
+        run: cmake --build ${{runner.workspace}}/build
   windows-vs2019-msvc:
     name: Windows VS2019 MSVC (v19.27.29111.0)
     runs-on: windows-2019
@@ -61,8 +62,7 @@ jobs:
           # Arguments to pass to Chocolatey
           args: install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --passive" --version 16.7.2.0 -y
 
-      - name: Setup VS Build Tools Environment  
-        shell: cmd
+      - name: Setup VS Build Tools Environment
         run: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsx86_amd64.bat"'
 
       - name: Install OpenSSL from Chocolatey
@@ -75,11 +75,11 @@ jobs:
 
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/build
-        run: cmake ${{runner.workspace}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
       
       - name: CMake Compile
         working-directory: ${{runner.workspace}}/build
-        run: cmake --build ${{runner.workspace}}/build
+        run: cmake --build .
 
       #- name: CMake Configure and Compile
         # You may pin to the exact commit or the version.
@@ -125,11 +125,11 @@ jobs:
         
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/build
-        run: cmake ${{runner.workspace}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
       
       - name: CMake Compile
         working-directory: ${{runner.workspace}}/build
-        run: cmake --build ${{runner.workspace}}/build
+        run: cmake --build .
         
       #- name: CMake Configure and Compile
         # You may pin to the exact commit or the version.
