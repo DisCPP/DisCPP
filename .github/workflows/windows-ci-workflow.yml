@@ -42,7 +42,7 @@ jobs:
       #  run: ls "C:\Program Files\OpenSSL-Win64"
 
       - name: Install OpenSSL from Chocolatey
-        if: steps.cache-key.outputs.cache-hit != 'true'
+        #if: steps.cache-key.outputs.cache-hit != 'true'
         uses: crazy-max/ghaction-chocolatey@v1.3.0
         with:
           args: install openssl -y
