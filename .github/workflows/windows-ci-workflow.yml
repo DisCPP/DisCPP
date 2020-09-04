@@ -47,12 +47,12 @@ jobs:
         with:
           args: install openssl -y
 
-      - name: Add Environmental Variables for Cached OpenSSL
-        if: steps.cache-key.outputs.cache-hit != 'false'
-        run: |
-          echo "::add-path::C:\Program Files\OpenSSL-Win64\bin"
-          echo "::set-env OPENSSL_CONF=C:\Program Files\OpenSSL-Win64\bin\openssl.cfg"
-          echo "::set-env OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL-Win64"
+      #- name: Add Environmental Variables for Cached OpenSSL
+      #  if: steps.cache-key.outputs.cache-hit != 'false'
+      #  run: |
+      #    echo "::add-path::C:\Program Files\OpenSSL-Win64\bin"
+      #    echo "::set-env OPENSSL_CONF=C:\Program Files\OpenSSL-Win64\bin\openssl.cfg"
+      #    echo "::set-env OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL-Win64"
 
       - uses: seanmiddleditch/gha-setup-vsdevenv@master
 
