@@ -30,10 +30,11 @@ jobs:
       #  run: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsx86_amd64.bat"'
 
       - name: Cache OpenSSL
+        id: cache-openssl
         uses: actions/cache@v2
         with:
           path: |
-            C:\ProgramData\Chocolatey
+            C:\ProgramData\Chocolatey\lib\openssl
             C:\Program Files\OpenSSL-Win64
           key: ${{ runner.os }}-choco-msvc-openssl
       
@@ -41,9 +42,16 @@ jobs:
       #  run: ls "C:\Program Files\OpenSSL-Win64"
 
       - name: Install OpenSSL from Chocolatey
+        if: steps.cache-openssl.outputs.cache-hit == 'false'
         uses: crazy-max/ghaction-chocolatey@v1.3.0
         with:
           args: install openssl -y
+
+      - name: Add Environmental Variables for Cached OpenSSL
+        if: steps.cache-openssl.outputs.cache-hit == 'true'
+        run: |
+          echo "::add-path::C:\Program Files\OpenSSL-Win64\bin"
+          echo "::set-env OPENSSL_CONF=::C:\Program Files\OpenSSL-Win64\bin\openssl.cfg"
 
       - uses: seanmiddleditch/gha-setup-vsdevenv@master
 
@@ -75,7 +83,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            C:\ProgramData\Chocolatey
+            C:\ProgramData\Chocolatey\lib\openssl
+            C:\ProgramData\Chocolatey\lib\llvm
             C:\Program Files\OpenSSL-Win64
             C:\Program Files\LLVM
           key: ${{ runner.os }}-choco-clang10-openssl
@@ -87,14 +96,23 @@ jobs:
       #    ls "C:\Program Files\LLVM"
 
       - name: Install Clang from Chocolatey
+        if: steps.cache-openssl.outputs.cache-hit == 'false'
         uses: crazy-max/ghaction-chocolatey@v1.3.0
         with:
           args: install llvm --version 10.0.0 -y
         
       - name: Install OpenSSL from Chocolatey
+        if: steps.cache-openssl.outputs.cache-hit == 'false'
         uses: crazy-max/ghaction-chocolatey@v1.3.0
         with:
           args: install openssl -y
+
+      - name: Add Environmental Variables for Cached OpenSSL and Clang
+        if: steps.cache-openssl.outputs.cache-hit == 'true'
+        run: |
+          echo "::add-path::C:\Program Files\OpenSSL-Win64\bin"
+          echo "::add-path::C:\Program Files\LLVM\bin"
+          echo "::set-env OPENSSL_CONF=::C:\Program Files\OpenSSL-Win64\bin\openssl.cfg"
         
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/DisCPP/build
