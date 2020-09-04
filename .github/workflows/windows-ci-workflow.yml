@@ -42,17 +42,17 @@ jobs:
       #  run: ls "C:\Program Files\OpenSSL-Win64"
 
       - name: Install OpenSSL from Chocolatey
-        #if: steps.cache-key.outputs.cache-hit != 'true'
+        if: steps.cache-key.outputs.cache-hit != 'true'
         uses: crazy-max/ghaction-chocolatey@v1.3.0
         with:
-          args: install openssl -y --force
+          args: install openssl -y
 
-      #- name: Add Environmental Variables for Cached OpenSSL
-      #  if: steps.cache-key.outputs.cache-hit != 'false'
-      #  run: |
-      #    echo "::add-path::C:\Program Files\OpenSSL-Win64\bin"
-      #    echo "::set-env OPENSSL_CONF=C:\Program Files\OpenSSL-Win64\bin\openssl.cfg"
-      #    echo "::set-env OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL-Win64"
+      - name: Add Environmental Variables for Cached OpenSSL
+        if: steps.cache-key.outputs.cache-hit != 'false'
+        run: |
+          echo "::add-path::C:\Program Files\OpenSSL-Win64\bin"
+          echo "::set-env name=OPENSSL_CONF::C:\Program Files\OpenSSL-Win64\bin\openssl.cfg"
+          echo "::set-env name=OPENSSL_ROOT_DIR::C:\Program Files\OpenSSL-Win64"
 
       - uses: seanmiddleditch/gha-setup-vsdevenv@master
 
@@ -114,8 +114,8 @@ jobs:
         run: |
           echo "::add-path::C:\Program Files\OpenSSL-Win64\bin"
           echo "::add-path::C:\Program Files\LLVM\bin"
-          echo "::set-env OPENSSL_CONF=C:\Program Files\OpenSSL-Win64\bin\openssl.cfg"
-          echo "::set-env OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL-Win64"
+          echo "::set-env name=OPENSSL_CONF::C:\Program Files\OpenSSL-Win64\bin\openssl.cfg"
+          echo "::set-env name=OPENSSL_ROOT_DIR::C:\Program Files\OpenSSL-Win64"
         
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/DisCPP/build
