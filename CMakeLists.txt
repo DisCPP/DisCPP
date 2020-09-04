@@ -24,8 +24,10 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
 set(BUILD_CPR_TESTS OFF CACHE BOOL "")
 set(BUILD_CURL_EXE OFF CACHE BOOL "")
 
+set(USE_ZLIB OFF CACHE BOOL "") # Don't use ZLib for IXWebsocket
+
 # Set TLS library for CPR and also IXWebsocket
-if(WIN32) # Use MBedTLS for Windows
+if(WIN32) # Use WinSSL for Windows
 	set(USE_WINSSL ON CACHE BOOL "")
 	set(USE_OPENSSL OFF CACHE BOOL "")
 
@@ -53,7 +55,7 @@ endif()
 option(USE_RAPID "Uses RapidJSON for json parsing." ON)
 option(USE_SIMD "Uses simdjson for json parsing. - NOT YET SUPPORTED" OFF)
 option(USE_FMT "Uses fmt for logger - NOT YET SUPPORTED" OFF)
-option(BUILD_EXAMPLES "Build example bots." OFF)
+option(BUILD_EXAMPLES "Build example bots." ON)
 option(BUILD_TESTS "Build unit tests." OFF)
 
 # Find dependencies
@@ -115,11 +117,13 @@ target_link_libraries(discpp PUBLIC ixwebsocket)
 
 # Build unit tests
 if (BUILD_TESTS)
+	message(STATUS "Building DisC++ tests")
 	add_subdirectory(tests)
 endif()
 
 # Build examples
 if (BUILD_EXAMPLES)
+	message(STATUS "Building DisC++ examples")
 	add_subdirectory(examples/pingbot)
 	add_subdirectory(examples/serverinfo)
 endif()
