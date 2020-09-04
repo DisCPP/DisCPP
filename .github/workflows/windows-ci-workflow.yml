@@ -33,9 +33,12 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            "C:\ProgramData\Chocolatey"
-            "C:\Program Files\OpenSSL-Win64"
+            C:\ProgramData\Chocolatey
+            C:\Program Files\OpenSSL-Win64
           key: ${{ runner.os }}-choco-msvc-opensslx64
+      
+      - name: List cached directories
+        run: ls "C:\Program Files\OpenSSL-Win64"
 
       - name: Install OpenSSL from Chocolatey
         uses: crazy-max/ghaction-chocolatey@v1.3.0
@@ -76,6 +79,12 @@ jobs:
             "C:\Program Files\OpenSSL-Win64"
             "C:\Program Files\LLVM"
           key: ${{ runner.os }}-choco-clang10-opensslx64
+
+      - name: List cached directories
+        run: |
+          ls "C:\Program Files\OpenSSL-Win64"
+          echo ---------------------------------------
+          ls "C:\Program Files\LLVM"
 
       - name: Install Clang from Chocolatey
         uses: crazy-max/ghaction-chocolatey@v1.3.0
