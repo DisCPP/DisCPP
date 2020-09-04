@@ -57,7 +57,7 @@ jobs:
       - name: Test
         run: |
           @echo on
-          echo ${{ env.OPENSSL_ROOT_DIR }}
+          echo "Test openssl directory: ${{ env.OPENSSL_ROOT_DIR }}"
 
       - uses: seanmiddleditch/gha-setup-vsdevenv@master
 
