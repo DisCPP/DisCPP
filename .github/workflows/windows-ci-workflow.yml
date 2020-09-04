@@ -58,7 +58,7 @@ jobs:
 
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/DisCPP/build
-        run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -G "MinGW Makefiles
+        run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -G "MinGW Makefiles" -DOPENSSL_ROOT_DIR="C:\Program Files\OpenSSL-Win64"
       
       - name: CMake Compile
         working-directory: ${{runner.workspace}}/DisCPP/build
