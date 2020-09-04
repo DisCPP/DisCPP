@@ -50,9 +50,10 @@ jobs:
       - name: Add Environmental Variables for Cached OpenSSL
         if: steps.cache-key.outputs.cache-hit != 'false'
         run: |
-          echo "::add-path::'C:\Program Files\OpenSSL-Win64\bin'"
-          echo "::set-env name=OPENSSL_CONF::'C:\Program Files\OpenSSL-Win64\bin\openssl.cfg'"
-          echo "::set-env name=OPENSSL_ROOT_DIR::'C:\Program Files\OpenSSL-Win64'"
+          @echo on
+          echo "::add-path::%programfiles%\OpenSSL-Win64\bin"
+          echo "::set-env name=OPENSSL_CONF::%programfiles%\OpenSSL-Win64\bin\openssl.cfg"
+          echo "::set-env name=OPENSSL_ROOT_DIR::%programfiles%\OpenSSL-Win64"
 
       - name: Test
         run: |
