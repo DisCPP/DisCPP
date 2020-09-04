@@ -55,7 +55,9 @@ jobs:
           echo "::set-env name=OPENSSL_ROOT_DIR::'C:\Program Files\OpenSSL-Win64'"
 
       - name: Test
-        run: echo ${{ env.OPENSSL_ROOT_DIR }}
+        run: |
+          @echo on
+          echo ${{ env.OPENSSL_ROOT_DIR }}
 
       - uses: seanmiddleditch/gha-setup-vsdevenv@master
 
