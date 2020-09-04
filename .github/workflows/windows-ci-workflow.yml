@@ -50,15 +50,15 @@ jobs:
       - name: Add Environmental Variables for Cached OpenSSL
         if: steps.cache-key.outputs.cache-hit != 'false'
         run: |
-          echo "::add-path::C:\Program Files\OpenSSL-Win64\bin"
-          echo "::set-env name=OPENSSL_CONF::C:\Program Files\OpenSSL-Win64\bin\openssl.cfg"
-          echo "::set-env name=OPENSSL_ROOT_DIR::C:\Program Files\OpenSSL-Win64"
+          echo "::add-path::'C:\Program Files\OpenSSL-Win64\bin'"
+          echo "::set-env name=OPENSSL_CONF::'C:\Program Files\OpenSSL-Win64\bin\openssl.cfg'"
+          echo "::set-env name=OPENSSL_ROOT_DIR::'C:\Program Files\OpenSSL-Win64'"
 
       - uses: seanmiddleditch/gha-setup-vsdevenv@master
 
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/DisCPP/build
-        run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -G "MinGW Makefiles" -DOPENSSL_ROOT_DIR="C:\Program Files\OpenSSL-Win64"
+        run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -G "MinGW Makefiles"
       
       - name: CMake Compile
         working-directory: ${{runner.workspace}}/DisCPP/build
@@ -112,10 +112,10 @@ jobs:
       - name: Add Environmental Variables for Cached OpenSSL and Clang
         if: steps.cache-key.outputs.cache-hit != 'false'
         run: |
-          echo "::add-path::C:\Program Files\OpenSSL-Win64\bin"
-          echo "::add-path::C:\Program Files\LLVM\bin"
-          echo "::set-env name=OPENSSL_CONF::C:\Program Files\OpenSSL-Win64\bin\openssl.cfg"
-          echo "::set-env name=OPENSSL_ROOT_DIR::C:\Program Files\OpenSSL-Win64"
+          echo "::add-path::'C:\Program Files\OpenSSL-Win64\bin'"
+          echo "::add-path::'C:\Program Files\LLVM\bin'"
+          echo "::set-env name=OPENSSL_CONF::'C:\Program Files\OpenSSL-Win64\bin\openssl.cfg'"
+          echo "::set-env name=OPENSSL_ROOT_DIR::'C:\Program Files\OpenSSL-Win64'"
         
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/DisCPP/build
