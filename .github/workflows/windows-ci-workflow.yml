@@ -35,7 +35,7 @@ jobs:
           path: |
             C:\ProgramData\Chocolatey
             C:\Program Files\OpenSSL-Win64
-          key: ${{ runner.os }}-choco-msvc-opensslx64
+          key: ${{ runner.os }}-choco-msvc-openssl
       
       #- name: List cached directories
       #  run: ls "C:\Program Files\OpenSSL-Win64"
@@ -78,7 +78,7 @@ jobs:
             C:\ProgramData\Chocolatey
             C:\Program Files\OpenSSL-Win64
             C:\Program Files\LLVM
-          key: ${{ runner.os }}-choco-clang10-opensslx64
+          key: ${{ runner.os }}-choco-clang10-openssl
 
       #- name: List cached directories
       #  run: |
