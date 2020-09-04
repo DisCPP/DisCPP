@@ -45,7 +45,7 @@ jobs:
         #if: steps.cache-key.outputs.cache-hit != 'true'
         uses: crazy-max/ghaction-chocolatey@v1.3.0
         with:
-          args: install openssl -y
+          args: install openssl -y --force
 
       #- name: Add Environmental Variables for Cached OpenSSL
       #  if: steps.cache-key.outputs.cache-hit != 'false'
