@@ -205,21 +205,28 @@ namespace discpp {
     }
 
     void EventDispatcher::GuildIntegrationsUpdateEvent(Shard& shard, rapidjson::Document& result) {
-        shard.client.event_handler->TriggerEvent<discpp::GuildIntegrationsUpdateEvent>(discpp::GuildIntegrationsUpdateEvent(shard, discpp::Guild(&shard.client, SnowflakeFromString(result["guild_id"].GetString()))));
+        shard.client.event_handler->TriggerEvent<discpp::GuildIntegrationsUpdateEvent>(discpp::GuildIntegrationsUpdateEvent(
+                shard, discpp::Guild(&shard.client, SnowflakeFromString(result["guild_id"].GetString()))));
     }
 
     void EventDispatcher::GuildMemberAddEvent(Shard& shard, rapidjson::Document& result) {
         std::shared_ptr<discpp::Guild> guild = shard.client.cache->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
         std::shared_ptr<discpp::Member> member = std::make_shared<discpp::Member>(&shard.client, result, *guild);
-        shard.client.cache->members.insert({ member->user.id, member });
+        guild->members.emplace(member->user.id, member);
+        shard.client.cache->members.emplace(member->user.id, member);
 
         shard.client.event_handler->TriggerEvent<discpp::GuildMemberAddEvent>(discpp::GuildMemberAddEvent(shard, guild, member));
     }
 
     void EventDispatcher::GuildMemberRemoveEvent(Shard& shard, rapidjson::Document& result) {
         std::shared_ptr<discpp::Guild> guild = shard.client.cache->GetGuild(SnowflakeFromString(result["guild_id"].GetString()));
-        std::shared_ptr<discpp::Member> member = std::make_shared<discpp::Member>(&shard.client, SnowflakeFromString(result["user"]["id"].GetString()), *guild);
-        shard.client.cache->members.erase(member->user.id);
+        std::shared_ptr<discpp::Member> member = guild->GetMember(SnowflakeFromString(result["user"]["id"].GetString()));
+        guild->members.erase(member->user.id);
+
+        // Only remove the member from member cache if the user isn't in more than one guild.
+        if (member->user.GetMutualGuilds().size() == 1) {
+            shard.client.cache->members.erase(member->user.id);
+        }
 
         shard.client.event_handler->TriggerEvent<discpp::GuildMemberRemoveEvent>(discpp::GuildMemberRemoveEvent(shard, guild, member));
     }

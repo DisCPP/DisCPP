@@ -98,6 +98,19 @@ namespace discpp {
         return FormatTime(TimeFromSnowflake(id));
     }
 
+    std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> User::GetMutualGuilds() {
+         std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> map;
+
+         for (auto const& guild : GetClient()->cache->guilds) {
+             auto mbr_it = guild.second->members.find(this->id);
+             if (mbr_it != guild.second->members.end()) {
+                 map.emplace(guild.first, guild.second);
+             }
+         }
+
+         return map;
+    }
+
     std::chrono::system_clock::time_point User::GetCreatedAt() const {
         return std::chrono::system_clock::from_time_t(TimeFromSnowflake(id));
 	}

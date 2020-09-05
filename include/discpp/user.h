@@ -7,6 +7,7 @@
 namespace discpp {
 	class Channel;
 	class Integration;
+	class Guild;
 
 	class User : public DiscordObject {
 	    friend class Member; // We need this so discpp::Member can use the client instance.
@@ -106,6 +107,13 @@ namespace discpp {
          * @return std::string
          */
 		std::string GetFormattedCreatedAt() const;
+
+        /**
+         * @brief Returns mutual guilds
+         *
+         * @return std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>>
+         */
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> GetMutualGuilds();
 
         /**
          * @brief Gets the created at time and date for this guild.
