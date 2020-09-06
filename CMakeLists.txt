@@ -99,6 +99,7 @@ endif()
 
 if (USE_RAPID)
 	target_include_directories(discpp PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
+	target_include_directories(discpp PUBLIC thirdparty/rapidjson/include)
 elseif(USE_SIMD)
 	target_link_libraries(discpp PUBLIC simdjson)
 endif()
