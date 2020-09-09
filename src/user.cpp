@@ -29,8 +29,8 @@ namespace discpp {
 				SplitAvatarHash(icon_str, avatar_hex);
 			}
 		}
-		if (GetDataSafely<bool>(json, "bot")) flags |= 1;
-        if (GetDataSafely<bool>(json, "system")) flags |= 2;
+		if (GetDataSafely<bool>(json, "bot")) flags |= 0b1;
+        if (GetDataSafely<bool>(json, "system")) flags |= 0b10;
 		//public_flags = GetDataSafely<int>(json, "public_flags");
 	}
 
@@ -70,9 +70,28 @@ namespace discpp {
 		return discpp::Channel(client, *result);
 	}
 	
-	std::string User::GetAvatarURL(const ImageType& img_type) const {
+	std::string User::GetAvatarURL(const ImageType& img_type, const ImageSize img_size) const {
+	    std::string size = "?size=";
+
+	    switch (img_size) {
+	        case ImageSize::x128:
+	            size += "128";
+	            break;
+	        case ImageSize::x256:
+	            size += "256";
+	            break;
+	        case ImageSize::x512:
+	            size += "512";
+	            break;
+	        case ImageSize::x1024:
+	            size += "1024";
+	            break;
+	        default:
+	            break;
+	    }
+
         if (avatar_hex[0] == 0) {
-			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(discriminator % 5) + ".png");
+			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(discriminator % 5) + ".png" + size);
 		} else {
 		    std::string avatar_str = CombineAvatarHash(avatar_hex);
 
@@ -81,15 +100,15 @@ namespace discpp {
 			if (tmp == ImageType::AUTO) tmp = is_avatar_gif ? ImageType::GIF : ImageType::PNG;
 			switch (tmp) {
 			case ImageType::GIF:
-				return cpr::Url(url + ".gif");
+				return cpr::Url(url + ".gif" + size);
 			case ImageType::JPEG:
-				return cpr::Url(url + ".jpeg");
+				return cpr::Url(url + ".jpeg" + size);
 			case ImageType::PNG:
-				return cpr::Url(url + ".png");
+				return cpr::Url(url + ".png" + size);
 			case ImageType::WEBP:
-				return cpr::Url(url + ".webp");
+				return cpr::Url(url + ".webp" + size);
 			default:
-				return cpr::Url(url);
+				return cpr::Url(url + size);
 			}
 		}
 	}

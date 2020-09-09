@@ -203,24 +203,25 @@ namespace discpp {
 		return messages;
 	}
 
+	discpp::Message Channel::RequestMessage(const discpp::Snowflake& message_id) {
+		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/messages/" + std::to_string(message_id)), DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
+
+		return discpp::Message(*result);
+	}
+
 	void Channel::TriggerTypingIndicator() {
         discpp::Client* client = GetClient();
 		std::unique_ptr<rapidjson::Document> result = SendPostRequest(client, Endpoint("/channels/" + std::to_string(id) + "/typing"), DefaultHeaders(client), {}, {});
 	}
 
-	std::optional<std::vector<discpp::Message>> Channel::GetPinnedMessages() {
-        discpp::Client* client = GetClient();
-        std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/channels/" + std::to_string(id) = "/pins"), DefaultHeaders(client), {}, {});
+	std::vector<discpp::Message> Channel::GetPinnedMessages() {
+        std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) = "/pins"), DefaultHeaders(), {}, {});
 
-        std::optional<std::vector<discpp::Message>> messages;
-        try {
-            for (auto &message : result->GetArray()) {
-                rapidjson::Document message_json;
-                message_json.CopyFrom(message, message_json.GetAllocator());
-                messages->push_back(discpp::Message(client, message_json));
-            }
-        } catch (std::exception& e) {
-            messages = std::nullopt;
+        std::vector<discpp::Message> messages;
+        for (auto &message : result->GetArray()) {
+            rapidjson::Document message_json;
+            message_json.CopyFrom(message, message_json.GetAllocator());
+            messages.push_back(discpp::Message(message_json));
         }
 
         return messages;
@@ -319,7 +320,15 @@ namespace discpp {
             }
         }
 
-		return tmp;
+		std::unique_ptr<rapidjson::Document> result = SendGetRequest(Endpoint("/channels/" + std::to_string(id) + "/invites"), DefaultHeaders(), {}, {});
+		std::vector<discpp::GuildInvite> invites;
+		for (auto& invite : result->GetArray()) {
+			rapidjson::Document invite_json;
+			invite_json.CopyFrom(invite, invite_json.GetAllocator());
+			invites.push_back(discpp::GuildInvite(invite_json));
+		}
+
+		return invites;
 	}
 
 	std::unordered_map<discpp::Snowflake, discpp::Channel> Channel::GetChildren() {

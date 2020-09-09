@@ -438,7 +438,7 @@ namespace discpp {
             discpp::Channel channel = shard.client.cache->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
             auto tmp = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
             if (!tmp.has_value()) {
-                throw std::runtime_error("couldn't find message");
+                throw std::runtime_error("Couldn't find message");
             }
             discpp::Message message = tmp.value();
 
@@ -503,7 +503,7 @@ namespace discpp {
             discpp::Channel channel = shard.client.cache->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
             auto tmp = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
             if (!tmp.has_value()) {
-                throw std::runtime_error("error finding message");
+                throw std::runtime_error("Error finding message");
             }
             discpp::Message message = tmp.value();
 
@@ -546,7 +546,7 @@ namespace discpp {
             discpp::Channel channel = shard.client.cache->GetChannel(SnowflakeFromString(result["channel_id"].GetString()));
             auto tmp = channel.RequestMessage(SnowflakeFromString(result["message_id"].GetString()));
             if (!tmp.has_value()) {
-                throw std::runtime_error("error can't find message");
+                throw std::runtime_error("Error can't find message");
             }
             discpp::Message message = tmp.value();
 
