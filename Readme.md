@@ -29,11 +29,11 @@ This library is ready to use but is still in development so you may encounter a 
     <th>Development</th> 
   </tr>
   <tr>
-    <td align="center"><a href="https://dev.azure.com/seanomik/DisCPP/_build">
-    <img src="https://dev.azure.com/seanomik/DisCPP/_apis/build/status/DisCPP.DisCPP?branchName=master">
+    <td align="center"><a href="https://github.com/DisCPP/DisCPP/actions?query=branch%3Amaster">
+    <img src="https://github.com/DisCPP/DisCPP/workflows/.github/workflows/unittest_compile.yml/badge.svg?branch=master">
   </a></td>
-    <td align="center"><a href="https://dev.azure.com/seanomik/DisCPP/_build">
-    <img src="https://dev.azure.com/seanomik/DisCPP/_apis/build/status/DisCPP.DisCPP?branchName=development">
+    <td align="center"><a href="https://github.com/DisCPP/DisCPP/actions?query=branch%3Adevelopment">
+    <img src="https://github.com/DisCPP/DisCPP/workflows/.github/workflows/unittest_compile.yml/badge.svg?branch=development">
   </a></td>
   </tr>
 </table>
