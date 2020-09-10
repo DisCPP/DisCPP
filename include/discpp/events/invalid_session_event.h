@@ -6,7 +6,11 @@
 namespace discpp {
 	class InvalidSessionEvent : public Event {
 	public:
-		InvalidSessionEvent() = default;
+		InvalidSessionEvent(Shard& shard) : Event(shard) {}
+
+        virtual int GetEventType() const override {
+            return 20;
+        }
 	};
 }
 

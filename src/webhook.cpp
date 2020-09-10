@@ -10,9 +10,9 @@ namespace discpp {
     Webhook::Webhook(rapidjson::Document& json) {
         id = SnowflakeFromString(json["id"].GetString());
         type = static_cast<WebhookType>(json["type"].GetInt());
-        guild = std::make_shared<discpp::Guild>(ConstructDiscppObjectFromID(json, "guild_id", discpp::Guild()));
-        channel = std::make_shared<discpp::Channel>(globals::client_instance->cache.GetChannel(SnowflakeFromString(json["guild_id"].GetString())));
-		user = std::make_shared<discpp::User>(ConstructDiscppObjectFromJson(json, "user", discpp::User()));
+        guild_id = Snowflake(json["guild_id"].GetString());
+        channel_id = Snowflake(json["channel_id"].GetString());
+		user = ConstructDiscppObjectFromJson(nullptr, json, "user", discpp::User());
         name = GetDataSafely<std::string>(json, "name");
         if (ContainsNotNull(json, "avatar")) {
             SplitAvatarHash(json["avatar"].GetString(), avatar_hex);
@@ -20,7 +20,7 @@ namespace discpp {
         token = GetDataSafely<std::string>(json, "token");
     }
 
-	Webhook::Webhook(const discpp::Snowflake& id, const std::string& token) : DiscordObject(id) {
+	Webhook::Webhook(const discpp::Snowflake& id, const std::string& token) : id(id) {
 		this->token = token;
 		this->id = id;
 	};
@@ -72,28 +72,34 @@ namespace discpp {
 
 			multipart_data.parts.emplace_back("payload_json", "{\"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "\"}");
 
-			WaitForRateLimits(id, RateLimitBucketType::WEBHOOK);
-			cpr::Response response = cpr::Post(cpr::Url{ Endpoint("/webhooks/" + std::to_string(id) + "/" + token) }, DefaultHeaders({ {"Content-Type", "multipart/form-data"} }), multipart_data);
-			HandleRateLimits(response.header, id, RateLimitBucketType::WEBHOOK);
+			WaitForRateLimits(nullptr, id, RateLimitBucketType::WEBHOOK);
+			cpr::Response response = cpr::Post(cpr::Url{ Endpoint("/webhooks/" + std::to_string(id) + "/" + token) }, Headers({ {"Content-Type", "multipart/form-data"} }), multipart_data);
+            HandleRateLimits(response.header, id, RateLimitBucketType::WEBHOOK);
 
             rapidjson::Document result_json(rapidjson::kObjectType);
             result_json.Parse(response.text);
-			return discpp::Message(result_json);
+			return discpp::Message(nullptr, result_json);
 		} else {
 			body = cpr::Body(DumpJson(message_json));
 		}
-		std::unique_ptr<rapidjson::Document> result = SendPostRequest(Endpoint("/webhooks/" + std::to_string(id) + "/" + token), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::WEBHOOK, body);
+		std::unique_ptr<rapidjson::Document> result = SendPostRequest(nullptr, Endpoint("/webhooks/" + std::to_string(id) + "/" + token), Headers({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::WEBHOOK, body);
 
-		return discpp::Message(*result);
+		return discpp::Message(nullptr, *result); // @TODO: Make WebhookMessage
 	}
 
 	void Webhook::EditName(std::string& name) {
         rapidjson::Document result_json(rapidjson::kObjectType);
         result_json.Parse("{\"name\": \"" + name + "\"}");
-		discpp::SendPatchRequest(discpp::Endpoint("/webhooks/" + std::to_string(id)), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK, cpr::Body(DumpJson(result_json)));
+		discpp::SendPatchRequest(nullptr, discpp::Endpoint("/webhooks/" + std::to_string(id)), Headers({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK, cpr::Body(DumpJson(result_json)));
 	}
 
 	void Webhook::Remove() {
-		discpp::SendDeleteRequest(discpp::Endpoint("/webhooks/" + std::to_string(id) + "/" + token), DefaultHeaders({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK);
+		discpp::SendDeleteRequest(nullptr, discpp::Endpoint("/webhooks/" + std::to_string(id) + "/" + token), Headers({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK);
 	}
+
+    cpr::Header Webhook::Headers(const cpr::Header& add) {
+        cpr::Header headers = { { "User-Agent", "DisC++ Webhook (https://github.com/seanomik/DisCPP, v0.0.0)" },
+                                { "X-RateLimit-Precision", "millisecond"} };
+        return headers;
+    }
 }

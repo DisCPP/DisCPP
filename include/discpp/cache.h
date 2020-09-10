@@ -7,8 +7,6 @@
 #ifndef DISCPP_CACHE_H
 #define DISCPP_CACHE_H
 
-
-
 #include "member.h"
 #include "guild.h"
 #include "message.h"
@@ -20,9 +18,11 @@
 namespace discpp {
     class Cache {
     public:
-        std::unordered_map<Snowflake, std::shared_ptr<Member>> members; /**< List of members the current bot can access. */
-        std::unordered_map<Snowflake, std::shared_ptr<Guild>> guilds; /**< List of guilds the current bot can access. */
-        std::unordered_map<Snowflake, std::shared_ptr<Message>> messages; /**< List of messages the current bot can access. */
+        Cache(discpp::Client* client);
+
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Member>> members; /**< List of members the current bot can access. */
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> guilds; /**< List of guilds the current bot can access. */
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Message>> messages; /**< List of messages the current bot can access. */
         std::unordered_map<discpp::Snowflake, discpp::Channel> private_channels; /**< List of dm channels the current client can access. */
 
         /**
@@ -72,7 +72,7 @@ namespace discpp {
          *
          * @return discpp::Member
          */
-        std::shared_ptr<discpp::Member> GetMember(const discpp::Snowflake& guild_id, const discpp::Snowflake& id, bool can_request = false);
+        std::shared_ptr<discpp::Member> GetMember(const std::shared_ptr<Guild> &guild, const discpp::Snowflake& id, bool can_request = false);
 
         /**
          * @brief Get a member with id.
@@ -88,6 +88,8 @@ namespace discpp {
          * @return discpp::Message
          */
         discpp::Message GetDiscordMessage(const Snowflake& channel_id, const Snowflake& id, bool can_request = false);
+    private:
+        discpp::Client* client;
     };
 }
 

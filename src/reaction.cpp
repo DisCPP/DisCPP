@@ -1,10 +1,10 @@
 #include "reaction.h"
 
 namespace discpp {
-	Reaction::Reaction(rapidjson::Document& json) {
+	Reaction::Reaction(discpp::Client* client, rapidjson::Document& json) {
 		count = json["count"].GetInt();
 		from_bot = json["me"].GetBool();
 
-		emoji = discpp::Emoji(*GetDocumentInsideJson(json, "emoji"));
+		emoji = discpp::Emoji(client, *GetDocumentInsideJson(json, "emoji"));
 	}
 }

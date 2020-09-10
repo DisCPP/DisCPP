@@ -5,6 +5,7 @@
 #include "user.h"
 #include "presence.h"
 #include "permission.h"
+#include "snowflake.h"
 
 #include <vector>
 
@@ -15,6 +16,8 @@ namespace discpp {
 	class Member {
 	public:
 		Member() = default;
+
+		Member(discpp::Client* client);
 
         /**
          * @brief Constructs a discpp::Member object using its id and the guild that it is in.
@@ -31,7 +34,7 @@ namespace discpp {
          *
          * @return discpp::Member, this is a constructor.
          */
-		Member(const Snowflake& id, discpp::Guild& guild, bool can_request = false);
+		Member(discpp::Client* client, const Snowflake& id, discpp::Guild& guild, bool can_request = false);
 
         /**
          * @brief Constructs a discpp::Member object by parsing json and stores the guild_id.
@@ -45,7 +48,7 @@ namespace discpp {
          *
          * @return discpp::Member, this is a constructor.
          */
-		Member(rapidjson::Document& json, const discpp::Guild& guild);
+		Member(discpp::Client* client, rapidjson::Document& json, const discpp::Guild& guild);
 
         Member(const discpp::Member& member);
         Member operator=(const discpp::Member& mbr);

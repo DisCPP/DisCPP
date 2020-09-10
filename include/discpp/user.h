@@ -7,8 +7,10 @@
 namespace discpp {
 	class Channel;
 	class Integration;
+	class Guild;
 
 	class User : public DiscordObject {
+	    friend class Member; // We need this so discpp::Member can use the client instance.
 	public:
         enum class ConnectionVisibility : int {
             NONE = 0,
@@ -58,7 +60,7 @@ namespace discpp {
          *
          * @return discpp::User, this is a constructor.
          */
-		User(const Snowflake& id);
+		User(discpp::Client* client, const Snowflake& id);
 
         /**
          * @brief Constructs a discpp::User object by parsing json.
@@ -71,7 +73,7 @@ namespace discpp {
          *
          * @return discpp::User, this is a constructor.
          */
-		User(rapidjson::Document& json);
+		User(discpp::Client* client, rapidjson::Document& json);
 
         /**
          * @brief Create a DM channel with this user.
@@ -105,6 +107,13 @@ namespace discpp {
          * @return std::string
          */
 		std::string GetFormattedCreatedAt() const;
+
+        /**
+         * @brief Returns mutual guilds
+         *
+         * @return std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>>
+         */
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> GetMutualGuilds();
 
         /**
          * @brief Gets the created at time and date for this guild.

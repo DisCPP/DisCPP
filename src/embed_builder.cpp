@@ -28,7 +28,7 @@ namespace discpp {
 
 	EmbedBuilder& EmbedBuilder::SetTitle(const std::string& title) {
 		if (title.size() < 0 || title.size() > 256) {
-			globals::client_instance->logger->Error(LogTextColor::RED + "Embed title can only be 0-256 characters!");
+			////client->logger->Error(LogTextColor::RED + "Embed title can only be 0-256 characters!");
 			throw std::runtime_error("Embed title can only be 0-256 characters");
 		}
 		auto& allocator = embed_json.GetAllocator();
@@ -57,7 +57,7 @@ namespace discpp {
 
 	EmbedBuilder& EmbedBuilder::SetDescription(const std::string& description) {
 		if (description.size() < 0 || description.size() > 2048) {
-			globals::client_instance->logger->Error(LogTextColor::RED + "Embed descriptions can only be 0-2048 characters!");
+			////client->logger->Error(LogTextColor::RED + "Embed descriptions can only be 0-2048 characters!");
 			throw std::runtime_error("Embed descriptions can only be 0-2048 characters!");
 		}
 
@@ -107,7 +107,7 @@ namespace discpp {
 
 	EmbedBuilder& EmbedBuilder::SetFooter(const std::string& text, const std::string& icon_url) {
 		if (text.size() > 2048) {
-			globals::client_instance->logger->Error(LogTextColor::RED + "Embed footer text can only be up to 0-2048 characters!");
+			////client->logger->Error(LogTextColor::RED + "Embed footer text can only be up to 0-2048 characters!");
 			throw std::runtime_error("Embed footer text can only be up to 0-2048 characters!");
 		}
 
@@ -205,7 +205,7 @@ namespace discpp {
 
 	EmbedBuilder& EmbedBuilder::SetAuthor(const std::string& name, const std::string& url, const std::string& icon_url) {
 		if (name.size() > 256) {
-			globals::client_instance->logger->Error(LogTextColor::RED + "Embed author names can only be up to 0-256 characters!");
+			//client->logger->Error(LogTextColor::RED + "Embed author names can only be up to 0-256 characters!");
 			throw std::runtime_error("Embed author names can only be up to 0-256 characters");
 		}
 
@@ -231,10 +231,10 @@ namespace discpp {
 
 	EmbedBuilder& EmbedBuilder::AddField(const std::string& name, const std::string& value, const bool is_inline) {
 		if (name.empty()) {
-			globals::client_instance->logger->Error(LogTextColor::RED + "You can not have an empty or null field name!");
+			//client->logger->Error(LogTextColor::RED + "You can not have an empty or null field name!");
 			throw std::runtime_error("You can not have an empty or null field title!");
 		} else if (value.empty()) {
-			globals::client_instance->logger->Error(LogTextColor::RED + "You can not have an empty or null field value!");
+			//client->logger->Error(LogTextColor::RED + "You can not have an empty or null field value!");
 			throw std::runtime_error("You can not have an empty or null field value!");
 		}
 
@@ -242,7 +242,7 @@ namespace discpp {
             rapidjson::Value& fields = embed_json["fields"];
 
 		    if (fields.Size() > 25) {
-		        globals::client_instance->logger->Error(LogTextColor::RED + "Embeds can only have 25 field objects!");
+		        //client->logger->Error(LogTextColor::RED + "Embeds can only have 25 field objects!");
 		        throw std::runtime_error("Embeds can only have 25 field objects!");
 		    }
 		} else {
@@ -251,12 +251,12 @@ namespace discpp {
 		}
 
 		if (name.size() > 256) {
-			globals::client_instance->logger->Error(LogTextColor::RED + "Embed field names can only be up to 1-256 characters!");
+			//client->logger->Error(LogTextColor::RED + "Embed field names can only be up to 1-256 characters!");
 			throw std::runtime_error("Embed field names can only be up to 1-256 characters!");
 		}
 
 		if (value.size() > 1024) {
-			globals::client_instance->logger->Error(LogTextColor::RED + "Embed field values can only be up to 1-1024 characters!");
+			//client->logger->Error(LogTextColor::RED + "Embed field values can only be up to 1-1024 characters!");
 			throw std::runtime_error("Embed field values can only be up to 1-1024 characters!");
 		}
 

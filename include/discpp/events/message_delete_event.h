@@ -9,9 +9,13 @@
 namespace discpp {
 	class MessageDeleteEvent : public Event {
 	public:
-		inline MessageDeleteEvent(discpp::Message message) : message(message) {}
+		inline MessageDeleteEvent(Shard& shard, discpp::Message message) : Event(shard), message(message) {}
 
 		discpp::Message message;
+
+        virtual int GetEventType() const override {
+            return 23;
+        }
 	};
 }
 

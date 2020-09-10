@@ -81,7 +81,8 @@ namespace discpp {
             std::string name;
 	    };
 
-		Message() = default;
+	    Message() = default;
+		Message(discpp::Client* client);
 
         /**
          * @brief Constructs a discpp::Message object from an id.
@@ -96,7 +97,7 @@ namespace discpp {
          *
          * @return discpp::Message, this is a constructor.
          */
-		Message(const Snowflake& channel_id, const Snowflake& id, bool can_request = false);
+		Message(discpp::Client* client, const Snowflake& channel_id, const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Constructs a discpp::Message object by parsing json
@@ -109,7 +110,7 @@ namespace discpp {
          *
          * @return discpp::Message, this is a constructor.
          */
-		Message(rapidjson::Document& json);
+		Message(discpp::Client* client, rapidjson::Document& json);
 
 
         /**

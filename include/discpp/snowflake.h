@@ -8,19 +8,20 @@ namespace discpp {
     private:
         uint64_t id;
     public:
-        constexpr Snowflake() noexcept : id(0) {}
-        constexpr Snowflake(const uint64_t& snowflake) noexcept : id(snowflake) {}
-        explicit Snowflake(const std::string& snowflake) noexcept : id(std::stoll(snowflake)) {}
+        Snowflake() : id(0) {}
+        Snowflake(const uint64_t& snowflake) : id(snowflake) {}
+        explicit Snowflake(const std::string& snowflake) : id(std::stoll(snowflake)) {}
+
         operator uint64_t() const { return id; }
         operator std::string() const { return std::to_string(id); }
     };
 }
 
 namespace std {
-    template <>
+    template<>
     struct hash<discpp::Snowflake> {
-        std::size_t operator()(const discpp::Snowflake& k) const {
-            return hash<uint64_t>()(k);
+        std::size_t operator()(const discpp::Snowflake& snowflake) const {
+          return std::hash<uint64_t>()((uint64_t) snowflake);
         }
     };
 }

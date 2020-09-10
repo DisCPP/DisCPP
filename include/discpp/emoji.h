@@ -68,7 +68,7 @@ namespace discpp {
          *
          * @return discpp::Emoji, this is a constructor.
          */
-        Emoji(rapidjson::Document& json);
+        Emoji(discpp::Client* client, rapidjson::Document& json);
 
         /**
          * @brief Constructs a discpp::Emoji object with a std::wstring unicode representation.

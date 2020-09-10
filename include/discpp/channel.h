@@ -96,7 +96,9 @@ namespace discpp {
 
 	class Channel : public DiscordObject {
 	public:
-		Channel() = default;
+	    Channel() = default;
+
+		Channel(discpp::Client* client);
 
         /**
          * @brief Constructs a discpp::Channel object from the id.
@@ -110,7 +112,7 @@ namespace discpp {
          *
          * @return discpp::Channel, this is a constructor.
          */
-		Channel(const Snowflake& id, bool can_request = false);
+		Channel(discpp::Client* client, const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Constructs a discpp::Channel object from json.
@@ -119,7 +121,7 @@ namespace discpp {
          *
          * @return discpp::Channel, this is a constructor.
          */
-		Channel(rapidjson::Document& json);
+		Channel(discpp::Client* client, rapidjson::Document& json);
 
         /**
          * @brief Requests a channel from discord's api.
@@ -132,7 +134,7 @@ namespace discpp {
          *
          * @return discpp::Channel
          */
-		static discpp::Channel RequestChannel(discpp::Snowflake id);
+		static discpp::Channel RequestChannel(discpp::Client* client, discpp::Snowflake id); // @TODO: Remove due to discpp::Cache
 
         /**
          * @brief Send a message in this channel.
@@ -277,9 +279,9 @@ namespace discpp {
          *      discpp::Guild = channel.GetGuild();
          * ```
          *
-         * @return discpp::Guild
+         * @return std::shared_ptr<discpp::Guild>
          */
-        [[nodiscard]] std::optional<std::shared_ptr<discpp::Guild>> GetGuild() const;
+        [[nodiscard]] std::shared_ptr<discpp::Guild> GetGuild() const;
 
         /**
          * @brief Create an invite for the channel.
@@ -311,12 +313,12 @@ namespace discpp {
         /**
          * @brief Lists children channels for this category.
          * ```cpp
-         *      std::unordered_map<discpp::Snowflake, discpp::Channel> children = category.GetChildren();
+         *      auto children = category.GetChildren();
          * ```
          *
          * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
          */
-        std::optional<std::unordered_map<discpp::Snowflake, discpp::Channel>> GetChildren();
+        std::unordered_map<discpp::Snowflake, discpp::Channel> GetChildren();
 
         /**
         * @brief Add a recipient to the group dm.

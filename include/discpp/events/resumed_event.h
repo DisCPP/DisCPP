@@ -6,7 +6,11 @@
 namespace discpp {
 	class ResumedEvent : public Event {
 	public:
-		ResumedEvent() = default;
+		ResumedEvent(Shard& shard) : Event(shard) {}
+
+        virtual int GetEventType() const override {
+            return 30;
+        }
 	};
 }
 

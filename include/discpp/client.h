@@ -11,7 +11,6 @@
 #include "user.h"
 #include "settings.h"
 #include "channel.h"
-#include "cache.h"
 
 namespace discpp {
 	class Role;
@@ -22,12 +21,14 @@ namespace discpp {
 	class Message;
 	class Logger;
 	class Image;
+	class EventHandler;
+	class Cache;
 
 	class ClientUser : public User {
 	public:
 		ClientUser() = default;
-		ClientUser(const Snowflake& id) : User(id) {}
-		ClientUser(rapidjson::Document & json);
+		ClientUser(discpp::Client* client, const Snowflake& id) : User(client, id) {}
+		ClientUser(discpp::Client* client, rapidjson::Document & json);
 
         /**
          * @brief Get all connections of this user.
@@ -55,7 +56,7 @@ namespace discpp {
 	    int type;
 	public:
         UserRelationship() = default;
-        UserRelationship(rapidjson::Document& json);
+        UserRelationship(discpp::Client* client, rapidjson::Document& json);
 
         /**
          * @brief Returns if this relation is a friend.
@@ -88,7 +89,8 @@ namespace discpp {
 		discpp::Logger* logger; /**< discpp::Logger object representing current logger. */
 
 		//std::unordered_map<Snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
-        discpp::Cache cache; /**< Bot cache. Stores members, channels, guilds, etc. */
+        discpp::Cache* cache; /**< Bot cache. Stores members, channels, guilds, etc. */
+		EventHandler* event_handler;
 
         /**
          * @brief Constructs a discpp::Bot object.
@@ -124,14 +126,14 @@ namespace discpp {
          * This is used in case you wanted to add functionality to the command handler.
          *
          * ```cpp
-         *      bot.SetCommandHandler(std::bind(&my_discpp_bot::command_handler::HandleCommands, std::placeholders::_1, std::placeholders::_2));
+         *      client->SetCommandHandler([](discpp::Shard& shard, discpp::Message& message) { my_discpp_bot::command_handler::FireCommand(shard, message); });
          * ```
          *
          * @param[in] command_handler The method that will handle commands from a user.
          *
          * @return void
          */
-		void SetCommandHandler(const std::function<void(discpp::Client*, discpp::Message)>& command_handler);
+		void SetCommandHandler(const std::function<void(discpp::Shard&, discpp::Message&)>& command_handler);
 
 		void StopClient();
 
@@ -257,6 +259,22 @@ namespace discpp {
                 futures.push_back(std::async(std::launch::async, func, std::forward<T>(args)...));
             }
 		}
+
+        /**
+         * @brief Get an instance of Client. Mainly used internally.
+         *
+         * @param[in] id The instance id of the client you're looking for.
+         *
+         * @return Client*
+         */
+		static Client* GetInstance(uint8_t id);
+
+        /**
+         * @brief Get the instance id of the client. Mainly used internally.
+         *
+         * @return uint8_t
+         */
+		uint8_t GetInstanceID();
 	private:
 		friend class Shard;
         friend class EventDispatcher;
@@ -269,11 +287,13 @@ namespace discpp {
 
 		int message_cache_count;
 
-		// Websocket Methods
+		static uint8_t next_instance_id;
+		static std::map<uint8_t, Client*> client_instances;
 
+		uint8_t my_instance_id;
 
-		// Commands
-		std::function<void(discpp::Client*, discpp::Message)> fire_command_method;
+		// The method to run to fire commands.
+		std::function<void(discpp::Shard&, discpp::Message&)> fire_command_method;
 
         class HeartbeatWaiter { // For explanation, go to https://stackoverflow.com/a/29775639
         public:
