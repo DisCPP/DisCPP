@@ -34,15 +34,15 @@ int main(int argc, const char* argv[]) {
 	}, {});
 
 	// New event system
-	bot.event_handler->RegisterListener<discpp::ReadyEvent>([&bot](discpp::ReadyEvent event) {
-		std::cout << "Ready!" << std::endl
-			<< "Logged in as: " << bot.client_user.username << "#" << bot.client_user.GetDiscriminator() << std::endl
-			<< "ID: " << bot.client_user.id << std::endl << "-----------------------------" << std::endl;
+    bot.event_handler->RegisterListener<discpp::ReadyEvent>([&] (const discpp::ReadyEvent& event) {
+        std::cout << "Ready!" << std::endl
+                  << "Logged in as: " << bot.client_user.username << "#" << bot.client_user.GetDiscriminator() << std::endl
+                  << "ID: " << bot.client_user.id << std::endl << "-----------------------------" << std::endl;
 
-		// Will show "Playing With Crashes!"
-		discpp::Presence activity("With DisC++!", discpp::Activity::ActivityType::GAME, "online");
-		bot.UpdatePresence(activity);
-	});
+        // Will show "Playing With DisC++!"
+        discpp::Presence activity("With DisC++!", discpp::Activity::ActivityType::GAME, "online");
+        bot.UpdatePresence(activity);
+    });
 
 	return bot.Run();
 }

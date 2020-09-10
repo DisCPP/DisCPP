@@ -23,7 +23,7 @@ int main(int argc, const char* argv[]) {
 	ServerinfoCommand();
 	
 	// ready event
-	discpp::EventHandler<discpp::ReadyEvent>::RegisterListener([&bot](discpp::ReadyEvent event) {
+    bot.event_handler->RegisterListener<discpp::ReadyEvent>([&] (const discpp::ReadyEvent& event) {
 		std::cout << "Ready!" << std::endl; 
 	});
 

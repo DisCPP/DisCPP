@@ -20,7 +20,7 @@ void ServerinfoCommand::CommandBody(discpp::Context ctx) {
 	std::string iconURL = guild->GetIconURL();
 	embed->AddField("Server Name:", guild->name, true);
 	embed->AddField("Server ID:", std::to_string(guild->id), true);
-	embed->AddField("Created At:", guild->created_at, true);
+	embed->AddField("Created At:", guild->GetFormattedCreatedAt(), true);
 	std::string ownerId = std::to_string(guild->owner_id);
 	embed->AddField("Owner:", "<@!" + ownerId + ">", true);
 	embed->AddField("Members:", std::to_string(guild->member_count), true);
