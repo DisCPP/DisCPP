@@ -62,7 +62,7 @@ There may be more inside the [Examples](examples) folder.
 - [ ] Make the audit log cleaner and easier to use.
 
 ## Documentation
-Currently the only documentation is from Doxygen; its currently completely up to date. You can view it [here](https://discpp.github.io/). If you want to generate documentation you need to install Doxygen and run doxygen in the root DisCPP directory and run the terminal command: ```doxygen Doxyfile```
+Currently the only documentation is from Doxygen; its currently completely up to date. You can view it [here](https://github.com/DisCPP/DisCPP). If you want to generate documentation you need to install Doxygen and run doxygen in the root DisCPP directory and run the terminal command: ```doxygen Doxyfile```
 
 ### License 
 See [LICENSE](LICENSE.md)
