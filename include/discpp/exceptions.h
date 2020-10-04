@@ -92,6 +92,13 @@ namespace discpp {
             explicit InvalidAPIVersionException(const std::string &str) : std::runtime_error(str) {}
         };
 
+        class RatelimitTooLong : public std::runtime_error {
+        public:
+            explicit RatelimitTooLong(const std::string &str, int milli_sec_ratelimit) : std::runtime_error(str), milli_sec_ratelimit(milli_sec_ratelimit) {}
+
+            int milli_sec_ratelimit;
+        };
+
         namespace http {
             class HTTPResponseException : public std::runtime_error {
             public:

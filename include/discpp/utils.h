@@ -212,6 +212,8 @@ namespace discpp {
     /**
      * @brief Handle rate limites
      *
+     * This can throw a `discpp::exceptions::RatelimitTooLong` if the ratelimit time was too long.
+     *
      * ```cpp
      *      discpp::HandleRateLimits(header, id, bucket);
      * ```

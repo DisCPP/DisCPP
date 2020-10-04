@@ -308,13 +308,17 @@ int discpp::WaitForRateLimits(discpp::Client* client, const Snowflake& object, c
 	}
 
 	if (rlmt->remaining_limit == 0) {
-		double milisecond_time = rlmt->ratelimit_reset * 1000 - time(NULL) * 1000;
+		double millisecond_time = rlmt->ratelimit_reset * 1000 - time(NULL) * 1000;
 
-		if (milisecond_time > 0) {
+		if (millisecond_time > client->config->milli_sec_max_ratelimit) {
+            throw exceptions::RatelimitTooLong("Ratelimit hit the max ratelimit", (int) millisecond_time);
+		}
+
+		if (millisecond_time > 0) {
 		    if (client) {
-                client->logger->Debug("Rate limit wait time: " + std::to_string(milisecond_time) + " milliseconds");
+                client->logger->Debug("Rate limit wait time: " + std::to_string(millisecond_time) + " milliseconds");
             }
-			std::this_thread::sleep_for(std::chrono::milliseconds((int)milisecond_time));
+			std::this_thread::sleep_for(std::chrono::milliseconds((int) millisecond_time));
 		}
 	}
 	return 0;
