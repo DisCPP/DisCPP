@@ -668,9 +668,9 @@ namespace discpp {
         data_ptr->CopyFrom(data, data_ptr->GetAllocator());
 
         if (ContainsNotNull(j, "s")) {
-            shard.last_sequence_number = j["s"].GetInt();
+            shard.last_sequence_number.store(j["s"].GetInt());
         } else {
-            shard.last_sequence_number = 0;
+            shard.last_sequence_number.store(0);
         }
 
         Shard* sh = &shard;

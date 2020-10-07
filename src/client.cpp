@@ -148,12 +148,12 @@ namespace discpp {
 
         websocket.start();
 
-        disconnected = false;
+        disconnected.store(false);
     }
 
     void Shard::HandleDiscordDisconnect(const ix::WebSocketMessagePtr& msg) {
         // if we're reconnecting this just stop here.
-        if (reconnecting) {
+        if (reconnecting.load()) {
             client.logger->Debug("[SHARD " + std::to_string(id) + "] Websocket was closed for reconnecting...");
             return;
         } else if (client.stay_disconnected) {
@@ -163,10 +163,10 @@ namespace discpp {
             client.logger->Error(LogTextColor::RED + "[SHARD " + std::to_string(id) + "] Websocket was closed with error: " + std::to_string(msg->closeInfo.code) + ", " + msg->closeInfo.reason + "! Attempting reconnect...");
         }
 
-        heartbeat_acked = false;
-        disconnected = true;
+        heartbeat_acked.store(false);
+        disconnected.store(true);
 
-        reconnecting = true;
+        reconnecting.store(true);
         client.DoFunctionLater(&Shard::ReconnectToWebsocket, this);
     }
 
@@ -200,7 +200,7 @@ namespace discpp {
 
         switch (result["op"].GetInt()) {
             case (Opcode::HELLO): {
-                if (reconnecting) {
+                if (reconnecting.load()) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(1200));
                     client.logger->Info(LogTextColor::GREEN + "[SHARD " + std::to_string(id) + "] Reconnected!");
 
@@ -211,14 +211,14 @@ namespace discpp {
                     rapidjson::Value resume_d(rapidjson::kObjectType);
                     resume_d.AddMember("token", client.token, resume.GetAllocator());
                     resume_d.AddMember("session_id", session_id, resume.GetAllocator());
-                    resume_d.AddMember("seq", last_sequence_number, resume.GetAllocator());
+                    resume_d.AddMember("seq", last_sequence_number.load(), resume.GetAllocator());
 
                     resume.AddMember("d", resume_d, resume.GetAllocator());
 
                     CreateWebsocketRequest(resume);
 
-                    heartbeat_acked = true;
-                    reconnecting = false;
+                    heartbeat_acked.store(true);
+                    reconnecting.store(false);
 
                     client.event_handler->TriggerEvent<discpp::ReconnectEvent>(discpp::ReconnectEvent(*this));
                 } else {
@@ -247,7 +247,7 @@ namespace discpp {
                     rapidjson::Value d(rapidjson::kObjectType);
                     d.AddMember("token", client.token, allocator);
                     d.AddMember("session_id", session_id, allocator);
-                    d.AddMember("seq", last_sequence_number, resume.GetAllocator());
+                    d.AddMember("seq", last_sequence_number.load(), resume.GetAllocator());
 
                     resume.AddMember("d", d, allocator);
 
@@ -264,27 +264,25 @@ namespace discpp {
                 EventDispatcher::HandleDiscordEvent(*this, result, result["t"].GetString());
                 break;
         }
-
-        packet_counter++;
     }
 
     void Shard::HandleHeartbeat() {
         try {
             while (client.run) {
                 // Make sure that it doesn't try to do anything while its trying to reconnect.
-                while (reconnecting && !client.run) {}
+                while (reconnecting.load() && !client.run) {}
 
                 rapidjson::Document data(rapidjson::kObjectType);
                 data.AddMember("op", Opcode::HEARTBEAT, data.GetAllocator());
                 data.AddMember("d", NULL, data.GetAllocator());
-                if (last_sequence_number != -1) {
-                    data["d"] = last_sequence_number;
+                if (last_sequence_number.load() != -1) {
+                    data["d"] = last_sequence_number.load();
                 }
 
                 std::string json_payload = DumpJson(data);
                 CreateWebsocketRequest(data, "[SHARD " + std::to_string(id) + "] Sending heartbeat payload: " + json_payload);
 
-                heartbeat_acked = false;
+                heartbeat_acked.store(false);
 
                 int heartbeat_interval = hello_packet["d"]["heartbeat_interval"].GetInt();
                 client.logger->Debug("[SHARD " + std::to_string(id) + "] Waiting for next heartbeat (" + std::to_string(heartbeat_interval / 1000.0 - 10) + " seconds)...");
@@ -295,9 +293,9 @@ namespace discpp {
                     break;
                 }
 
-                if (!heartbeat_acked && !reconnecting) {
+                if (!heartbeat_acked.load() && !reconnecting.load()) {
                     client.logger->Warn(LogTextColor::YELLOW + "[SHARD " + std::to_string(id) + "] Heartbeat wasn't acked, trying to reconnect...");
-                    disconnected = true;
+                    disconnected.store(true);
 
                     ReconnectToWebsocket();
                 }
@@ -344,7 +342,7 @@ namespace discpp {
     void Shard::ReconnectToWebsocket() {
         client.logger->Info(LogTextColor::YELLOW + "[SHARD " + std::to_string(id) + "] Reconnecting to Discord gateway!");
 
-        reconnecting = true;
+        reconnecting.store(true);
 
         DisconnectWebsocket();
         WebSocketStart();
@@ -525,16 +523,6 @@ namespace discpp {
         payload.AddMember("d", *activity_json, payload.GetAllocator());
 
         shards.front()->CreateWebsocketRequest(payload);
-    }
-
-    discpp::User Client::ReqestUserIfNotCached(const discpp::Snowflake& id) {
-        discpp::User user(this, id);
-        if (user.username.empty()) {
-            std::unique_ptr<rapidjson::Document> result = SendGetRequest(this, Endpoint("/users/" + std::to_string(id)), DefaultHeaders(this), 0, RateLimitBucketType::GLOBAL);
-            return discpp::User(this, *result);
-        }
-
-        return user;
     }
 
     std::vector<discpp::User::Connection> Client::GetBotUserConnections() {
