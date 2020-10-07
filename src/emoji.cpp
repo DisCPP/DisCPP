@@ -3,11 +3,8 @@
 #include "user.h"
 
 namespace discpp {
-	Emoji::Emoji(const discpp::Guild& guild, const Snowflake& id) : id(id) {
-		auto it = guild.emojis.find(id);
-		if (it != guild.emojis.end()) {
-			*this = it->second;
-		}
+	Emoji::Emoji(std::shared_ptr<discpp::Guild> guild, const Snowflake& id, bool can_request) : id(id) {
+	    guild->GetEmoji(id, can_request);
 	}
 
 	Emoji::Emoji(discpp::Client* client, rapidjson::Document& json) {

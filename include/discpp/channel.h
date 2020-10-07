@@ -5,6 +5,7 @@
 #include "permission.h"
 #include "embed_builder.h"
 #include "utils.h"
+#include "user.h"
 
 #include <variant>
 #include <vector>
@@ -13,7 +14,7 @@
 namespace discpp {
 	class Message;
 	class GuildInvite;
-	class User;
+	//class User;
 	class Guild;
 
 	enum class ChannelProperty : int {

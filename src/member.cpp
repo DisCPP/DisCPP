@@ -12,11 +12,19 @@ namespace discpp {
 
     }
 
-	Member::Member(discpp::Client* client, const Snowflake& id, discpp::Guild& guild, bool can_request) {
-		*this = *guild.GetMember(id, can_request);
-	}
+    Member::Member(discpp::Client* client, const Snowflake& id, std::shared_ptr<discpp::Guild> guild, bool can_request) : Member(client, id, guild.get(), can_request) {
 
-	Member::Member(discpp::Client* client, rapidjson::Document& json, const discpp::Guild& guild) : guild_id(guild.id) {
+    }
+
+    Member::Member(discpp::Client* client, const Snowflake& id, discpp::Guild* guild, bool can_request) {
+        *this = *guild->GetMember(id, can_request);
+    }
+
+    Member::Member(discpp::Client* client, rapidjson::Document& json, std::shared_ptr<discpp::Guild> guild) : Member(client, json, guild.get()) {
+
+    }
+
+	Member::Member(discpp::Client* client, rapidjson::Document& json, discpp::Guild* guild) : guild_id(guild->id) {
 		user = ConstructDiscppObjectFromJson(client, json, "user", discpp::User());
 		nick = GetDataSafely<std::string>(json, "nick");
 
@@ -26,7 +34,7 @@ namespace discpp {
 				rapidjson::Document role_json;
 				role_json.CopyFrom(role, role_json.GetAllocator());
 
-				std::shared_ptr<discpp::Role> r = guild.GetRole(SnowflakeFromString(role_json.GetString()));
+				std::shared_ptr<discpp::Role> r = guild->GetRole(SnowflakeFromString(role_json.GetString()));
 				if (r->position > highest_hiearchy) {
 					highest_hiearchy = r->position;
 				}
@@ -189,7 +197,7 @@ namespace discpp {
     }
 
     Member Member::operator=(const discpp::Member& mbr) {
-        return std::move(Member(mbr));
+        return Member(mbr);
     }
 
     std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>> Member::GetRoles() {

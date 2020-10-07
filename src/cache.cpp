@@ -13,7 +13,34 @@ discpp::Cache::Cache(discpp::Client *client) : client(client) {
 
 }
 
+void discpp::Cache::CacheMember(std::shared_ptr<discpp::Guild> guild, std::shared_ptr<discpp::Member> member) {
+    std::lock_guard<std::mutex> members_lock_guard(members_mutex);
+    std::lock_guard<std::mutex> guilds_lock_guard(guilds_mutex);
+
+    guild->CacheMember(member);
+    members.emplace(member->user.id, member);
+}
+
+void discpp::Cache::CacheGuild(std::shared_ptr<discpp::Guild> guild) {
+    std::lock_guard<std::mutex> lock_guard(guilds_mutex);
+
+    guilds.emplace(guild->id, guild);
+}
+
+void discpp::Cache::CacheMessage(std::shared_ptr<discpp::Message> message) {
+    std::lock_guard<std::mutex> lock_guard(messages_mutex);
+
+    messages.emplace(message->id, message);
+}
+
+void discpp::Cache::CachePrivateChannel(discpp::Channel channel) {
+    std::lock_guard<std::mutex> lock_guard(channels_mutex);
+
+    private_channels.emplace(channel.id, channel);
+}
+
 std::shared_ptr<discpp::Guild> discpp::Cache::GetGuild(const discpp::Snowflake &guild_id, bool can_request) {
+    std::lock_guard<std::mutex> lock_guard(guilds_mutex);
     auto it = guilds.find(guild_id);
     if (it != guilds.end()) {
         return it->second;
@@ -32,7 +59,8 @@ std::shared_ptr<discpp::Guild> discpp::Cache::GetGuild(const discpp::Snowflake &
 discpp::Channel discpp::Cache::GetChannel(const discpp::Snowflake &id, bool can_request) {
     try {
         return GetDMChannel(id, can_request);
-    } catch (exceptions::DiscordObjectNotFound) {
+    } catch (const exceptions::DiscordObjectNotFound&) {
+        std::lock_guard<std::mutex> guilds_lock_guard(guilds_mutex);
         for (const auto &guild : guilds) {
             discpp::Channel channel = guild.second->GetChannel(id);
 
@@ -49,6 +77,7 @@ discpp::Channel discpp::Cache::GetChannel(const discpp::Snowflake &id, bool can_
 }
 
 discpp::Channel discpp::Cache::GetDMChannel(const discpp::Snowflake &id, bool can_request) {
+    std::lock_guard<std::mutex> lock_guard(channels_mutex);
     auto it = private_channels.find(id);
     if (it != private_channels.end()) {
         return it->second;
@@ -66,6 +95,7 @@ discpp::Channel discpp::Cache::GetDMChannel(const discpp::Snowflake &id, bool ca
 }
 
 std::shared_ptr<discpp::Member> discpp::Cache::GetMember(const std::shared_ptr<Guild> &guild, const discpp::Snowflake &id, bool can_request) {
+    std::lock_guard<std::mutex> lock_guard(members_mutex);
     auto it = members.find(id);
     if (it != members.end()) {
         return it->second;
@@ -73,15 +103,16 @@ std::shared_ptr<discpp::Member> discpp::Cache::GetMember(const std::shared_ptr<G
 
     if (can_request) {
         std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(guild->id) + "/members/" + std::to_string(id)), DefaultHeaders(client), guild->id, RateLimitBucketType::GUILD);
-        auto member = std::make_shared<discpp::Member>(client, *result, *guild);
+        auto member = std::make_shared<discpp::Member>(client, *result, guild);
         members.emplace(member->user.id, member);
         return member;
     } else {
-        throw exceptions::DiscordObjectNotFound("Member not found of id: " + std::to_string(guild->id) + ", in guild of id: " + std::to_string(guild->id));
+        throw exceptions::DiscordObjectNotFound("Member not found of id: " + std::to_string(id) + ", in guild of id: " + std::to_string(guild->id));
     }
 }
 
 discpp::Message discpp::Cache::GetDiscordMessage(const discpp::Snowflake &channel_id, const discpp::Snowflake &id, bool can_request) {
+    std::lock_guard<std::mutex> lock_guard(messages_mutex);
     auto message = messages.find(id);
     if (message != messages.end()) {
         return *message->second;
@@ -94,5 +125,20 @@ discpp::Message discpp::Cache::GetDiscordMessage(const discpp::Snowflake &channe
         return Message(client, *result);
     } else {
         throw exceptions::DiscordObjectNotFound("Message of id \"" + std::to_string(id) + "\" was not found!");
+    }
+}
+
+discpp::User discpp::Cache::GetUser(const discpp::Snowflake &id, bool can_request) {
+    std::lock_guard<std::mutex> lock_guard(members_mutex);
+    auto it = members.find(id);
+    if (it != members.end()) {
+        return it->second->user;
+    }
+
+    if (can_request) {
+        std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/users/" + std::to_string(id)), DefaultHeaders(client), id, RateLimitBucketType::GLOBAL);
+        return discpp::User(client, *result);
+    } else {
+        throw exceptions::DiscordObjectNotFound("User not found of id: " + std::to_string(id) + "!");
     }
 }

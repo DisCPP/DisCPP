@@ -15,17 +15,19 @@ namespace discpp {
          * @brief Constructs a discpp::Role object using a role id and a guild.
          *
          * This constructor searches the roles cache in the guild object to get the role object from.
+         * If the role is not found in cache, a DiscordObjectNotFound exception will be thrown.
          *
          * ```cpp
-         *      discpp::Role role(657246994997444614, guild);
+         *      discpp::Role role(client, 657246994997444614, guild);
          * ```
          *
+         * @param[in] client The client.
          * @param[in] role_id The role id.
          * @param[in] guild The guild that has this role.
          *
          * @return discpp::Role, this is a constructor.
          */
-		Role(discpp::Client* client, const Snowflake& role_id, const discpp::Guild& guild);
+		Role(discpp::Client* client, const Snowflake& role_id, Guild &guild);
 
         /**
          * @brief Constructs a discpp::Role object by parsing json.
@@ -34,6 +36,7 @@ namespace discpp {
          *      discpp::Role role(json);
          * ```
          *
+         * @param[in] client The client.
          * @param[in] json The json that makes up of role object.
          *
          * @return discpp::Role, this is a constructor.

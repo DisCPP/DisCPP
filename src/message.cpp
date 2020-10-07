@@ -35,12 +35,12 @@ namespace discpp {
                     doc.CopyFrom(json["member"], doc.GetAllocator());
 
                     // Since the member isn't cached, create it.
-                    auto mbr = std::make_shared<discpp::Member>(discpp::Member(client, doc, *guild));
+                    auto mbr = std::make_shared<discpp::Member>(discpp::Member(client, doc, guild));
                     mbr->user = author;
                     member = mbr;
 
                     // Add the new member into cache since it isn't already.
-                    guild->members.emplace(id, mbr);
+                    guild->CacheMember(mbr);
                 }
             }
         }
