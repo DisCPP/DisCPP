@@ -18,7 +18,7 @@ namespace discpp {
         // @TODO: This for some reason causes an exception.
         shard.session_id = result["session_id"].GetString();
 
-        if (shard.client.config->type == discpp::TokenType::USER) {
+        if (shard.client.config.type == discpp::TokenType::USER) {
             rapidjson::Document user_json;
             user_json.CopyFrom(result["user"], user_json.GetAllocator());
 
@@ -339,7 +339,7 @@ namespace discpp {
         }
 
         // Only run the command handler if the token is a bot.
-        if (shard.client.config->type == discpp::TokenType::BOT) {
+        if (shard.client.config.type == discpp::TokenType::BOT) {
             shard.client.DoFunctionLater([message, &shard]() { shard.client.fire_command_method(shard, *message); });
         }
 

@@ -35,7 +35,7 @@ namespace discpp {
          * @brief Get all connections of this user.
          *
          * ```cpp
-         *      std::vector<discpp::User::Connection> conntections = client->GetUserConnections();
+         *      std::vector<discpp::User::Connection> connections = client->GetUserConnections();
          * ```
          *
          * @return std::vector<discpp::User::Connection>
@@ -85,15 +85,16 @@ namespace discpp {
 	    friend class Shard;
 	public:
 		std::string token; /**< Token for the current client. */
-		ClientConfig* config; /**< Configuration for the current client. */
+        ClientConfig& config; /**< Configuration for the current client. */
 
-		discpp::ClientUser client_user; /**< discpp::User object representing current user. */
-		discpp::Logger* logger; /**< discpp::Logger object representing current logger. */
+        discpp::ClientUser client_user; /**< discpp::User object representing current user. */
+        std::unique_ptr<discpp::Logger> logger; /**< discpp::Logger object representing current logger. */
 
-    discpp::Cache* cache; /**< Bot cache. Stores members, channels, guilds, etc. */
+        std::unique_ptr<discpp::Cache> cache; /**< Bot cache. Stores members, channels, guilds, etc. */
 
-		EventHandler* event_handler; /**< Event handler. For registering event listeners, and dispatching them. */
-		std::shared_ptr<CommandHandler> command_handler; /**< Command handler. For registering commands. */
+        std::unique_ptr<EventHandler> event_handler; /**< Event handler. For registering event listeners, and dispatching them. */
+		std::unique_ptr<CommandHandler> command_handler; /**< Command handler. For registering commands. */
+        std::vector<std::unique_ptr<Shard>> shards;
 
         /**
          * @brief Constructs a discpp::Bot object.
@@ -109,7 +110,9 @@ namespace discpp {
          *
          * @return discpp::Bot, this is a constructor.
          */
-		Client(const std::string& token, ClientConfig* config);
+		Client(const std::string& token, ClientConfig& config);
+
+		~Client();
 
         /**
          * @brief Executes the discpp bot.

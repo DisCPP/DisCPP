@@ -24,8 +24,6 @@ namespace discpp {
         {
             auto command = std::make_shared<T>(args...);
 
-            command->parent = shared_from_this();
-
             registered_commands.insert({command->name, command});
             for (auto &alias : command->aliases)
             {
@@ -33,6 +31,7 @@ namespace discpp {
             }
         };
     };
+
     /**
      * @brief Detects if a command has ran, and if it has then execute it.
      *
