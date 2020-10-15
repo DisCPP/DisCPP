@@ -1,48 +1,28 @@
 /*
-	Basic bot showing off commands
+	Basic ping bot
 */
 
 #include <discpp/client.h>
 #include <discpp/context.h>
 #include <discpp/command_handler.h>
-
-// Events
+#include <discpp/client_config.h>
 #include <discpp/event_handler.h>
 #include <discpp/events/ready_event.h>
-#include <discpp/events/guild_member_add_event.h>
-#include <discpp/events/channel_pins_update_event.h>
-#include <discpp/client_config.h>
-
-#include "ping_command.h"
 
 int main(int argc, const char* argv[]) {
-	std::ifstream token_file("token.txt", std::ios::out);
-	std::string token;
-	std::getline(token_file, token);
+    discpp::ClientConfig config({"!"});
+	// Make sure to replace `TOKEN HERE` with your actual token
+	discpp::Client client{ "TOKEN HERE", config }; // Token, config
 
-	std::cout << "Read token: " << token << std::endl;
-
-	discpp::ClientConfig* config = new discpp::ClientConfig({"!"});
-	discpp::Client bot{ token, config }; // Token, config
-
-	bot.command_handler->RegisterCommand<PingCommand>();
-
-	// I would recommend creating a class for the commands, you can check that in the examples folder
-	// But, you can still register a command like you did before
-	bot.command_handler->RegisterCommand<discpp::Command>("test", "Quick example of a quick command", [](discpp::Context ctx) {
-		ctx.Send("Quick new command handler test");
+	// For more complex commands, create a class for each one.
+    client.command_handler->RegisterCommand<discpp::Command>("ping", "", [](discpp::Context ctx) {
+        ctx.Send("Pong!");
 	});
 
-	// New event system
-    bot.event_handler->RegisterListener<discpp::ReadyEvent>([&] (const discpp::ReadyEvent& event) {
-        std::cout << "Ready!" << std::endl
-                  << "Logged in as: " << bot.client_user.username << "#" << bot.client_user.GetDiscriminator() << std::endl
-                  << "ID: " << bot.client_user.id << std::endl << "-----------------------------" << std::endl;
-
-        // Will show "Playing With DisC++!"
-        discpp::Presence activity("With DisC++!", discpp::Activity::ActivityType::GAME, "online");
-        bot.UpdatePresence(activity);
+    // This notifies you in the console when the client becomes ready to receive and send requests
+    client.event_handler->RegisterListener<discpp::ReadyEvent>([&] (const discpp::ReadyEvent& event) {
+        client.logger->Info("Ready!");
     });
 
-	return bot.Run();
+	return client.Run();
 }

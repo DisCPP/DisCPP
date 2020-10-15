@@ -29,7 +29,7 @@ namespace discpp {
          *
          * @return ClientConfig, its a constructor.
          */
-		ClientConfig(std::vector<std::string> prefixes, int shard_amount = 1, TokenType type = TokenType::BOT, int logger_flags = (unsigned int)logger_flags::ERROR_SEVERITY | (unsigned int)logger_flags::WARNING_SEVERITY, int message_cache_size = 5000, std::string logger_path = "", int milli_sec_max_ratelimit = 60000)
+		ClientConfig(std::vector<std::string> prefixes, int shard_amount = 1, TokenType type = TokenType::BOT, int logger_flags = (unsigned int)logger_flags::ERROR_SEVERITY | (unsigned int)logger_flags::WARNING_SEVERITY | (unsigned int)logger_flags::INFO_SEVERITY, int message_cache_size = 5000, std::string logger_path = "", int milli_sec_max_ratelimit = 60000)
 			: prefixes(std::move(prefixes)), type(type), logger_flags(logger_flags), message_cache_size(message_cache_size), logger_path(logger_path), shard_amount(shard_amount), milli_sec_max_ratelimit(milli_sec_max_ratelimit) {}
 	};
 }

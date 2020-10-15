@@ -22,31 +22,33 @@ namespace discpp {
     uint8_t Client::next_instance_id = 0;
     std::map<uint8_t, Client*> Client::client_instances;
 
-    Client::Client(const std::string& token, ClientConfig* config) : token(token), config(config), cache(new discpp::Cache(this)), event_handler(new discpp::EventHandler(this)) {
+    Client::Client(const std::string& token, ClientConfig& config) : token(token), config(config), cache(new discpp::Cache(this)), event_handler(new discpp::EventHandler(this)) {
         fire_command_method = std::bind(discpp::FireCommand, std::placeholders::_1, std::placeholders::_2);
 
-        message_cache_count = config->message_cache_size;
+        message_cache_count = config.message_cache_size;
 
-        if (config->logger_path.empty()) {
-            logger = new discpp::Logger(config->logger_flags);
+        if (config.logger_path.empty()) {
+            logger = std::make_unique<discpp::Logger>(config.logger_flags);
         } else {
-            logger = new discpp::Logger(config->logger_path, config->logger_flags);
+            logger = std::make_unique<discpp::Logger>(config.logger_path, config.logger_flags);
         }
 
         this->my_instance_id = next_instance_id;
         next_instance_id++;
 
-        this->command_handler = std::make_shared<CommandHandler>(*this);
+        this->command_handler = std::make_unique<CommandHandler>(*this);
         
         client_instances.emplace(my_instance_id, this);
     }
+
+    Client::~Client() = default;
 
     int Client::Run() {
         EventDispatcher::BindEvents();
 
         DoFunctionLater([&] {
             rapidjson::Document gateway_request(rapidjson::kObjectType);
-            switch (config->type) {
+            switch (config.type) {
                 case TokenType::USER: {
                     std::unique_ptr<rapidjson::Document> user_doc = SendGetRequest(this, Endpoint("/gateway"), {{"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"}}, {}, {});
                     gateway_request.CopyFrom(*user_doc, gateway_request.GetAllocator());
@@ -69,18 +71,18 @@ namespace discpp {
 
                 if (ContainsNotNull(gateway_request, "shards")) {
                     int recommended_shards = gateway_request["shards"].GetInt();
-                    if (recommended_shards > config->shard_amount) {
-                        logger->Warn(LogTextColor::YELLOW + "You set shard amount to \"" + std::to_string(config->shard_amount) + \
+                    if (recommended_shards > config.shard_amount) {
+                        logger->Warn(LogTextColor::YELLOW + "You set shard amount to \"" + std::to_string(config.shard_amount) + \
                             "\" but discord recommends to use \"" + std::to_string(recommended_shards) + "\", so we're gonna listen to Discord...");
 
-                        config->shard_amount = recommended_shards;
+                        config.shard_amount = recommended_shards;
                     }
                 }
 
                 // Specify version and encoding just ot be safe
                 std::string url = std::string(gateway_request["url"].GetString()) + "/?v=6&encoding=json";
 
-                for (int i = 0; i < config->shard_amount; i++) {
+                for (int i = 0; i < config.shard_amount; i++) {
                     auto* shard = new Shard(*this, i, url);
                     shard->WebSocketStart();
 
@@ -329,10 +331,10 @@ namespace discpp {
         d.AddMember("large_threshold", 250, allocator);
 
         // We only want to add this if sharding is enabled.
-        if (client.config->shard_amount > 1) {
+        if (client.config.shard_amount > 1) {
             rapidjson::Value shard(rapidjson::kArrayType);
             shard.PushBack(id, allocator);
-            shard.PushBack(client.config->shard_amount, allocator);
+            shard.PushBack(client.config.shard_amount, allocator);
 
             d.AddMember("shard", shard, allocator);
         }

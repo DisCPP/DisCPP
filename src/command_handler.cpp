@@ -5,7 +5,7 @@
 void discpp::FireCommand(discpp::Shard& shard, const discpp::Message& message) {
     size_t prefixSize = 0;
     bool trigger = false;
-    for (std::string const& prefix : shard.client.config->prefixes) {
+    for (std::string const& prefix : shard.client.config.prefixes) {
         prefixSize = prefix.size();
         if (message.author.IsBot()) {
             return;

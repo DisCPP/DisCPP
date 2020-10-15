@@ -143,7 +143,7 @@ cpr::Header discpp::DefaultHeaders(discpp::Client* client, const cpr::Header& ad
     cpr::Header headers = { { "User-Agent", "DisC++ Bot (https://github.com/seanomik/DisCPP, v0.0.0)" },
                             { "X-RateLimit-Precision", "millisecond"} };
     // Add the correct authorization header depending on the token type.
-	if (client->config->type == TokenType::USER) {
+	if (client->config.type == TokenType::USER) {
 	    headers.insert({ "Authorization", client->token });
 	} else {
         headers.insert({ "Authorization", "Bot " + client->token });
@@ -310,7 +310,7 @@ int discpp::WaitForRateLimits(discpp::Client* client, const Snowflake& object, c
 	if (rlmt->remaining_limit == 0) {
 		double millisecond_time = rlmt->ratelimit_reset * 1000 - time(NULL) * 1000;
 
-		if (millisecond_time > client->config->milli_sec_max_ratelimit) {
+		if (millisecond_time > client->config.milli_sec_max_ratelimit) {
             throw exceptions::RatelimitTooLong("Ratelimit hit the max ratelimit", (int) millisecond_time);
 		}
 
