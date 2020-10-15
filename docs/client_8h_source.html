@@ -131,168 +131,198 @@ $(function() {
 <div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keyword">class </span><a class="code" href="classdiscpp_1_1Shard.html">Shard</a>;</div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
 <div class="line"><a name="l00081"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Client.html">   81</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classdiscpp_1_1Client.html">Client</a> {</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00083"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Client.html#afb8cebf2e10ccca7716953fe0d9a5ad8">   83</a></span>&#160;        std::string <a class="code" href="classdiscpp_1_1Client.html#afb8cebf2e10ccca7716953fe0d9a5ad8">token</a>; </div>
-<div class="line"><a name="l00084"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Client.html#a80207f0321eb28b1a1f39228f14b1bb3">   84</a></span>&#160;        <a class="code" href="classdiscpp_1_1ClientConfig.html">ClientConfig</a>* <a class="code" href="classdiscpp_1_1Client.html#a80207f0321eb28b1a1f39228f14b1bb3">config</a>; </div>
-<div class="line"><a name="l00086"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Client.html#ad592e83ceecd8a5a2e9ed288b9acdb37">   86</a></span>&#160;        <a class="code" href="classdiscpp_1_1ClientUser.html">discpp::ClientUser</a> <a class="code" href="classdiscpp_1_1Client.html#ad592e83ceecd8a5a2e9ed288b9acdb37">client_user</a>; </div>
-<div class="line"><a name="l00087"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Client.html#a1f3a21dae7be1fcfd52b82fdcac9e4c5">   87</a></span>&#160;        <a class="code" href="classdiscpp_1_1Logger.html">discpp::Logger</a>* <a class="code" href="classdiscpp_1_1Client.html#a1f3a21dae7be1fcfd52b82fdcac9e4c5">logger</a>; </div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        <span class="comment">//std::unordered_map&lt;Snowflake, std::shared_ptr&lt;Channel&gt;&gt; channels; /**&lt; List of channels the current bot can access. */</span></div>
-<div class="line"><a name="l00090"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Client.html#a257ecefd8ba06fd70d6c838bfdf483f4">   90</a></span>&#160;        <a class="code" href="classdiscpp_1_1Cache.html">discpp::Cache</a> <a class="code" href="classdiscpp_1_1Client.html#a257ecefd8ba06fd70d6c838bfdf483f4">cache</a>; </div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        <a class="code" href="classdiscpp_1_1Client.html#adea6881406292515da84ecca8dd7e998">Client</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="classdiscpp_1_1Client.html#afb8cebf2e10ccca7716953fe0d9a5ad8">token</a>, <a class="code" href="classdiscpp_1_1ClientConfig.html">ClientConfig</a>* <a class="code" href="classdiscpp_1_1Client.html#a80207f0321eb28b1a1f39228f14b1bb3">config</a>);</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160; </div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        <span class="keywordtype">int</span> <a class="code" href="classdiscpp_1_1Client.html#a3d487f007e402be57e0803d1a0455eb8">Run</a>();</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160; </div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classdiscpp_1_1Client.html#a800fbd955f2b7cb62fb2add03089ce57">SetCommandHandler</a>(<span class="keyword">const</span> std::function&lt;<span class="keywordtype">void</span>(<a class="code" href="classdiscpp_1_1Client.html">discpp::Client</a>*, <a class="code" href="classdiscpp_1_1Message.html">discpp::Message</a>)&gt;&amp; command_handler);</div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160; </div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;        <span class="keywordtype">void</span> StopClient();</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160; </div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;        <span class="comment">// Discord based methods.</span></div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160; </div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classdiscpp_1_1Client.html#acd6a5e4820c02c77f10bde413f1f447d">AddFriend</a>(<span class="keyword">const</span> <a class="code" href="classdiscpp_1_1User.html">discpp::User</a>&amp; user);</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160; </div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classdiscpp_1_1Client.html#adf53a707ec2dffec5d3f34483ff06dbb">RemoveFriend</a>(<span class="keyword">const</span> <a class="code" href="classdiscpp_1_1User.html">discpp::User</a>&amp; user);</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160; </div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;        std::unordered_map&lt;discpp::Snowflake, discpp::UserRelationship&gt; <a class="code" href="classdiscpp_1_1Client.html#a3a56fd72aba504fab47f134b1328e62c">GetRelationships</a>();</div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160; </div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classdiscpp_1_1Shard.html">Shard</a>;</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00084"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Client.html#afb8cebf2e10ccca7716953fe0d9a5ad8">   84</a></span>&#160;        std::string <a class="code" href="classdiscpp_1_1Client.html#afb8cebf2e10ccca7716953fe0d9a5ad8">token</a>; </div>
+<div class="line"><a name="l00085"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Client.html#a80207f0321eb28b1a1f39228f14b1bb3">   85</a></span>&#160;        <a class="code" href="classdiscpp_1_1ClientConfig.html">ClientConfig</a>* <a class="code" href="classdiscpp_1_1Client.html#a80207f0321eb28b1a1f39228f14b1bb3">config</a>; </div>
+<div class="line"><a name="l00087"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Client.html#ad592e83ceecd8a5a2e9ed288b9acdb37">   87</a></span>&#160;        <a class="code" href="classdiscpp_1_1ClientUser.html">discpp::ClientUser</a> <a class="code" href="classdiscpp_1_1Client.html#ad592e83ceecd8a5a2e9ed288b9acdb37">client_user</a>; </div>
+<div class="line"><a name="l00088"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Client.html#a1f3a21dae7be1fcfd52b82fdcac9e4c5">   88</a></span>&#160;        <a class="code" href="classdiscpp_1_1Logger.html">discpp::Logger</a>* <a class="code" href="classdiscpp_1_1Client.html#a1f3a21dae7be1fcfd52b82fdcac9e4c5">logger</a>; </div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        <span class="comment">//std::unordered_map&lt;Snowflake, std::shared_ptr&lt;Channel&gt;&gt; channels; /**&lt; List of channels the current bot can access. */</span></div>
+<div class="line"><a name="l00091"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Client.html#a257ecefd8ba06fd70d6c838bfdf483f4">   91</a></span>&#160;        <a class="code" href="classdiscpp_1_1Cache.html">discpp::Cache</a> <a class="code" href="classdiscpp_1_1Client.html#a257ecefd8ba06fd70d6c838bfdf483f4">cache</a>; </div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        <a class="code" href="classdiscpp_1_1Client.html#adea6881406292515da84ecca8dd7e998">Client</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="classdiscpp_1_1Client.html#afb8cebf2e10ccca7716953fe0d9a5ad8">token</a>, <a class="code" href="classdiscpp_1_1ClientConfig.html">ClientConfig</a>* <a class="code" href="classdiscpp_1_1Client.html#a80207f0321eb28b1a1f39228f14b1bb3">config</a>);</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160; </div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;        <span class="keywordtype">int</span> <a class="code" href="classdiscpp_1_1Client.html#a3d487f007e402be57e0803d1a0455eb8">Run</a>();</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160; </div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classdiscpp_1_1Client.html#a800fbd955f2b7cb62fb2add03089ce57">SetCommandHandler</a>(<span class="keyword">const</span> std::function&lt;<span class="keywordtype">void</span>(<a class="code" href="classdiscpp_1_1Client.html">discpp::Client</a>*, <a class="code" href="classdiscpp_1_1Message.html">discpp::Message</a>)&gt;&amp; command_handler);</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160; </div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;        <span class="keywordtype">void</span> StopClient();</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160; </div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;        <span class="comment">// Discord based methods.</span></div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160; </div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classdiscpp_1_1Client.html#acd6a5e4820c02c77f10bde413f1f447d">AddFriend</a>(<span class="keyword">const</span> <a class="code" href="classdiscpp_1_1User.html">discpp::User</a>&amp; user);</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160; </div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classdiscpp_1_1Client.html#adf53a707ec2dffec5d3f34483ff06dbb">RemoveFriend</a>(<span class="keyword">const</span> <a class="code" href="classdiscpp_1_1User.html">discpp::User</a>&amp; user);</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160; </div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;        std::unordered_map&lt;discpp::Snowflake, discpp::UserRelationship&gt; <a class="code" href="classdiscpp_1_1Client.html#a3a56fd72aba504fab47f134b1328e62c">GetRelationships</a>();</div>
 <div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160; </div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;        <a class="code" href="classdiscpp_1_1User.html">discpp::User</a> <a class="code" href="classdiscpp_1_1Client.html#a812aaae89aa0985517d0fd66933b3ea6">ModifyCurrentUser</a>(<span class="keyword">const</span> std::string&amp; username, <a class="code" href="classdiscpp_1_1Image.html">discpp::Image</a>&amp; avatar);</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160; </div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classdiscpp_1_1Client.html#a04658448897e6a07c86c18f551672ab0">LeaveGuild</a>(<span class="keyword">const</span> <a class="code" href="classdiscpp_1_1Guild.html">discpp::Guild</a>&amp; guild);</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160; </div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classdiscpp_1_1Client.html#aaf9e050d856cb326addb8ec82a9b6149">UpdatePresence</a>(<a class="code" href="classdiscpp_1_1Presence.html">discpp::Presence</a>&amp; activity);</div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160; </div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;        <a class="code" href="classdiscpp_1_1User.html">discpp::User</a> <a class="code" href="classdiscpp_1_1Client.html#a35c3ada7dd80765541b05de44fa701c7">ReqestUserIfNotCached</a>(<span class="keyword">const</span> <a class="code" href="classdiscpp_1_1Snowflake.html">discpp::Snowflake</a>&amp; <span class="keywordtype">id</span>);</div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160; </div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;        std::vector&lt;discpp::User::Connection&gt; <a class="code" href="classdiscpp_1_1Client.html#a07a93c834748147c2bfd309ee992cbfe">GetBotUserConnections</a>();</div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160; </div>
-<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;        std::unordered_map&lt;discpp::Snowflake, discpp::Channel&gt; <a class="code" href="classdiscpp_1_1Client.html#ad2b9fe139065ecb016d381853e2921fd">GetUserDMs</a>();</div>
-<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160; </div>
-<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;        <span class="comment">// discpp::Channel CreateGroupDM(std::vector&lt;discpp::User&gt; users); // Deprecated and will not be shown in the discord client.</span></div>
-<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160; </div>
-<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;        <span class="keywordtype">bool</span> user_mfa_enabled;</div>
-<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;        std::string user_locale;</div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;        <span class="keywordtype">bool</span> user_verified;</div>
-<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;        std::vector&lt;Shard*&gt; shards;</div>
-<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160; </div>
-<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> FType, <span class="keyword">typename</span>... T&gt;</div>
-<div class="line"><a name="l00240"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Client.html#ad26c79198a05a37f1dd483fb2b616019">  240</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classdiscpp_1_1Client.html#ad26c79198a05a37f1dd483fb2b616019">DoFunctionLater</a>(FType&amp;&amp; func, T&amp;&amp;... args) {</div>
-<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;            {</div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;                std::lock_guard&lt;std::mutex&gt; futures_guard(futures_mutex);</div>
-<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;                futures.push_back(std::async(std::launch::async, func, std::forward&lt;T&gt;(args)...));</div>
-<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;            }</div>
-<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;        }</div>
-<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;    <span class="keyword">private</span>:</div>
-<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;        <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classdiscpp_1_1Shard.html">Shard</a>;</div>
-<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;        <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classdiscpp_1_1EventDispatcher.html">EventDispatcher</a>;</div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;        <span class="keywordtype">bool</span> stay_disconnected = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;        <span class="keywordtype">bool</span> run = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160; </div>
-<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;        std::vector&lt;std::future&lt;void&gt;&gt; futures;</div>
-<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160; </div>
-<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;        std::mutex futures_mutex;</div>
-<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160; </div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;        <span class="keywordtype">int</span> message_cache_count;</div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160; </div>
-<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;        <span class="comment">// Websocket Methods</span></div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160; </div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160; </div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;        <a class="code" href="classdiscpp_1_1User.html">discpp::User</a> <a class="code" href="classdiscpp_1_1Client.html#a812aaae89aa0985517d0fd66933b3ea6">ModifyCurrentUser</a>(<span class="keyword">const</span> std::string&amp; username, <a class="code" href="classdiscpp_1_1Image.html">discpp::Image</a>&amp; avatar);</div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160; </div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classdiscpp_1_1Client.html#a04658448897e6a07c86c18f551672ab0">LeaveGuild</a>(<span class="keyword">const</span> <a class="code" href="classdiscpp_1_1Guild.html">discpp::Guild</a>&amp; guild);</div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160; </div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classdiscpp_1_1Client.html#aaf9e050d856cb326addb8ec82a9b6149">UpdatePresence</a>(<a class="code" href="classdiscpp_1_1Presence.html">discpp::Presence</a>&amp; activity);</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160; </div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;        <a class="code" href="classdiscpp_1_1User.html">discpp::User</a> <a class="code" href="classdiscpp_1_1Client.html#a35c3ada7dd80765541b05de44fa701c7">ReqestUserIfNotCached</a>(<span class="keyword">const</span> <a class="code" href="classdiscpp_1_1Snowflake.html">discpp::Snowflake</a>&amp; <span class="keywordtype">id</span>);</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160; </div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;        std::vector&lt;discpp::User::Connection&gt; <a class="code" href="classdiscpp_1_1Client.html#a07a93c834748147c2bfd309ee992cbfe">GetBotUserConnections</a>();</div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160; </div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;        std::unordered_map&lt;discpp::Snowflake, discpp::Channel&gt; <a class="code" href="classdiscpp_1_1Client.html#ad2b9fe139065ecb016d381853e2921fd">GetUserDMs</a>();</div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160; </div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;        <span class="comment">// discpp::Channel CreateGroupDM(std::vector&lt;discpp::User&gt; users); // Deprecated and will not be shown in the discord client.</span></div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160; </div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;        <span class="keywordtype">bool</span> user_mfa_enabled;</div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;        std::string user_locale;</div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;        <span class="keywordtype">bool</span> user_verified;</div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;        std::vector&lt;Shard*&gt; shards;</div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160; </div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> FType, <span class="keyword">typename</span>... T&gt;</div>
+<div class="line"><a name="l00241"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Client.html#ad26c79198a05a37f1dd483fb2b616019">  241</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classdiscpp_1_1Client.html#ad26c79198a05a37f1dd483fb2b616019">DoFunctionLater</a>(FType&amp;&amp; func, T&amp;&amp;... args) {</div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;            {</div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;                std::lock_guard&lt;std::mutex&gt; futures_guard(futures_mutex);</div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;                futures.push_back(std::async(std::launch::async, func, std::forward&lt;T&gt;(args)...));</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;            }</div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;        }</div>
+<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;    <span class="keyword">private</span>:</div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;        <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classdiscpp_1_1Shard.html">Shard</a>;</div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;        <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classdiscpp_1_1EventDispatcher.html">EventDispatcher</a>;</div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;        <span class="keywordtype">bool</span> stay_disconnected = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;        <span class="keywordtype">bool</span> run = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160; </div>
+<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;        std::vector&lt;std::future&lt;void&gt;&gt; futures;</div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160; </div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;        std::mutex futures_mutex;</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160; </div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;        <span class="keywordtype">int</span> message_cache_count;</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160; </div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;        <span class="comment">// Websocket Methods</span></div>
 <div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160; </div>
-<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;        <span class="comment">// Commands</span></div>
-<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;        std::function&lt;void(<a class="code" href="classdiscpp_1_1Client.html">discpp::Client</a>*, <a class="code" href="classdiscpp_1_1Message.html">discpp::Message</a>)&gt; fire_command_method;</div>
-<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;    };</div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160; </div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;        <span class="comment">// Commands</span></div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;        std::function&lt;void(<a class="code" href="classdiscpp_1_1Client.html">discpp::Client</a>*, <a class="code" href="classdiscpp_1_1Message.html">discpp::Message</a>)&gt; fire_command_method;</div>
 <div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160; </div>
-<div class="line"><a name="l00278"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Shard.html">  278</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classdiscpp_1_1Shard.html">Shard</a> {</div>
-<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;    <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classdiscpp_1_1Shard.html#a10a0f4e7d88090ac7c62be1c3ce668cc">CreateWebsocketRequest</a>(rapidjson::Document&amp; json, <span class="keyword">const</span> std::string&amp; message = <span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160; </div>
-<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;        <span class="keyword">enum</span> Opcode : <span class="keywordtype">int</span> {</div>
-<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;            DISPATCH = 0,               <span class="comment">// Receive</span></div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;            HEARTBEAT = 1,              <span class="comment">// Send/Receive</span></div>
-<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;            IDENTIFY = 2,               <span class="comment">// Send</span></div>
-<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;            STATUS_UPDATE = 3,          <span class="comment">// Send</span></div>
-<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;            VOICE_STATE_UPDATE = 4,     <span class="comment">// Send</span></div>
-<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;            RESUME = 6,                 <span class="comment">// Send</span></div>
-<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;            RECONNECT = 7,              <span class="comment">// Receive</span></div>
-<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;            REQUEST_GUILD_MEMBERS = 8,  <span class="comment">// Send</span></div>
-<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;            INVALID_SESSION = 9,        <span class="comment">// Receive</span></div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;            HELLO = 10,                 <span class="comment">// Receive</span></div>
-<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;            HEARTBEAT_ACK = 11          <span class="comment">// Receive</span></div>
-<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;        };</div>
-<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160; </div>
-<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;        <span class="keywordtype">int</span> id;</div>
-<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;        <a class="code" href="classdiscpp_1_1Client.html">Client</a>&amp; client;</div>
-<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;    <span class="keyword">private</span>:</div>
-<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;        <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classdiscpp_1_1Client.html">Client</a>;</div>
-<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;        <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classdiscpp_1_1EventDispatcher.html">EventDispatcher</a>;</div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160; </div>
-<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;        <a class="code" href="classdiscpp_1_1Shard.html">Shard</a>(<a class="code" href="classdiscpp_1_1Client.html">Client</a>&amp; client, <span class="keywordtype">int</span> <span class="keywordtype">id</span>, std::string endpoint) : client(client), id(<span class="keywordtype">id</span>), gateway_endpoint(endpoint) {}</div>
-<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160; </div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;        std::string session_id;</div>
-<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;        std::string gateway_endpoint;</div>
-<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160; </div>
-<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;        rapidjson::Document hello_packet;</div>
-<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160; </div>
-<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;        std::thread heartbeat_thread;</div>
-<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160; </div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;        ix::WebSocket websocket;</div>
-<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160; </div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;        <span class="keywordtype">bool</span> ready = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;        <span class="keywordtype">bool</span> disconnected = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;        <span class="keywordtype">bool</span> reconnecting = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;        <span class="keywordtype">bool</span> heartbeat_acked;</div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;        <span class="keywordtype">int</span> last_sequence_number = 0;</div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;        <span class="keywordtype">long</span> <span class="keywordtype">long</span> packet_counter;</div>
-<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160; </div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;        <span class="keywordtype">void</span> ReconnectToWebsocket();</div>
-<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;        <span class="keywordtype">void</span> DisconnectWebsocket();</div>
-<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;        <span class="keywordtype">void</span> WebSocketStart();</div>
-<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;        <span class="keywordtype">void</span> OnWebSocketListen(ix::WebSocketMessagePtr&amp; msg);</div>
-<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;        <span class="keywordtype">void</span> OnWebSocketPacket(rapidjson::Document&amp; result);</div>
-<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;        <span class="keywordtype">void</span> HandleDiscordDisconnect(<span class="keyword">const</span> ix::WebSocketMessagePtr&amp; msg);</div>
-<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;        <span class="keywordtype">void</span> HandleHeartbeat();</div>
-<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;        std::unique_ptr&lt;rapidjson::Document&gt; GetIdentifyPacket();</div>
-<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;    };</div>
-<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;}</div>
-<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160; </div>
-<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;        <span class="keyword">class </span>HeartbeatWaiter { <span class="comment">// For explanation, go to https://stackoverflow.com/a/29775639</span></div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;        <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;            <span class="comment">// returns false if killed:</span></div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;            <span class="keyword">template</span>&lt;<span class="keyword">class</span> R, <span class="keyword">class</span> P&gt;</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;            <span class="keywordtype">bool</span> WaitFor( std::chrono::duration&lt;R,P&gt; <span class="keyword">const</span>&amp; time )<span class="keyword"> const </span>{</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;                std::unique_lock&lt;std::mutex&gt; lock(m);</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;                <span class="keywordflow">return</span> !cv.wait_for(lock, time, [&amp;]{ <span class="keywordflow">return</span> terminate; });</div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;            }</div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160; </div>
+<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;            <span class="keywordtype">void</span> Kill() {</div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;                std::unique_lock&lt;std::mutex&gt; lock(m);</div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;                terminate = <span class="keyword">true</span>; <span class="comment">// should be modified inside mutex lock</span></div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;                cv.notify_all(); <span class="comment">// it is safe, and *sometimes* optimal, to do this outside the lock</span></div>
+<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;            }</div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160; </div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;            <span class="comment">// I like to explicitly delete/default special member functions:</span></div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;            HeartbeatWaiter() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;            HeartbeatWaiter(HeartbeatWaiter&amp;&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;            HeartbeatWaiter(HeartbeatWaiter <span class="keyword">const</span>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;            HeartbeatWaiter&amp; operator=(HeartbeatWaiter&amp;&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;            HeartbeatWaiter&amp; operator=(HeartbeatWaiter <span class="keyword">const</span>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;        <span class="keyword">private</span>:</div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;            <span class="keyword">mutable</span> std::condition_variable cv;</div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;            <span class="keyword">mutable</span> std::mutex m;</div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;            <span class="keywordtype">bool</span> terminate = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;        };</div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;    };</div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160; </div>
+<div class="line"><a name="l00306"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Shard.html">  306</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classdiscpp_1_1Shard.html">Shard</a> {</div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;    <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classdiscpp_1_1Shard.html#a10a0f4e7d88090ac7c62be1c3ce668cc">CreateWebsocketRequest</a>(rapidjson::Document&amp; json, <span class="keyword">const</span> std::string&amp; message = <span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160; </div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;        <span class="keyword">enum</span> Opcode : <span class="keywordtype">int</span> {</div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;            DISPATCH = 0,               <span class="comment">// Receive</span></div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;            HEARTBEAT = 1,              <span class="comment">// Send/Receive</span></div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;            IDENTIFY = 2,               <span class="comment">// Send</span></div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;            STATUS_UPDATE = 3,          <span class="comment">// Send</span></div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;            VOICE_STATE_UPDATE = 4,     <span class="comment">// Send</span></div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;            RESUME = 6,                 <span class="comment">// Send</span></div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;            RECONNECT = 7,              <span class="comment">// Receive</span></div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;            REQUEST_GUILD_MEMBERS = 8,  <span class="comment">// Send</span></div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;            INVALID_SESSION = 9,        <span class="comment">// Receive</span></div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;            HELLO = 10,                 <span class="comment">// Receive</span></div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;            HEARTBEAT_ACK = 11          <span class="comment">// Receive</span></div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;        };</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160; </div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;        <span class="keywordtype">int</span> id;</div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;        <a class="code" href="classdiscpp_1_1Client.html">Client</a>&amp; client;</div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;    <span class="keyword">private</span>:</div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;        <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classdiscpp_1_1Client.html">Client</a>;</div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;        <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classdiscpp_1_1EventDispatcher.html">EventDispatcher</a>;</div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160; </div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;        <a class="code" href="classdiscpp_1_1Shard.html">Shard</a>(<a class="code" href="classdiscpp_1_1Client.html">Client</a>&amp; client, <span class="keywordtype">int</span> <span class="keywordtype">id</span>, std::string endpoint) : client(client), id(<span class="keywordtype">id</span>), gateway_endpoint(endpoint) {}</div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160; </div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;        std::string session_id;</div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;        std::string gateway_endpoint;</div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160; </div>
+<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;        rapidjson::Document hello_packet;</div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160; </div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;        std::thread heartbeat_thread;</div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160; </div>
+<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;        ix::WebSocket websocket;</div>
+<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160; </div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;        discpp::Client::HeartbeatWaiter heartbeat_waiter;</div>
+<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160; </div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;        <span class="keywordtype">bool</span> ready = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;        <span class="keywordtype">bool</span> disconnected = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;        <span class="keywordtype">bool</span> reconnecting = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;        <span class="keywordtype">bool</span> heartbeat_acked;</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;        <span class="keywordtype">int</span> last_sequence_number = 0;</div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;        <span class="keywordtype">long</span> <span class="keywordtype">long</span> packet_counter;</div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160; </div>
+<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;        <span class="keywordtype">void</span> ReconnectToWebsocket();</div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;        <span class="keywordtype">void</span> DisconnectWebsocket();</div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;        <span class="keywordtype">void</span> WebSocketStart();</div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;        <span class="keywordtype">void</span> OnWebSocketListen(ix::WebSocketMessagePtr&amp; msg);</div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;        <span class="keywordtype">void</span> OnWebSocketPacket(rapidjson::Document&amp; result);</div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;        <span class="keywordtype">void</span> HandleDiscordDisconnect(<span class="keyword">const</span> ix::WebSocketMessagePtr&amp; msg);</div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;        <span class="keywordtype">void</span> HandleHeartbeat();</div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;        std::unique_ptr&lt;rapidjson::Document&gt; GetIdentifyPacket();</div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;    };</div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;}</div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160; </div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="aclassdiscpp_1_1User_html"><div class="ttname"><a href="classdiscpp_1_1User.html">discpp::User</a></div><div class="ttdef"><b>Definition:</b> user.h:11</div></div>
 <div class="ttc" id="aclassdiscpp_1_1Client_html"><div class="ttname"><a href="classdiscpp_1_1Client.html">discpp::Client</a></div><div class="ttdef"><b>Definition:</b> client.h:81</div></div>
 <div class="ttc" id="aclassdiscpp_1_1Snowflake_html"><div class="ttname"><a href="classdiscpp_1_1Snowflake.html">discpp::Snowflake</a></div><div class="ttdef"><b>Definition:</b> snowflake.h:7</div></div>
 <div class="ttc" id="aclassdiscpp_1_1EventDispatcher_html"><div class="ttname"><a href="classdiscpp_1_1EventDispatcher.html">discpp::EventDispatcher</a></div><div class="ttdef"><b>Definition:</b> event_dispatcher.h:14</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Client_html_acd6a5e4820c02c77f10bde413f1f447d"><div class="ttname"><a href="classdiscpp_1_1Client.html#acd6a5e4820c02c77f10bde413f1f447d">discpp::Client::AddFriend</a></div><div class="ttdeci">void AddFriend(const discpp::User &amp;user)</div><div class="ttdoc">Add a friend. Only supports user tokens!</div><div class="ttdef"><b>Definition:</b> client.cpp:469</div></div>
-<div class="ttc" id="aclassdiscpp_1_1UserRelationship_html_a2598fc2579925158578a4ee0527a3cc4"><div class="ttname"><a href="classdiscpp_1_1UserRelationship.html#a2598fc2579925158578a4ee0527a3cc4">discpp::UserRelationship::IsFriend</a></div><div class="ttdeci">bool IsFriend()</div><div class="ttdoc">Returns if this relation is a friend.</div><div class="ttdef"><b>Definition:</b> client.cpp:556</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Client_html_a35c3ada7dd80765541b05de44fa701c7"><div class="ttname"><a href="classdiscpp_1_1Client.html#a35c3ada7dd80765541b05de44fa701c7">discpp::Client::ReqestUserIfNotCached</a></div><div class="ttdeci">discpp::User ReqestUserIfNotCached(const discpp::Snowflake &amp;id)</div><div class="ttdoc">Get a user.</div><div class="ttdef"><b>Definition:</b> client.cpp:527</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Client_html_acd6a5e4820c02c77f10bde413f1f447d"><div class="ttname"><a href="classdiscpp_1_1Client.html#acd6a5e4820c02c77f10bde413f1f447d">discpp::Client::AddFriend</a></div><div class="ttdeci">void AddFriend(const discpp::User &amp;user)</div><div class="ttdoc">Add a friend. Only supports user tokens!</div><div class="ttdef"><b>Definition:</b> client.cpp:463</div></div>
+<div class="ttc" id="aclassdiscpp_1_1UserRelationship_html_a2598fc2579925158578a4ee0527a3cc4"><div class="ttname"><a href="classdiscpp_1_1UserRelationship.html#a2598fc2579925158578a4ee0527a3cc4">discpp::UserRelationship::IsFriend</a></div><div class="ttdeci">bool IsFriend()</div><div class="ttdoc">Returns if this relation is a friend.</div><div class="ttdef"><b>Definition:</b> client.cpp:550</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Client_html_a35c3ada7dd80765541b05de44fa701c7"><div class="ttname"><a href="classdiscpp_1_1Client.html#a35c3ada7dd80765541b05de44fa701c7">discpp::Client::ReqestUserIfNotCached</a></div><div class="ttdeci">discpp::User ReqestUserIfNotCached(const discpp::Snowflake &amp;id)</div><div class="ttdoc">Get a user.</div><div class="ttdef"><b>Definition:</b> client.cpp:521</div></div>
 <div class="ttc" id="aclassdiscpp_1_1Client_html_a800fbd955f2b7cb62fb2add03089ce57"><div class="ttname"><a href="classdiscpp_1_1Client.html#a800fbd955f2b7cb62fb2add03089ce57">discpp::Client::SetCommandHandler</a></div><div class="ttdeci">void SetCommandHandler(const std::function&lt; void(discpp::Client *, discpp::Message)&gt; &amp;command_handler)</div><div class="ttdoc">Change the command handler.</div><div class="ttdef"><b>Definition:</b> client.cpp:114</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Client_html_ad26c79198a05a37f1dd483fb2b616019"><div class="ttname"><a href="classdiscpp_1_1Client.html#ad26c79198a05a37f1dd483fb2b616019">discpp::Client::DoFunctionLater</a></div><div class="ttdeci">void DoFunctionLater(FType &amp;&amp;func, T &amp;&amp;... args)</div><div class="ttdef"><b>Definition:</b> client.h:240</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Client_html_ad26c79198a05a37f1dd483fb2b616019"><div class="ttname"><a href="classdiscpp_1_1Client.html#ad26c79198a05a37f1dd483fb2b616019">discpp::Client::DoFunctionLater</a></div><div class="ttdeci">void DoFunctionLater(FType &amp;&amp;func, T &amp;&amp;... args)</div><div class="ttdef"><b>Definition:</b> client.h:241</div></div>
 <div class="ttc" id="aclassdiscpp_1_1Image_html"><div class="ttname"><a href="classdiscpp_1_1Image.html">discpp::Image</a></div><div class="ttdef"><b>Definition:</b> image.h:9</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Client_html_a257ecefd8ba06fd70d6c838bfdf483f4"><div class="ttname"><a href="classdiscpp_1_1Client.html#a257ecefd8ba06fd70d6c838bfdf483f4">discpp::Client::cache</a></div><div class="ttdeci">discpp::Cache cache</div><div class="ttdef"><b>Definition:</b> client.h:90</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Guild_html"><div class="ttname"><a href="classdiscpp_1_1Guild.html">discpp::Guild</a></div><div class="ttdef"><b>Definition:</b> guild.h:198</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Client_html_ad2b9fe139065ecb016d381853e2921fd"><div class="ttname"><a href="classdiscpp_1_1Client.html#ad2b9fe139065ecb016d381853e2921fd">discpp::Client::GetUserDMs</a></div><div class="ttdeci">std::unordered_map&lt; discpp::Snowflake, discpp::Channel &gt; GetUserDMs()</div><div class="ttdoc">Get all DM's for this user. Only supports user tokens!</div><div class="ttdef"><b>Definition:</b> client.cpp:365</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Client_html_a257ecefd8ba06fd70d6c838bfdf483f4"><div class="ttname"><a href="classdiscpp_1_1Client.html#a257ecefd8ba06fd70d6c838bfdf483f4">discpp::Client::cache</a></div><div class="ttdeci">discpp::Cache cache</div><div class="ttdef"><b>Definition:</b> client.h:91</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Guild_html"><div class="ttname"><a href="classdiscpp_1_1Guild.html">discpp::Guild</a></div><div class="ttdef"><b>Definition:</b> guild.h:199</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Client_html_ad2b9fe139065ecb016d381853e2921fd"><div class="ttname"><a href="classdiscpp_1_1Client.html#ad2b9fe139065ecb016d381853e2921fd">discpp::Client::GetUserDMs</a></div><div class="ttdeci">std::unordered_map&lt; discpp::Snowflake, discpp::Channel &gt; GetUserDMs()</div><div class="ttdoc">Get all DM's for this user. Only supports user tokens!</div><div class="ttdef"><b>Definition:</b> client.cpp:359</div></div>
 <div class="ttc" id="aclassdiscpp_1_1Shard_html_a10a0f4e7d88090ac7c62be1c3ce668cc"><div class="ttname"><a href="classdiscpp_1_1Shard.html#a10a0f4e7d88090ac7c62be1c3ce668cc">discpp::Shard::CreateWebsocketRequest</a></div><div class="ttdeci">void CreateWebsocketRequest(rapidjson::Document &amp;json, const std::string &amp;message=&quot;&quot;)</div><div class="ttdoc">Send a request to the websocket.</div><div class="ttdef"><b>Definition:</b> client.cpp:99</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Client_html_a812aaae89aa0985517d0fd66933b3ea6"><div class="ttname"><a href="classdiscpp_1_1Client.html#a812aaae89aa0985517d0fd66933b3ea6">discpp::Client::ModifyCurrentUser</a></div><div class="ttdeci">discpp::User ModifyCurrentUser(const std::string &amp;username, discpp::Image &amp;avatar)</div><div class="ttdoc">Modify the bot's username.</div><div class="ttdef"><b>Definition:</b> client.cpp:504</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Client_html_a812aaae89aa0985517d0fd66933b3ea6"><div class="ttname"><a href="classdiscpp_1_1Client.html#a812aaae89aa0985517d0fd66933b3ea6">discpp::Client::ModifyCurrentUser</a></div><div class="ttdeci">discpp::User ModifyCurrentUser(const std::string &amp;username, discpp::Image &amp;avatar)</div><div class="ttdoc">Modify the bot's username.</div><div class="ttdef"><b>Definition:</b> client.cpp:498</div></div>
 <div class="ttc" id="aclassdiscpp_1_1ClientConfig_html"><div class="ttname"><a href="classdiscpp_1_1ClientConfig.html">discpp::ClientConfig</a></div><div class="ttdef"><b>Definition:</b> client_config.h:15</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Client_html_afb8cebf2e10ccca7716953fe0d9a5ad8"><div class="ttname"><a href="classdiscpp_1_1Client.html#afb8cebf2e10ccca7716953fe0d9a5ad8">discpp::Client::token</a></div><div class="ttdeci">std::string token</div><div class="ttdef"><b>Definition:</b> client.h:83</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Client_html_afb8cebf2e10ccca7716953fe0d9a5ad8"><div class="ttname"><a href="classdiscpp_1_1Client.html#afb8cebf2e10ccca7716953fe0d9a5ad8">discpp::Client::token</a></div><div class="ttdeci">std::string token</div><div class="ttdef"><b>Definition:</b> client.h:84</div></div>
 <div class="ttc" id="aclassdiscpp_1_1ClientUser_html_a850b2cec7ca06eb393bc09a4a1a54a10"><div class="ttname"><a href="classdiscpp_1_1ClientUser.html#a850b2cec7ca06eb393bc09a4a1a54a10">discpp::ClientUser::premium_type</a></div><div class="ttdeci">discpp::specials::NitroSubscription premium_type</div><div class="ttdef"><b>Definition:</b> client.h:50</div></div>
-<div class="ttc" id="aclassdiscpp_1_1ClientUser_html_ac662121f5a188932d1fc637f40a95ae0"><div class="ttname"><a href="classdiscpp_1_1ClientUser.html#ac662121f5a188932d1fc637f40a95ae0">discpp::ClientUser::GetUserConnections</a></div><div class="ttdeci">std::vector&lt; Connection &gt; GetUserConnections()</div><div class="ttdoc">Get all connections of this user.</div><div class="ttdef"><b>Definition:</b> client.cpp:385</div></div>
+<div class="ttc" id="aclassdiscpp_1_1ClientUser_html_ac662121f5a188932d1fc637f40a95ae0"><div class="ttname"><a href="classdiscpp_1_1ClientUser.html#ac662121f5a188932d1fc637f40a95ae0">discpp::ClientUser::GetUserConnections</a></div><div class="ttdeci">std::vector&lt; Connection &gt; GetUserConnections()</div><div class="ttdoc">Get all connections of this user.</div><div class="ttdef"><b>Definition:</b> client.cpp:379</div></div>
 <div class="ttc" id="aclassdiscpp_1_1ClientUser_html"><div class="ttname"><a href="classdiscpp_1_1ClientUser.html">discpp::ClientUser</a></div><div class="ttdef"><b>Definition:</b> client.h:26</div></div>
 <div class="ttc" id="aclassdiscpp_1_1Client_html_adea6881406292515da84ecca8dd7e998"><div class="ttname"><a href="classdiscpp_1_1Client.html#adea6881406292515da84ecca8dd7e998">discpp::Client::Client</a></div><div class="ttdeci">Client(const std::string &amp;token, ClientConfig *config)</div><div class="ttdoc">Constructs a discpp::Bot object.</div><div class="ttdef"><b>Definition:</b> client.cpp:19</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Client_html_adf53a707ec2dffec5d3f34483ff06dbb"><div class="ttname"><a href="classdiscpp_1_1Client.html#adf53a707ec2dffec5d3f34483ff06dbb">discpp::Client::RemoveFriend</a></div><div class="ttdeci">void RemoveFriend(const discpp::User &amp;user)</div><div class="ttdoc">Remove a friend. Only supports user tokens!</div><div class="ttdef"><b>Definition:</b> client.cpp:477</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Client_html_aaf9e050d856cb326addb8ec82a9b6149"><div class="ttname"><a href="classdiscpp_1_1Client.html#aaf9e050d856cb326addb8ec82a9b6149">discpp::Client::UpdatePresence</a></div><div class="ttdeci">void UpdatePresence(discpp::Presence &amp;activity)</div><div class="ttdoc">Updates the bot's presence.</div><div class="ttdef"><b>Definition:</b> client.cpp:517</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Client_html_adf53a707ec2dffec5d3f34483ff06dbb"><div class="ttname"><a href="classdiscpp_1_1Client.html#adf53a707ec2dffec5d3f34483ff06dbb">discpp::Client::RemoveFriend</a></div><div class="ttdeci">void RemoveFriend(const discpp::User &amp;user)</div><div class="ttdoc">Remove a friend. Only supports user tokens!</div><div class="ttdef"><b>Definition:</b> client.cpp:471</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Client_html_aaf9e050d856cb326addb8ec82a9b6149"><div class="ttname"><a href="classdiscpp_1_1Client.html#aaf9e050d856cb326addb8ec82a9b6149">discpp::Client::UpdatePresence</a></div><div class="ttdeci">void UpdatePresence(discpp::Presence &amp;activity)</div><div class="ttdoc">Updates the bot's presence.</div><div class="ttdef"><b>Definition:</b> client.cpp:511</div></div>
 <div class="ttc" id="aclassdiscpp_1_1Cache_html"><div class="ttname"><a href="classdiscpp_1_1Cache.html">discpp::Cache</a></div><div class="ttdef"><b>Definition:</b> cache.h:21</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Client_html_a04658448897e6a07c86c18f551672ab0"><div class="ttname"><a href="classdiscpp_1_1Client.html#a04658448897e6a07c86c18f551672ab0">discpp::Client::LeaveGuild</a></div><div class="ttdeci">void LeaveGuild(const discpp::Guild &amp;guild)</div><div class="ttdoc">Leave the guild.</div><div class="ttdef"><b>Definition:</b> client.cpp:513</div></div>
-<div class="ttc" id="aclassdiscpp_1_1UserRelationship_html_a24193a11b985fdf7ad8bb3471a98a1ab"><div class="ttname"><a href="classdiscpp_1_1UserRelationship.html#a24193a11b985fdf7ad8bb3471a98a1ab">discpp::UserRelationship::IsBlocked</a></div><div class="ttdeci">bool IsBlocked()</div><div class="ttdoc">Returns if this relation is a block.</div><div class="ttdef"><b>Definition:</b> client.cpp:560</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Client_html_a1f3a21dae7be1fcfd52b82fdcac9e4c5"><div class="ttname"><a href="classdiscpp_1_1Client.html#a1f3a21dae7be1fcfd52b82fdcac9e4c5">discpp::Client::logger</a></div><div class="ttdeci">discpp::Logger * logger</div><div class="ttdef"><b>Definition:</b> client.h:87</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Client_html_a07a93c834748147c2bfd309ee992cbfe"><div class="ttname"><a href="classdiscpp_1_1Client.html#a07a93c834748147c2bfd309ee992cbfe">discpp::Client::GetBotUserConnections</a></div><div class="ttdeci">std::vector&lt; discpp::User::Connection &gt; GetBotUserConnections()</div><div class="ttdoc">Get the bot's user connections.</div><div class="ttdef"><b>Definition:</b> client.cpp:537</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Client_html_a80207f0321eb28b1a1f39228f14b1bb3"><div class="ttname"><a href="classdiscpp_1_1Client.html#a80207f0321eb28b1a1f39228f14b1bb3">discpp::Client::config</a></div><div class="ttdeci">ClientConfig * config</div><div class="ttdef"><b>Definition:</b> client.h:84</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Client_html_a04658448897e6a07c86c18f551672ab0"><div class="ttname"><a href="classdiscpp_1_1Client.html#a04658448897e6a07c86c18f551672ab0">discpp::Client::LeaveGuild</a></div><div class="ttdeci">void LeaveGuild(const discpp::Guild &amp;guild)</div><div class="ttdoc">Leave the guild.</div><div class="ttdef"><b>Definition:</b> client.cpp:507</div></div>
+<div class="ttc" id="aclassdiscpp_1_1UserRelationship_html_a24193a11b985fdf7ad8bb3471a98a1ab"><div class="ttname"><a href="classdiscpp_1_1UserRelationship.html#a24193a11b985fdf7ad8bb3471a98a1ab">discpp::UserRelationship::IsBlocked</a></div><div class="ttdeci">bool IsBlocked()</div><div class="ttdoc">Returns if this relation is a block.</div><div class="ttdef"><b>Definition:</b> client.cpp:554</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Client_html_a1f3a21dae7be1fcfd52b82fdcac9e4c5"><div class="ttname"><a href="classdiscpp_1_1Client.html#a1f3a21dae7be1fcfd52b82fdcac9e4c5">discpp::Client::logger</a></div><div class="ttdeci">discpp::Logger * logger</div><div class="ttdef"><b>Definition:</b> client.h:88</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Client_html_a07a93c834748147c2bfd309ee992cbfe"><div class="ttname"><a href="classdiscpp_1_1Client.html#a07a93c834748147c2bfd309ee992cbfe">discpp::Client::GetBotUserConnections</a></div><div class="ttdeci">std::vector&lt; discpp::User::Connection &gt; GetBotUserConnections()</div><div class="ttdoc">Get the bot's user connections.</div><div class="ttdef"><b>Definition:</b> client.cpp:531</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Client_html_a80207f0321eb28b1a1f39228f14b1bb3"><div class="ttname"><a href="classdiscpp_1_1Client.html#a80207f0321eb28b1a1f39228f14b1bb3">discpp::Client::config</a></div><div class="ttdeci">ClientConfig * config</div><div class="ttdef"><b>Definition:</b> client.h:85</div></div>
 <div class="ttc" id="aclassdiscpp_1_1Message_html"><div class="ttname"><a href="classdiscpp_1_1Message.html">discpp::Message</a></div><div class="ttdef"><b>Definition:</b> message.h:68</div></div>
-<div class="ttc" id="aclassdiscpp_1_1ClientUserSettings_html"><div class="ttname"><a href="classdiscpp_1_1ClientUserSettings.html">discpp::ClientUserSettings</a></div><div class="ttdef"><b>Definition:</b> settings.h:200</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Client_html_ad592e83ceecd8a5a2e9ed288b9acdb37"><div class="ttname"><a href="classdiscpp_1_1Client.html#ad592e83ceecd8a5a2e9ed288b9acdb37">discpp::Client::client_user</a></div><div class="ttdeci">discpp::ClientUser client_user</div><div class="ttdef"><b>Definition:</b> client.h:86</div></div>
+<div class="ttc" id="aclassdiscpp_1_1ClientUserSettings_html"><div class="ttname"><a href="classdiscpp_1_1ClientUserSettings.html">discpp::ClientUserSettings</a></div><div class="ttdef"><b>Definition:</b> settings.h:199</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Client_html_ad592e83ceecd8a5a2e9ed288b9acdb37"><div class="ttname"><a href="classdiscpp_1_1Client.html#ad592e83ceecd8a5a2e9ed288b9acdb37">discpp::Client::client_user</a></div><div class="ttdeci">discpp::ClientUser client_user</div><div class="ttdef"><b>Definition:</b> client.h:87</div></div>
 <div class="ttc" id="aclassdiscpp_1_1UserRelationship_html"><div class="ttname"><a href="classdiscpp_1_1UserRelationship.html">discpp::UserRelationship</a></div><div class="ttdef"><b>Definition:</b> client.h:53</div></div>
 <div class="ttc" id="aclassdiscpp_1_1Client_html_a3d487f007e402be57e0803d1a0455eb8"><div class="ttname"><a href="classdiscpp_1_1Client.html#a3d487f007e402be57e0803d1a0455eb8">discpp::Client::Run</a></div><div class="ttdeci">int Run()</div><div class="ttdoc">Executes the discpp bot.</div><div class="ttdef"><b>Definition:</b> client.cpp:33</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Client_html_a3a56fd72aba504fab47f134b1328e62c"><div class="ttname"><a href="classdiscpp_1_1Client.html#a3a56fd72aba504fab47f134b1328e62c">discpp::Client::GetRelationships</a></div><div class="ttdeci">std::unordered_map&lt; discpp::Snowflake, discpp::UserRelationship &gt; GetRelationships()</div><div class="ttdoc">Get all friends. Only supports user tokens!</div><div class="ttdef"><b>Definition:</b> client.cpp:485</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Client_html_a3a56fd72aba504fab47f134b1328e62c"><div class="ttname"><a href="classdiscpp_1_1Client.html#a3a56fd72aba504fab47f134b1328e62c">discpp::Client::GetRelationships</a></div><div class="ttdeci">std::unordered_map&lt; discpp::Snowflake, discpp::UserRelationship &gt; GetRelationships()</div><div class="ttdoc">Get all friends. Only supports user tokens!</div><div class="ttdef"><b>Definition:</b> client.cpp:479</div></div>
 <div class="ttc" id="aclassdiscpp_1_1Logger_html"><div class="ttname"><a href="classdiscpp_1_1Logger.html">discpp::Logger</a></div><div class="ttdef"><b>Definition:</b> log.h:85</div></div>
 <div class="ttc" id="aclassdiscpp_1_1Presence_html"><div class="ttname"><a href="classdiscpp_1_1Presence.html">discpp::Presence</a></div><div class="ttdef"><b>Definition:</b> presence.h:133</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Shard_html"><div class="ttname"><a href="classdiscpp_1_1Shard.html">discpp::Shard</a></div><div class="ttdef"><b>Definition:</b> client.h:278</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Shard_html"><div class="ttname"><a href="classdiscpp_1_1Shard.html">discpp::Shard</a></div><div class="ttdef"><b>Definition:</b> client.h:306</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

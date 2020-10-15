@@ -1,7 +1,7 @@
 var searchData=
 [
   ['rate_5flimit_5fper_5fuser_325',['rate_limit_per_user',['../classdiscpp_1_1Channel.html#a301fd4ee82ffc19b732a3b97a31fd54f',1,'discpp::Channel']]],
-  ['ratelimit_326',['RateLimit',['../structdiscpp_1_1RateLimit.html',1,'discpp::RateLimit'],['../classdiscpp_1_1Ratelimit.html',1,'discpp::Ratelimit']]],
+  ['ratelimit_326',['Ratelimit',['../classdiscpp_1_1Ratelimit.html',1,'discpp::Ratelimit'],['../structdiscpp_1_1RateLimit.html',1,'discpp::RateLimit']]],
   ['reaction_327',['Reaction',['../classdiscpp_1_1Reaction.html',1,'discpp::Reaction'],['../classdiscpp_1_1Reaction.html#a8f150d81a089ad613d355d3278df5dd1',1,'discpp::Reaction::Reaction()']]],
   ['readyevent_328',['ReadyEvent',['../classdiscpp_1_1ReadyEvent.html',1,'discpp']]],
   ['reason_329',['reason',['../structdiscpp_1_1GuildBan.html#ae00456cf08d665888df284409d4530e3',1,'discpp::GuildBan']]],
@@ -18,14 +18,13 @@ var searchData=
   ['reqestuserifnotcached_340',['ReqestUserIfNotCached',['../classdiscpp_1_1Client.html#a35c3ada7dd80765541b05de44fa701c7',1,'discpp::Client']]],
   ['requestchannel_341',['RequestChannel',['../classdiscpp_1_1Channel.html#aadbe5617a07799afa37926e75663d029',1,'discpp::Channel']]],
   ['requestchannelsmessagemethod_342',['RequestChannelsMessageMethod',['../structdiscpp_1_1RequestChannelsMessageMethod.html',1,'discpp']]],
-  ['requestmemberifnotexist_343',['RequestMemberIfNotExist',['../classdiscpp_1_1Guild.html#af6ed1604dcaafa6cc788bd7dadf0febf',1,'discpp::Guild']]],
-  ['requestmessage_344',['RequestMessage',['../classdiscpp_1_1Channel.html#af3c4cfe274e5001489049e1d3a60fa4a',1,'discpp::Channel']]],
-  ['requestmessages_345',['RequestMessages',['../classdiscpp_1_1Channel.html#a2c99abb36c7f4b32a1e2bba2609a6879',1,'discpp::Channel']]],
-  ['requesttoolargeexception_346',['RequestTooLargeException',['../classdiscpp_1_1exceptions_1_1RequestTooLargeException.html',1,'discpp::exceptions']]],
-  ['resumedevent_347',['ResumedEvent',['../classdiscpp_1_1ResumedEvent.html',1,'discpp']]],
-  ['role_348',['Role',['../classdiscpp_1_1Role.html',1,'discpp::Role'],['../classdiscpp_1_1Role.html#ad29698a59523e2a5b803ca0717fb75cc',1,'discpp::Role::Role(const Snowflake &amp;role_id, const discpp::Guild &amp;guild)'],['../classdiscpp_1_1Role.html#a9bb03f275b08fb43a6c28b7a97a267ab',1,'discpp::Role::Role(rapidjson::Document &amp;json)']]],
-  ['role_5fid_349',['role_id',['../classdiscpp_1_1Integration.html#a93b2cade0cf558a1ca274112b2404d83',1,'discpp::Integration']]],
-  ['roles_350',['roles',['../classdiscpp_1_1Emoji.html#a7ff4cbfa7d5c1828c9ac3c9ad8bfad31',1,'discpp::Emoji::roles()'],['../classdiscpp_1_1Guild.html#a02a51e3b40ceb19bfa54a41737bd7523',1,'discpp::Guild::roles()']]],
-  ['rules_5fchannel_5fid_351',['rules_channel_id',['../classdiscpp_1_1Guild.html#a377f43044e0f9019d90fad5830499f03',1,'discpp::Guild']]],
-  ['run_352',['Run',['../classdiscpp_1_1Client.html#a3d487f007e402be57e0803d1a0455eb8',1,'discpp::Client']]]
+  ['requestmessage_343',['RequestMessage',['../classdiscpp_1_1Channel.html#af3c4cfe274e5001489049e1d3a60fa4a',1,'discpp::Channel']]],
+  ['requestmessages_344',['RequestMessages',['../classdiscpp_1_1Channel.html#a2c99abb36c7f4b32a1e2bba2609a6879',1,'discpp::Channel']]],
+  ['requesttoolargeexception_345',['RequestTooLargeException',['../classdiscpp_1_1exceptions_1_1RequestTooLargeException.html',1,'discpp::exceptions']]],
+  ['resumedevent_346',['ResumedEvent',['../classdiscpp_1_1ResumedEvent.html',1,'discpp']]],
+  ['role_347',['Role',['../classdiscpp_1_1Role.html',1,'discpp::Role'],['../classdiscpp_1_1Role.html#ad29698a59523e2a5b803ca0717fb75cc',1,'discpp::Role::Role(const Snowflake &amp;role_id, const discpp::Guild &amp;guild)'],['../classdiscpp_1_1Role.html#a9bb03f275b08fb43a6c28b7a97a267ab',1,'discpp::Role::Role(rapidjson::Document &amp;json)']]],
+  ['role_5fid_348',['role_id',['../classdiscpp_1_1Integration.html#a93b2cade0cf558a1ca274112b2404d83',1,'discpp::Integration']]],
+  ['roles_349',['roles',['../classdiscpp_1_1Emoji.html#a7ff4cbfa7d5c1828c9ac3c9ad8bfad31',1,'discpp::Emoji::roles()'],['../classdiscpp_1_1Guild.html#a02a51e3b40ceb19bfa54a41737bd7523',1,'discpp::Guild::roles()']]],
+  ['rules_5fchannel_5fid_350',['rules_channel_id',['../classdiscpp_1_1Guild.html#a377f43044e0f9019d90fad5830499f03',1,'discpp::Guild']]],
+  ['run_351',['Run',['../classdiscpp_1_1Client.html#a3d487f007e402be57e0803d1a0455eb8',1,'discpp::Client']]]
 ];

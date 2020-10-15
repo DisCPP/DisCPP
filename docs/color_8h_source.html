@@ -100,11 +100,11 @@ $(function() {
 <div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Color.html">   29</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classdiscpp_1_1Color.html">Color</a> {</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <span class="keyword">public</span>:</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;        <a class="code" href="classdiscpp_1_1Color.html">Color</a>() = <span class="keywordflow">default</span>;</div>
-<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Color.html#a81ddc504f63c38ab7762e58ffcac442e">   32</a></span>&#160;        <a class="code" href="classdiscpp_1_1Color.html#a81ddc504f63c38ab7762e58ffcac442e">Color</a>(<span class="keyword">const</span> <span class="keywordtype">int</span>&amp; red, <span class="keyword">const</span> <span class="keywordtype">int</span>&amp; green, <span class="keyword">const</span> <span class="keywordtype">int</span>&amp; blue) : red(red), green(green), blue(blue) {</div>
+<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Color.html#a9a28578dc371c5fe967261a3c9075933">   32</a></span>&#160;        <a class="code" href="classdiscpp_1_1Color.html#a9a28578dc371c5fe967261a3c9075933">Color</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> red, <span class="keyword">const</span> <span class="keywordtype">int</span> green, <span class="keyword">const</span> <span class="keywordtype">int</span> blue) : red(red), green(green), blue(blue) {</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;            color_hex = (red &lt;&lt; 16) + (green &lt;&lt; 8) + (blue);</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        }</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160; </div>
-<div class="line"><a name="l00049"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Color.html#a1a614ecf61a86728f84c9e3cc2add630">   49</a></span>&#160;        <a class="code" href="classdiscpp_1_1Color.html#a1a614ecf61a86728f84c9e3cc2add630">Color</a>(<span class="keyword">const</span> <span class="keywordtype">int</span>&amp; color_hex) : color_hex(color_hex) {</div>
+<div class="line"><a name="l00049"></a><span class="lineno"><a class="line" href="classdiscpp_1_1Color.html#a41aae27ee2ee06e8df6e7c39ee0c9365">   49</a></span>&#160;        <a class="code" href="classdiscpp_1_1Color.html#a41aae27ee2ee06e8df6e7c39ee0c9365">Color</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> color_hex) : color_hex(color_hex) {</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;            red = (color_hex &gt;&gt; 16) &amp; 0xFF;</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;            green = (color_hex &gt;&gt; 8) &amp; 0xFF;</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;            blue = color_hex &amp; 0xFF;</div>
@@ -115,15 +115,14 @@ $(function() {
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        <span class="keywordtype">int</span> red;</div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        <span class="keywordtype">int</span> green;</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <span class="keywordtype">int</span> blue;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    };</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;}</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    };</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;}</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160; </div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="aclassdiscpp_1_1Color_html"><div class="ttname"><a href="classdiscpp_1_1Color.html">discpp::Color</a></div><div class="ttdef"><b>Definition:</b> color.h:29</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Color_html_a81ddc504f63c38ab7762e58ffcac442e"><div class="ttname"><a href="classdiscpp_1_1Color.html#a81ddc504f63c38ab7762e58ffcac442e">discpp::Color::Color</a></div><div class="ttdeci">Color(const int &amp;red, const int &amp;green, const int &amp;blue)</div><div class="ttdef"><b>Definition:</b> color.h:32</div></div>
-<div class="ttc" id="aclassdiscpp_1_1Color_html_a1a614ecf61a86728f84c9e3cc2add630"><div class="ttname"><a href="classdiscpp_1_1Color.html#a1a614ecf61a86728f84c9e3cc2add630">discpp::Color::Color</a></div><div class="ttdeci">Color(const int &amp;color_hex)</div><div class="ttdef"><b>Definition:</b> color.h:49</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Color_html_a41aae27ee2ee06e8df6e7c39ee0c9365"><div class="ttname"><a href="classdiscpp_1_1Color.html#a41aae27ee2ee06e8df6e7c39ee0c9365">discpp::Color::Color</a></div><div class="ttdeci">Color(const int color_hex)</div><div class="ttdef"><b>Definition:</b> color.h:49</div></div>
+<div class="ttc" id="aclassdiscpp_1_1Color_html_a9a28578dc371c5fe967261a3c9075933"><div class="ttname"><a href="classdiscpp_1_1Color.html#a9a28578dc371c5fe967261a3c9075933">discpp::Color::Color</a></div><div class="ttdeci">Color(const int red, const int green, const int blue)</div><div class="ttdef"><b>Definition:</b> color.h:32</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">
