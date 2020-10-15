@@ -22,7 +22,7 @@ namespace discpp {
     uint8_t Client::next_instance_id = 0;
     std::map<uint8_t, Client*> Client::client_instances;
 
-    Client::Client(const std::string& token, ClientConfig& config) : token(token), config(config), cache(new discpp::Cache(this)), event_handler(new discpp::EventHandler(this)) {
+    Client::Client(const std::string& token, ClientConfig& config) : token(token), config(config) {
         fire_command_method = std::bind(discpp::FireCommand, std::placeholders::_1, std::placeholders::_2);
 
         message_cache_count = config.message_cache_size;
@@ -37,7 +37,9 @@ namespace discpp {
         next_instance_id++;
 
         this->command_handler = std::make_unique<CommandHandler>(*this);
-        
+        this->event_handler = std::make_unique<EventHandler>(this);
+        this->cache = std::make_unique<discpp::Cache>(this);
+
         client_instances.emplace(my_instance_id, this);
     }
 
