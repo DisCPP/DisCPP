@@ -25,13 +25,13 @@ int main(int argc, const char* argv[]) {
 	discpp::ClientConfig* config = new discpp::ClientConfig({"!"});
 	discpp::Client bot{ token, config }; // Token, config
 
-	PingCommand(); // This runs the constructor which will register the command.
+	bot.command_handler->RegisterCommand<PingCommand>();
 
 	// I would recommend creating a class for the commands, you can check that in the examples folder
 	// But, you can still register a command like you did before
-	discpp::Command("test", "Quick example of a quick command", {}, [](discpp::Context ctx) {
+	bot.command_handler->RegisterCommand<discpp::Command>("test", "Quick example of a quick command", [](discpp::Context ctx) {
 		ctx.Send("Quick new command handler test");
-	}, {});
+	});
 
 	// New event system
     bot.event_handler->RegisterListener<discpp::ReadyEvent>([&] (const discpp::ReadyEvent& event) {

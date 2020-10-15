@@ -11,7 +11,10 @@ namespace discpp {
     class SubCommand;
 	class Command {
 	private:
-	    friend class SubCommand;
+	  friend class SubCommand;
+      friend class CommandHandler;
+      std::shared_ptr<CommandHandler> parent;
+      
 	public:
 		Command() = default;
 
@@ -35,7 +38,8 @@ namespace discpp {
          *
          * @return discpp::Command, this is a constructor.
          */
-		Command(const std::string& name, const std::string& desc, const std::vector<std::string>& hint_args, const std::function<void(discpp::Context)>& function, const std::vector<std::function<bool(discpp::Context)>>& requirements);
+		Command(const std::string& name, const std::string& desc, const std::vector<std::string>& hint_args, const std::function<void(discpp::Context)>& function, const std::vector<std::function<bool(discpp::Context)>>& requirements = {});
+		Command(const std::string& name, const std::string& desc, const std::function<void(discpp::Context)>& function, const std::vector<std::function<bool(discpp::Context)>>& requirements = {});
 
         /**
          * @brief The method that is executed when the command is triggered if overrided.
@@ -64,6 +68,7 @@ namespace discpp {
 		std::function<void(discpp::Context)> function = nullptr;
 		std::string name; /**< Name of the current command. Ex: "ping"*/
 		std::string description; /**< Description of the current command. Ex: "replies pong!" */
+		std::vector<std::string> aliases;
 		std::vector<std::string> hint_args; /**< Arguments of the current command. Ex: @user */
 		std::vector<std::function<bool(discpp::Context)>> requirements;
         std::unordered_map<std::string, discpp::SubCommand*> registered_commands;

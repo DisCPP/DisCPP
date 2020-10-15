@@ -25,8 +25,8 @@ void discpp::FireCommand(discpp::Shard& shard, const discpp::Message& message) {
     std::vector<std::string> argument_vec = SplitString(messageContent, " ");
     if (!argument_vec.size()) return;
 
-    auto found_command = registered_commands.find(argument_vec[0]);
-    if (found_command == registered_commands.end()) return;
+    auto found_command = shard.client.command_handler->registered_commands.find(argument_vec[0]);
+    if (found_command == shard.client.command_handler->registered_commands.end()) return;
 
     argument_vec.erase(argument_vec.begin()); // Erase the command from the arguments
 

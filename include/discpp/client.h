@@ -1,6 +1,7 @@
 #ifndef DISCPP_BOT_H
 #define DISCPP_BOT_H
 
+#include <memory>
 #include <string>
 #include <future>
 #include <string_view>
@@ -78,6 +79,7 @@ namespace discpp {
 	};
 
 	class Shard;
+    class CommandHandler;
 
 	class Client {
 	    friend class Shard;
@@ -88,13 +90,10 @@ namespace discpp {
 		discpp::ClientUser client_user; /**< discpp::User object representing current user. */
 		discpp::Logger* logger; /**< discpp::Logger object representing current logger. */
 
-        discpp::Cache* cache; /**< Bot cache. Stores members, channels, guilds, etc. */
-		EventHandler* event_handler; /**< Event handler. For registering event listeners, and dispatching them. */
+    discpp::Cache* cache; /**< Bot cache. Stores members, channels, guilds, etc. */
 
-        bool user_mfa_enabled; /**< If the Client's user mfa enabled. */
-        std::string user_locale; /**< Client's user locale. */
-        bool user_verified; /**< If the Client's user if verified. */
-        std::vector<Shard*> shards; /**< All the shards running. */
+		EventHandler* event_handler; /**< Event handler. For registering event listeners, and dispatching them. */
+		std::shared_ptr<CommandHandler> command_handler; /**< Command handler. For registering commands. */
 
         /**
          * @brief Constructs a discpp::Bot object.
