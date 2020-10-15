@@ -6,23 +6,25 @@
 #include "message.h"
 #include "command.h"
 
+#include <memory>
 #include <type_traits>
 
 namespace discpp {
-    class CommandHandler {
+    class CommandHandler : public std::enable_shared_from_this<CommandHandler> {
         Client &client;
         friend class Client;
         friend class Command;
       public:
-        std::unordered_map<std::string, Command *> registered_commands;
+        std::unordered_map<std::string, std::shared_ptr<Command>> registered_commands;
 
         CommandHandler(Client &parent) : client(parent) {}
 
-        template <typename T, typename... Args/*, std::enable_if_t<std::is_base_of<Command, T>::value || std::is_same<T, Command>::value> * = nullptr*/>
+        template <typename T, typename... Args, std::enable_if_t<std::is_base_of<Command, T>::value || std::is_same<T, Command>::value> * = nullptr>
         void RegisterCommand(Args &&... args)
         {
-            auto command = new T(args...);
-            command->parent = this;
+            auto command = std::make_shared<T>(args...);
+
+            command->parent = shared_from_this();
 
             registered_commands.insert({command->name, command});
             for (auto &alias : command->aliases)

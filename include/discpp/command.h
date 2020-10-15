@@ -11,9 +11,9 @@ namespace discpp {
     class SubCommand;
 	class Command {
 	private:
-	    friend class SubCommand;
+	  friend class SubCommand;
       friend class CommandHandler;
-      CommandHandler* parent;
+      std::shared_ptr<CommandHandler> parent;
       
 	public:
 		Command() = default;

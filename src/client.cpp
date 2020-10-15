@@ -16,6 +16,7 @@
 #include "cache.h"
 
 #include <ixwebsocket/IXNetSystem.h>
+#include <memory>
 
 namespace discpp {
     uint8_t Client::next_instance_id = 0;
@@ -35,7 +36,7 @@ namespace discpp {
         this->my_instance_id = next_instance_id;
         next_instance_id++;
 
-        this->command_handler = new CommandHandler(*this);
+        this->command_handler = std::make_shared<CommandHandler>(*this);
         
         client_instances.emplace(my_instance_id, this);
     }

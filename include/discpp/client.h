@@ -1,6 +1,7 @@
 #ifndef DISCPP_BOT_H
 #define DISCPP_BOT_H
 
+#include <memory>
 #include <string>
 #include <future>
 #include <string_view>
@@ -78,7 +79,7 @@ namespace discpp {
 	};
 
 	class Shard;
-  class CommandHandler;
+    class CommandHandler;
 
 	class Client {
 	    friend class Shard;
@@ -92,7 +93,7 @@ namespace discpp {
 		//std::unordered_map<Snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
         discpp::Cache* cache; /**< Bot cache. Stores members, channels, guilds, etc. */
 		EventHandler* event_handler;
-		CommandHandler* command_handler;
+		std::shared_ptr<CommandHandler> command_handler;
 
         /**
          * @brief Constructs a discpp::Bot object.
