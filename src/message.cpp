@@ -13,7 +13,7 @@ namespace discpp {
 
 	Message::Message(rapidjson::Document& json) {
 		id = GetIDSafely(json, "id");
-		channel = globals::client_instance->cache.GetChannel(discpp::Snowflake(json["channel_id"].GetString()));
+        channel = globals::client_instance->cache.GetChannel(discpp::Snowflake(json["channel_id"].GetString()));
 		try {
             guild = channel.GetGuild();
         } catch (const exceptions::DiscordObjectNotFound&) {
@@ -24,7 +24,7 @@ namespace discpp {
             if (guild != nullptr) {
                 try {
                     auto mbr = guild->GetMember(author.id);
-                    member = mbr.value();
+                    member = mbr;
                 } catch (const exceptions::DiscordObjectNotFound&) {
                     rapidjson::Document doc(rapidjson::kObjectType);
                     doc.CopyFrom(json["member"], doc.GetAllocator());
