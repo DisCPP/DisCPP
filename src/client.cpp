@@ -35,6 +35,8 @@ namespace discpp {
         this->my_instance_id = next_instance_id;
         next_instance_id++;
 
+        this->command_handler = new CommandHandler(*this);
+        
         client_instances.emplace(my_instance_id, this);
     }
 

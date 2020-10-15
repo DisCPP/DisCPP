@@ -78,6 +78,7 @@ namespace discpp {
 	};
 
 	class Shard;
+  class CommandHandler;
 
 	class Client {
 	    friend class Shard;
@@ -91,6 +92,7 @@ namespace discpp {
 		//std::unordered_map<Snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
         discpp::Cache* cache; /**< Bot cache. Stores members, channels, guilds, etc. */
 		EventHandler* event_handler;
+		CommandHandler* command_handler;
 
         /**
          * @brief Constructs a discpp::Bot object.

@@ -20,7 +20,7 @@ int main(int argc, const char* argv[]) {
 	discpp::ClientConfig* config = new discpp::ClientConfig({"!"});
 	discpp::Client bot { token, config }; // Token, config
 
-	ServerinfoCommand();
+	bot.command_handler->RegisterCommand<ServerinfoCommand>();
 	
 	// ready event
     bot.event_handler->RegisterListener<discpp::ReadyEvent>([&] (const discpp::ReadyEvent& event) {
