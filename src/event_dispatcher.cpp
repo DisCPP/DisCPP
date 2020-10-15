@@ -602,7 +602,17 @@ namespace discpp {
     }
 
     void EventDispatcher::VoiceStateUpdateEvent(Shard& shard, rapidjson::Document& result) {
-        shard.client.event_handler->TriggerEvent<discpp::VoiceStateUpdateEvent>(discpp::VoiceStateUpdateEvent(shard, result));
+        VoiceState voice_state(&shard.client, result);
+        auto guild = shard.client.cache->GetGuild(voice_state.guild_id);
+
+        auto it = std::find_if(guild->voice_states.begin(), guild->voice_states.end(), [&](const discpp::VoiceState& v) { return voice_state.user_id == v.user_id; });
+        if (it != guild->voice_states.end()) {
+            *it = voice_state;
+        } else {
+            guild->voice_states.emplace_back(voice_state);
+        }
+
+        shard.client.event_handler->TriggerEvent<discpp::VoiceStateUpdateEvent>(discpp::VoiceStateUpdateEvent(shard, voice_state));
     }
 
     void EventDispatcher::VoiceServerUpdateEvent(Shard& shard, rapidjson::Document& result) {
