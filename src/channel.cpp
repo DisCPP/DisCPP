@@ -327,7 +327,7 @@ namespace discpp {
 		for (auto& invite : result->GetArray()) {
 			rapidjson::Document invite_json;
 			invite_json.CopyFrom(invite, invite_json.GetAllocator());
-			invites.push_back(discpp::GuildInvite(client, invite_json));
+			invites.emplace_back(client, invite_json);
 		}
 
 		return invites;
@@ -339,8 +339,10 @@ namespace discpp {
             GetClient()->logger->Debug(LogTextColor::RED + "discpp::Channel::GetChildren only available for category channels!");
             throw std::runtime_error("discpp::Channel::GetChildren only available for category channels!");
         } else {
-            if (this->GetGuild()) {
-                for (auto const chnl : this->GetGuild()->channels) {
+            std::shared_ptr<discpp::Guild> guild = this->GetGuild();
+            if (guild) {
+                std::lock_guard<std::mutex> lock_guard(guild->channels_mutex);
+                for (auto const& chnl : guild->channels) {
                     if (chnl.second.category_id == this->id) {
                         children.insert({ chnl.first, chnl.second });
                     } else {
