@@ -29,7 +29,7 @@ int main(int argc, const char* argv[]) {
 
 	// I would recommend creating a class for the commands, you can check that in the examples folder
 	// But, you can still register a command like you did before
-	bot.command_handler->RegisterCommand("test", "Quick example of a quick command", [](discpp::Context ctx) {
+	bot.command_handler->RegisterCommand<discpp::Command>("test", "Quick example of a quick command", [](discpp::Context ctx) {
 		ctx.Send("Quick new command handler test");
 	});
 
