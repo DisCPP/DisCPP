@@ -83,14 +83,18 @@ namespace discpp {
 	    friend class Shard;
 	public:
 		std::string token; /**< Token for the current client. */
-		ClientConfig* config; /**< Configuration for the current bot. */
+		ClientConfig* config; /**< Configuration for the current client. */
 
 		discpp::ClientUser client_user; /**< discpp::User object representing current user. */
 		discpp::Logger* logger; /**< discpp::Logger object representing current logger. */
 
-		//std::unordered_map<Snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
         discpp::Cache* cache; /**< Bot cache. Stores members, channels, guilds, etc. */
-		EventHandler* event_handler;
+		EventHandler* event_handler; /**< Event handler. For registering event listeners, and dispatching them. */
+
+        bool user_mfa_enabled; /**< If the Client's user mfa enabled. */
+        std::string user_locale; /**< Client's user locale. */
+        bool user_verified; /**< If the Client's user if verified. */
+        std::vector<Shard*> shards; /**< All the shards running. */
 
         /**
          * @brief Constructs a discpp::Bot object.
@@ -135,9 +139,14 @@ namespace discpp {
          */
 		void SetCommandHandler(const std::function<void(discpp::Shard&, discpp::Message&)>& command_handler);
 
+        /**
+         * @brief Stop the client.
+         *
+         * This will cause the thread being blocked by discpp::Client::Run() to no longer be blocked.
+         *
+         * @return void
+         */
 		void StopClient();
-
-		// Discord based methods.
 
         /**
          * @brief Add a friend. Only supports user tokens!
@@ -160,12 +169,11 @@ namespace discpp {
          */
         std::unordered_map<discpp::Snowflake, discpp::UserRelationship> GetRelationships();
 
-
         /**
-         * @brief Modify the bot's username.
+         * @brief Modify the client's user.
          *
          * ```cpp
-         *      discpp::User user = bot.ModifyCurrent("New bot name!", new_avatar);
+         *      discpp::User user = client.ModifyCurrent("New bot name!", new_avatar);
          * ```
          *
          * @param[in] username The new username.
@@ -176,7 +184,7 @@ namespace discpp {
         discpp::User ModifyCurrentUser(const std::string& username, discpp::Image& avatar);
 
         /**
-         * @brief Leave the guild
+         * @brief Leave the guild.
          *
          * ```cpp
          *      bot.LeaveGuild(guild);
@@ -202,19 +210,6 @@ namespace discpp {
         void UpdatePresence(discpp::Presence& activity);
 
         /**
-         * @brief Get a user.
-         *
-         * ```cpp
-         *      bot.GetUser("150312037426135041");
-         * ```
-         *
-         * @param[in] id The user to get with this id.
-         *
-         * @return discpp::User
-         */
-		discpp::User ReqestUserIfNotCached(const discpp::Snowflake& id);
-
-        /**
          * @brief Get the bot's user connections.
          *
          * ```cpp
@@ -233,11 +228,6 @@ namespace discpp {
         std::unordered_map<discpp::Snowflake, discpp::Channel> GetUserDMs();
 
         // discpp::Channel CreateGroupDM(std::vector<discpp::User> users); // Deprecated and will not be shown in the discord client.
-
-		bool user_mfa_enabled;
-		std::string user_locale;
-		bool user_verified;
-        std::vector<Shard*> shards;
 
 		template <typename FType, typename... T>
 		void DoFunctionLater(FType&& func, T&&... args) {
@@ -355,7 +345,7 @@ namespace discpp {
             HEARTBEAT_ACK = 11			// Receive
         };
 
-        int id;
+        const int id;
         Client& client;
     private:
         friend class Client;
@@ -374,12 +364,11 @@ namespace discpp {
 
         discpp::Client::HeartbeatWaiter heartbeat_waiter;
 
-        bool ready = false;
-        bool disconnected = true;
-        bool reconnecting = false;
-        bool heartbeat_acked;
-        int last_sequence_number = 0;
-        long long packet_counter;
+        std::atomic<bool> ready = false;
+        std::atomic<bool> disconnected = true;
+        std::atomic<bool> reconnecting = false;
+        std::atomic<bool> heartbeat_acked;
+        std::atomic<int> last_sequence_number = 0;
 
         void ReconnectToWebsocket();
         void DisconnectWebsocket();

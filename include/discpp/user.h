@@ -51,16 +51,21 @@ namespace discpp {
          * @brief Constructs a discpp::User object from an id.
          *
          * This constructor searches the user cache to get a user object.
+         * If you set `can_request` to true, and the user is not found in the member cache, then we will request
+         * the user from the REST API. But if its not true, and its not found, an exception will be
+         * thrown of DiscordObjectNotFound.
          *
          * ```cpp
-         *      discpp::User user(583251190591258624);
+         *      discpp::User user(client, 583251190591258624);
          * ```
          *
+         * @param[in] client The client.
          * @param[in] id The id of the user.
+         * @param[in] can_request Can we request the user from REST?
          *
          * @return discpp::User, this is a constructor.
          */
-		User(discpp::Client* client, const Snowflake& id);
+		User(discpp::Client* client, const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Constructs a discpp::User object by parsing json.
@@ -69,6 +74,7 @@ namespace discpp {
          *      discpp::User user(json);
          * ```
          *
+         * @param[in] client The client.
          * @param[in] json The json that makes up of user object.
          *
          * @return discpp::User, this is a constructor.

@@ -151,7 +151,7 @@ namespace discpp {
                 rapidjson::Document member_json;
                 member_json.CopyFrom(member, member_json.GetAllocator());
 
-                discpp::Member tmp(client, member_json, *this);
+                discpp::Member tmp(client, member_json, this);
                 members.insert({ tmp.user.id, std::make_shared<discpp::Member>(tmp)});
             }
         }
@@ -175,6 +175,61 @@ namespace discpp {
 		}
 	}
 
+    Guild::Guild(const Guild& guild) {
+        this->name = guild.name;
+        this->owner_id = guild.owner_id;
+        this->permissions = guild.permissions;
+        this->region = guild.region;
+        this->afk_channel_id = guild.afk_channel_id;
+        this->verification_level = guild.verification_level;
+        this->default_message_notifications = guild.default_message_notifications;
+        this->explicit_content_filter = guild.explicit_content_filter;
+        this->features = guild.features;
+        this->mfa_level = guild.mfa_level;
+        this->application_id = guild.application_id;
+        this->widget_enabled = guild.widget_enabled;
+        this->widget_channel_id = guild.widget_channel_id;
+        this->system_channel_id = guild.system_channel_id;
+        this->system_channel_flags = guild.system_channel_flags;
+        this->rules_channel_id = guild.rules_channel_id;
+        this->joined_at = guild.joined_at;
+        this->member_count = guild.member_count;
+        this->max_presences = guild.max_presences;
+        this->max_members = guild.max_members;
+        this->vanity_url_code = guild.vanity_url_code;
+        this->description = guild.description;
+        this->premium_tier = guild.premium_tier;
+        this->premium_subscription_count = guild.premium_subscription_count;
+        this->preferred_locale = guild.preferred_locale;
+        this->public_updates_channel = guild.public_updates_channel;
+        this->approximate_member_count = guild.approximate_member_count;
+        this->approximate_presence_count = guild.approximate_presence_count;
+        this->roles = guild.roles;
+        this->emojis = guild.emojis;
+        this->voice_states = guild.voice_states;
+        this->members = guild.members;
+        this->channels = guild.channels;
+        this->flags = guild.flags;
+
+        this->icon_hex[0] = guild.icon_hex[0];
+        this->icon_hex[1] = guild.icon_hex[1];
+
+        this->splash_hex[0] = guild.splash_hex[0];
+        this->splash_hex[1] = guild.splash_hex[1];
+
+        this->discovery_hex[0] = guild.discovery_hex[0];
+        this->discovery_hex[1] = guild.discovery_hex[1];
+
+        this->banner_hex[0] = guild.banner_hex[0];
+        this->banner_hex[1] = guild.banner_hex[1];
+
+        this->is_icon_gif = guild.is_icon_gif;
+    }
+
+    Guild Guild::operator=(const Guild& guild) {
+        return Guild(guild);
+    }
+
 	void Guild::DeleteGuild() {
         discpp::Client* client = GetClient();
 		if (client->client_user.id != this->owner_id) {
@@ -184,7 +239,9 @@ namespace discpp {
 		SendDeleteRequest(client, Endpoint("/guilds/" + std::to_string(id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
 	}
 
-    std::unordered_map<discpp::Snowflake, discpp::Channel> Guild::GetChannels() {
+    std::unordered_map<discpp::Snowflake, discpp::Channel> Guild::UpdateChannels() {
+        std::lock_guard<std::mutex> lock_guard(channels_mutex);
+
         discpp::Client* client = GetClient();
 		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/channels"), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
         std::unordered_map<discpp::Snowflake, discpp::Channel> channels;
@@ -206,7 +263,7 @@ namespace discpp {
     std::unordered_map<discpp::Snowflake, discpp::Channel> Guild::GetCategories() {
 	    std::unordered_map<discpp::Snowflake, discpp::Channel> tmp;
 
-	    for (auto& chnl : this->GetChannels()) {
+	    for (auto& chnl : channels) {
 	        if (chnl.second.type == discpp::ChannelType::GROUP_CATEGORY) {
 	            tmp.emplace(chnl.first, chnl.second);
 	        } else continue;
@@ -218,7 +275,7 @@ namespace discpp {
 	std::unordered_map<discpp::Snowflake, discpp::Channel> Guild::GetParentlessChannels() {
 	    std::unordered_map<discpp::Snowflake, discpp::Channel> tmp;
 
-	    for (auto& chnl : this->GetChannels()) {
+	    for (auto& chnl : channels) {
 	        if (chnl.second.category_id == 0) {
 	            tmp.emplace(std::pair(chnl.first, chnl.second));
 	        }
@@ -227,13 +284,15 @@ namespace discpp {
 	    return tmp;
 	}
 
-    discpp::Channel Guild::GetChannel(const Snowflake& id) const {
+    discpp::Channel Guild::GetChannel(const Snowflake& id) {
+        std::lock_guard<std::mutex> lock_guard(channels_mutex);
+
 	    auto it = channels.find(id);
 	    if (it != channels.end()) {
 	        return it->second;
 	    }
 
-		return discpp::Channel();
+		throw discpp::exceptions::DiscordObjectNotFound("Failed to find cached channel.");
 	}
 
     discpp::Channel Guild::CreateChannel(const std::string& name, const std::string& topic, const ChannelType& type, const int& bitrate, const int& user_limit, const int& rate_limit_per_user, const int& position, const std::vector<discpp::Permissions>& permission_overwrites, const discpp::Snowflake& parent_id, const bool nsfw) {
@@ -303,12 +362,13 @@ namespace discpp {
 	}
 
 	std::shared_ptr<discpp::Member> Guild::GetMember(const Snowflake& id, bool can_request) {
+        std::lock_guard<std::mutex> lock_guard(members_mutex);
+
 		if (id == 0) {
 			throw exceptions::DiscordObjectNotFound("Member id: " + std::to_string(id) + " is not valid!");
 		}
 
 		auto it = members.find(id);
-
         if (it != members.end()) {
             return it->second;
         }
@@ -317,7 +377,7 @@ namespace discpp {
             discpp::Client* client = GetClient();
             std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(this->id) + "/members/"+ std::to_string(id)), DefaultHeaders(client), id, RateLimitBucketType::CHANNEL);
 
-            auto member = std::make_shared<discpp::Member>(client, *result, *this);
+            auto member = std::make_shared<discpp::Member>(client, *result, this);
             members.emplace(member->user.id, member);
             return member;
         } else {
@@ -351,7 +411,7 @@ namespace discpp {
         discpp::Client* client = GetClient();
 		std::unique_ptr<rapidjson::Document> result = SendPutRequest(client, Endpoint("/guilds/" + std::to_string(this->id) + "/members/" + std::to_string(id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD, body);
 
-		return std::make_shared<discpp::Member>((result->Empty()) ? discpp::Member(client, id, *this) : discpp::Member(client, *result, *this)); // If the member is already added, return it.
+		return std::make_shared<discpp::Member>((result->Empty()) ? discpp::Member(client, id, this) : discpp::Member(client, *result, this)); // If the member is already added, return it.
 	}
 
 	void Guild::RemoveMember(const discpp::Member& member) {
@@ -432,7 +492,9 @@ namespace discpp {
         SendDeleteRequest(client, url, DefaultHeaders(client), id, RateLimitBucketType::GUILD);
 	}
 
-	std::shared_ptr<discpp::Role> Guild::GetRole(const Snowflake& id) const {
+	std::shared_ptr<discpp::Role> Guild::GetRole(const Snowflake& id) {
+        std::lock_guard<std::mutex> lock_guard(roles_mutex);
+
 		auto it = roles.find(id);
 		if (it != roles.end()) {
 			return it->second;
@@ -629,7 +691,9 @@ namespace discpp {
 		return result->GetString();
 	}
 
-	std::unordered_map<Snowflake, Emoji> Guild::GetEmojis() {
+	std::unordered_map<Snowflake, Emoji> Guild::UpdateEmojis() {
+        std::lock_guard<std::mutex> lock_guard(emojis_mutex);
+
         discpp::Client* client = GetClient();
 		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/emojis"), DefaultHeaders(client), {}, {});
 
@@ -648,11 +712,28 @@ namespace discpp {
 		return emojis;
 	}
 
-    Emoji Guild::GetEmoji(const Snowflake& id) const {
-        discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(this->id) + "/emojis/" + std::to_string(id)), DefaultHeaders(client), {}, {});
+    Emoji Guild::GetEmoji(const Snowflake& id, bool can_request) {
+        std::lock_guard<std::mutex> lock_guard(emojis_mutex);
 
-		return discpp::Emoji(client, *result);
+        if (id == 0) {
+            throw exceptions::DiscordObjectNotFound("Member id: " + std::to_string(id) + " is not valid!");
+        }
+
+        auto it = emojis.find(id);
+        if (it != emojis.end()) {
+            return it->second;
+        }
+
+        if (can_request) {
+            discpp::Client* client = GetClient();
+            std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(this->id) + "/emojis/" + std::to_string(id)), DefaultHeaders(client), {}, {});
+
+            discpp::Emoji emoji(client, *result);
+            emojis.emplace(emoji.id, emoji);
+            return emoji;
+        } else {
+            throw exceptions::DiscordObjectNotFound("Member not found of id: " + std::to_string(id));
+        }
 	}
 
     Emoji Guild::CreateEmoji(const std::string& name, discpp::Image& image, const std::vector<discpp::Role>& roles) {
@@ -868,7 +949,7 @@ namespace discpp {
             discpp::Client* client = GetClient();
             std::unique_ptr<rapidjson::Document> result = discpp::SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/members/" + std::to_string(member_id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
 
-            std::shared_ptr<discpp::Member> member = std::make_shared<discpp::Member>(client, *result, *this);
+            std::shared_ptr<discpp::Member> member = std::make_shared<discpp::Member>(client, *result, this);
             members.insert({ member_id, member });
 
             return member;
@@ -954,6 +1035,21 @@ namespace discpp {
         return std::chrono::system_clock::from_time_t(TimeFromSnowflake(id));
     }
 
+    void Guild::CacheMember(const std::shared_ptr<discpp::Member>& member) {
+        std::lock_guard<std::mutex> lock_guard(members_mutex);
+        members.emplace(member->user.id, member);
+    }
+
+    void Guild::CacheChannel(const discpp::Channel& channel) {
+        std::lock_guard<std::mutex> lock_guard(channels_mutex);
+        channels.emplace(channel.id, channel);
+    }
+
+    void Guild::CacheEmoji(const discpp::Emoji& emoji) {
+        std::lock_guard<std::mutex> lock_guard(emojis_mutex);
+        emojis.emplace(emoji.id, emoji);
+    }
+
     GuildInvite::GuildInvite(discpp::Client* client, rapidjson::Document &json) {
         code = json["code"].GetString();
         if (ContainsNotNull(json, "guild")) {
@@ -987,7 +1083,7 @@ namespace discpp {
 			rapidjson::Document member_json;
 			member_json.CopyFrom(json["member"], member_json.GetAllocator());
 
-			discpp::Guild guild(client, guild_id);
+			std::shared_ptr<discpp::Guild> guild = client->cache->GetGuild(guild_id);
 			member = std::make_shared<discpp::Member>(client, member_json, guild);
 		}
 		session_id = json["session_id"].GetString();

@@ -3,16 +3,14 @@
 #include "guild.h"
 #include "member.h"
 #include "cache.h"
+#include "exceptions.h"
 
 #include <iomanip>
 #include <discpp/exceptions.h>
 
 namespace discpp {
-	User::User(discpp::Client* client, const Snowflake& id) : discpp::DiscordObject(client, id) {
-		auto it = client->cache->members.find(id);
-		if (it != client->cache->members.end()) {
-			*this = it->second->user;
-		}
+	User::User(discpp::Client* client, const Snowflake& id, bool can_request) : discpp::DiscordObject(client, id) {
+        *this = client->cache->GetUser(id, can_request);
 	}
 
 	User::User(discpp::Client* client, rapidjson::Document& json) : discpp::DiscordObject(client) {
@@ -120,10 +118,15 @@ namespace discpp {
     std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> User::GetMutualGuilds() {
          std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> map;
 
-         for (auto const& guild : GetClient()->cache->guilds) {
-             auto mbr_it = guild.second->members.find(this->id);
-             if (mbr_it != guild.second->members.end()) {
+         discpp::Client* client = GetClient();
+
+         std::lock_guard<std::mutex> guilds_guard(client->cache->guilds_mutex);
+         for (auto const& guild : client->cache->guilds) {
+             try {
+                 guild.second->GetMember(this->id);
                  map.emplace(guild.first, guild.second);
+             } catch (const discpp::exceptions::DiscordObjectNotFound&) {
+
              }
          }
 

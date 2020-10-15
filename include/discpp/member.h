@@ -34,7 +34,24 @@ namespace discpp {
          *
          * @return discpp::Member, this is a constructor.
          */
-		Member(discpp::Client* client, const Snowflake& id, discpp::Guild& guild, bool can_request = false);
+		Member(discpp::Client* client, const Snowflake& id, std::shared_ptr<discpp::Guild> guild, bool can_request = false);
+
+        /**
+         * @brief Constructs a discpp::Member object using its id and the guild that it is in.
+         *
+         * This constructor searches the guild's member cache to get a member object.
+         *
+         * If you set `can_request` to true, and the message is not found in cache, then we will request
+         * the message from the REST API. But if its not true, and its not found, an exception will be
+         * thrown of DiscordObjectNotFound.
+         *
+         * @param[in] id The id of the member.
+         * @param[in] guild The guild the member is in.
+         * @param[in] can_request Whether or not the library can request the message from the REST API.
+         *
+         * @return discpp::Member, this is a constructor.
+         */
+        Member(discpp::Client* client, const Snowflake& id, discpp::Guild* guild, bool can_request = false);
 
         /**
          * @brief Constructs a discpp::Member object by parsing json and stores the guild_id.
@@ -48,7 +65,21 @@ namespace discpp {
          *
          * @return discpp::Member, this is a constructor.
          */
-		Member(discpp::Client* client, rapidjson::Document& json, const discpp::Guild& guild);
+		Member(discpp::Client* client, rapidjson::Document& json, std::shared_ptr<discpp::Guild> guild);
+
+        /**
+         * @brief Constructs a discpp::Member object by parsing json and stores the guild_id.
+         *
+         * ```cpp
+         *      discpp::Member member(json, 657246994997444614);
+         * ```
+         *
+         * @param[in] json The json that makes up of member object.
+         * @param[in] json guild The guild containing this member.
+         *
+         * @return discpp::Member, this is a constructor.
+         */
+        Member(discpp::Client* client, rapidjson::Document& json, discpp::Guild* guild);
 
         Member(const discpp::Member& member);
         Member operator=(const discpp::Member& mbr);
