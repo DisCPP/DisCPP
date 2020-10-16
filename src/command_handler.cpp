@@ -3,14 +3,16 @@
 #include "client_config.h"
 
 void discpp::FireCommand(discpp::Shard& shard, const discpp::Message& message) {
-    size_t prefixSize = 0;
+    if (message.author.IsBot()) return;
+
+    size_t prefix_size = 0;
     bool trigger = false;
+
     for (std::string const& prefix : shard.client.config.prefixes) {
-        prefixSize = prefix.size();
-        if (message.author.IsBot()) {
-            return;
-        }
+        if (prefix.empty()) continue;
+
         if (StartsWith(message.content, prefix)) {
+            prefix_size = prefix.size();
             trigger = true;
             break;
         }
@@ -19,11 +21,9 @@ void discpp::FireCommand(discpp::Shard& shard, const discpp::Message& message) {
         return;
     }
 
-    std::string messageContent = message.content;
-    messageContent = messageContent.substr(prefixSize);
-
-    std::vector<std::string> argument_vec = SplitString(messageContent, " ");
-    if (!argument_vec.size()) return;
+    // Remove the prefix from the message
+    std::string content = message.content.substr(prefix_size);
+    std::vector<std::string> argument_vec = discpp::SplitString(content, " ");
 
     auto found_command = shard.client.command_handler->registered_commands.find(argument_vec[0]);
     if (found_command == shard.client.command_handler->registered_commands.end()) return;
