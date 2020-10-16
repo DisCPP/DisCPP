@@ -1,10 +1,14 @@
 #include "discpp/snowflake.h"
-#include <stdlib.h>
 #include "discpp/utils.h"
 
-namespace discpp {
+#if(__STDC_WANT_LIB_EXT1__ != 1)
+#define __STDC_WANT_LIB_EXT1__ 1
+#endif
 
-    std::string Snowflake::GetFormattedTimestamp(CommonTimeFormat format, const std::string &format_str, bool localtime) const {
+#include <time.h>
+
+namespace discpp {
+    std::string Snowflake::GetFormattedTimestamp(CommonTimeFormat format, const std::string &format_str, bool localtime_format) const {
         std::string time_format;
         switch (format) {
             case CommonTimeFormat::ISO8601:
@@ -17,7 +21,7 @@ namespace discpp {
                 time_format = "%d-%m-%Y %H:%M:%S";
                 break;
             case CommonTimeFormat::DEFAULT:
-                time_format = (localtime ? "%F @ %r %Z" : "%F @ %r");
+                time_format = (localtime_format ? "%F @ %r %Z" : "%F @ %r");
                 break;
             default:
                 time_format = format_str;
@@ -28,10 +32,18 @@ namespace discpp {
 
         struct tm now{};
 
-        if (localtime) {
+        if (localtime_format) {
+#if defined(__STDC_LIB_EXT1__) || !defined(__linux__)
             localtime_s(&now, &time);
+#else
+            now = *localtime(&time);
+#endif
         } else {
+#if defined(__STDC_LIB_EXT1__) || !defined(__linux__)
             gmtime_s(&now, &time);
+#else
+            now = *gmtime(&time);
+#endif
         }
 
         char buffer[256];

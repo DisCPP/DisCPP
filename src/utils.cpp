@@ -390,7 +390,12 @@ time_t discpp::TimeFromDiscord(const std::string &time) {
 
 std::string discpp::FormatTime(const time_t& time, const std::string& format) {
     struct tm now{};
+#if defined(__STDC_LIB_EXT1__) || !defined(__linux__)
     localtime_s(&now, &time);
+#else
+    now = *localtime(&time);
+#endif
+
     char buffer[256];
     strftime(buffer, sizeof(buffer), format.c_str(), &now);
 
