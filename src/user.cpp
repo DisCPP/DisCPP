@@ -112,7 +112,7 @@ namespace discpp {
 	}
 
     std::string User::GetFormattedCreatedAt() const {
-        return FormatTime(TimeFromSnowflake(id));
+        return id.GetFormattedTimestamp();
     }
 
     std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> User::GetMutualGuilds() {
@@ -134,7 +134,7 @@ namespace discpp {
     }
 
     std::chrono::system_clock::time_point User::GetCreatedAt() const {
-        return std::chrono::system_clock::from_time_t(TimeFromSnowflake(id));
+        return std::chrono::system_clock::from_time_t(id.GetRawTime());
 	}
 
     std::string User::CreateMention() {

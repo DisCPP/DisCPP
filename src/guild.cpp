@@ -1028,11 +1028,11 @@ namespace discpp {
     }
 
     std::string Guild::GetFormattedCreatedAt() const {
-        return FormatTime(TimeFromSnowflake(id));
+        return id.GetFormattedTimestamp();
     }
 
     std::chrono::system_clock::time_point Guild::GetCreatedAt() const {
-        return std::chrono::system_clock::from_time_t(TimeFromSnowflake(id));
+        return std::chrono::system_clock::from_time_t(id.GetRawTime());
     }
 
     void Guild::CacheMember(const std::shared_ptr<discpp::Member>& member) {

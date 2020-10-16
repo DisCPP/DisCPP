@@ -383,19 +383,14 @@ time_t discpp::TimeFromDiscord(const std::string &time) {
     return std::mktime(&tm);
 }
 
-time_t discpp::TimeFromSnowflake(const Snowflake& snow) {
+[[deprecated]] [[maybe_unused]] time_t discpp::TimeFromSnowflake(const Snowflake& snow) {
     constexpr static uint64_t discord_epoch = 1420070400000;
     return (( (uint64_t) snow >> (unsigned int) 22) + discord_epoch) / 1000;
 }
 
 std::string discpp::FormatTime(const time_t& time, const std::string& format) {
     struct tm now{};
-#ifndef __linux__
     localtime_s(&now, &time);
-#else
-    now = *localtime(&time);
-#endif
-
     char buffer[256];
     strftime(buffer, sizeof(buffer), format.c_str(), &now);
 
