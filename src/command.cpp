@@ -20,7 +20,7 @@ discpp::Command::Command(const std::string& name, const std::string& desc, const
 
 void discpp::Command::CommandBody(discpp::Context ctx) {
     if (function == nullptr) {
-        this->parent->client.logger->Info("CommandBody for command '" + this->name + "' is not set!");
+        ctx.shard.client.logger->Info("CommandBody for command '" + this->name + "' is not set!");
     } else {
         function(ctx);
     }

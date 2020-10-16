@@ -18,10 +18,6 @@ namespace discpp {
 	class Client;
 	class Role;
 
-	namespace globals {
-		//inline discpp::Client* client_instance;
-	}
-
 	namespace specials {
 		enum class NitroSubscription : uint8_t {
 			NO_NITRO = 0,

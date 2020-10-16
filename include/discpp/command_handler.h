@@ -10,7 +10,7 @@
 #include <type_traits>
 
 namespace discpp {
-    class CommandHandler : public std::enable_shared_from_this<CommandHandler> {
+    class CommandHandler {
         Client &client;
         friend class Client;
         friend class Command;
