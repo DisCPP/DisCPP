@@ -13,6 +13,30 @@ discpp::Cache::Cache(discpp::Client *client) : client(client) {
 
 }
 
+const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Member>> discpp::Cache::GetMembers() {
+    std::lock_guard<std::mutex> lock_guard(members_mutex);
+
+    return members;
+}
+
+const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> discpp::Cache::GetGuilds() {
+    std::lock_guard<std::mutex> lock_guard(guilds_mutex);
+
+    return guilds;
+}
+
+const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Message>> discpp::Cache::GetMessages() {
+    std::lock_guard<std::mutex> lock_guard(messages_mutex);
+
+    return messages;
+}
+
+const std::unordered_map<discpp::Snowflake, discpp::Channel> discpp::Cache::GetPrivateChannels() {
+    std::lock_guard<std::mutex> lock_guard(channels_mutex);
+
+    return private_channels;
+}
+
 void discpp::Cache::CacheMember(std::shared_ptr<discpp::Guild> guild, std::shared_ptr<discpp::Member> member) {
     std::lock_guard<std::mutex> members_lock_guard(members_mutex);
     std::lock_guard<std::mutex> guilds_lock_guard(guilds_mutex);

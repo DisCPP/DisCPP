@@ -33,6 +33,38 @@ namespace discpp {
         Cache(discpp::Client* client);
 
         /**
+         * @brief Get all members the bot is handling. Do not modify contents since it will break thread-safety!
+         * If you just want to get a member, use discpp::Cache::GetMember().
+         *
+         * @return const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Member>>
+         */
+        const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Member>> GetMembers();
+
+        /**
+         * @brief Get all guilds the bot is in. Do not modify contents since it will break thread-safety!
+         * If you just want to get a guild, use discpp::Cache::GetGuild().
+         *
+         * @return const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>>
+         */
+        const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> GetGuilds();
+
+        /**
+         * @brief Get all messages the bot has seen or requested. Do not modify contents since it will break thread-safety!
+         * If you just want to get a message, use discpp::Cache::GetMessage().
+         *
+         * @return const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Message>>
+         */
+        const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Message>> GetMessages();
+
+        /**
+         * @brief Get all private channels the bot is handling. Do not modify contents since it will break thread-safety!
+         * If you just want to get a private channel, use discpp::Cache::GetPrivateChannel().
+         *
+         * @return const std::unordered_map<discpp::Snowflake, discpp::Channel>
+         */
+        const std::unordered_map<discpp::Snowflake, discpp::Channel> GetPrivateChannels();
+
+        /**
          * @brief Cache a discpp::Member.
          *
          * @param[in] guild The guild that the member is in.
