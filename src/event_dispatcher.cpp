@@ -607,7 +607,11 @@ namespace discpp {
 
         auto it = std::find_if(guild->voice_states.begin(), guild->voice_states.end(), [&](const discpp::VoiceState& v) { return voice_state.user_id == v.user_id; });
         if (it != guild->voice_states.end()) {
-            *it = voice_state;
+            if (voice_state.channel_id == 0) {
+                guild->voice_states.erase(it);
+            } else {
+                *it = voice_state;
+            }
         } else {
             guild->voice_states.emplace_back(voice_state);
         }

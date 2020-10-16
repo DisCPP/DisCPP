@@ -1085,6 +1085,9 @@ namespace discpp {
 
 			std::shared_ptr<discpp::Guild> guild = client->cache->GetGuild(guild_id);
 			member = std::make_shared<discpp::Member>(client, member_json, guild);
+		} else if (guild_id != 0) { // If it doesn't have member field, and has the guild_id field
+            std::shared_ptr<discpp::Guild> guild = client->cache->GetGuild(guild_id);
+            member = guild->GetMember(user_id);
 		}
 		session_id = json["session_id"].GetString();
 		deaf = json["deaf"].GetBool();
