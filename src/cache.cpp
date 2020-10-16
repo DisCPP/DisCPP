@@ -86,9 +86,11 @@ discpp::Channel discpp::Cache::GetChannel(const discpp::Snowflake &id, bool can_
     } catch (const exceptions::DiscordObjectNotFound&) {
         std::lock_guard<std::mutex> guilds_lock_guard(guilds_mutex);
         for (const auto &guild : guilds) {
-            discpp::Channel channel = guild.second->GetChannel(id);
+            try {
+                discpp::Channel channel = guild.second->GetChannel(id);
 
-            if (channel.id != 0) return channel;
+                if (channel.id != 0) return channel;
+            } catch (const exceptions::DiscordObjectNotFound&) { }
         }
 
         if (can_request) {
