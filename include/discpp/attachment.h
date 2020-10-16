@@ -27,6 +27,13 @@ namespace discpp {
          .*/
 		Attachment(rapidjson::Document& json);
 
+		[[nodiscard]] std::string GetFormattedTime(CommonTimeFormat format_type = CommonTimeFormat::DEFAULT, const std::string& format_str = "", bool localtime = false) const noexcept {
+		    return this->id.GetFormattedTimestamp(format_type, format_str, localtime);
+		}
+		[[nodiscard]] time_t GetRawTime() const noexcept {
+		    return this->id.GetRawTime();
+		}
+
 		Snowflake id; /**< id for the current attachment. .*/
 		std::string filename; /**< filename for the current attachment. .*/
 		int size; /**< size of the current attachment. .*/

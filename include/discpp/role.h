@@ -64,6 +64,13 @@ namespace discpp {
          */
         bool IsMentionable() const;
 
+        [[nodiscard]] std::string GetFormattedTime(CommonTimeFormat format_type = CommonTimeFormat::DEFAULT, const std::string& format_str = "", bool localtime = false) const noexcept {
+            return this->id.GetFormattedTimestamp(format_type, format_str, localtime);
+        }
+        [[nodiscard]] time_t GetRawTime() const noexcept {
+            return this->id.GetRawTime();
+        }
+
 		std::string name; /**< Name of the current role. */
 		int color; /**< Color of the current role. */
 		int position; /**< Position of the current role. */
