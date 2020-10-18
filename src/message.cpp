@@ -18,7 +18,7 @@ namespace discpp {
 
 	Message::Message(discpp::Client* client, rapidjson::Document& json) : discpp::DiscordObject(client) {
 		id = GetIDSafely(json, "id");
-		channel = client->cache->GetChannel(SnowflakeFromString(json["channel_id"].GetString()));
+		channel = client->cache->GetChannel(Snowflake(json["channel_id"].GetString()));
 		try {
             guild = channel.GetGuild();
         } catch (const exceptions::DiscordObjectNotFound&) {
@@ -72,7 +72,7 @@ namespace discpp {
                 rapidjson::Document mentioned_role_json;
                 mentioned_role_json.CopyFrom(mentioned_role, mentioned_role_json.GetAllocator());
 
-                mentioned_roles.push_back(SnowflakeFromString(mentioned_role_json.GetString()));
+                mentioned_roles.push_back(Snowflake(mentioned_role_json.GetString()));
             }
         }
 

@@ -7,7 +7,7 @@ namespace discpp {
 	}
 
 	Permissions::Permissions(rapidjson::Document& json) {
-		role_user_id = SnowflakeFromString(json["id"].GetString());
+		role_user_id = Snowflake(json["id"].GetString());
 		permission_type = (json["type"] == "role") ? PermissionType::ROLE : PermissionType::MEMBER;
 		allow_perms = PermissionOverwrite(json["allow"].GetInt());
 		deny_perms = PermissionOverwrite(json["deny"].GetInt());

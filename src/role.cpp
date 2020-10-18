@@ -7,7 +7,7 @@ namespace discpp {
 	}
 
 	Role::Role(discpp::Client* client, rapidjson::Document& json) : DiscordObject(client) {
-		id = SnowflakeFromString(json["id"].GetString());
+		id = Snowflake(json["id"].GetString());
 		name = json["name"].GetString();
 		color = json["color"].GetInt();
         if (GetDataSafely<bool>(json, "hoist")) {

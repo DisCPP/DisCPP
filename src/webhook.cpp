@@ -8,7 +8,7 @@
 
 namespace discpp {
     Webhook::Webhook(rapidjson::Document& json) {
-        id = SnowflakeFromString(json["id"].GetString());
+        id = Snowflake(json["id"].GetString());
         type = static_cast<WebhookType>(json["type"].GetInt());
         guild_id = Snowflake(json["guild_id"].GetString());
         channel_id = Snowflake(json["channel_id"].GetString());

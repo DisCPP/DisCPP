@@ -559,7 +559,7 @@ namespace discpp {
     }
 
     UserRelationship::UserRelationship(discpp::Client* client, rapidjson::Document& json) {
-        id = SnowflakeFromString(json["id"].GetString());
+        id = Snowflake(json["id"].GetString());
         nickname = GetDataSafely<std::string>(json, "nickname");
         type = json["type"].GetInt();
 

@@ -90,8 +90,6 @@ namespace discpp {
 		return nullptr;
 	}
 
-    discpp::Snowflake SnowflakeFromString(const std::string& str);
-
 	inline discpp::Snowflake GetIDSafely(rapidjson::Document& json, const char* value_name) {
         rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
         if (itr != json.MemberEnd()) {
@@ -99,7 +97,7 @@ namespace discpp {
                 rapidjson::Document t_doc;
                 t_doc.CopyFrom(json[value_name], t_doc.GetAllocator());
 
-                return SnowflakeFromString(std::string(t_doc.GetString()));
+                return Snowflake(std::string(t_doc.GetString()));
             }
         }
 
@@ -129,7 +127,7 @@ namespace discpp {
                 rapidjson::Document t_doc;
                 t_doc.CopyFrom(doc[value_name], t_doc.GetAllocator());
 
-                return T(SnowflakeFromString(t_doc.GetString()));
+                return T(Snowflake(t_doc.GetString()));
             }
         }
 

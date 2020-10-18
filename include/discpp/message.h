@@ -44,7 +44,7 @@ namespace discpp {
 
 		MessageApplication() = default;
 		MessageApplication(rapidjson::Document& json) {
-			id = SnowflakeFromString(json["id"].GetString());
+			id = Snowflake(json["id"].GetString());
 			cover_image = GetDataSafely<std::string>(json, "cover_image");
 			description = json["description"].GetString();
 			icon = json["icon"].GetString();
@@ -60,7 +60,7 @@ namespace discpp {
 		MessageReference() = default;
 		MessageReference(rapidjson::Document& json) {
 			message_id = GetIDSafely(json, "message_id");
-			channel_id = SnowflakeFromString(json["channel_id"].GetString());
+			channel_id = Snowflake(json["channel_id"].GetString());
 			guild_id = GetIDSafely(json, "guild_id");
 		}
 	};
@@ -70,8 +70,8 @@ namespace discpp {
 	    class ChannelMention : public DiscordObject {
 	    public:
             ChannelMention(rapidjson::Document& json) {
-                id = SnowflakeFromString(json["id"].GetString());
-                guild_id = SnowflakeFromString(json["id"].GetString());
+                id = Snowflake(json["id"].GetString());
+                guild_id = Snowflake(json["id"].GetString());
                 type = static_cast<discpp::ChannelType>(json["type"].GetInt());
                 name = json["name"].GetString();
             }

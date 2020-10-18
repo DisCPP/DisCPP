@@ -17,7 +17,7 @@ namespace discpp {
 	}
 
 	Channel::Channel(discpp::Client* client, rapidjson::Document& json) : discpp::DiscordObject(client) {
-	    id = SnowflakeFromString(json["id"].GetString());
+	    id = Snowflake(json["id"].GetString());
 		type = static_cast<ChannelType>(json["type"].GetInt());
 		name = GetDataSafely<std::string>(json, "name");
 		topic = GetDataSafely<std::string>(json, "topic");

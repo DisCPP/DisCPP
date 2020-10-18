@@ -473,30 +473,26 @@ char SAFE[256] = {
 
 std::string discpp::URIEncode(const std::string& str) {
     const char DEC2HEX[16 + 1] = "0123456789ABCDEF";
-    const unsigned char * pSrc = (const unsigned char *) str.c_str();
+    const auto* p_src = (const unsigned char *) str.c_str();
     const size_t SRC_LEN = str.length();
-    unsigned char * const pStart = new unsigned char[SRC_LEN * 3];
-    unsigned char * pEnd = pStart;
-    const unsigned char * const SRC_END = pSrc + SRC_LEN;
+    auto* const p_start = new unsigned char[SRC_LEN * 3];
+    unsigned char* p_end = p_start;
+    const unsigned char* const SRC_END = p_src + SRC_LEN;
 
-    for (; pSrc < SRC_END; ++pSrc) {
-        if (SAFE[*pSrc]) {
-            *pEnd++ = *pSrc;
+    for (; p_src < SRC_END; ++p_src) {
+        if (SAFE[*p_src]) {
+            *p_end++ = *p_src;
         } else {
             // escape this char
-            *pEnd++ = '%';
-            *pEnd++ = DEC2HEX[*pSrc >> 4];
-            *pEnd++ = DEC2HEX[*pSrc & 0x0F];
+            *p_end++ = '%';
+            *p_end++ = DEC2HEX[*p_src >> 4];
+            *p_end++ = DEC2HEX[*p_src & 0x0F];
         }
     }
 
-    std::string sResult((char *)pStart, (char *)pEnd);
-    delete [] pStart;
+    std::string sResult((char *)p_start, (char *)p_end);
+    delete [] p_start;
     return sResult;
-}
-
-discpp::Snowflake discpp::SnowflakeFromString(const std::string& str) {
-    return std::stoll(str, nullptr, 10);
 }
 
 void discpp::SplitAvatarHash(const std::string &hash, uint64_t out[2]) {

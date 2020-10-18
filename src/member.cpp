@@ -34,7 +34,7 @@ namespace discpp {
 				rapidjson::Document role_json;
 				role_json.CopyFrom(role, role_json.GetAllocator());
 
-				std::shared_ptr<discpp::Role> r = guild->GetRole(SnowflakeFromString(role_json.GetString()));
+				std::shared_ptr<discpp::Role> r = guild->GetRole(Snowflake(role_json.GetString()));
 				if (r->position > highest_hiearchy) {
 					highest_hiearchy = r->position;
 				}
