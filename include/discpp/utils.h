@@ -20,10 +20,6 @@ namespace discpp {
 	class Client;
 	class Role;
 
-	namespace globals {
-		inline discpp::Client* client_instance;
-	}
-
 	namespace specials {
 		enum class NitroSubscription : uint8_t {
 			NO_NITRO = 0,
@@ -65,6 +61,8 @@ namespace discpp {
 
     enum ImageType : int { AUTO, WEBP, PNG, JPEG, GIF };
 
+	enum ImageSize : int { x128 = 128, x256 = 256, x512 = 512, x1024 = 1024 };
+
     enum ChannelType : int {
         GUILD_TEXT, DM, GUILD_VOICE, GROUP_DM,
         GROUP_CATEGORY, GROUP_NEWS, GROUP_STORE
@@ -94,8 +92,6 @@ namespace discpp {
 		return nullptr;
 	}
 
-    discpp::Snowflake SnowflakeFromString(const std::string& str);
-
 	inline discpp::Snowflake GetIDSafely(rapidjson::Document& json, const char* value_name) {
         rapidjson::Value::ConstMemberIterator itr = json.FindMember(value_name);
         if (itr != json.MemberEnd()) {
@@ -103,7 +99,7 @@ namespace discpp {
                 rapidjson::Document t_doc;
                 t_doc.CopyFrom(json[value_name], t_doc.GetAllocator());
 
-                return SnowflakeFromString(std::string(t_doc.GetString()));
+                return Snowflake(std::string(t_doc.GetString()));
             }
         }
 
@@ -133,15 +129,15 @@ namespace discpp {
                 rapidjson::Document t_doc;
                 t_doc.CopyFrom(doc[value_name], t_doc.GetAllocator());
 
-                return T(SnowflakeFromString(t_doc.GetString()));
+                return T(Snowflake(t_doc.GetString()));
             }
         }
 
         return default_val;
     }
 
-	template<class T>
-	inline T ConstructDiscppObjectFromJson(const rapidjson::Document& doc, const char* value_name, T default_val) {
+    template<class T>
+    inline T ConstructDiscppObjectFromJson(const rapidjson::Document& doc, const char* value_name, T default_val) {
         rapidjson::Value::ConstMemberIterator itr = doc.FindMember(value_name);
         if (itr != doc.MemberEnd()) {
             if (!doc[value_name].IsNull()) {
@@ -149,6 +145,21 @@ namespace discpp {
                 t_doc.CopyFrom(doc[value_name], t_doc.GetAllocator());
 
                 return T(t_doc);
+            }
+        }
+
+        return default_val;
+    }
+
+	template<class T>
+	inline T ConstructDiscppObjectFromJson(discpp::Client* client, const rapidjson::Document& doc, const char* value_name, T default_val) {
+        rapidjson::Value::ConstMemberIterator itr = doc.FindMember(value_name);
+        if (itr != doc.MemberEnd()) {
+            if (!doc[value_name].IsNull()) {
+                rapidjson::Document t_doc;
+                t_doc.CopyFrom(doc[value_name], t_doc.GetAllocator());
+
+                return T(client, t_doc);
             }
         }
 
@@ -188,7 +199,7 @@ namespace discpp {
      *
      * @return int
      */
-	int WaitForRateLimits(const Snowflake& object, const RateLimitBucketType& ratelimit_bucket);
+	int WaitForRateLimits(discpp::Client* client, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket);
 
     /**
      * @brief Handle rate limites
@@ -374,7 +385,7 @@ namespace discpp {
      * ```cpp
      *      std::string raw_text = "{\"content\":\"" + EscapeString(text) + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
      *		cpr::Body body = cpr::Body(raw_text);
-     *		std::unique_ptr<rapidjson::Document> result = SendPostRequest(Endpoint("/channels/%/messages", id), DefaultHeaders({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+     *		std::unique_ptr<rapidjson::Document> result = SendPostRequest(client, Endpoint("/channels/%/messages", id), DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
      * ```
      *
      * @param[in] string The string to escape.

@@ -1,0 +1,72 @@
+sudo: required
+language: cpp
+
+git:
+  submodules: true
+  depth: 5
+
+jobs:
+  include:
+    - os: linux
+      name: Linux Bionic GCC 10
+      compiler: gcc
+      dist: bionic
+      env:
+        - MATRIX_EVAL="CC=gcc-10 && CXX=g++-10"
+      addons:
+        apt:
+          packages: 
+            - g++-10
+            - libcrypto++-dev
+      install: # Install CMake v3.16.0
+        - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+        - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
+        - travis_retry wget --no-check-certificate https://cmake.org/files/v3.16/cmake-3.16.0-Linux-x86_64.tar.gz
+        - tar -xvf cmake-3.16.0-Linux-x86_64.tar.gz > /dev/null
+        - mv cmake-3.16.0-Linux-x86_64 cmake-install
+        - PATH=${DEPS_DIR}/cmake-install:${DEPS_DIR}/cmake-install/bin:$PATH
+        - cd ${TRAVIS_BUILD_DIR}
+    - os: windows
+      name: Windows GCC (v8.1.0)
+      compiler: gcc
+      env:
+        - MATRIX_EVAL="CC=gcc && CXX=c++"
+      install:
+        - choco upgrade cmake.install -y
+        - choco install make openssl -y
+    - os: windows
+      name: Windows LLVM (Clang) (v10.0.0)
+      compiler: clang
+      env:
+        - MATRIX_EVAL="CC=clang && CXX=clang++"
+      install:
+        - choco upgrade cmake.install -y
+        - choco install make llvm openssl -y
+    - os: windows
+      name: Windows VS2017 Build Tools (v15.9.26.0)
+      env:
+        - MATRIX_EVAL="CC=cl && CXX=cl"
+      install:
+          - choco upgrade cmake.install -y
+          - choco install make visualstudio2017buildtools openssl -y
+          - cd "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
+          - ls
+          - vcvarsx86_amd64.bat
+          - cd ${TRAVIS_BUILD_DIR}
+    - os: windows
+      name: Windows VS2019 Build Tools (v16.7.2.0)
+      env:
+        - MATRIX_EVAL="CC=cl && CXX=cl"
+      install:
+          - choco upgrade cmake.install -y
+          - choco install make visualstudio2019buildtools openssl -y
+          - cd "C:\Program Files (x86)\Microsoft Visual Studio\BuildTools\VC\Auxiliary\Build"
+          - ls
+          - vcvarsx86_amd64.bat
+          - cd ${TRAVIS_BUILD_DIR}
+
+script:
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_BUILD_TYPE=Release .. -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=${CXX}
+  - cmake --build . --target discpp

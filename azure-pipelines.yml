@@ -3,72 +3,122 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-variables:
-  #2020.1
-  vcpkgGitRef: 7aebb481085de7387f8a9975652c26f9053f66df
-  vcpkgArgs: rapidjson cpr openssl
-  vcpkgLocation: '$(Build.SourcesDirectory)/vcpkg'
-
 trigger:
 - master
 - development
 
 jobs:
-  - job: Windows_VS2019_x64
+  - job: Windows_VS2019_Build_Tools_v16_7_2_0
     pool:
-      vmImage: 'windows-latest'
+      vmImage: 'windows-2019'
     steps:
-    - script: git submodule update --init
-      displayName: Checkout IXWebsocket submodule.
-    - task: Cache@2
-      displayName: Cache vcpkg
+    - script: git submodule update --recursive --init
+      displayName: Recursively checkout submodules
+    - task: ChocolateyCommand@0
+      displayName: Install OpenSSL via Chocolatey
       inputs:
-        key: 'version2 | $(vcpkgArgs) | "$(vcpkgGitRef)"" | "$(Agent.OS)"'
-        path: '$(vcpkgLocation)'
-    - task: run-vcpkg@0
-      displayName: 'Run vcpkg'
+        command: 'install'
+        installPackageId: 'openssl'
+        installInstallArgs: '-y'
+    - task: ChocolateyCommand@0
+      displayName: Install VS2019 Build Tools (v16.7.2.0) via Chocolatey
       inputs:
-        vcpkgDirectory: '$(vcpkgLocation)'
-        vcpkgArguments: $(vcpkgArgs) --triplet x64-windows
-        vcpkgGitCommitId: $(vcpkgGitRef)
-        vcpkgTriplet: 'x64-windows'
-        vcpkgGitURL: https://github.com/microsoft/vcpkg.git
-    - task: run-cmake@0
-      displayName: 'Run CMake with Ninja'
-      enabled: true
+        command: 'install'
+        installPackageId: 'visualstudio2019buildtools'
+        installInstallArgs: '-y'
+        installParams: '--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --passive'
+        installPackageVersion: '16.7.2.0'
+
+        #extraArguments: '--package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64" --version '
+    #- task: CmdLine@2
+    #  displayName: Refresh Environment Variables
+    #  inputs:
+    #    script: refreshenv
+    #    failOnStderr: true
+    #- task: CmdLine@2
+    #  inputs:
+    #    script: |
+    #      ls 'C:\'
+    #      echo -----------------------------------------------------------------------
+    #      ls 'C:\Program Files (x86)'
+    #      echo -----------------------------------------------------------------------
+    #      ls 'C:\Program Files (x86)\Microsoft Visual Studio'
+    #      echo -----------------------------------------------------------------------
+    #      ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019'
+    #      echo -----------------------------------------------------------------------
+    #      ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools'
+    #      echo -----------------------------------------------------------------------
+    #      ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC'
+    #      echo -----------------------------------------------------------------------
+    #      ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary'
+    #      echo -----------------------------------------------------------------------
+    #      ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build'
+    #      echo -----------------------------------------------------------------------
+    #      ls 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build'
+    #      echo -----------------------------------------------------------------------
+    - task: BatchScript@1
+      displayName: Setup VS Build Tools Environment
       inputs:
-        cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-        cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
-        useVcpkgToolchainFile: true
-        vcpkgTriplet: 'x64-windows'
-        buildDirectory: '$(Build.ArtifactStagingDirectory)'
-        buildWithCMakeArgs: '-- -v'
-  - job: Linux_Latest
+        filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsx86_amd64.bat'
+        modifyEnvironment: true
+        failOnStandardError: true
+    - task: CMake@1
+      displayName: CMake Configure
+      inputs:
+        workingDirectory: 'build'
+        cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=cl -DCMAKE_C_COMPILER=cl'
+    - task: CMake@1
+      displayName: CMake Compile
+      inputs:
+        workingDirectory: 'build'
+        cmakeArgs: '--build . --target discpp'
+  - job: Windows_Clang__v10_0_0
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'windows-2019'
     steps:
-    - script: git submodule update --init
-      displayName: Checkout IXWebsocket submodule.
-    - task: Cache@2
-      displayName: Cache vcpkg
-      inputs:
-        key: 'version2 | $(vcpkgArgs) | "$(vcpkgGitRef)"" | "$(Agent.OS)"'
-        path: '$(vcpkgLocation)'
-    - task: run-vcpkg@0
-      displayName: 'Run vcpkg'
-      inputs:
-        vcpkgDirectory: '$(vcpkgLocation)'
-        vcpkgArguments: $(vcpkgArgs) --triplet x64-linux
-        vcpkgGitCommitId: $(vcpkgGitRef)
-        vcpkgTriplet: 'x64-linux'
-        vcpkgGitURL: https://github.com/microsoft/vcpkg.git
-    - task: run-cmake@0
-      displayName: 'Run CMake'
-      enabled: true
-      inputs:
-        cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-        cmakeListsTxtPath: '$(Build.SourcesDirectory)/CMakeLists.txt'
-        useVcpkgToolchainFile: true
-        vcpkgTriplet: 'x64-linux'
-        buildDirectory: '$(Build.ArtifactStagingDirectory)'
-        buildWithCMakeArgs: '-- -v'
+      - script: git submodule update --recursive --init
+        displayName: Recursively checkout submodules
+      - task: ChocolateyCommand@0
+        displayName: Install Clang via Chocolatey
+        inputs:
+          command: 'install'
+          installPackageId: 'llvm'
+          installInstallArgs: '-y'
+          installPackageVersion: '10.0.0'
+      - task: ChocolateyCommand@0
+        displayName: Install OpenSSL via Chocolatey
+        inputs:
+          command: 'install'
+          installPackageId: 'openssl'
+          installInstallArgs: '-y'
+      #- task: CmdLine@2
+      #  displayName: Refresh Environment Variables
+      #  inputs:
+      #    script: refreshenv
+      #    failOnStderr: true
+      - task: CMake@1
+        displayName: CMake Configure
+        inputs:
+          workingDirectory: 'build'
+          cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_CXX_COMPILER="C:/Program Files/LLVM/bin/clang++.exe" -DCMAKE_C_COMPILER="C:/Program Files/LLVM/bin/clang.exe"'
+      - task: CMake@1
+        displayName: CMake Compile
+        inputs:
+          workingDirectory: 'build'
+          cmakeArgs: '--build . --target discpp'
+  - job: Linux_GCC_v7_5_0
+    pool:
+      vmImage: 'ubuntu-18.04'
+    steps:
+      - script: git submodule update --recursive --init
+        displayName: Recursively checkout submodules
+      - task: CMake@1
+        displayName: CMake Configure
+        inputs:
+          workingDirectory: 'build'
+          cmakeArgs: '.. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"'
+      - task: CMake@1
+        displayName: CMake Compile
+        inputs:
+          workingDirectory: 'build'
+          cmakeArgs: '--build . --target discpp'

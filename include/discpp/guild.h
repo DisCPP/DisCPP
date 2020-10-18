@@ -59,7 +59,7 @@ namespace discpp {
          *
          * @return discpp::GuildInvite, this is a constructor.
          */
-		GuildInvite(rapidjson::Document& json);
+		GuildInvite(discpp::Client* client, rapidjson::Document& json);
 
         std::string code; /**< The invite code (unique ID). */
         std::shared_ptr<discpp::Guild> guild; /**< The guild this invite is for. */
@@ -196,8 +196,16 @@ namespace discpp {
     };
 
 	class Guild : public DiscordObject {
+	    friend class Cache;
+	    friend class Channel;
+	    friend class EventDispatcher;
+	    friend class Message;
 	public:
-		Guild() = default;
+	    Guild() = default;
+		Guild(discpp::Client* client);
+		Guild(const Guild& guild);
+
+        Guild operator=(const Guild& guild);
 
         /**
          * @brief Constructs a discpp::Guild object from an id.
@@ -213,7 +221,7 @@ namespace discpp {
          *
          * @return discpp::Guild, this is a constructor.
          */
-		Guild(const Snowflake& id, bool can_request = false);
+		Guild(discpp::Client* client, const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Constructs a discpp::Guild object by parsing json
@@ -226,7 +234,7 @@ namespace discpp {
          *
          * @return discpp::Guild, this is a constructor.
          */
-		Guild(rapidjson::Document& json);
+		Guild(discpp::Client* client, rapidjson::Document& json);
 
         /**
          * @brief Modify the guild.
@@ -261,14 +269,15 @@ namespace discpp {
          *
          * The first element in the map is the id of the channel, while the second in the channel.
          * This makes it easy to find a channel in the array by using the `std::unordered_map::find()` method.
+         * This will send a REST request to receive, and update the guild's channel list.
          *
          * ```cpp
-         *      std::unordered_map<discpp::Snowflake, discpp::Channel> guild.GetChannels();
+         *      std::unordered_map<discpp::Snowflake, discpp::Channel> guild.UpdateChannels();
          * ```
          *
          * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
          */
-		std::unordered_map<discpp::Snowflake, discpp::Channel> GetChannels();
+		std::unordered_map<discpp::Snowflake, discpp::Channel> UpdateChannels();
 
         /**
          * @brief Gets a list of channel categories in this guild.
@@ -297,11 +306,13 @@ namespace discpp {
         /**
          * @brief Gets a channel in this guild.
          *
+         * If the channel is not found, a DiscordObjectNotFound exception will be thrown.
+         *
          * @param[in] id The id of the channel you want to retrieve
          *
          * @return discpp::Channel
          */
-        discpp::Channel GetChannel(const Snowflake& id) const;
+        discpp::Channel GetChannel(const Snowflake& id);
 
         /**
          * @brief Creates a channel for this Guild.
@@ -505,6 +516,10 @@ namespace discpp {
         /**
          * @brief Retrieve a guild role.
          *
+         * If you set `can_request` to true, and the role is not found in cache, then we will request
+         * the role from the REST API. But if its not true, and its not found, an exception will be
+         * thrown of DiscordObjectNotFound.
+         *
          * ```cpp
          *      discpp::Role new_role = guild.GetRole(638157816325996565)
          * ```
@@ -513,7 +528,7 @@ namespace discpp {
          *
          * @return std::shared_ptr<discpp::Role>
          */
-        std::shared_ptr<discpp::Role> GetRole(const Snowflake& id) const;
+        std::shared_ptr<discpp::Role> GetRole(const Snowflake& id);
 
         /**
          * @brief Create a guild role.
@@ -735,7 +750,9 @@ namespace discpp {
         std::shared_ptr<discpp::Member> RequestMemberIfNotExist(const Snowflake& member_id);
 
         /**
-         * @brief Get all guild emojis.
+         * @brief Request the guild's emojis again.
+         *
+         * Only do this if, for some reason, the emojis have gotten out of sync!
          *
          * ```cpp
          *      std::unordered_map<Snowflake, std::shared_ptr<Emoji>> guild_emojis = guild.GetEmojis();
@@ -743,10 +760,14 @@ namespace discpp {
          *
          * @return std::unordered_map<Snowflake, std::shared_ptr<Emoji>>
          */
-		std::unordered_map<Snowflake, discpp::Emoji> GetEmojis();
+		std::unordered_map<Snowflake, discpp::Emoji> UpdateEmojis();
 
         /**
          * @brief Get a guild emoji.
+         *
+         * If you set `can_request` to true, and the emoji is not found in cache, then we will request
+         * the emoji from the REST API. But if its not true, and its not found, an exception will be
+         * thrown of DiscordObjectNotFound.
          *
          * ```cpp
          *      discpp::Emoji emoji = guild.GetEmoji(685895680115605543);
@@ -756,7 +777,7 @@ namespace discpp {
          *
          * @return Emoji
          */
-        discpp::Emoji GetEmoji(const Snowflake& id) const;
+        discpp::Emoji GetEmoji(const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Create a guild emoji.
@@ -956,6 +977,42 @@ namespace discpp {
          */
         std::chrono::system_clock::time_point GetCreatedAt() const;
 
+        /**
+         * @brief Get a constant map of roles.
+         *
+         * @return std::unordered_map<Snowflake, std::shared_ptr<Role>>
+         */
+        inline std::unordered_map<Snowflake, std::shared_ptr<Role>> GetRoles() const {
+            return roles;
+        }
+
+        /**
+         * @brief Get a constant map of members.
+         *
+         * @return std::unordered_map<Snowflake, std::shared_ptr<Member>>
+         */
+        inline std::unordered_map<Snowflake, std::shared_ptr<Member>> GetMembers() const {
+            return members;
+        }
+
+        /**
+         * @brief Get a constant map of channels.
+         *
+         * @return std::unordered_map<Snowflake, Channel>
+         */
+        inline std::unordered_map<Snowflake, Channel> GetChannels() const {
+            return channels;
+        }
+
+        /**
+         * @brief Get a constant map of emojis.
+         *
+         * @return std::unordered_map<Snowflake, Emoji>
+         */
+        inline std::unordered_map<Snowflake, Emoji> GetEmojis() const {
+            return emojis;
+        }
+
 		std::string name; /**< Guild name. */
 		Snowflake owner_id; /**< ID of the guild owner. */
 		int permissions; /**< Total permissions for the bot in the guild (does not include channel overrides). */
@@ -965,8 +1022,6 @@ namespace discpp {
 		discpp::specials::VerificationLevel verification_level; /**< Verification level required for the guild. */
 		discpp::specials::DefaultMessageNotificationLevel default_message_notifications; /**< Default message notifications level. */
 		discpp::specials::ExplicitContentFilterLevel explicit_content_filter; /**< Explicit content filter level. */
-		std::unordered_map<Snowflake, std::shared_ptr<Role>> roles; /**< Roles in the guild. */
-		std::unordered_map<Snowflake, Emoji> emojis; /**< Custom guild emojis. */
 		std::vector<std::string> features; /**< Enabled guild features. */
 		discpp::specials::MFALevel mfa_level; /**< Required MFA level for the guild. */
 		Snowflake application_id; /**< Application id of the guild creator if it is bot-created. */
@@ -977,9 +1032,6 @@ namespace discpp {
         Snowflake rules_channel_id; /**< The id of the channel where "PUBLIC" guilds display rules and/or guidelines. */
         std::chrono::system_clock::time_point joined_at; /**< When this guild was joined at. */
 		int member_count; /**< Total number of members in this guild. */
-		std::vector<discpp::VoiceState> voice_states; /**< Array of partial voice state objects. */
-		std::unordered_map<Snowflake, std::shared_ptr<Member>> members; /**< Users in the guild. */
-		std::unordered_map<Snowflake, discpp::Channel> channels; /**< Channels in the guild. */
 		int max_presences; /**< The maximum amount of presences for the guild (the default value, currently 25000, is in effect when null is returned). */
 		int max_members; /**< The maximum amount of members for the guild. */
 		std::string vanity_url_code; /**< The vanity url code for the guild. */
@@ -990,7 +1042,22 @@ namespace discpp {
         discpp::Channel public_updates_channel; /**< The channel where admins and moderators of "PUBLIC" guilds receive notices from Discord. */
 		int approximate_member_count; /**< Approximate number of members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
 		int approximate_presence_count; /**< Approximate number of online members in this guild, returned from the GET /guild/<id> endpoint when with_counts is true. */
+        std::vector<discpp::VoiceState> voice_states; /**< Array of partial voice state objects. */
 	private:
+	    void CacheMember(const std::shared_ptr<discpp::Member>& member);
+	    void CacheChannel(const discpp::Channel& channel);
+	    void CacheEmoji(const discpp::Emoji& emoji);
+
+	    std::mutex roles_mutex;
+	    std::mutex emojis_mutex;
+	    std::mutex members_mutex;
+	    std::mutex channels_mutex;
+
+        std::unordered_map<Snowflake, std::shared_ptr<Role>> roles;
+        std::unordered_map<Snowflake, Emoji> emojis;
+        std::unordered_map<Snowflake, std::shared_ptr<Member>> members;
+        std::unordered_map<Snowflake, discpp::Channel> channels;
+
         unsigned char flags = 0b0;
         uint64_t icon_hex[2] = {0, 0};
         uint64_t splash_hex[2] = {0, 0};
@@ -1002,7 +1069,7 @@ namespace discpp {
 
     class VoiceState {
     public:
-        VoiceState() = default;
+        VoiceState(discpp::Client* client);
 
         /**
          * @brief Constructs a discpp::VoiceState object from json.
@@ -1015,7 +1082,7 @@ namespace discpp {
          *
          * @return discpp::VoiceState, this is a constructor.
          */
-        VoiceState(rapidjson::Document& json);
+        VoiceState(discpp::Client* client, rapidjson::Document& json);
 
         Snowflake guild_id; /**< The guild id this voice state is for. */
         Snowflake channel_id; /**< The channel id this user is connected to. */
@@ -1028,6 +1095,8 @@ namespace discpp {
         bool self_mute; /**< Whether this user is locally muted. */
         bool self_stream; /**< Whether this user is streaming using "Go Live". */
         bool suppress; /**< Whether this user is muted by the current user. */
+    private:
+        discpp::Client* client;
     };
 }
 

@@ -46,6 +46,10 @@ namespace discpp {
          *
          * This constructor searches the emoji cache in the guild object to get an emoji object.
          *
+         * If you set `can_request` to true, and the emoji is not found in cache, then we will request
+         * the emoji from the REST API. But if its not true, and its not found, an exception will be
+         * thrown of DiscordObjectNotFound.
+         *
          * ```cpp
          *      discpp::Emoji emoji(guild, 657246994997444614);
          * ```
@@ -55,7 +59,7 @@ namespace discpp {
          *
          * @return discpp::Emoji, this is a constructor.
          */
-        Emoji(const discpp::Guild& guild, const Snowflake& id);
+        Emoji(std::shared_ptr<discpp::Guild> guild, const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Constructs a discpp::Emoji object by parsing json.
@@ -68,7 +72,7 @@ namespace discpp {
          *
          * @return discpp::Emoji, this is a constructor.
          */
-        Emoji(rapidjson::Document& json);
+        Emoji(discpp::Client* client, rapidjson::Document& json);
 
         /**
          * @brief Constructs a discpp::Emoji object with a std::wstring unicode representation.

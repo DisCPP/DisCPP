@@ -17,7 +17,7 @@ namespace discpp {
 	private:
 
 	public:
-		discpp::Client* client;
+		discpp::Shard& shard;
 		std::shared_ptr<discpp::Guild> guild;
         discpp::Channel channel;
         discpp::User user;
@@ -41,7 +41,7 @@ namespace discpp {
          *
          * @return discpp::Context, this is a constructor.
          */
-		Context(discpp::Client* client, discpp::Channel channel, std::shared_ptr<discpp::Member> author, const discpp::Message& message, std::string remainder, std::vector<std::string> arguments);
+		Context(discpp::Shard& shard, discpp::Channel channel, std::shared_ptr<discpp::Member> author, const discpp::Message& message, std::string remainder, std::vector<std::string> arguments);
 
         /**
          * @brief Sends a text message (Shortcut for `channel.send(text, tts, embed, files)`).

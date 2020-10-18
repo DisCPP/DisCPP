@@ -13,24 +13,27 @@
 #include <ixwebsocket/IXNetSystem.h>
 
 std::string discpp::GetOsName() {
-	#ifdef _WIN32
-		return "Windows 32-bit";
-	#elif _WIN64
+	#ifdef _WIN64
 		return "Windows 64-bit";
-        #elif __APPLE__ || __MACH__
-                return "Mac OSX";
-        #elif __linux__
-            return "Linux";
-        #elif __FreeBSD__
-            return "FreeBSD";
-        #elif __unix || __unix__
-            return "Unix";
-        #else
-            return "Other";
+	#elif _WIN32
+		return "Windows 32-bit";
+    #elif __APPLE__ || __MACH__
+		return "Mac OSX";
+    #elif __linux__
+        return "Linux";
+    #elif __FreeBSD__
+        return "FreeBSD";
+    #elif __unix || __unix__
+        return "Unix";
+    #else
+        return "Other";
 	#endif
 }
 
 // @TODO: Test if the json document type returned is what its supposed to be, like an array or object.
+std::unique_ptr<rapidjson::Document> discpp::HandleResponse(discpp::Client* client, cpr::Response& response, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
+    if (client) {
+        client->logger->Debug("Received requested payload: " + response.text);
 std::unique_ptr<rapidjson::Document> discpp::HandleResponse(ix::HttpResponsePtr response, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket) {
     if (globals::client_instance != nullptr) {
         globals::client_instance->logger->Debug("Received requested payload: " + response->payload);
@@ -96,10 +99,10 @@ std::unique_ptr<rapidjson::Document> discpp::HandleResponse(ix::HttpResponsePtr 
 }
 
 std::string CprBodyToString(const cpr::Body& body) {
-	if (body.empty()) {
+	if (body.str().empty()) {
 		return "Empty";
 	}
-	
+
 	return body;
 }
 
@@ -344,7 +347,7 @@ std::string discpp::EscapeString(const std::string& string) {
 	return tmp;
 }
 
-int discpp::WaitForRateLimits(const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
+int discpp::WaitForRateLimits(discpp::Client* client, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
 
 	RateLimit* rlmt = nullptr;
 
@@ -366,18 +369,26 @@ int discpp::WaitForRateLimits(const Snowflake& object, const RateLimitBucketType
 			rlmt = &global_ratelimit;
 			break;
 		default:
-			globals::client_instance->logger->Error(LogTextColor::RED + "RateLimitBucketType is invalid!");
+		    if (client) {
+                client->logger->Error(LogTextColor::RED + "RateLimitBucketType is invalid!");
+            }
 			throw std::runtime_error("RateLimitBucketType is invalid!");
 			break;
 		}
 	}
 
 	if (rlmt->remaining_limit == 0) {
-		double milisecond_time = rlmt->ratelimit_reset * 1000 - time(NULL) * 1000;
+		double millisecond_time = rlmt->ratelimit_reset * 1000 - time(NULL) * 1000;
 
-		if (milisecond_time > 0) {
-			globals::client_instance->logger->Debug("Rate limit wait time: " + std::to_string(milisecond_time) + " milliseconds");
-			std::this_thread::sleep_for(std::chrono::milliseconds((int)milisecond_time));
+		if (millisecond_time > client->config.milli_sec_max_ratelimit) {
+            throw exceptions::RatelimitTooLong("Ratelimit hit the max ratelimit", (int) millisecond_time);
+		}
+
+		if (millisecond_time > 0) {
+		    if (client) {
+                client->logger->Debug("Rate limit wait time: " + std::to_string(millisecond_time) + " milliseconds");
+            }
+			std::this_thread::sleep_for(std::chrono::milliseconds((int) millisecond_time));
 		}
 	}
 	return 0;
@@ -419,50 +430,20 @@ void discpp::HandleRateLimits(ix::WebSocketHttpHeaders headers, const Snowflake&
 }
 
 time_t discpp::TimeFromDiscord(const std::string &time) {
-    int year, month, day, hour, minute;
-    int timezone_hr = 0, timezone_min = 0;
-    float second;
-    if (6 < sscanf(time.c_str(), "%d-%d-%dT%d:%d:%f%d:%d", &year, &month, &day, &hour, &minute, &second, &timezone_hr, &timezone_min)) {
-        if (timezone_hr < 0) {
-            timezone_min = -timezone_min;
-        }
-
-        hour += timezone_hr;
-        minute += timezone_hr;
-
-        struct tm t{};
-        t.tm_year = year - 1900;
-        t.tm_mon = month - 1;
-        t.tm_mday = day;
-        t.tm_hour = hour;
-        t.tm_min = minute;
-        t.tm_sec = (int) second;
-
-        time_t utc_time = mktime(&t);
-        struct tm utc_buf;
-
-#ifndef __linux__
-        localtime_s(&utc_buf, &utc_time);
-#else
-        utc_buf = *localtime(&utc_time);
-#endif
-
-        discpp::globals::client_instance->logger->Debug("Parsed time: " + FormatTime(utc_time));
-
-        return utc_time;
-    }
-
-    throw std::runtime_error("Failed to parse time");
+    std::tm tm = {};
+    std::istringstream ss(time);
+    ss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%S");
+    return std::mktime(&tm);
 }
 
-time_t discpp::TimeFromSnowflake(const Snowflake& snow) {
+[[deprecated]] [[maybe_unused]] time_t discpp::TimeFromSnowflake(const Snowflake& snow) {
     constexpr static uint64_t discord_epoch = 1420070400000;
-    return ((snow >> 22) + discord_epoch) / 1000;
+    return (( (uint64_t) snow >> (unsigned int) 22) + discord_epoch) / 1000;
 }
 
 std::string discpp::FormatTime(const time_t& time, const std::string& format) {
     struct tm now{};
-#ifndef __linux__
+#if defined(__STDC_LIB_EXT1__) || !defined(__linux__)
     localtime_s(&now, &time);
 #else
     now = *localtime(&time);
@@ -545,30 +526,26 @@ char SAFE[256] = {
 
 std::string discpp::URIEncode(const std::string& str) {
     const char DEC2HEX[16 + 1] = "0123456789ABCDEF";
-    const unsigned char * pSrc = (const unsigned char *) str.c_str();
+    const auto* p_src = (const unsigned char *) str.c_str();
     const size_t SRC_LEN = str.length();
-    unsigned char * const pStart = new unsigned char[SRC_LEN * 3];
-    unsigned char * pEnd = pStart;
-    const unsigned char * const SRC_END = pSrc + SRC_LEN;
+    auto* const p_start = new unsigned char[SRC_LEN * 3];
+    unsigned char* p_end = p_start;
+    const unsigned char* const SRC_END = p_src + SRC_LEN;
 
-    for (; pSrc < SRC_END; ++pSrc) {
-        if (SAFE[*pSrc]) {
-            *pEnd++ = *pSrc;
+    for (; p_src < SRC_END; ++p_src) {
+        if (SAFE[*p_src]) {
+            *p_end++ = *p_src;
         } else {
             // escape this char
-            *pEnd++ = '%';
-            *pEnd++ = DEC2HEX[*pSrc >> 4];
-            *pEnd++ = DEC2HEX[*pSrc & 0x0F];
+            *p_end++ = '%';
+            *p_end++ = DEC2HEX[*p_src >> 4];
+            *p_end++ = DEC2HEX[*p_src & 0x0F];
         }
     }
 
-    std::string sResult((char *)pStart, (char *)pEnd);
-    delete [] pStart;
+    std::string sResult((char *)p_start, (char *)p_end);
+    delete [] p_start;
     return sResult;
-}
-
-discpp::Snowflake discpp::SnowflakeFromString(const std::string& str) {
-    return std::stoll(str, nullptr, 10);
 }
 
 void discpp::SplitAvatarHash(const std::string &hash, uint64_t out[2]) {

@@ -9,9 +9,13 @@
 namespace discpp {
 	class GuildCreateEvent : public Event {
 	public:
-		inline GuildCreateEvent(std::shared_ptr<discpp::Guild> guild) : guild(guild) {}
+		inline GuildCreateEvent(Shard& shard, std::shared_ptr<discpp::Guild> guild) : Event(shard), guild(guild) {}
 
         std::shared_ptr<discpp::Guild> guild;
+
+        virtual int GetEventType() const override {
+            return 8;
+        }
 	};
 }
 

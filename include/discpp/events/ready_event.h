@@ -5,24 +5,22 @@
 
 namespace discpp {
 	class ReadyEvent : public Event {
-	private:
-        //std::shared_ptr<rapidjson::Document> payload;
-
 	public:
-        ReadyEvent(const discpp::ReadyEvent& ready_event) {
+        /*ReadyEvent(const discpp::ReadyEvent& ready_event) : Event(ready_event) {
             payload.SetObject();
             payload.CopyFrom(ready_event.payload, payload.GetAllocator());
-        }
+        }*/
 
-		inline ReadyEvent(rapidjson::Document& json) {
-		    /*payload->SetObject();
-		    payload->CopyFrom(json, payload->GetAllocator());*/
-
-            payload.SetObject();
+		inline ReadyEvent(Shard& shard, rapidjson::Document& json) : Event(shard) {
+		    payload.SetObject();
             payload.CopyFrom(json, payload.GetAllocator());
 		}
 
         rapidjson::Document payload;
+
+        virtual int GetEventType() const override {
+            return 1;
+        }
 	};
 }
 

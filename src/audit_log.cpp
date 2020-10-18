@@ -11,7 +11,7 @@
 #include "role.h"
 
 // This is extremely ugly and probably slow, maybe theres a way we could trim this down?
-discpp::AuditLogChangeKey GetKey(const std::string& key, rapidjson::Document& j) {
+discpp::AuditLogChangeKey GetKey(discpp::Client* client, const std::string& key, rapidjson::Document& j) {
 	discpp::AuditLogChangeKey a_key;
 
 	discpp::AuditLogKey keyval = discpp::StrToKey(key);
@@ -27,13 +27,13 @@ discpp::AuditLogChangeKey GetKey(const std::string& key, rapidjson::Document& j)
 	        a_key.splash_hash = j.GetString();
 	        break;
 	    case discpp::AuditLogKey::OWNER_ID:
-            a_key.owner_id = discpp::SnowflakeFromString(j.GetString());
+            a_key.owner_id = discpp::Snowflake(j.GetString());
 	        break;
 	    case discpp::AuditLogKey::REGION:
             a_key.region = j.GetString();
 	        break;
 	    case discpp::AuditLogKey::AFK_CHANNEL_ID:
-            a_key.afk_channel_id = discpp::SnowflakeFromString(j.GetString());
+            a_key.afk_channel_id = discpp::Snowflake(j.GetString());
 	        break;
 	    case discpp::AuditLogKey::AFK_TIMEOUT:
             a_key.afk_timeout = j.GetInt();
@@ -58,7 +58,7 @@ discpp::AuditLogChangeKey GetKey(const std::string& key, rapidjson::Document& j)
                 rapidjson::Document role_json(rapidjson::kObjectType);
                 role_json.CopyFrom(role, role_json.GetAllocator());
 
-                a_key.roles_add.push_back(discpp::Role(role_json));
+                a_key.roles_add.push_back(discpp::Role(client, role_json));
             }
 	        break;
 	    case discpp::AuditLogKey::REMOVE:
@@ -66,7 +66,7 @@ discpp::AuditLogChangeKey GetKey(const std::string& key, rapidjson::Document& j)
                 rapidjson::Document role_json(rapidjson::kObjectType);
                 role_json.CopyFrom(role, role_json.GetAllocator());
 
-                a_key.roles_remove.push_back(discpp::Role(role_json));
+                a_key.roles_remove.push_back(discpp::Role(client, role_json));
             }
 	        break;
 	    case discpp::AuditLogKey::PRUNE_DELETE_DAYS:
@@ -76,10 +76,10 @@ discpp::AuditLogChangeKey GetKey(const std::string& key, rapidjson::Document& j)
             a_key.widget_enabled = j.GetBool();
 	        break;
 	    case discpp::AuditLogKey::WIDGET_CHANNEL_ID:
-            a_key.widget_channel_id = discpp::SnowflakeFromString(j.GetString());
+            a_key.widget_channel_id = discpp::Snowflake(j.GetString());
 	        break;
 	    case discpp::AuditLogKey::SYSTEM_CHANNEL_ID:
-            a_key.system_channel_id = discpp::SnowflakeFromString(j.GetString());
+            a_key.system_channel_id = discpp::Snowflake(j.GetString());
 	        break;
 	    case discpp::AuditLogKey::POSITION:
             a_key.position = j.GetInt();
@@ -102,7 +102,7 @@ discpp::AuditLogChangeKey GetKey(const std::string& key, rapidjson::Document& j)
             a_key.nsfw = j.GetBool();
 	        break;
 	    case discpp::AuditLogKey::APPLICATION_ID:
-            a_key.application_id = discpp::SnowflakeFromString(j.GetString());
+            a_key.application_id = discpp::Snowflake(j.GetString());
 	        break;
 	    case discpp::AuditLogKey::RATE_LIMIT_PER_USER:
             a_key.rate_limit_per_user = j.GetInt();
@@ -129,10 +129,10 @@ discpp::AuditLogChangeKey GetKey(const std::string& key, rapidjson::Document& j)
             a_key.code = j.GetString();
 	        break;
 	    case discpp::AuditLogKey::CHANNEL_ID:
-            a_key.channel_id = discpp::SnowflakeFromString(j.GetString());
+            a_key.channel_id = discpp::Snowflake(j.GetString());
 	        break;
 	    case discpp::AuditLogKey::INVITER_ID:
-            a_key.inviter_id = discpp::SnowflakeFromString(j.GetString());
+            a_key.inviter_id = discpp::Snowflake(j.GetString());
 	        break;
 	    case discpp::AuditLogKey::MAX_USES:
             a_key.max_uses = j.GetInt();
@@ -158,7 +158,7 @@ discpp::AuditLogChangeKey GetKey(const std::string& key, rapidjson::Document& j)
         case discpp::AuditLogKey::AVATAR_HASH:
             break;
         case discpp::AuditLogKey::ID:
-            a_key.id = discpp::SnowflakeFromString(j.GetString());
+            a_key.id = discpp::Snowflake(j.GetString());
             break;
         case discpp::AuditLogKey::TYPE:
             a_key.type = j.GetString();
@@ -177,17 +177,17 @@ discpp::AuditLogChangeKey GetKey(const std::string& key, rapidjson::Document& j)
 	return a_key;
 }
 
-discpp::AuditLogChange::AuditLogChange(rapidjson::Document& json) {
+discpp::AuditLogChange::AuditLogChange(discpp::Client* client, rapidjson::Document& json) {
 	key = json["key"].GetString();
 
 	if (ContainsNotNull(json, "new_value")) {
 	    std::unique_ptr<rapidjson::Document> new_value_json = GetDocumentInsideJson(json, "new_value");
-		new_value = GetKey(key, *new_value_json);
+		new_value = GetKey(client, key, *new_value_json);
 	}
 
     if (ContainsNotNull(json, "old_value")) {
         std::unique_ptr<rapidjson::Document> old_value_json = GetDocumentInsideJson(json, "old_value");
-        old_value = GetKey(key, *old_value_json);
+        old_value = GetKey(client, key, *old_value_json);
     }
 }
 
@@ -196,10 +196,10 @@ discpp::AuditEntryOptions::AuditEntryOptions(rapidjson::Document& json) {
 	members_removed = GetDataSafely<std::string>(json, "members_removed");
 	// @TODO: Make channel valid.
 	if (ContainsNotNull(json, "channel_id")) {
-        channel_id = discpp::SnowflakeFromString(json["channel_id"].GetString());
+        channel_id = discpp::Snowflake(json["channel_id"].GetString());
 	}
     if (ContainsNotNull(json, "message_id")) {
-        message_id = discpp::SnowflakeFromString(json["message_id"].GetString());
+        message_id = discpp::Snowflake(json["message_id"].GetString());
     }
 	count = GetDataSafely<std::string>(json, "count");
 	id = GetIDSafely(json, "id");
@@ -207,24 +207,24 @@ discpp::AuditEntryOptions::AuditEntryOptions(rapidjson::Document& json) {
 	role_name = GetDataSafely<std::string>(json, "role_name");
 }
 
-discpp::AuditLogEntry::AuditLogEntry(rapidjson::Document& json) {
+discpp::AuditLogEntry::AuditLogEntry(discpp::Client* client, rapidjson::Document& json) {
     target_id = GetDataSafely<std::string>(json, "target_id");
     if (ContainsNotNull(json, "changes")) {
         for (auto const& change : json["changes"].GetArray()) {
             rapidjson::Document change_json(rapidjson::kObjectType);
             change_json.CopyFrom(change, change_json.GetAllocator());
 
-            changes.push_back(discpp::AuditLogChange(change_json));
+            changes.push_back(discpp::AuditLogChange(client, change_json));
         }
     }
-    user = discpp::User(SnowflakeFromString(json["user_id"].GetString()));
-    id = SnowflakeFromString(json["id"].GetString());
+    user = discpp::User(client, Snowflake(json["user_id"].GetString()));
+    id = Snowflake(json["id"].GetString());
     action_type = static_cast<discpp::AuditLogEvent>(json["action_type"].GetInt());
     options = ConstructDiscppObjectFromJson(json, "options", discpp::AuditEntryOptions());
     reason = GetDataSafely<std::string>(json, "reason");
 }
 
-discpp::AuditLog::AuditLog(rapidjson::Document& json) {
+discpp::AuditLog::AuditLog(discpp::Client* client, rapidjson::Document& json) {
     for (auto const& webhook : json["webhooks"].GetArray()) {
         rapidjson::Document webhook_json(rapidjson::kObjectType);
         webhook_json.CopyFrom(webhook, webhook_json.GetAllocator());
@@ -236,14 +236,14 @@ discpp::AuditLog::AuditLog(rapidjson::Document& json) {
         rapidjson::Document user_json(rapidjson::kObjectType);
         user_json.CopyFrom(user, user_json.GetAllocator());
 
-        users.push_back(discpp::User(user_json));
+        users.push_back(discpp::User(client, user_json));
     }
 
     for (auto const& audit_log_entry : json["audit_log_entries"].GetArray()) {
         rapidjson::Document audit_log_entry_json(rapidjson::kObjectType);
         audit_log_entry_json.CopyFrom(audit_log_entry, audit_log_entry_json.GetAllocator());
 
-        audit_log_entries.push_back(discpp::AuditLogEntry(audit_log_entry_json));
+        audit_log_entries.push_back(discpp::AuditLogEntry(client, audit_log_entry_json));
     }
 
     for (auto const& integration : json["integrations"].GetArray()) {

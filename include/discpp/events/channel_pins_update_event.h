@@ -9,9 +9,13 @@
 namespace discpp {
 	class ChannelPinsUpdateEvent : public Event {
 	public:
-		inline ChannelPinsUpdateEvent(discpp::Channel channel) : channel(channel) {}
+		inline ChannelPinsUpdateEvent(Shard& shard, discpp::Channel channel) : Event(shard), channel(channel) {}
 
 		discpp::Channel channel;
+
+        virtual int GetEventType() const override {
+            return 4;
+        }
 	};
 }
 

@@ -2,18 +2,18 @@
 #include "client.h"
 #include "guild.h"
 #include "member.h"
+#include "cache.h"
+#include "exceptions.h"
 
 #include <iomanip>
+#include <discpp/exceptions.h>
 
 namespace discpp {
-	User::User(const Snowflake& id) : discpp::DiscordObject(id) {
-		auto it = discpp::globals::client_instance->cache.members.find(id);
-		if (it != discpp::globals::client_instance->cache.members.end()) {
-			*this = it->second->user;
-		}
+	User::User(discpp::Client* client, const Snowflake& id, bool can_request) : discpp::DiscordObject(client, id) {
+        *this = client->cache->GetUser(id, can_request);
 	}
 
-	User::User(rapidjson::Document& json) {
+	User::User(discpp::Client* client, rapidjson::Document& json) : discpp::DiscordObject(client) {
 		id = GetIDSafely(json, "id");
 		username = GetDataSafely<std::string>(json, "username");
 		discriminator = (unsigned short) strtoul(GetDataSafely<std::string>(json, "discriminator").c_str(), nullptr, 10);
@@ -62,14 +62,34 @@ namespace discpp {
 
 	discpp::Channel User::CreateDM() {
 		cpr::Body body("{\"recipient_id\": \"" + std::to_string(id) + "\"}");
-		std::unique_ptr<rapidjson::Document> result = SendPostRequest(Endpoint("/users/@me/channels"), DefaultHeaders({ {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
+        discpp::Client* client = GetClient();
+		std::unique_ptr<rapidjson::Document> result = SendPostRequest(client, Endpoint("/users/@me/channels"), DefaultHeaders(client, { {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
 
-		return discpp::Channel(*result);
+		return discpp::Channel(client, *result);
 	}
 	
-	std::string User::GetAvatarURL(const ImageType& img_type) const {
+	std::string User::GetAvatarURL(const ImageType& img_type, const ImageSize img_size) const {
+	    std::string size = "?size=";
+
+	    switch (img_size) {
+	        case ImageSize::x128:
+	            size += "128";
+	            break;
+	        case ImageSize::x256:
+	            size += "256";
+	            break;
+	        case ImageSize::x512:
+	            size += "512";
+	            break;
+	        case ImageSize::x1024:
+	            size += "1024";
+	            break;
+	        default:
+	            break;
+	    }
+
         if (avatar_hex[0] == 0) {
-			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(discriminator % 5) + ".png");
+			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(discriminator % 5) + ".png" + size);
 		} else {
 		    std::string avatar_str = CombineAvatarHash(avatar_hex);
 
@@ -78,25 +98,43 @@ namespace discpp {
 			if (tmp == ImageType::AUTO) tmp = is_avatar_gif ? ImageType::GIF : ImageType::PNG;
 			switch (tmp) {
 			case ImageType::GIF:
-				return cpr::Url(url + ".gif");
+				return cpr::Url(url + ".gif" + size);
 			case ImageType::JPEG:
-				return cpr::Url(url + ".jpeg");
+				return cpr::Url(url + ".jpeg" + size);
 			case ImageType::PNG:
-				return cpr::Url(url + ".png");
+				return cpr::Url(url + ".png" + size);
 			case ImageType::WEBP:
-				return cpr::Url(url + ".webp");
+				return cpr::Url(url + ".webp" + size);
 			default:
-				return cpr::Url(url);
+				return cpr::Url(url + size);
 			}
 		}
 	}
 
     std::string User::GetFormattedCreatedAt() const {
-        return FormatTime(TimeFromSnowflake(id));
+        return id.GetFormattedTimestamp();
+    }
+
+    std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> User::GetMutualGuilds() {
+         std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> map;
+
+         discpp::Client* client = GetClient();
+
+         std::lock_guard<std::mutex> guilds_guard(client->cache->guilds_mutex);
+         for (auto const& guild : client->cache->guilds) {
+             try {
+                 guild.second->GetMember(this->id);
+                 map.emplace(guild.first, guild.second);
+             } catch (const discpp::exceptions::DiscordObjectNotFound&) {
+
+             }
+         }
+
+         return map;
     }
 
     std::chrono::system_clock::time_point User::GetCreatedAt() const {
-        return std::chrono::system_clock::from_time_t(TimeFromSnowflake(id));
+        return std::chrono::system_clock::from_time_t(id.GetRawTime());
 	}
 
     std::string User::CreateMention() {
@@ -104,11 +142,11 @@ namespace discpp {
     }
 
     bool User::IsBot() const {
-	    return (flags & 0b1) == 0b1;
+	    return flags & 1;
     }
 
     bool User::IsSystemUser() {
-        return (flags & 0b10) == 0b10;
+        return flags & 2;
     }
 
     std::string User::GetDiscriminator() const {
@@ -116,5 +154,41 @@ namespace discpp {
         stream << std::setfill('0') << std::setw(4) << discriminator;
 
         return stream.str();
+    }
+
+    void User::Block() {
+        discpp::Client* client = GetClient();
+        if (client->client_user.IsBot()) {
+            throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+        } else {
+            std::unique_ptr<rapidjson::Document> result = SendPutRequest(client, Endpoint("users/@me/relationships/" + std::to_string(this->id)), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL, "{\"type\":2}");
+        }
+    }
+
+    void User::Unblock() {
+        discpp::Client* client = GetClient();
+        if(client->client_user.IsBot()) {
+            throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+        } else {
+            std::unique_ptr<rapidjson::Document> result = SendDeleteRequest(client, Endpoint("users/@me/relationships/" + std::to_string(this->id)), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL);
+        }
+	}
+
+    void User::AddFriend() {
+        discpp::Client* client = GetClient();
+        if (!client->client_user.IsBot()) {
+            throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+        } else {
+            std::unique_ptr<rapidjson::Document> result = SendPutRequest(client, Endpoint("users/@me/relationships/" + std::to_string(this->id)), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL);
+        }
+    }
+
+    void User::RemoveFriend() {
+        discpp::Client* client = GetClient();
+        if(client->client_user.IsBot()) {
+            throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
+        } else {
+            std::unique_ptr<rapidjson::Document> result = SendDeleteRequest(client, Endpoint("users/@me/relationships/" + std::to_string(this->id)), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL);
+        }
     }
 }

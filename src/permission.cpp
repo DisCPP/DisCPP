@@ -7,7 +7,7 @@ namespace discpp {
 	}
 
 	Permissions::Permissions(rapidjson::Document& json) {
-		role_user_id = SnowflakeFromString(json["id"].GetString());
+		role_user_id = Snowflake(json["id"].GetString());
 		permission_type = (json["type"] == "role") ? PermissionType::ROLE : PermissionType::MEMBER;
 		allow_perms = PermissionOverwrite(json["allow"].GetInt());
 		deny_perms = PermissionOverwrite(json["deny"].GetInt());
@@ -17,7 +17,7 @@ namespace discpp {
 		std::string str_type = (permission_type == PermissionType::ROLE) ? "role" : "member";
 
         rapidjson::Document json;
-        json.AddMember("id", role_user_id, json.GetAllocator());
+        json.AddMember("id", (uint64_t) role_user_id, json.GetAllocator());
         json.AddMember("type", str_type, json.GetAllocator());
         json.AddMember("allow", allow_perms.value, json.GetAllocator());
         json.AddMember("deny", deny_perms.value, json.GetAllocator());

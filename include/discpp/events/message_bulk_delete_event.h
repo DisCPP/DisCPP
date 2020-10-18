@@ -12,9 +12,13 @@
 namespace discpp {
 	class MessageBulkDeleteEvent : public Event {
 	public:
-		inline MessageBulkDeleteEvent(std::vector<discpp::Message> messages) : messages(messages) {}
+		inline MessageBulkDeleteEvent(Shard& shard, std::vector<discpp::Message> messages) : Event(shard), messages(messages) {}
 
 		std::vector<discpp::Message> messages;
+
+        virtual int GetEventType() const override {
+            return 21;
+        }
 	};
 }
 

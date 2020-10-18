@@ -9,9 +9,13 @@
 namespace discpp {
 	class GuildRoleUpdateEvent : public Event {
 	public:
-		inline GuildRoleUpdateEvent(discpp::Role role) : role(role) {}
+		inline GuildRoleUpdateEvent(Shard& shard, discpp::Role role) : Event(shard), role(role) {}
 
 		discpp::Role role;
+
+        virtual int GetEventType() const override {
+            return 18;
+        }
 	};
 }
 

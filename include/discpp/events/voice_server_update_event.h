@@ -7,9 +7,13 @@
 namespace discpp {
 	class VoiceServerUpdateEvent : public Event {
 	public:
-		inline VoiceServerUpdateEvent(rapidjson::Document& json) : json(json) { }
+		inline VoiceServerUpdateEvent(Shard& shard, rapidjson::Document& json) : Event(shard), json(json) { }
 
 		rapidjson::Document& json;
+
+        virtual int GetEventType() const override {
+            return 33;
+        }
 	};
 }
 

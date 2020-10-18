@@ -7,8 +7,10 @@
 namespace discpp {
 	class Channel;
 	class Integration;
+	class Guild;
 
 	class User : public DiscordObject {
+	    friend class Member; // We need this so discpp::Member can use the client instance.
 	public:
         enum class ConnectionVisibility : int {
             NONE = 0,
@@ -49,16 +51,21 @@ namespace discpp {
          * @brief Constructs a discpp::User object from an id.
          *
          * This constructor searches the user cache to get a user object.
+         * If you set `can_request` to true, and the user is not found in the member cache, then we will request
+         * the user from the REST API. But if its not true, and its not found, an exception will be
+         * thrown of DiscordObjectNotFound.
          *
          * ```cpp
-         *      discpp::User user(583251190591258624);
+         *      discpp::User user(client, 583251190591258624);
          * ```
          *
+         * @param[in] client The client.
          * @param[in] id The id of the user.
+         * @param[in] can_request Can we request the user from REST?
          *
          * @return discpp::User, this is a constructor.
          */
-		User(const Snowflake& id);
+		User(discpp::Client* client, const Snowflake& id, bool can_request = false);
 
         /**
          * @brief Constructs a discpp::User object by parsing json.
@@ -67,11 +74,12 @@ namespace discpp {
          *      discpp::User user(json);
          * ```
          *
+         * @param[in] client The client.
          * @param[in] json The json that makes up of user object.
          *
          * @return discpp::User, this is a constructor.
          */
-		User(rapidjson::Document& json);
+		User(discpp::Client* client, rapidjson::Document& json);
 
         /**
          * @brief Create a DM channel with this user.
@@ -95,7 +103,7 @@ namespace discpp {
          *
          * @return std::string
          */
-        std::string GetAvatarURL(const ImageType& img_type = ImageType::AUTO) const;
+        std::string GetAvatarURL(const ImageType& img_type = ImageType::AUTO, const ImageSize img_size = ImageSize::x128) const;
 
         /**
          * @brief Gets the formatted created at time and date for this user.
@@ -105,6 +113,13 @@ namespace discpp {
          * @return std::string
          */
 		std::string GetFormattedCreatedAt() const;
+
+        /**
+         * @brief Returns mutual guilds
+         *
+         * @return std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>>
+         */
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> GetMutualGuilds();
 
         /**
          * @brief Gets the created at time and date for this guild.
@@ -144,6 +159,11 @@ namespace discpp {
          * @return bool
          */
 		bool IsSystemUser();
+
+		void Block();
+		void Unblock();
+		void AddFriend();
+		void RemoveFriend();
 
 		std::string username; /**< The user's username, not unique across the platform. */
 		// int public_flags; // Is this ever needed?

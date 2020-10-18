@@ -3,7 +3,7 @@
 
 namespace discpp {
 	discpp::Attachment::Attachment(rapidjson::Document& json) {
-		id = SnowflakeFromString(json["id"].GetString());
+		id = Snowflake(json["id"].GetString());
 		filename = json["filename"].GetString();
 		size = json["size"].GetInt();
 		url = json["url"].GetString();

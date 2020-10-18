@@ -1,0 +1,112 @@
+on: [push, pull_request]
+name: Linux CI
+
+env:
+  BUILD_TYPE: Debug
+
+jobs:
+  ubuntu-gcc-9-3:
+    name: 18.04 GCC v9.3.0
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout submodules and DisC++
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: Create Build Environment
+        shell: bash
+        run: cmake -E make_directory ${{runner.workspace}}/build
+
+      - name: CMake Configure
+        shell: bash
+        working-directory: ${{runner.workspace}}/build
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=gcc-9 -DCMAKE_CXX_COMPILER=g++-9
+
+      - name: CMake Build
+        working-directory: ${{runner.workspace}}/build
+        shell: bash
+        run: cmake --build ${{runner.workspace}}/build
+  ubuntu-gcc-10-0:
+    name: 18.04 GCC v10.0.0
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout submodules and DisC++
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: Create Build Environment
+        shell: bash
+        run: cmake -E make_directory ${{runner.workspace}}/build
+
+      - name: Install GCC 10 From apt
+        shell: bash
+        run: |
+          sudo apt update
+          sudo apt install g++-10 -y
+
+      - name: CMake Configure
+        shell: bash
+        working-directory: ${{runner.workspace}}/build
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
+
+      - name: CMake Build
+        working-directory: ${{runner.workspace}}/build
+        shell: bash
+        run: cmake --build ${{runner.workspace}}/build
+
+  ubuntu-clang-9:
+    name: 18.04 Clang v9.0.0
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout submodules and DisC++
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: Create Build Environment
+        shell: bash
+        run: cmake -E make_directory ${{runner.workspace}}/build
+
+      - name: CMake Configure
+        shell: bash
+        working-directory: ${{runner.workspace}}/build
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang-9 -DCMAKE_CXX_COMPILER=clang++-9
+
+      - name: CMake Build
+        working-directory: ${{runner.workspace}}/build
+        shell: bash
+        run: cmake --build ${{runner.workspace}}/build
+  ubuntu-clang-10:
+    name: 18.04 Clang v10.0.0
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout submodules and DisC++
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: Create Build Folder
+        shell: bash
+        run: cmake -E make_directory ${{runner.workspace}}/build
+
+      - name: Install Clang 10 From apt
+        shell: bash
+        run: |
+          sudo apt update
+          sudo apt install clang-10 -y
+
+      - name: CMake Configure
+        shell: bash
+        working-directory: ${{runner.workspace}}/build
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang-10 -DCMAKE_CXX_COMPILER=clang++-10
+
+      - name: CMake Build
+        working-directory: ${{runner.workspace}}/build
+        shell: bash
+        run: cmake --build ${{runner.workspace}}/build

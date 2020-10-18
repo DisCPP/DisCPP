@@ -9,9 +9,13 @@
 namespace discpp {
 	class GuildIntegrationsUpdateEvent : public Event {
 	public:
-		inline GuildIntegrationsUpdateEvent(discpp::Guild guild) : guild(guild) {}
+		inline GuildIntegrationsUpdateEvent(Shard& shard, discpp::Guild guild) : Event(shard), guild(guild) {}
 
 		discpp::Guild guild;
+
+        virtual int GetEventType() const override {
+            return 11;
+        }
 	};
 }
 

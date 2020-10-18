@@ -13,21 +13,25 @@ namespace discpp {
 		unsigned int id = UINT_MAX;
 	};
 
-	template<typename T>
+	//template<typename T>
 	class EventHandler {
+	private:
+	    discpp::Client* client;
 	public:
+        EventHandler(discpp::Client* client) : client(client) {}
+
 		using IdType = unsigned int;
 
-		static EventListenerHandle RegisterListener(const std::function<void(const T&)>& listener) {
+        template<typename T>
+		EventListenerHandle RegisterListener(const std::function<void(const T&)>& listener) {
 			/**
 			 * @brief Registers an event listener.
 			 *
 			 * The given event class must derive from discpp::Event
 			 *
 			 * ```cpp
-			 *      discpp::EventHandler<discpp::ChannelPinsUpdateEvent>::RegisterListener([](discpp::ChannelPinsUpdateEvent event)->bool {
+			 *      discpp::EventHandler<discpp::ChannelPinsUpdateEvent>::RegisterListener([](const discpp::ChannelPinsUpdateEvent& event) {
 			 *			event.channel.Send("Detected a pin update!");
-			 *			return false;
 			 *		});
 			 * ```
 			 *
@@ -39,14 +43,20 @@ namespace discpp {
 			// Make sure that the given event class derives from discpp::Event
 			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
-			discpp::globals::client_instance->logger->Debug(LogTextColor::GREEN + "Event listener registered: " + typeid(T).name());
+			client->logger->Debug(LogTextColor::GREEN + "Event listener registered: " + typeid(T).name());
 
 			auto id = GetNextId();
-			GetHandlers()[id] = listener;
+			GetHandlers()[id] = [listener](const Event& base_evt) {
+                const T* event = dynamic_cast<const T*>(&base_evt);
+
+                if (event) {
+                    listener(*event);
+                }
+			};
 			return EventListenerHandle{ id };
 		}
 
-		static void RemoveListener(const EventListenerHandle& handle) {
+		void RemoveListener(const EventListenerHandle& handle) {
 			/**
 			 * @brief Removes an event listener.
 			 *
@@ -66,14 +76,15 @@ namespace discpp {
 			 * @return void
 			 */
 
-			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
+			//static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
-			discpp::globals::client_instance->logger->Debug("Event listener removed: " + std::string(typeid(T).name()));
+			//client->logger->Debug("Event listener removed: " + std::string(typeid(T).name()));
 
 			GetHandlers().erase(handle.id);
 		}
 
-		static void TriggerEvent(const T& e) {
+        template<typename T>
+		void TriggerEvent(const discpp::Event& e) {
 			/**
 			 * @brief Triggers an event.
 			 *
@@ -88,32 +99,36 @@ namespace discpp {
 			 * @return void
 			 */
 
-			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
+			//static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
-			discpp::globals::client_instance->logger->Debug("Event listener triggered: " + std::string(typeid(T).name()));
+			client->logger->Debug("Event listener triggered: " + std::string(typeid(e).name()));
 
 			for (std::pair<IdType, std::function<void(const T&)>> handler : GetHandlers()) {
-                discpp::globals::client_instance->DoFunctionLater(handler.second, e);
+			    std::function<void(const Event*)> func = [handler, e](const Event* base_evt) {
+			        const T* event = dynamic_cast<const T*>(base_evt);
+
+			        if (event) {
+                        handler.second(*event);
+			        }
+			    };
+
+			    client->DoFunctionLater(func, &e);
 			}
 		}
 
 	private:
-		static IdType GetNextId() {
-			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
-
+		IdType GetNextId() {
 			static IdType id = 0;
 			return ++id;
 		}
 
-		static std::unordered_map<IdType, std::function<void(const T&)>>& GetHandlers() {
-			static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
-
-			static std::unordered_map<IdType, std::function<void(const T&)>> handlers;
+		std::unordered_map<IdType, std::function<void(const discpp::Event&)>>& GetHandlers() {
+			static std::unordered_map<IdType, std::function<void(const discpp::Event&)>> handlers;
 			return handlers;
 		}
 	};
 
-	template<typename T>
+	/*template<typename T>
 	class EventHandler<T*> {};
 
 	template<typename T>
@@ -125,7 +140,7 @@ namespace discpp {
 	// For convenience
 	template<typename T>
 	void DispatchEvent(const T& t) {
-		/**
+		*//**
 		 * @brief Dispatches an event, shorter than using TriggerEvent.
 		 *
 		 * The given event class must derive from discpp::Event.
@@ -137,7 +152,7 @@ namespace discpp {
 		 * @param[in] t The event to dispatch.
 		 *
 		 * @return void
-		 */
+		 *//*
 
 		static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
@@ -147,7 +162,7 @@ namespace discpp {
 	// To let the caller pass pointers as the event object
 	template<typename T>
 	void DispatchEvent(T* t) {
-		/**
+		*//**
 		 * @brief Dispatches an event pointer, shorter than using TriggerEvent.
 		 *
 		 * The given event class must derive from discpp::Event.
@@ -159,12 +174,12 @@ namespace discpp {
 		 * @param[in] t The event to dispatch.
 		 *
 		 * @return void
-		 */
+		 *//*
 
 		static_assert(std::is_base_of_v<Event, T>, "Event class must derive from discpp::Event");
 
 		DispatchEvent<T>(*t);
-	}
+	}*/
 }
 
 #endif

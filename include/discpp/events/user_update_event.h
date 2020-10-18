@@ -9,9 +9,13 @@
 namespace discpp {
 	class UserUpdateEvent : public Event {
 	public:
-		inline UserUpdateEvent(discpp::User user) : user(user) {}
+		inline UserUpdateEvent(Shard& shard, discpp::User user) : Event(shard), user(user) {}
 
 		discpp::User user;
+
+        virtual int GetEventType() const override {
+            return 32;
+        }
 	};
 }
 

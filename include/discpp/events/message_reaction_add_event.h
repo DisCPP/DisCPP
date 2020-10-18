@@ -11,11 +11,15 @@
 namespace discpp {
 	class MessageReactionAddEvent : public Event {
 	public:
-		inline MessageReactionAddEvent(discpp::Message message, discpp::Emoji emoji, discpp::User user) : message(message), emoji(emoji), user(user) {}
+		inline MessageReactionAddEvent(Shard& shard, discpp::Message message, discpp::Emoji emoji, discpp::User user) : Event(shard), message(message), emoji(emoji), user(user) {}
 
 		discpp::Message message;
 		discpp::Emoji emoji;
 		discpp::User user;
+
+        virtual int GetEventType() const override {
+            return 24;
+        }
 	};
 }
 

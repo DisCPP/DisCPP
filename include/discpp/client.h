@@ -1,6 +1,7 @@
 #ifndef DISCPP_BOT_H
 #define DISCPP_BOT_H
 
+#include <memory>
 #include <string>
 #include <future>
 #include <string_view>
@@ -11,7 +12,6 @@
 #include "user.h"
 #include "settings.h"
 #include "channel.h"
-#include "cache.h"
 
 namespace discpp {
 	class Role;
@@ -22,18 +22,20 @@ namespace discpp {
 	class Message;
 	class Logger;
 	class Image;
+	class EventHandler;
+	class Cache;
 
 	class ClientUser : public User {
 	public:
 		ClientUser() = default;
-		ClientUser(const Snowflake& id) : User(id) {}
-		ClientUser(rapidjson::Document & json);
+		ClientUser(discpp::Client* client, const Snowflake& id) : User(client, id) {}
+		ClientUser(discpp::Client* client, rapidjson::Document & json);
 
         /**
          * @brief Get all connections of this user.
          *
          * ```cpp
-         *      std::vector<discpp::User::Connection> conntections = client->GetUserConnections();
+         *      std::vector<discpp::User::Connection> connections = client->GetUserConnections();
          * ```
          *
          * @return std::vector<discpp::User::Connection>
@@ -55,7 +57,7 @@ namespace discpp {
 	    int type;
 	public:
         UserRelationship() = default;
-        UserRelationship(rapidjson::Document& json);
+        UserRelationship(discpp::Client* client, rapidjson::Document& json);
 
         /**
          * @brief Returns if this relation is a friend.
@@ -77,17 +79,22 @@ namespace discpp {
 	};
 
 	class Shard;
+    class CommandHandler;
 
 	class Client {
+	    friend class Shard;
 	public:
 		std::string token; /**< Token for the current client. */
-		ClientConfig* config; /**< Configuration for the current bot. */
+        ClientConfig& config; /**< Configuration for the current client. */
 
-		discpp::ClientUser client_user; /**< discpp::User object representing current user. */
-		discpp::Logger* logger; /**< discpp::Logger object representing current logger. */
+        discpp::ClientUser client_user; /**< discpp::User object representing current user. */
+        std::unique_ptr<discpp::Logger> logger; /**< discpp::Logger object representing current logger. */
 
-		//std::unordered_map<Snowflake, std::shared_ptr<Channel>> channels; /**< List of channels the current bot can access. */
-        discpp::Cache cache; /**< Bot cache. Stores members, channels, guilds, etc. */
+        std::unique_ptr<discpp::Cache> cache; /**< Bot cache. Stores members, channels, guilds, etc. */
+
+        std::unique_ptr<EventHandler> event_handler; /**< Event handler. For registering event listeners, and dispatching them. */
+		std::unique_ptr<CommandHandler> command_handler; /**< Command handler. For registering commands. */
+        std::vector<std::unique_ptr<Shard>> shards;
 
         /**
          * @brief Constructs a discpp::Bot object.
@@ -103,7 +110,9 @@ namespace discpp {
          *
          * @return discpp::Bot, this is a constructor.
          */
-		Client(const std::string& token, ClientConfig* config);
+		Client(const std::string& token, ClientConfig& config);
+
+		~Client();
 
         /**
          * @brief Executes the discpp bot.
@@ -123,18 +132,23 @@ namespace discpp {
          * This is used in case you wanted to add functionality to the command handler.
          *
          * ```cpp
-         *      bot.SetCommandHandler(std::bind(&my_discpp_bot::command_handler::HandleCommands, std::placeholders::_1, std::placeholders::_2));
+         *      client->SetCommandHandler([](discpp::Shard& shard, discpp::Message& message) { my_discpp_bot::command_handler::FireCommand(shard, message); });
          * ```
          *
          * @param[in] command_handler The method that will handle commands from a user.
          *
          * @return void
          */
-		void SetCommandHandler(const std::function<void(discpp::Client*, discpp::Message)>& command_handler);
+		void SetCommandHandler(const std::function<void(discpp::Shard&, discpp::Message&)>& command_handler);
 
+        /**
+         * @brief Stop the client.
+         *
+         * This will cause the thread being blocked by discpp::Client::Run() to no longer be blocked.
+         *
+         * @return void
+         */
 		void StopClient();
-
-		// Discord based methods.
 
         /**
          * @brief Add a friend. Only supports user tokens!
@@ -157,12 +171,11 @@ namespace discpp {
          */
         std::unordered_map<discpp::Snowflake, discpp::UserRelationship> GetRelationships();
 
-
         /**
-         * @brief Modify the bot's username.
+         * @brief Modify the client's user.
          *
          * ```cpp
-         *      discpp::User user = bot.ModifyCurrent("New bot name!", new_avatar);
+         *      discpp::User user = client.ModifyCurrent("New bot name!", new_avatar);
          * ```
          *
          * @param[in] username The new username.
@@ -173,7 +186,7 @@ namespace discpp {
         discpp::User ModifyCurrentUser(const std::string& username, discpp::Image& avatar);
 
         /**
-         * @brief Leave the guild
+         * @brief Leave the guild.
          *
          * ```cpp
          *      bot.LeaveGuild(guild);
@@ -199,19 +212,6 @@ namespace discpp {
         void UpdatePresence(discpp::Presence& activity);
 
         /**
-         * @brief Get a user.
-         *
-         * ```cpp
-         *      bot.GetUser("150312037426135041");
-         * ```
-         *
-         * @param[in] id The user to get with this id.
-         *
-         * @return discpp::User
-         */
-		discpp::User ReqestUserIfNotCached(const discpp::Snowflake& id);
-
-        /**
          * @brief Get the bot's user connections.
          *
          * ```cpp
@@ -230,11 +230,6 @@ namespace discpp {
         std::unordered_map<discpp::Snowflake, discpp::Channel> GetUserDMs();
 
         // discpp::Channel CreateGroupDM(std::vector<discpp::User> users); // Deprecated and will not be shown in the discord client.
-
-		bool user_mfa_enabled;
-		std::string user_locale;
-		bool user_verified;
-        std::vector<Shard*> shards;
 
 		template <typename FType, typename... T>
 		void DoFunctionLater(FType&& func, T&&... args) {
@@ -256,6 +251,22 @@ namespace discpp {
                 futures.push_back(std::async(std::launch::async, func, std::forward<T>(args)...));
             }
 		}
+
+        /**
+         * @brief Get an instance of Client. Mainly used internally.
+         *
+         * @param[in] id The instance id of the client you're looking for.
+         *
+         * @return Client*
+         */
+		static Client* GetInstance(uint8_t id);
+
+        /**
+         * @brief Get the instance id of the client. Mainly used internally.
+         *
+         * @return uint8_t
+         */
+		uint8_t GetInstanceID();
 	private:
 		friend class Shard;
         friend class EventDispatcher;
@@ -268,11 +279,40 @@ namespace discpp {
 
 		int message_cache_count;
 
-		// Websocket Methods
+		static uint8_t next_instance_id;
+		static std::map<uint8_t, Client*> client_instances;
 
+		uint8_t my_instance_id;
 
-		// Commands
-		std::function<void(discpp::Client*, discpp::Message)> fire_command_method;
+		// The method to run to fire commands.
+		std::function<void(discpp::Shard&, discpp::Message&)> fire_command_method;
+
+        class HeartbeatWaiter { // For explanation, go to https://stackoverflow.com/a/29775639
+        public:
+            // returns false if killed:
+            template<class R, class P>
+            bool WaitFor( std::chrono::duration<R,P> const& time ) const {
+                std::unique_lock<std::mutex> lock(m);
+                return !cv.wait_for(lock, time, [&]{ return terminate; });
+            }
+
+            void Kill() {
+                std::unique_lock<std::mutex> lock(m);
+                terminate = true; // should be modified inside mutex lock
+                cv.notify_all(); // it is safe, and *sometimes* optimal, to do this outside the lock
+            }
+
+            // I like to explicitly delete/default special member functions:
+            HeartbeatWaiter() = default;
+            HeartbeatWaiter(HeartbeatWaiter&&) = delete;
+            HeartbeatWaiter(HeartbeatWaiter const&) = delete;
+            HeartbeatWaiter& operator=(HeartbeatWaiter&&) = delete;
+            HeartbeatWaiter& operator=(HeartbeatWaiter const&) = delete;
+        private:
+            mutable std::condition_variable cv;
+            mutable std::mutex m;
+            bool terminate = false;
+        };
     };
 
     class Shard {
@@ -307,7 +347,7 @@ namespace discpp {
             HEARTBEAT_ACK = 11			// Receive
         };
 
-        int id;
+        const int id;
         Client& client;
     private:
         friend class Client;
@@ -324,12 +364,13 @@ namespace discpp {
 
         ix::WebSocket websocket;
 
-        bool ready = false;
-        bool disconnected = true;
-        bool reconnecting = false;
-        bool heartbeat_acked;
-        int last_sequence_number = 0;
-        long long packet_counter;
+        discpp::Client::HeartbeatWaiter heartbeat_waiter;
+
+        std::atomic<bool> ready = false;
+        std::atomic<bool> disconnected = true;
+        std::atomic<bool> reconnecting = false;
+        std::atomic<bool> heartbeat_acked;
+        std::atomic<int> last_sequence_number = 0;
 
         void ReconnectToWebsocket();
         void DisconnectWebsocket();

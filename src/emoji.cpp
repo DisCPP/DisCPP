@@ -3,27 +3,24 @@
 #include "user.h"
 
 namespace discpp {
-	Emoji::Emoji(const discpp::Guild& guild, const Snowflake& id) : id(id) {
-		auto it = guild.emojis.find(id);
-		if (it != guild.emojis.end()) {
-			*this = it->second;
-		}
+	Emoji::Emoji(std::shared_ptr<discpp::Guild> guild, const Snowflake& id, bool can_request) : id(id) {
+	    guild->GetEmoji(id, can_request);
 	}
 
-	Emoji::Emoji(rapidjson::Document& json) {
+	Emoji::Emoji(discpp::Client* client, rapidjson::Document& json) {
 		id = GetIDSafely(json, "id");
 		name = GetDataSafely<std::string>(json, "name");
 		if (ContainsNotNull(json, "roles")) {
 			for (auto& role : json["roles"].GetArray()) {
 				rapidjson::Document role_json;
 				role_json.CopyFrom(role, role_json.GetAllocator());
-				roles.emplace_back(SnowflakeFromString(role.GetString()));
+				roles.emplace_back(Snowflake(role.GetString()));
 			}
 		}
 		if (ContainsNotNull(json, "user")) {
 			rapidjson::Document user_json;
 			user_json.CopyFrom(json["user"], user_json.GetAllocator());
-			creator = std::make_shared<discpp::User>(discpp::User(user_json));
+			creator = std::make_shared<discpp::User>(discpp::User(client, user_json));
 		}
 		require_colons = GetDataSafely<bool>(json, "require_colons");
         managed = GetDataSafely<bool>(json, "managed");

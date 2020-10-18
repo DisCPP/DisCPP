@@ -10,10 +10,14 @@
 namespace discpp {
 	class GuildBanRemoveEvent : public Event {
 	public:
-		inline GuildBanRemoveEvent(discpp::Guild guild, discpp::User user) : guild(guild), user(user) {}
+		inline GuildBanRemoveEvent(Shard& shard, discpp::Guild guild, discpp::User user) : Event(shard), guild(guild), user(user) {}
 
 		discpp::Guild guild;
 		discpp::User user;
+
+        virtual int GetEventType() const override {
+            return 7;
+        }
 	};
 }
 

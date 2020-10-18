@@ -4,7 +4,7 @@
 #include <fstream>
 #include <utility>
 
-#ifndef __STDC_LIB_EXT1__
+#if(__STDC_WANT_LIB_EXT1__ != 1)
 #define __STDC_WANT_LIB_EXT1__ 1
 #endif
 
@@ -142,7 +142,7 @@ namespace discpp {
             std::tm now{};
             char st[80];
 
-#ifndef __linux__
+#if defined(__STDC_LIB_EXT1__) || !defined(__linux__)
             localtime_s(&now, &now_time_t);
 #else
             now = *localtime(&now_time_t);

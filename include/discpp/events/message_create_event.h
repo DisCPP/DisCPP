@@ -9,9 +9,13 @@
 namespace discpp {
 	class MessageCreateEvent : public Event {
 	public:
-		inline MessageCreateEvent(discpp::Message message) : message(message) {}
+		inline MessageCreateEvent(Shard& shard, discpp::Message message) : Event(shard), message(message) {}
 
 		discpp::Message message;
+
+        virtual int GetEventType() const override {
+            return 22;
+        }
 	};
 }
 
