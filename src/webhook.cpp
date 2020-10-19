@@ -92,7 +92,6 @@ namespace discpp {
             data_parameters["payload_json"] = discpp::DumpJson(message_json);
 
             args->verbose = false;
-            args->compress = false;
             args->extraHeaders = Headers();
 
             // Generate a body from the multipart using IXWebsocket's method but then modify it
@@ -105,7 +104,6 @@ namespace discpp {
             WaitForRateLimits(nullptr, id, RateLimitBucketType::CHANNEL);
 
             ix::HttpResponsePtr result = http_client->post(Endpoint("/webhooks/" + std::to_string(id) + "/" + token), body, args);
-
 
             rapidjson::Document result_json(rapidjson::kObjectType);
             result_json.Parse(result->body);

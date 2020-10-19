@@ -59,7 +59,7 @@ elseif(USE_SIMD)
 	add_compile_definitions(SIMDJSON_BACKEND)
 endif()
 
-set(USE_ZLIB TRUE)
+set(USE_ZLIB FALSE)
 add_subdirectory(thirdparty/IXWebSocket)
 
 # Link sources

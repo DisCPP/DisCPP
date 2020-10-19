@@ -132,7 +132,6 @@ namespace discpp {
 
             //args->logger = [&](const std::string& msg) { client->logger->Info(msg); };
             args->verbose = false;
-            args->compress = false;
             args->extraHeaders = DefaultHeaders(client);
 
             // Generate a body from the multipart using IXWebsocket's method but then modify it
