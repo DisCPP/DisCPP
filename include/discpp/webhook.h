@@ -36,7 +36,7 @@ namespace discpp {
 	private:
         uint64_t avatar_hex[2] = {0, 0};
 
-        cpr::Header Headers(const cpr::Header& add = {});
+		ix::WebSocketHttpHeaders Headers(const ix::WebSocketHttpHeaders& add = {});
 	};
 }
 

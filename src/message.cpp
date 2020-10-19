@@ -161,7 +161,7 @@ namespace discpp {
 	std::unordered_map<discpp::Snowflake, discpp::User> Message::GetReactorsOfEmoji(const discpp::Emoji& emoji, const int& amount) {
         discpp::Emoji tmp = emoji;
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + tmp.ToURL());
-		cpr::Body body("{\"limit\": " + std::to_string(amount) + "}");
+        std::string body("{\"limit\": " + std::to_string(amount) + "}");
         discpp::Client* client = GetClient();
 		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, endpoint, DefaultHeaders(client), channel.id, RateLimitBucketType::CHANNEL, body);
 
@@ -178,7 +178,7 @@ namespace discpp {
         discpp::Emoji tmp = emoji;
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id) + "/reactions/" + tmp.ToURL());
 		std::string method_str = (method == GetReactionsMethod::BEFORE_USER) ? "before" : "after";
-		cpr::Body body("{\"" + method_str + "\": " + std::to_string(user.id) + "}");
+        std::string body("{\"" + method_str + "\": " + std::to_string(user.id) + "}");
         discpp::Client* client = GetClient();
 		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, endpoint, DefaultHeaders(client), channel.id, RateLimitBucketType::CHANNEL, body);
 
@@ -199,7 +199,7 @@ namespace discpp {
 
 	discpp::Message Message::EditMessage(const std::string& text) {
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id));
-		cpr::Body body("{\"content\": \"" + EscapeString(text) + "\"}");
+        std::string body("{\"content\": \"" + EscapeString(text) + "\"}");
         discpp::Client* client = GetClient();
 		std::unique_ptr<rapidjson::Document> result = SendPatchRequest(client, endpoint, DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL);
 
@@ -211,7 +211,7 @@ namespace discpp {
 
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id));
 		std::unique_ptr<rapidjson::Document> json = embed.ToJson();
-		cpr::Body body("{\"embed\": " + DumpJson(*json) + "}");
+        std::string body("{\"embed\": " + DumpJson(*json) + "}");
         discpp::Client* client = GetClient();
 		std::unique_ptr<rapidjson::Document> result = SendPatchRequest(client, endpoint, DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
@@ -221,7 +221,7 @@ namespace discpp {
 
 	discpp::Message Message::EditMessage(const int& flags) {
 		std::string endpoint = Endpoint("/channels/" + std::to_string(channel.id) + "/messages/" + std::to_string(id));
-		cpr::Body body("{\"flags\": " + std::to_string(flags) + "}");
+		std::string body("{\"flags\": " + std::to_string(flags) + "}");
         discpp::Client* client = GetClient();
         std::unique_ptr<rapidjson::Document> result = SendPatchRequest(client, endpoint, DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 

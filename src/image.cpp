@@ -1,7 +1,9 @@
-#include <discpp/log.h>
 #include "image.h"
+#include "log.h"
 #include "utils.h"
 #include "client.h"
+
+#include <sstream>
 
 namespace discpp {
 	std::string GetFileExtension(const std::string& file_name) {

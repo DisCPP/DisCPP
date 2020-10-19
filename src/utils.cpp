@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <numeric>
 #include <iomanip>
+#include <sstream>
 
 #include <rapidjson/writer.h>
 
@@ -31,23 +32,20 @@ std::string discpp::GetOsName() {
 }
 
 // @TODO: Test if the json document type returned is what its supposed to be, like an array or object.
-std::unique_ptr<rapidjson::Document> discpp::HandleResponse(discpp::Client* client, cpr::Response& response, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket) {
+std::unique_ptr<rapidjson::Document> discpp::HandleResponse(discpp::Client* client, ix::HttpResponsePtr response, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket) {
     if (client) {
-        client->logger->Debug("Received requested payload: " + response.text);
-std::unique_ptr<rapidjson::Document> discpp::HandleResponse(ix::HttpResponsePtr response, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket) {
-    if (globals::client_instance != nullptr) {
-        globals::client_instance->logger->Debug("Received requested payload: " + response->payload);
+        client->logger->Debug("Received requested payload: " + response->body);
     }
 
     auto tmp = std::make_unique<rapidjson::Document>();
-    if (!response->payload.empty() && response->payload[0] == '[' && response->payload[response->payload.size() - 1] == ']') {
+    if (!response->body.empty() && response->body[0] == '[' && response->body[response->body.size() - 1] == ']') {
         tmp->SetArray();
     } else {
         tmp->SetObject();
     }
 
     if (!response->errorMsg.empty()) {
-        globals::client_instance->logger->Error(LogTextColor::RED + "Received HTTPS error: " + response->errorMsg);
+        client->logger->Error(LogTextColor::RED + "Received HTTPS error: " + response->errorMsg);
     }
 
     // Handle http response codes and throw an exception if it failed.
@@ -87,7 +85,7 @@ std::unique_ptr<rapidjson::Document> discpp::HandleResponse(ix::HttpResponsePtr 
     }
 
 	HandleRateLimits(response->headers, object, ratelimit_bucket);
-	tmp->Parse((!response->payload.empty() ? response->payload.c_str() : "{}"));
+	tmp->Parse((!response->body.empty() ? response->body.c_str() : "{}"));
 
 	// Check if we were returned a json error and throw an exception if so.
 	if (!tmp->IsNull() && tmp->IsObject() && ContainsNotNull(*tmp, "code")) {
@@ -98,22 +96,14 @@ std::unique_ptr<rapidjson::Document> discpp::HandleResponse(ix::HttpResponsePtr 
 	return tmp;
 }
 
-std::string CprBodyToString(const cpr::Body& body) {
-	if (body.str().empty()) {
-		return "Empty";
-	}
-
-	return body;
-}
-
-std::unique_ptr<rapidjson::Document> discpp::SendGetRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body) {
-    if (globals::client_instance != nullptr) {
-        globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + body);
+std::unique_ptr<rapidjson::Document> discpp::SendGetRequest(discpp::Client* client, std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body) {
+    if (client != nullptr) {
+        client->logger->Debug("Sending get request, URL: " + url + ", body: " + body);
     }
 
     ix::initNetSystem();
 
-    WaitForRateLimits(object, ratelimit_bucket);
+    WaitForRateLimits(client, object, ratelimit_bucket);
 
     ix::HttpClient httpClient;
     ix::HttpRequestArgsPtr args = httpClient.createRequest();
@@ -122,19 +112,19 @@ std::unique_ptr<rapidjson::Document> discpp::SendGetRequest(std::string url, ix:
     ix::HttpResponsePtr result;
     result = httpClient.get(url, args);
 
-    std::unique_ptr<rapidjson::Document> doc = HandleResponse(result, object, ratelimit_bucket);
+    std::unique_ptr<rapidjson::Document> doc = HandleResponse(client, result, object, ratelimit_bucket);
 
 	return doc;
 }
 
-std::unique_ptr<rapidjson::Document> discpp::SendPostRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body) {
-    if (globals::client_instance != nullptr) {
-        globals::client_instance->logger->Debug("Sending post request, URL: " + url + ", body: " + body);
+std::unique_ptr<rapidjson::Document> discpp::SendPostRequest(discpp::Client* client, std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body) {
+    if (client != nullptr) {
+        client->logger->Debug("Sending post request, URL: " + url + ", body: " + body);
     }
 
     ix::initNetSystem();
 
-    WaitForRateLimits(object, ratelimit_bucket);
+    WaitForRateLimits(client, object, ratelimit_bucket);
 
     ix::HttpClient httpClient;
     ix::HttpRequestArgsPtr args = httpClient.createRequest();
@@ -142,19 +132,19 @@ std::unique_ptr<rapidjson::Document> discpp::SendPostRequest(std::string url, ix
     ix::HttpResponsePtr result;
     result = httpClient.post(url, body, args);
 
-    std::unique_ptr<rapidjson::Document> doc = HandleResponse(result, object, ratelimit_bucket);
+    std::unique_ptr<rapidjson::Document> doc = HandleResponse(client, result, object, ratelimit_bucket);
 
     return doc;
 }
 
-std::unique_ptr<rapidjson::Document> discpp::SendPutRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body) {
-    if (globals::client_instance != nullptr) {
-        globals::client_instance->logger->Debug("Sending get request, URL: " + url + ", body: " + body);
+std::unique_ptr<rapidjson::Document> discpp::SendPutRequest(discpp::Client* client, std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body) {
+    if (client != nullptr) {
+        client->logger->Debug("Sending get request, URL: " + url + ", body: " + body);
     }
 
     ix::initNetSystem();
 
-    WaitForRateLimits(object, ratelimit_bucket);
+    WaitForRateLimits(client, object, ratelimit_bucket);
 
     ix::HttpClient httpClient;
     ix::HttpRequestArgsPtr args = httpClient.createRequest();
@@ -162,19 +152,19 @@ std::unique_ptr<rapidjson::Document> discpp::SendPutRequest(std::string url, ix:
     ix::HttpResponsePtr result;
     result = httpClient.put(url, body, args);
 
-    std::unique_ptr<rapidjson::Document> doc = HandleResponse(result, object, ratelimit_bucket);
+    std::unique_ptr<rapidjson::Document> doc = HandleResponse(client, result, object, ratelimit_bucket);
 
     return doc;
 }
 
-std::unique_ptr<rapidjson::Document> discpp::SendPatchRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body) {
-    if (globals::client_instance != nullptr) {
-        globals::client_instance->logger->Debug("Sending patch request, URL: " + url + ", body: " + body);
+std::unique_ptr<rapidjson::Document> discpp::SendPatchRequest(discpp::Client* client, std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body) {
+    if (client != nullptr) {
+        client->logger->Debug("Sending patch request, URL: " + url + ", body: " + body);
     }
 
     ix::initNetSystem();
 
-    WaitForRateLimits(object, ratelimit_bucket);
+    WaitForRateLimits(client, object, ratelimit_bucket);
 
     ix::HttpClient httpClient;
     ix::HttpRequestArgsPtr args = httpClient.createRequest();
@@ -182,19 +172,19 @@ std::unique_ptr<rapidjson::Document> discpp::SendPatchRequest(std::string url, i
     ix::HttpResponsePtr result;
     result = httpClient.patch(url, body, args);
 
-    std::unique_ptr<rapidjson::Document> doc = HandleResponse(result, object, ratelimit_bucket);
+    std::unique_ptr<rapidjson::Document> doc = HandleResponse(client, result, object, ratelimit_bucket);
 
     return doc;
 }
 
-std::unique_ptr<rapidjson::Document> discpp::SendDeleteRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket) {
-    if (globals::client_instance != nullptr) {
-        globals::client_instance->logger->Debug("Sending delete request, URL: " + url);
+std::unique_ptr<rapidjson::Document> discpp::SendDeleteRequest(discpp::Client* client, std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket) {
+    if (client != nullptr) {
+        client->logger->Debug("Sending delete request, URL: " + url);
     }
 
     ix::initNetSystem();
 
-    WaitForRateLimits(object, ratelimit_bucket);
+    WaitForRateLimits(client, object, ratelimit_bucket);
 
     ix::HttpClient httpClient;
     ix::HttpRequestArgsPtr args = httpClient.createRequest();
@@ -202,21 +192,21 @@ std::unique_ptr<rapidjson::Document> discpp::SendDeleteRequest(std::string url, 
     ix::HttpResponsePtr result;
     result = httpClient.del(url, args);
 
-    std::unique_ptr<rapidjson::Document> doc = HandleResponse(result, object, ratelimit_bucket);
+    std::unique_ptr<rapidjson::Document> doc = HandleResponse(client, result, object, ratelimit_bucket);
 
     return doc;
 }
 
-ix::WebSocketHttpHeaders discpp::DefaultHeaders(ix::WebSocketHttpHeaders add) {
+ix::WebSocketHttpHeaders discpp::DefaultHeaders(discpp::Client* client, ix::WebSocketHttpHeaders add) {
     ix::WebSocketHttpHeaders headers = {
         { "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" },
         { "X-RateLimit-Precision", "millisecond"}};
 
     // Add the correct authorization header depending on the token type.
-    if (globals::client_instance->config->type == TokenType::USER) {
-        headers.insert({ "Authorization", discpp::globals::client_instance->token });
+    if (client->config.type == TokenType::USER) {
+        headers.insert({ "Authorization", client->token });
     } else {
-        headers.insert({ "Authorization", "Bot " + discpp::globals::client_instance->token });
+        headers.insert({ "Authorization", "Bot " + client->token });
     }
 
     for (auto head : add) {
@@ -319,18 +309,21 @@ std::string discpp::Base64Encode(const std::string& text) {
 
 std::string discpp::ReplaceAll(const std::string& data, const std::string& to_search, const std::string& replace_str) {
 	std::string tmp = data;
+	ReplaceAll(tmp, to_search, replace_str);
+	return tmp;
+}
+
+void discpp::ReplaceAll(std::string& data, const std::string& to_search, const std::string& replace_str) {
     // Get the first occurrence
-    size_t pos = tmp.find(to_search);
+    size_t pos = data.find(to_search);
 
     // Repeat till end is reached
     while(pos != std::string::npos) {
         // Replace this occurrence of Sub String
-        tmp.replace(pos, to_search.size(), replace_str);
+        data.replace(pos, to_search.size(), replace_str);
         // Get the next occurrence from the current position
-        pos = tmp.find(to_search, pos + replace_str.size());
+        pos = data.find(to_search, pos + replace_str.size());
     }
-
-	return tmp;
 }
 
 std::string discpp::EscapeString(const std::string& string) {

@@ -9,8 +9,6 @@
 
 #include "discord_object.h"
 
-#include <cpr/cpr.h>
-
 #include <unordered_map>
 #include <climits>
 
@@ -222,7 +220,7 @@ namespace discpp {
      *
      * @return rapidjson::Document
      */
-	extern std::unique_ptr<rapidjson::Document> HandleResponse(ix::HttpResponsePtr response, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket);
+	extern std::unique_ptr<rapidjson::Document> HandleResponse(discpp::Client* client, ix::HttpResponsePtr response, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket);
 
     /**
      * @brief Sends a get request to a url.
@@ -235,7 +233,7 @@ namespace discpp {
      *
      * @return rapidjson::Document
      */
-    extern std::unique_ptr<rapidjson::Document> SendGetRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
+    extern std::unique_ptr<rapidjson::Document> SendGetRequest(discpp::Client* client, std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
 
     /**
      * @brief Sends a post request to a url.
@@ -248,7 +246,7 @@ namespace discpp {
      *
      * @return rapidjson::Document
      */
-    extern std::unique_ptr<rapidjson::Document> SendPostRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
+    extern std::unique_ptr<rapidjson::Document> SendPostRequest(discpp::Client* client, std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
 
     /**
      * @brief Sends a put request to a url.
@@ -261,7 +259,7 @@ namespace discpp {
      *
      * @return rapidjson::Document
      */
-    extern std::unique_ptr<rapidjson::Document> SendPutRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
+    extern std::unique_ptr<rapidjson::Document> SendPutRequest(discpp::Client* client, std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
 
     /**
      * @brief Sends a patch request to a url.
@@ -274,7 +272,7 @@ namespace discpp {
      *
      * @return rapidjson::Document
      */
-    extern std::unique_ptr<rapidjson::Document> SendPatchRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
+    extern std::unique_ptr<rapidjson::Document> SendPatchRequest(discpp::Client* client, std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
 
     /**
      * @brief Sends a delete request to a url.
@@ -286,7 +284,7 @@ namespace discpp {
      *
      * @return std::unique_ptr<rapidjson::Document>
      */
-    extern std::unique_ptr<rapidjson::Document> SendDeleteRequest(std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket);
+    extern std::unique_ptr<rapidjson::Document> SendDeleteRequest(discpp::Client* client, std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket);
 
     /**
      * @brief Gets the default headers to communicate with the discpp servers.
@@ -295,7 +293,7 @@ namespace discpp {
      *
      * @return ix::WebSocketHttpHeaders
      */
-    ix::WebSocketHttpHeaders DefaultHeaders(ix::WebSocketHttpHeaders add = {});
+    ix::WebSocketHttpHeaders DefaultHeaders(discpp::Client* client, ix::WebSocketHttpHeaders add = {});
 
     /**
      * @brief Check if a string starts with another string.
@@ -373,18 +371,36 @@ namespace discpp {
      *      std::string raw_text = ReplaceAll("discpp text", " ", "_");
      * ```
      *
-     * @param[in] string The string to escape.
+     * @param[in] data The string to replace things inside of.
+     * @param[in] to_search The string to search for and replace.
+     * @param[in] replace_str The string we're gonna replace `to_search` with.
      *
      * @return std::string
      */
 	std::string ReplaceAll(const std::string& data, const std::string& to_search, const std::string& replace_str);
 
     /**
+     * @brief Replace all occurences of sub strings
+     *
+     * ```cpp
+     *      std::string str = "discpp text";
+     *      ReplaceAll(str, " ", "_");
+     * ```
+     *
+     * @param[out] data The string to replace things inside of.
+     * @param[in] to_search The string to search for and replace.
+     * @param[in] replace_str The string we're gonna replace `to_search` with.
+     *
+     * @return void
+     */
+    void ReplaceAll(std::string& data, const std::string& to_search, const std::string& replace_str);
+
+    /**
      * @brief Escape strings for discpp json endpoints and cpr body
      *
      * ```cpp
      *      std::string raw_text = "{\"content\":\"" + EscapeString(text) + (tts ? "\",\"tts\":\"true\"" : "\"") + "}";
-     *		cpr::Body body = cpr::Body(raw_text);
+     *		std::string body = cpr::Body(raw_text);
      *		std::unique_ptr<rapidjson::Document> result = SendPostRequest(client, Endpoint("/channels/%/messages", id), DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
      * ```
      *

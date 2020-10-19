@@ -470,7 +470,7 @@ namespace discpp {
             if (user_settings.GetStreamNotificationsEnabled() != old_settings.GetStreamNotificationsEnabled()) new_settings.AddMember("stream_notifications_enabled", user_settings.GetStreamNotificationsEnabled(), allocator);
 
             discpp::Client* client = GetClient();
-            std::unique_ptr<rapidjson::Document> result = SendPatchRequest(client, Endpoint("users/@me/settings/"), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL, cpr::Body(DumpJson(new_settings)));
+            std::unique_ptr<rapidjson::Document> result = SendPatchRequest(client, Endpoint("users/@me/settings/"), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL, DumpJson(new_settings));
         }
     }
 
@@ -510,7 +510,7 @@ namespace discpp {
     }
 
     discpp::User Client::ModifyCurrentUser(const std::string& username, discpp::Image& avatar) {
-        cpr::Body body("{\"username\": \"" + username + "\", \"avatar\": " + avatar.ToDataURI() + "}");
+        std::string body("{\"username\": \"" + username + "\", \"avatar\": " + avatar.ToDataURI() + "}");
         std::unique_ptr<rapidjson::Document> result = SendPatchRequest(this, Endpoint("/users/@me"), DefaultHeaders(this), 0, discpp::RateLimitBucketType::GLOBAL, body);
 
         client_user = discpp::ClientUser(this, *result);

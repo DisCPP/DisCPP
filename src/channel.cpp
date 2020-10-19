@@ -1,4 +1,3 @@
-#include <ixwebsocket/IXHttpClient.h>
 #include "channel.h"
 #include "utils.h"
 #include "client.h"
@@ -7,6 +6,9 @@
 #include "guild.h"
 #include "exceptions.h"
 #include "cache.h"
+
+#include <ixwebsocket/IXHttpClient.h>
+#include <sstream>
 
 namespace discpp {
     Channel::Channel(discpp::Client* client) : discpp::DiscordObject(client) {
@@ -109,55 +111,52 @@ namespace discpp {
 
         if (!files.empty()) {
             // @TODO THIS:
-            ix::HttpClient* client = new ix::HttpClient();
+            auto* http_client = new ix::HttpClient();
 
-            ix::HttpRequestArgsPtr args = client->createRequest();
-            args->logger = [](const std::string& msg) { globals::client_instance->logger->Debug(msg); };
+            ix::HttpRequestArgsPtr args = http_client->createRequest();
+            args->logger = [&](const std::string& msg) { client->logger->Debug(msg); };
 
             ix::HttpFormDataParameters data_parameters;
             /*for (int i = 0; i < files.size(); i++) {
-                std::ifstream file(files[i].file_path, std::ios::in | std::ios::binary);
+                const discpp::File& file = files[i];
+                std::ifstream file_stream(files[i].file_path, std::ios::in | std::ios::binary);
                 std::ostringstream ss;
-                ss << file.rdbuf(); // reading data
+                ss << file_stream.rdbuf();
 
-                std::cout << "Read file: " << ss.str() << std::endl;
+                //std::cout << "Read file: " << ss.str() << std::endl;
 
-                data_parameters["file_" + std::to_string(i)] = ss.str();
+                if (file.file_name.empty()) {
+                    data_parameters["file_" + std::to_string(i)] = ss.str();
+                } else {
+                    data_parameters[file.file_name] = ss.str();
+                }
             }*/
-            std::string test_content = "test";
 
-            rapidjson::Document doc(rapidjson::kObjectType);
-            if (!text.empty()) {
-                doc.AddMember("content", EscapeString(text), doc.GetAllocator());
-                doc.AddMember("tts", tts, doc.GetAllocator());
-            }
-            if (embed != nullptr) {
-                doc.AddMember("embed", *embed->ToJson(), doc.GetAllocator());
-            }
-            data_parameters["payload_json"] = discpp::DumpJson(doc);
+            data_parameters["payload_json"] = discpp::DumpJson(message_json);
 
-            std::string multipart_bound = client->generateMultipartBoundary();
+            std::string multipart_bound = http_client->generateMultipartBoundary();
             args->multipartBoundary = multipart_bound;
-            args->body = client->serializeHttpFormDataParameters(multipart_bound, data_parameters);
-            args->logger = [](const std::string& msg) { globals::client_instance->logger->Debug(msg); };
+            args->body = http_client->serializeHttpFormDataParameters(multipart_bound, data_parameters);
+            discpp::ReplaceAll(args->body, "Content-Disposition: form-data; name=\"payload_json\"; filename=\"payload_json\"\r\nContent-Type: application/octet-stream", "Content-Type: application/json");
+            client->logger->Info("Created body: " + args->body);
+            args->logger = [&](const std::string& msg) { client->logger->Debug(msg); };
             args->verbose = true;
-            args->extraHeaders = DefaultHeaders();
+            args->extraHeaders = DefaultHeaders(client);
 
-            WaitForRateLimits(id, RateLimitBucketType::CHANNEL);
+            WaitForRateLimits(client, id, RateLimitBucketType::CHANNEL);
             //globals::client_instance->logger->Debug("Sending patch request, URL: " + Endpoint("/channels/" + std::to_string(id) + "/messages") + ", body: " + args->body);
 
-            ix::HttpResponsePtr result = client->post(Endpoint("/channels/" + std::to_string(id) + "/messages"), data_parameters, args);
+            ix::HttpResponsePtr result = http_client->post(Endpoint("/channels/" + std::to_string(id) + "/messages"), {}, data_parameters, args);
 
-            globals::client_instance->logger->Debug("Received requested payload: " + result->payload);
+            client->logger->Debug("Received requested payload: " + result->body);
 
             rapidjson::Document result_json(rapidjson::kObjectType);
-            result_json.Parse(result->payload);
+            result_json.Parse(result->body);
 
             return discpp::Message(client, result_json);
         }
 
-        cpr::Body body(DumpJson(message_json));
-        std::unique_ptr<rapidjson::Document> result = SendPostRequest(client, Endpoint("/channels/" + std::to_string(id) + "/messages"), DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+        std::unique_ptr<rapidjson::Document> result = SendPostRequest(client, Endpoint("/channels/" + std::to_string(id) + "/messages"), DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, DumpJson(message_json));
 
         return discpp::Message(client, *result);
 	}
@@ -180,9 +179,6 @@ namespace discpp {
 	discpp::Channel Channel::Modify(ModifyRequests& modify_requests) {
 	    discpp::Client* client = GetClient();
 
-		cpr::Header headers = DefaultHeaders(client, { {"Content-Type", "application/json" } });
-		std::string field;
-
         rapidjson::Document j_body(rapidjson::kObjectType);
         for (auto request : modify_requests.requests) {
             std::variant<std::string, int, bool> variant = request.second;
@@ -193,8 +189,7 @@ namespace discpp {
             }, variant);
         }
 
-		cpr::Body body(DumpJson(j_body));
-		std::unique_ptr<rapidjson::Document> result = SendPatchRequest(Endpoint("/channels/" + std::to_string(id)), DefaultHeaders({ {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+		std::unique_ptr<rapidjson::Document> result = SendPatchRequest(client, Endpoint("/channels/" + std::to_string(id)), DefaultHeaders(client, { {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, DumpJson(j_body));
 		
 		*this = discpp::Channel(client, *result);
 		return *this;
@@ -276,7 +271,7 @@ namespace discpp {
 			}
 		}
 
-		cpr::Body body("{\"messages\": [" + combined_message + "]}");
+		std::string body("{\"messages\": [" + combined_message + "]}");
 
         discpp::Client* client = GetClient();
 		std::unique_ptr<rapidjson::Document> result = SendPostRequest(client, endpoint, DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
@@ -308,7 +303,7 @@ namespace discpp {
         std::string json_payload = DumpJson(permission_json);
 
         discpp::Client* client = GetClient();
-        SendPutRequest(client, Endpoint("/channels/" + std::to_string(id) + "/permissions/" + std::to_string(permissions.role_user_id)), DefaultHeaders(client, { {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, cpr::Body(json_payload));
+        SendPutRequest(client, Endpoint("/channels/" + std::to_string(id) + "/permissions/" + std::to_string(permissions.role_user_id)), DefaultHeaders(client, { {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, json_payload);
     }
 
     std::shared_ptr<discpp::Guild> Channel::GetGuild() const {
@@ -324,7 +319,7 @@ namespace discpp {
             throw std::runtime_error("discpp::Channel::CreateInvite only available for guild channels!");
         }
 
-        cpr::Body body("{\"max_age\": " + std::to_string(max_age) + ", \"max_uses\": " + std::to_string(max_uses) + ", \"temporary\": " + std::to_string(temporary) + ", \"unique\": " + std::to_string(unique) + "}");
+        std::string body("{\"max_age\": " + std::to_string(max_age) + ", \"max_uses\": " + std::to_string(max_uses) + ", \"temporary\": " + std::to_string(temporary) + ", \"unique\": " + std::to_string(unique) + "}");
 
         discpp::Client* client = GetClient();
         std::unique_ptr<rapidjson::Document> result = SendPostRequest(client, Endpoint("/channels/" + std::to_string(id) + "/invites"), DefaultHeaders(client, { {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
@@ -409,15 +404,15 @@ namespace discpp {
         if (tmp == ImageType::AUTO) tmp = is_icon_gif ? ImageType::GIF : ImageType::PNG;
         switch (img_type) {
             case ImageType::GIF:
-                return cpr::Url(url + ".gif");
+                return url + ".gif";
             case ImageType::JPEG:
-                return cpr::Url(url + ".jpeg");
+                return url + ".jpeg";
             case ImageType::PNG:
-                return cpr::Url(url + ".png");
+                return url + ".png";
             case ImageType::WEBP:
-                return cpr::Url(url + ".webp");
+                return url + ".webp";
             default:
-                return cpr::Url(url);
+                return url;
         }
     }
 }
