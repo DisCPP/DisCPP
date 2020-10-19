@@ -2,12 +2,16 @@
 #include "client.h"
 
 namespace discpp {
-    DiscordObject::DiscordObject(discpp::Client *client) : client_instance_id(client->GetInstanceID()) {
-
+    DiscordObject::DiscordObject(discpp::Client *client) {
+        if (client) {
+            this->client_instance_id = client->GetInstanceID();
+        }
     }
 
-	DiscordObject::DiscordObject(discpp::Client *client, const Snowflake& id) : client_instance_id(client->GetInstanceID()), id(id) {
-
+	DiscordObject::DiscordObject(discpp::Client *client, const Snowflake& id) : id(id) {
+        if (client) {
+            this->client_instance_id = client->GetInstanceID();
+        }
 	}
 
 	bool DiscordObject::operator==(DiscordObject& other) const {

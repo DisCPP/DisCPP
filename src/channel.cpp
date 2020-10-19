@@ -110,43 +110,41 @@ namespace discpp {
         discpp::Client* client = GetClient();
 
         if (!files.empty()) {
-            // @TODO THIS:
             auto* http_client = new ix::HttpClient();
 
             ix::HttpRequestArgsPtr args = http_client->createRequest();
-            args->logger = [&](const std::string& msg) { client->logger->Debug(msg); };
 
             ix::HttpFormDataParameters data_parameters;
-            /*for (int i = 0; i < files.size(); i++) {
+            for (int i = 0; i < files.size(); i++) {
                 const discpp::File& file = files[i];
-                std::ifstream file_stream(files[i].file_path, std::ios::in | std::ios::binary);
+                std::ifstream file_stream(file.file_path, std::ios::in | std::ios::binary);
                 std::ostringstream ss;
                 ss << file_stream.rdbuf();
-
-                //std::cout << "Read file: " << ss.str() << std::endl;
 
                 if (file.file_name.empty()) {
                     data_parameters["file_" + std::to_string(i)] = ss.str();
                 } else {
                     data_parameters[file.file_name] = ss.str();
                 }
-            }*/
+            }
 
             data_parameters["payload_json"] = discpp::DumpJson(message_json);
 
-            std::string multipart_bound = http_client->generateMultipartBoundary();
-            args->multipartBoundary = multipart_bound;
-            args->body = http_client->serializeHttpFormDataParameters(multipart_bound, data_parameters);
-            discpp::ReplaceAll(args->body, "Content-Disposition: form-data; name=\"payload_json\"; filename=\"payload_json\"\r\nContent-Type: application/octet-stream", "Content-Type: application/json");
-            client->logger->Info("Created body: " + args->body);
-            args->logger = [&](const std::string& msg) { client->logger->Debug(msg); };
-            args->verbose = true;
+            //args->logger = [&](const std::string& msg) { client->logger->Info(msg); };
+            args->verbose = false;
+            args->compress = false;
             args->extraHeaders = DefaultHeaders(client);
 
-            WaitForRateLimits(client, id, RateLimitBucketType::CHANNEL);
-            //globals::client_instance->logger->Debug("Sending patch request, URL: " + Endpoint("/channels/" + std::to_string(id) + "/messages") + ", body: " + args->body);
+            // Generate a body from the multipart using IXWebsocket's method but then modify it
+            // so the payload_json field will actually be send as json, and not a file.
+            std::string multipart_bound = http_client->generateMultipartBoundary();
+            args->multipartBoundary = multipart_bound;
+            std::string body = http_client->serializeHttpFormDataParameters(multipart_bound, data_parameters);
+            discpp::ReplaceAll(body, "Content-Disposition: form-data; name=\"payload_json\"; filename=\"payload_json\"\r\nContent-Type: application/octet-stream", "Content-Disposition: form-data; name=\"payload_json\"\r\nContent-Type: application/json");
 
-            ix::HttpResponsePtr result = http_client->post(Endpoint("/channels/" + std::to_string(id) + "/messages"), {}, data_parameters, args);
+            WaitForRateLimits(client, id, RateLimitBucketType::CHANNEL);
+
+            ix::HttpResponsePtr result = http_client->post(Endpoint("/channels/" + std::to_string(id) + "/messages"), body, args);
 
             client->logger->Debug("Received requested payload: " + result->body);
 
