@@ -20,9 +20,6 @@ namespace discpp {
 
 		bool operator==(DiscordObject& other) const;
 		bool operator==(discpp::Snowflake& other) const;
-
-		bool operator!=(DiscordObject& other) const;
-		bool operator!=(discpp::Snowflake& other) const;
 	private:
 	    uint8_t client_instance_id;
     protected:

@@ -43,8 +43,8 @@ endif()
 option(USE_RAPID "Uses RapidJSON for json parsing." ON)
 option(USE_SIMD "Uses simdjson for json parsing. - NOT YET SUPPORTED" OFF)
 option(USE_FMT "Uses fmt for logger - NOT YET SUPPORTED" OFF)
-option(BUILD_EXAMPLES "Build example bots." ON)
-option(BUILD_TESTS "Build unit tests." OFF)
+option(BUILD_DISCPP_EXAMPLES "Build example bots." OFF)
+option(BUILD_DISCPP_TESTS "Build unit tests." OFF)
 
 # Find dependencies
 if (USE_FMT)
@@ -99,13 +99,13 @@ target_compile_definitions(discpp PUBLIC __STDC_WANT_LIB_EXT1__)
 target_link_libraries(discpp PUBLIC ixwebsocket)
 
 # Build unit tests
-if (BUILD_TESTS)
+if (BUILD_DISCPP_TESTS)
 	message(STATUS "Building DisC++ tests")
 	add_subdirectory(tests)
 endif()
 
 # Build examples
-if (BUILD_EXAMPLES)
+if (BUILD_DISCPP_EXAMPLES)
 	message(STATUS "Building DisC++ examples")
 	add_subdirectory(examples/pingbot)
 	add_subdirectory(examples/serverinfo)
