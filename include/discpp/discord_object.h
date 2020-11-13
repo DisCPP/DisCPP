@@ -20,6 +20,11 @@ namespace discpp {
 
 		bool operator==(DiscordObject& other) const;
 		bool operator==(discpp::Snowflake& other) const;
+
+#ifdef __GNUC__
+		bool operator!=(DiscordObject& other) const;
+		bool operator!=(discpp::Snowflake& other) const;
+#endif
 	private:
 	    uint8_t client_instance_id;
     protected:

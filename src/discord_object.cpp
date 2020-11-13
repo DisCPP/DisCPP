@@ -22,6 +22,16 @@ namespace discpp {
 		return this->id == other;
 	}
 
+#ifdef __GNUC__
+		bool DiscordObject::operator!=(DiscordObject& other) const {
+            return this->id != other.id;
+        }
+
+        bool DiscordObject::operator!=(Snowflake& other) const {
+            return this->id != other;
+        }
+#endif
+
     discpp::Client* DiscordObject::GetClient() const {
         return discpp::Client::GetInstance(client_instance_id);
     }
