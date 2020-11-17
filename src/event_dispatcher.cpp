@@ -372,6 +372,10 @@ namespace discpp {
             shard.client.event_handler->TriggerEvent<discpp::MessageDeleteEvent>(discpp::MessageDeleteEvent(shard, *message->second));
 
             shard.client.cache->messages.erase(message);
+        } else {
+            discpp::Message msg(&shard.client);
+            msg.id = Snowflake(result["id"].GetString());
+            shard.client.event_handler->TriggerEvent<discpp::MessageDeleteEvent>(discpp::MessageDeleteEvent(shard, msg));
         }
     }
 

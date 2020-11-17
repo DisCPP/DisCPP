@@ -21,7 +21,7 @@ namespace discpp {
 		bool operator==(DiscordObject& other) const;
 		bool operator==(discpp::Snowflake& other) const;
 
-#if __cplusplus <= 201703L
+#if __cplusplus <= 201703L || defined(__GNUC__)
 		bool operator!=(DiscordObject& other) const;
 		bool operator!=(discpp::Snowflake& other) const;
 #endif

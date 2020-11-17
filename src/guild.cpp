@@ -296,7 +296,7 @@ namespace discpp {
 	}
 
     discpp::Channel Guild::CreateChannel(const std::string& name, const std::string& topic, const ChannelType& type, const int& bitrate, const int& user_limit, const int& rate_limit_per_user, const int& position, const std::vector<discpp::Permissions>& permission_overwrites, const discpp::Snowflake& parent_id, const bool nsfw) {
-		Guild::EnsureBotPermission(Permission::MANAGE_CHANNELS);
+		this->EnsureBotPermission(Permission::MANAGE_CHANNELS);
         int tmp = bitrate;
 		if (tmp < 8000) tmp = 8000;
 
