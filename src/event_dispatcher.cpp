@@ -330,7 +330,7 @@ namespace discpp {
     void EventDispatcher::MessageCreateEvent(Shard& shard, rapidjson::Document& result) {
         std::lock_guard<std::mutex> messages_guard(shard.client.cache->messages_mutex);
         std::shared_ptr<discpp::Message> message = std::make_shared<discpp::Message>(&shard.client, result);
-        if (!shard.client.cache->messages.empty()) {
+        if (shard.client.message_cache_count != 0) {
             if (shard.client.cache->messages.size() >= shard.client.message_cache_count) {
                 shard.client.cache->messages.erase(shard.client.cache->messages.begin());
             }

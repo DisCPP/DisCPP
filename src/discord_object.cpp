@@ -22,7 +22,7 @@ namespace discpp {
 		return this->id == other;
 	}
 
-#ifdef __GNUC__
+#if __cplusplus <= 201703L
 		bool DiscordObject::operator!=(DiscordObject& other) const {
             return this->id != other.id;
         }
