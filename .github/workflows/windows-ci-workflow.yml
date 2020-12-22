@@ -42,7 +42,7 @@ jobs:
         # Incase we ever remove the `default: run: shell: cmd`
         shell: cmd
         run: |
-          echo ::add-path::%programfiles%\OpenSSL-Win64\bin" >> $GITHUB_PATH
+          echo "%programfiles%\OpenSSL-Win64\bin" >> $GITHUB_PATH
           echo "OPENSSL_CONF=%programfiles%\OpenSSL-Win64\bin\openssl.cfg" >> $GITHUB_ENV
           echo "OPENSSL_ROOT_DIR=%programfiles%\OpenSSL-Win64" >> $GITHUB_ENV
 
