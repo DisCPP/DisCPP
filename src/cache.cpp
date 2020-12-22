@@ -156,9 +156,13 @@ discpp::Message discpp::Cache::GetDiscordMessage(const discpp::Snowflake &channe
 
 discpp::User discpp::Cache::GetUser(const discpp::Snowflake &id, bool can_request) {
     std::lock_guard<std::mutex> lock_guard(members_mutex);
-    auto it = members.find(id);
-    if (it != members.end()) {
-        return it->second->user;
+    std::lock_guard<std::mutex> guilds_lock_guard(guilds_mutex);
+
+    for (auto const& guild : guilds) {
+        auto it = guild.second->members.find(id);
+        if (it != guild.second->members.end()) {
+            return it->second->user;
+        }
     }
 
     if (can_request) {
