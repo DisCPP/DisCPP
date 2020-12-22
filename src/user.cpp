@@ -6,7 +6,7 @@
 #include "exceptions.h"
 
 #include <iomanip>
-#include <discpp/exceptions.h>
+#include <sstream>
 
 namespace discpp {
 	User::User(discpp::Client* client, const Snowflake& id, bool can_request) : discpp::DiscordObject(client, id) {
@@ -61,7 +61,7 @@ namespace discpp {
 	}
 
 	discpp::Channel User::CreateDM() {
-		cpr::Body body("{\"recipient_id\": \"" + std::to_string(id) + "\"}");
+		std::string body("{\"recipient_id\": \"" + std::to_string(id) + "\"}");
         discpp::Client* client = GetClient();
 		std::unique_ptr<rapidjson::Document> result = SendPostRequest(client, Endpoint("/users/@me/channels"), DefaultHeaders(client, { {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
 
@@ -89,7 +89,7 @@ namespace discpp {
 	    }
 
         if (avatar_hex[0] == 0) {
-			return cpr::Url("https://cdn.discordapp.com/embed/avatars/" + std::to_string(discriminator % 5) + ".png" + size);
+			return "https://cdn.discordapp.com/embed/avatars/" + std::to_string(discriminator % 5) + ".png" + size;
 		} else {
 		    std::string avatar_str = CombineAvatarHash(avatar_hex);
 
@@ -98,15 +98,15 @@ namespace discpp {
 			if (tmp == ImageType::AUTO) tmp = is_avatar_gif ? ImageType::GIF : ImageType::PNG;
 			switch (tmp) {
 			case ImageType::GIF:
-				return cpr::Url(url + ".gif" + size);
+				return url + ".gif" + size;
 			case ImageType::JPEG:
-				return cpr::Url(url + ".jpeg" + size);
+				return url + ".jpeg" + size;
 			case ImageType::PNG:
-				return cpr::Url(url + ".png" + size);
+				return url + ".png" + size;
 			case ImageType::WEBP:
-				return cpr::Url(url + ".webp" + size);
+				return url + ".webp" + size;
 			default:
-				return cpr::Url(url + size);
+				return url + size;
 			}
 		}
 	}

@@ -2,9 +2,15 @@
 #include "utils.h"
 #include "message.h"
 #include "client.h"
-#include "guild.h"
 
 #include <fstream>
+#include <sstream>
+
+#include <ixwebsocket/IXHttpClient.h>
+
+/* @TODO: Create a WebhookMessage, WebhookChannel, and add a logger.
+ * WebhookChannel will override the discpp::Channel::Send method to modify it for webhooks.
+ */
 
 namespace discpp {
     Webhook::Webhook(rapidjson::Document& json) {
@@ -26,63 +32,86 @@ namespace discpp {
 	};
 
 	discpp::Message Webhook::Send(const std::string& text, const bool tts, discpp::EmbedBuilder* embed, const std::vector<discpp::File>& files) {
+        // Send a file filled with message contents if the message is more than 2000 characters.
+        if (text.size() >= 2000) {
+            // Write message to file
+            std::ofstream message("message.txt", std::ios::out | std::ios::binary);
+            message << text;
+            message.close();
 
-		std::string escaped_text = EscapeString(text);
-        rapidjson::Document message_json = rapidjson::Document(rapidjson::kObjectType);
-        message_json.Parse("{\"content\":\"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "}");
+            // Ensure the file will be deleted even if it runs into an exception sending the file.
+            discpp::Message sent_message(nullptr);
+            try {
+                // Send the message
+                std::vector<discpp::File> files;
+                files.push_back({ "message.txt", "message.txt" });
+                sent_message = Send("Message was too large to fit in 2000 characters", tts, embed, files);
 
-		if (escaped_text.size() >= 2000) {
-			// Write message to file
-			std::ofstream message("message.txt", std::ios::out | std::ios::binary);
-			message << message_json["content"].GetString();
-			message.close();
+                // Delete the temporary message file
+                remove("message.txt");
+            } catch (const std::runtime_error& e) {
+                // Delete the temporary message file and then throw this exception again.
+                remove("message.txt");
 
-			// Ensure the file will be deleted even if it runs into an exception sending the file.
-			discpp::Message sent_message;
-			try {
-				// Send the message
-				std::vector<discpp::File> files;
-				files.push_back({ "message.txt", "message.txt" });
-				sent_message = Send("Message was too large to fit in 2000 characters", tts, nullptr, files);
+                throw std::runtime_error(e);
+            }
 
-				// Delete the temporary message file
-				remove("message.txt");
-			}
-			catch (std::exception e) {
-				// Delete the temporary message file
-				remove("message.txt");
+            return sent_message;
+        }
 
-				throw std::exception(e);
-			}
+        rapidjson::Document message_json(rapidjson::kObjectType);
+        message_json.AddMember("content", text, message_json.GetAllocator());
+        message_json.AddMember("tts", tts, message_json.GetAllocator());
 
-			return sent_message;
-		}
+        if (embed != nullptr) {
+            rapidjson::Value embed_value(rapidjson::kObjectType);
+            embed_value.CopyFrom(embed->embed_json, message_json.GetAllocator());
 
-		cpr::Body body;
-		if (embed != nullptr) {
-		    std::unique_ptr<rapidjson::Document> json = embed->ToJson();
-			body = cpr::Body("{\"embed\": " + DumpJson(*json) + ((!text.empty()) ? ", \"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") : "") + "}");
-		}
-		else if (!files.empty()) {
-			cpr::Multipart multipart_data{};
+            message_json.AddMember("embed", embed_value, message_json.GetAllocator());
+        }
 
-			for (int i = 0; i < files.size(); i++) {
-				multipart_data.parts.emplace_back("file" + std::to_string(i), cpr::File(files[i].file_path), "application/octet-stream");
-			}
+        if (!files.empty()) {
+            auto* http_client = new ix::HttpClient();
 
-			multipart_data.parts.emplace_back("payload_json", "{\"content\": \"" + escaped_text + (tts ? "\",\"tts\":\"true\"" : "\"") + "\"}");
+            ix::HttpRequestArgsPtr args = http_client->createRequest();
 
-			WaitForRateLimits(nullptr, id, RateLimitBucketType::WEBHOOK);
-			cpr::Response response = cpr::Post(cpr::Url{ Endpoint("/webhooks/" + std::to_string(id) + "/" + token) }, Headers({ {"Content-Type", "multipart/form-data"} }), multipart_data);
-            HandleRateLimits(response.header, id, RateLimitBucketType::WEBHOOK);
+            ix::HttpFormDataParameters data_parameters;
+            for (int i = 0; i < files.size(); i++) {
+                const discpp::File& file = files[i];
+                std::ifstream file_stream(file.file_path, std::ios::in | std::ios::binary);
+                std::ostringstream ss;
+                ss << file_stream.rdbuf();
+
+                if (file.file_name.empty()) {
+                    data_parameters["file_" + std::to_string(i)] = ss.str();
+                } else {
+                    data_parameters[file.file_name] = ss.str();
+                }
+            }
+
+            data_parameters["payload_json"] = discpp::DumpJson(message_json);
+
+            args->verbose = false;
+            args->extraHeaders = Headers();
+
+            // Generate a body from the multipart using IXWebsocket's method but then modify it
+            // so the payload_json field will actually be send as json, and not a file.
+            std::string multipart_bound = http_client->generateMultipartBoundary();
+            args->multipartBoundary = multipart_bound;
+            std::string body = http_client->serializeHttpFormDataParameters(multipart_bound, data_parameters);
+            discpp::ReplaceAll(body, "Content-Disposition: form-data; name=\"payload_json\"; filename=\"payload_json\"\r\nContent-Type: application/octet-stream", "Content-Disposition: form-data; name=\"payload_json\"\r\nContent-Type: application/json");
+
+            WaitForRateLimits(nullptr, id, RateLimitBucketType::CHANNEL);
+
+            ix::HttpResponsePtr result = http_client->post(Endpoint("/webhooks/" + std::to_string(id) + "/" + token), body, args);
 
             rapidjson::Document result_json(rapidjson::kObjectType);
-            result_json.Parse(response.text);
-			return discpp::Message(nullptr, result_json);
-		} else {
-			body = cpr::Body(DumpJson(message_json));
-		}
-		std::unique_ptr<rapidjson::Document> result = SendPostRequest(nullptr, Endpoint("/webhooks/" + std::to_string(id) + "/" + token), Headers({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::WEBHOOK, body);
+            result_json.Parse(result->body);
+
+            return discpp::Message(nullptr, result_json);
+        }
+
+        std::unique_ptr<rapidjson::Document> result = SendPostRequest(nullptr, Endpoint("/webhooks/" + std::to_string(id) + "/" + token), DefaultHeaders(nullptr, { { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, DumpJson(message_json));
 
 		return discpp::Message(nullptr, *result); // @TODO: Make WebhookMessage
 	}
@@ -90,15 +119,15 @@ namespace discpp {
 	void Webhook::EditName(std::string& name) {
         rapidjson::Document result_json(rapidjson::kObjectType);
         result_json.Parse("{\"name\": \"" + name + "\"}");
-		discpp::SendPatchRequest(nullptr, discpp::Endpoint("/webhooks/" + std::to_string(id)), Headers({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK, cpr::Body(DumpJson(result_json)));
+		discpp::SendPatchRequest(nullptr, discpp::Endpoint("/webhooks/" + std::to_string(id)), Headers({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK, DumpJson(result_json));
 	}
 
 	void Webhook::Remove() {
 		discpp::SendDeleteRequest(nullptr, discpp::Endpoint("/webhooks/" + std::to_string(id) + "/" + token), Headers({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK);
 	}
 
-    cpr::Header Webhook::Headers(const cpr::Header& add) {
-        cpr::Header headers = { { "User-Agent", "DisC++ Webhook (https://github.com/seanomik/DisCPP, v0.0.0)" },
+    ix::WebSocketHttpHeaders Webhook::Headers(const ix::WebSocketHttpHeaders& add) {
+        ix::WebSocketHttpHeaders headers = { { "User-Agent", "DisC++ Webhook (https://github.com/seanomik/DisCPP, v0.0.0)" },
                                 { "X-RateLimit-Precision", "millisecond"} };
         return headers;
     }

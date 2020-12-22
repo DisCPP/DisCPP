@@ -100,61 +100,65 @@ namespace discpp {
          */
 		Emoji(const std::string& s_unicode);
 
-        bool operator==(Emoji& other) const {
-#ifndef WIN32
+        bool operator==(const Emoji& other) const {
+#ifdef WIN32
+            // Check if the other emoji doesn't have a name but does have unicode convert it to string and compare to this emoji name.
+            if (other.name.empty() && !other.unicode.empty() && !name.empty() && unicode.empty()) {
+                char ansi_emoji[MAX_PATH];
+                if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, other.unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
+                    throw std::runtime_error("Failed to convert emoji to string!");
+                } else {
+                    return std::string(ansi_emoji) == name;
+                }
+            }
+            // Check if this emoji doesn't have a name but does have unicode convert it to string and compare to the other emoji name.
+            else if (!other.name.empty() && other.unicode.empty() && name.empty() && !unicode.empty()) {
+                char ansi_emoji[MAX_PATH];
+                if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
+                    throw std::runtime_error("Failed to convert emoji to string!");
+                } else {
+                    return std::string(ansi_emoji) == other.name;
+                }
+            }
+#else
             auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
+            // Check if the other emoji doesn't have a name but does have unicode convert it to string and compare to this emoji name.
+            if (other.name.empty() && !other.unicode.empty() && !name.empty() && unicode.empty()) {
+                return wstr_converter.to_bytes(other.unicode) == name;
+            }
+            // Check if this emoji doesn't have a name but does have unicode convert it to string and compare to the other emoji name.
+            else if (!other.name.empty() && other.unicode.empty() && name.empty() && !unicode.empty()) {
+                return wstr_converter.to_bytes(unicode) == other.name;
+            }
 #endif
 
-            // If the other's name is empty but mine is not then it must have unicode.
-            if (other.name.empty() && !name.empty() && unicode.empty()) {
-#ifdef WIN32
-            char ansi_emoji[MAX_PATH];
-            if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, other.unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
-                throw std::runtime_error("Failed to convert emoji to string!");
-            } else {
-                std::cout << "Just processed: " << ansi_emoji << std::endl;
-                return std::string(ansi_emoji) == name;
-            }
-#else
-            return wstr_converter.to_bytes(other.unicode) == name;
-#endif
-            } else if (!other.name.empty() && name.empty() && !unicode.empty()) {
-#ifdef WIN32
-            char ansi_emoji[MAX_PATH];
-            if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
-                throw std::runtime_error("Failed to convert emoji to string!");
-            } else {
-                std::cout << "Just processed: " << ansi_emoji << std::endl;
-                return std::string(ansi_emoji) == other.name;
-            }
-#else
-            return wstr_converter.to_bytes(unicode) == other.name;
-#endif
-            } else if (other.id != 0 && id != 0 && !other.name.empty() && !name.empty()) {
+            if (other.id != 0 && id != 0 && !other.name.empty() && !name.empty()) {
                 return other.id == id && other.name == name;
+            } else if (!other.name.empty() && !name.empty()) {
+                return other.name == name;
+            } else if (other.id != 0 && id != 0) {
+                return other.id == id;
             }
 
-            return false; // Hopefully this never runs.
+            return false;
         }
 
+        /**
+         * @brief Gets a string representation of this emoji for sending through messages.
+         *
+         * ```cpp
+         *      ctx.Send(emoji.ToString() + " Failed to make request!");
+         * ```
+         *
+         * @return std::string
+         */
         std::string ToString() {
-            /**
-			 * @brief Gets a string representation of this emoji for sending through messages.
-			 *
-			 * ```cpp
-			 *      ctx.Send(emoji.ToString() + " Failed to make request!");
-			 * ```
-			 *
-			 * @return std::string
-			 */
-
             if (name.empty() && id == 0) {
 #ifdef WIN32
                 char ansi_emoji[MAX_PATH];
                 if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
                     throw std::runtime_error("Failed to convert emoji to string!");
                 } else {
-                    std::cout << "Just processed: " << ansi_emoji << std::endl;
                     return ansi_emoji;
                 }
 #else
@@ -166,22 +170,18 @@ namespace discpp {
             }
         }
 
+        /**
+         * @brief Gets a URL representation of this emoji for adding reactions.
+         *
+         * This URI encodes the emoji and returns the string result.
+         *
+         * ```cpp
+         *      std::string endpoint = Endpoint("/channels/%/messages/%/reactions/%/@me", channel.id, id, emoji);
+         * ```
+         *
+         * @return std::string
+         */
 		std::string ToURL() {
-			/**
-			 * @brief Gets a URL representation of this emoji for adding reactions.
-			 *
-			 * This URI encodes the emoji and returns the string result.
-			 *
-			 * ```cpp
-			 *      std::string endpoint = Endpoint("/channels/%/messages/%/reactions/%/@me", channel.id, id, emoji);
-			 * ```
-			 *
-			 * @return std::string
-			 */
-
-#ifndef WIN32
-            auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
-#endif
 			std::wstring emoji;
 			if (name.empty()) {
 				emoji = unicode;
@@ -193,10 +193,10 @@ namespace discpp {
 			if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, emoji.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
 			    throw std::runtime_error("Failed to convert emoji to string!");
 			} else {
-			    std::cout << "Just processed: " << ansi_emoji << std::endl;
                 return URIEncode(ansi_emoji);
 			}
 #else
+            auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
 			return URIEncode(wstr_converter.to_bytes(emoji));
 #endif
 		}

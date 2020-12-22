@@ -10,6 +10,7 @@
 
 #include <utility>
 #include <variant>
+#include <mutex>
 
 namespace discpp {
 	class Guild;

@@ -20,30 +20,18 @@ set(RAPIDJSON_HAS_STDSTRING ON CACHE BOOL "")
 set(CURL_STATICLIB ON CACHE BOOL "")
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
 
-# Set options for CPR/Curl
-set(BUILD_CPR_TESTS OFF CACHE BOOL "")
-set(BUILD_CURL_EXE OFF CACHE BOOL "")
-
 set(USE_ZLIB OFF CACHE BOOL "") # Don't use ZLib for IXWebsocket
 
 # Set TLS library for CPR and also IXWebsocket
 if(WIN32) # Use WinSSL for Windows
-	set(USE_WINSSL ON CACHE BOOL "")
-	set(USE_OPENSSL OFF CACHE BOOL "")
-
 	# For IXWebsocket
 	set(USE_MBED_TLS OFF)
 	set(USE_OPEN_SSL ON)
 elseif(APPLE) # Use secure transport for Apple
-	set(CMAKE_USE_SECTRANSP ON CACHE BOOL "")
-	set(CMAKE_USE_OPENSSL OFF CACHE BOOL "")
-
 	# For IXWebsocket
 	set(USE_SECURE_TRANSPORT ON CACHE BOOL "")
 	set(USE_OPEN_SSL OFF CACHE BOOL "")
 else() # Use OpenSSL for anything else.
-	set(USE_OPENSSL ON CACHE BOOL "")
-
 	set(USE_OPEN_SSL ON CACHE BOOL "") # For IXWebsocket
 
 	# Set ssl certificate.
@@ -55,8 +43,8 @@ endif()
 option(USE_RAPID "Uses RapidJSON for json parsing." ON)
 option(USE_SIMD "Uses simdjson for json parsing. - NOT YET SUPPORTED" OFF)
 option(USE_FMT "Uses fmt for logger - NOT YET SUPPORTED" OFF)
-option(BUILD_EXAMPLES "Build example bots." ON)
-option(BUILD_TESTS "Build unit tests." OFF)
+option(BUILD_DISCPP_EXAMPLES "Build example bots." OFF)
+option(BUILD_DISCPP_TESTS "Build unit tests." OFF)
 
 # Find dependencies
 if (USE_FMT)
@@ -71,7 +59,6 @@ elseif(USE_SIMD)
 	add_compile_definitions(SIMDJSON_BACKEND)
 endif()
 
-add_subdirectory(thirdparty/cpr)
 set(USE_ZLIB FALSE)
 add_subdirectory(thirdparty/IXWebSocket)
 
@@ -109,20 +96,16 @@ endif()
 # Set options for C++ standard lib.
 target_compile_definitions(discpp PUBLIC __STDC_WANT_LIB_EXT1__)
 
-# I have to do some weird stuff to get Cpr to link
-target_compile_definitions(${CPR_LIBRARIES} PUBLIC CURL_STATICLIB)
-target_include_directories(discpp PUBLIC ${CPR_INCLUDE_DIRS})
-target_link_libraries(discpp PUBLIC ${CPR_LIBRARIES})
 target_link_libraries(discpp PUBLIC ixwebsocket)
 
 # Build unit tests
-if (BUILD_TESTS)
+if (BUILD_DISCPP_TESTS)
 	message(STATUS "Building DisC++ tests")
 	add_subdirectory(tests)
 endif()
 
 # Build examples
-if (BUILD_EXAMPLES)
+if (BUILD_DISCPP_EXAMPLES)
 	message(STATUS "Building DisC++ examples")
 	add_subdirectory(examples/pingbot)
 	add_subdirectory(examples/serverinfo)

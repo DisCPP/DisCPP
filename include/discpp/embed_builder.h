@@ -16,6 +16,7 @@ namespace discpp {
 
 	class EmbedBuilder {
     friend class Channel;
+    friend class Webhook;
 	public:
 		EmbedBuilder();
 

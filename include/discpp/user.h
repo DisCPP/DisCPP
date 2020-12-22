@@ -4,6 +4,8 @@
 #include "discord_object.h"
 #include "utils.h"
 
+#include <chrono>
+
 namespace discpp {
 	class Channel;
 	class Integration;

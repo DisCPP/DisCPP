@@ -130,7 +130,7 @@ namespace discpp {
         int flags;
     };
 
-	class Presence {
+	class Presence { // @TODO: Add documentation.
 	public:
 	    Presence() = default;
 		Presence(discpp::Client* client, rapidjson::Document& json) {
