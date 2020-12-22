@@ -121,6 +121,7 @@ namespace discpp {
                 }
             }
 #else
+            auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
             // Check if the other emoji doesn't have a name but does have unicode convert it to string and compare to this emoji name.
             if (other.name.empty() && !other.unicode.empty() && !name.empty() && unicode.empty()) {
                 return wstr_converter.to_bytes(other.unicode) == name;
@@ -142,17 +143,16 @@ namespace discpp {
             return false;
         }
 
+        /**
+         * @brief Gets a string representation of this emoji for sending through messages.
+         *
+         * ```cpp
+         *      ctx.Send(emoji.ToString() + " Failed to make request!");
+         * ```
+         *
+         * @return std::string
+         */
         std::string ToString() {
-            /**
-			 * @brief Gets a string representation of this emoji for sending through messages.
-			 *
-			 * ```cpp
-			 *      ctx.Send(emoji.ToString() + " Failed to make request!");
-			 * ```
-			 *
-			 * @return std::string
-			 */
-
             if (name.empty() && id == 0) {
 #ifdef WIN32
                 char ansi_emoji[MAX_PATH];
@@ -170,22 +170,18 @@ namespace discpp {
             }
         }
 
+        /**
+         * @brief Gets a URL representation of this emoji for adding reactions.
+         *
+         * This URI encodes the emoji and returns the string result.
+         *
+         * ```cpp
+         *      std::string endpoint = Endpoint("/channels/%/messages/%/reactions/%/@me", channel.id, id, emoji);
+         * ```
+         *
+         * @return std::string
+         */
 		std::string ToURL() {
-			/**
-			 * @brief Gets a URL representation of this emoji for adding reactions.
-			 *
-			 * This URI encodes the emoji and returns the string result.
-			 *
-			 * ```cpp
-			 *      std::string endpoint = Endpoint("/channels/%/messages/%/reactions/%/@me", channel.id, id, emoji);
-			 * ```
-			 *
-			 * @return std::string
-			 */
-
-#ifndef WIN32
-            auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
-#endif
 			std::wstring emoji;
 			if (name.empty()) {
 				emoji = unicode;
@@ -200,6 +196,7 @@ namespace discpp {
                 return URIEncode(ansi_emoji);
 			}
 #else
+            auto wstr_converter = std::wstring_convert<std::codecvt_utf8<wchar_t>>();
 			return URIEncode(wstr_converter.to_bytes(emoji));
 #endif
 		}
