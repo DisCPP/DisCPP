@@ -4,6 +4,7 @@
 #include "member.h"
 #include "cache.h"
 #include "exceptions.h"
+#include "http_client.h"
 
 #include <iomanip>
 #include <sstream>
@@ -63,7 +64,7 @@ namespace discpp {
 	discpp::Channel User::CreateDM() {
 		std::string body("{\"recipient_id\": \"" + std::to_string(id) + "\"}");
         discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendPostRequest(client, Endpoint("/users/@me/channels"), DefaultHeaders(client, { {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
+		std::unique_ptr<rapidjson::Document> result = client->http_client->SendPostRequest(Endpoint("/users/@me/channels"), client->http_client->DefaultHeaders( { {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
 
 		return discpp::Channel(client, *result);
 	}
@@ -115,8 +116,8 @@ namespace discpp {
         return id.GetFormattedTimestamp();
     }
 
-    std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> User::GetMutualGuilds() {
-         std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> map;
+    std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>, discpp::SnowflakeHash> User::GetMutualGuilds() {
+         std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>, discpp::SnowflakeHash> map;
 
          discpp::Client* client = GetClient();
 
@@ -161,7 +162,7 @@ namespace discpp {
         if (client->client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            std::unique_ptr<rapidjson::Document> result = SendPutRequest(client, Endpoint("users/@me/relationships/" + std::to_string(this->id)), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL, "{\"type\":2}");
+            std::unique_ptr<rapidjson::Document> result = client->http_client->SendPutRequest(Endpoint("users/@me/relationships/" + std::to_string(this->id)), client->http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL, "{\"type\":2}");
         }
     }
 
@@ -170,7 +171,7 @@ namespace discpp {
         if(client->client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            std::unique_ptr<rapidjson::Document> result = SendDeleteRequest(client, Endpoint("users/@me/relationships/" + std::to_string(this->id)), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL);
+            std::unique_ptr<rapidjson::Document> result = client->http_client->SendDeleteRequest(Endpoint("users/@me/relationships/" + std::to_string(this->id)), client->http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
 	}
 
@@ -179,7 +180,7 @@ namespace discpp {
         if (!client->client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            std::unique_ptr<rapidjson::Document> result = SendPutRequest(client, Endpoint("users/@me/relationships/" + std::to_string(this->id)), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL);
+            std::unique_ptr<rapidjson::Document> result = client->http_client->SendPutRequest(Endpoint("users/@me/relationships/" + std::to_string(this->id)), client->http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
     }
 
@@ -188,7 +189,7 @@ namespace discpp {
         if(client->client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            std::unique_ptr<rapidjson::Document> result = SendDeleteRequest(client, Endpoint("users/@me/relationships/" + std::to_string(this->id)), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL);
+            std::unique_ptr<rapidjson::Document> result = client->http_client->SendDeleteRequest(Endpoint("users/@me/relationships/" + std::to_string(this->id)), client->http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
     }
 }

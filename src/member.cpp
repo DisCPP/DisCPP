@@ -4,6 +4,7 @@
 #include "role.h"
 #include "cache.h"
 #include "exceptions.h"
+#include "http_client.h"
 
 #include <climits>
 
@@ -94,24 +95,24 @@ namespace discpp {
 		std::string body("{\"nick\": \"" + EscapeString(nick) + "\", \"roles\": " + json_roles + ", \"mute\": " + std::to_string(mute) + ", \"deaf\": " + std::to_string(deaf) + "\"channel_id\": \"" + std::to_string(channel_id) + "\"" + "}");
 
 		discpp::Client* client = user.GetClient();
-		SendPatchRequest(client, Endpoint("/guilds/" + std::to_string(this->user.id) + "/members/" + std::to_string(user.id)), DefaultHeaders(client, { { "Content-Type", "application/json" } }), guild_id, RateLimitBucketType::GUILD, body);
+        client->http_client->SendPatchRequest( Endpoint("/guilds/" + std::to_string(this->user.id) + "/members/" + std::to_string(user.id)), client->http_client->DefaultHeaders({ { "Content-Type", "application/json" } }), guild_id, RateLimitBucketType::GUILD, body);
 	}
 
 	void Member::AddRole(const discpp::Role& role) {
         discpp::Client* client = user.GetClient();
-		SendPutRequest(client, Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(user.id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(client), guild_id, RateLimitBucketType::GUILD);
+        client->http_client->SendPutRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(user.id) + "/roles/" + std::to_string(role.id)), client->http_client->DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 	}
 
 	void Member::RemoveRole(const discpp::Role& role) {
         discpp::Client* client = user.GetClient();
-		SendDeleteRequest(client, Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(user.id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(client), guild_id, RateLimitBucketType::GUILD);
+        client->http_client->SendDeleteRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/members/" + std::to_string(user.id) + "/roles/" + std::to_string(role.id)), client->http_client->DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 	}
 
 	bool Member::IsBanned() {
         discpp::Client* client = user.GetClient();
 
         try {
-            std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(guild_id) + "/bans/" + std::to_string(user.id)), DefaultHeaders(client), guild_id, RateLimitBucketType::GUILD);
+            std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("/guilds/" + std::to_string(guild_id) + "/bans/" + std::to_string(user.id)), client->http_client->DefaultHeaders(), guild_id, RateLimitBucketType::GUILD);
 
             return true;
 		} catch (const exceptions::http::HTTPResponseException& e) {
@@ -200,8 +201,8 @@ namespace discpp {
         return Member(mbr);
     }
 
-    std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>> Member::GetRoles() {
-        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>> r;
+    std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>, discpp::SnowflakeHash> Member::GetRoles() {
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>, discpp::SnowflakeHash> r;
 
         std::shared_ptr<discpp::Guild> guild = GetGuild();
 	    for (auto const& role : roles) {

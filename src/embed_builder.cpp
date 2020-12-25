@@ -28,7 +28,7 @@ namespace discpp {
 
 	EmbedBuilder& EmbedBuilder::SetTitle(const std::string& title) {
 		if (title.size() < 0 || title.size() > 256) {
-			////client->logger->Error(LogTextColor::RED + "Embed title can only be 0-256 characters!");
+			//client->logger->Error(LogTextColor::RED + "Embed title can only be 0-256 characters!");
 			throw std::runtime_error("Embed title can only be 0-256 characters");
 		}
 		auto& allocator = embed_json.GetAllocator();

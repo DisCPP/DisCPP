@@ -20,10 +20,10 @@ namespace discpp {
         friend class EventDispatcher;
         friend class User;
     private:
-        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Member>> members;
-        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> guilds;
-        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Message>> messages;
-        std::unordered_map<discpp::Snowflake, discpp::Channel> private_channels;
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Member>, discpp::SnowflakeHash> members;
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>, discpp::SnowflakeHash> guilds;
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Message>, discpp::SnowflakeHash> messages;
+        std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash> private_channels;
 
         std::mutex members_mutex;
         std::mutex guilds_mutex;
@@ -36,33 +36,33 @@ namespace discpp {
          * @brief Get all members the bot is handling. Do not modify contents since it will break thread-safety!
          * If you just want to get a member, use discpp::Cache::GetMember().
          *
-         * @return const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Member>>
+         * @return const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Member>, discpp::SnowflakeHash>
          */
-        const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Member>> GetMembers();
+        const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Member>, discpp::SnowflakeHash> GetMembers();
 
         /**
          * @brief Get all guilds the bot is in. Do not modify contents since it will break thread-safety!
          * If you just want to get a guild, use discpp::Cache::GetGuild().
          *
-         * @return const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>>
+         * @return const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>, discpp::SnowflakeHash>
          */
-        const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> GetGuilds();
+        const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>, discpp::SnowflakeHash> GetGuilds();
 
         /**
          * @brief Get all messages the bot has seen or requested. Do not modify contents since it will break thread-safety!
          * If you just want to get a message, use discpp::Cache::GetMessage().
          *
-         * @return const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Message>>
+         * @return const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Message>, discpp::SnowflakeHash>
          */
-        const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Message>> GetMessages();
+        const std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Message>, discpp::SnowflakeHash> GetMessages();
 
         /**
          * @brief Get all private channels the bot is handling. Do not modify contents since it will break thread-safety!
          * If you just want to get a private channel, use discpp::Cache::GetPrivateChannel().
          *
-         * @return const std::unordered_map<discpp::Snowflake, discpp::Channel>
+         * @return const std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash>
          */
-        const std::unordered_map<discpp::Snowflake, discpp::Channel> GetPrivateChannels();
+        const std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash> GetPrivateChannels();
 
         /**
          * @brief Cache a discpp::Member.

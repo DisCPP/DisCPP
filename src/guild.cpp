@@ -8,6 +8,7 @@
 #include "audit_log.h"
 #include "user.h"
 #include "cache.h"
+#include "http_client.h"
 
 #include <memory>
 
@@ -236,15 +237,15 @@ namespace discpp {
 			throw NotGuildOwnerException();
 		}
 
-		SendDeleteRequest(client, Endpoint("/guilds/" + std::to_string(id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
+        client->http_client->SendDeleteRequest(Endpoint("/guilds/" + std::to_string(id)), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
-    std::unordered_map<discpp::Snowflake, discpp::Channel> Guild::UpdateChannels() {
+    std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash> Guild::UpdateChannels() {
         std::lock_guard<std::mutex> lock_guard(channels_mutex);
 
         discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/channels"), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
-        std::unordered_map<discpp::Snowflake, discpp::Channel> channels;
+		std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/channels"), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD);
+        std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash> channels;
 
         for (auto const& channel : result->GetArray()) {
             if (!channel.IsNull()) {
@@ -260,8 +261,8 @@ namespace discpp {
 		return channels;
 	}
 
-    std::unordered_map<discpp::Snowflake, discpp::Channel> Guild::GetCategories() {
-	    std::unordered_map<discpp::Snowflake, discpp::Channel> tmp;
+    std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash> Guild::GetCategories() {
+	    std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash> tmp;
 
 	    for (auto& chnl : channels) {
 	        if (chnl.second.type == discpp::ChannelType::GROUP_CATEGORY) {
@@ -272,8 +273,8 @@ namespace discpp {
 	    return tmp;
 	}
 
-	std::unordered_map<discpp::Snowflake, discpp::Channel> Guild::GetParentlessChannels() {
-	    std::unordered_map<discpp::Snowflake, discpp::Channel> tmp;
+	std::unordered_map<Snowflake, Channel, discpp::SnowflakeHash> Guild::GetParentlessChannels() {
+	    std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash> tmp;
 
 	    for (auto& chnl : channels) {
 	        if (chnl.second.category_id == 0) {
@@ -334,7 +335,7 @@ namespace discpp {
         std::string body(DumpJson(channel_json));
 
         discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendPostRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/channels"), DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::CHANNEL, body);
+		std::unique_ptr<rapidjson::Document> result = client->http_client->SendPostRequest(Endpoint("/guilds/" + std::to_string(id) + "/channels"), client->http_client->DefaultHeaders( { { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::CHANNEL, body);
 
         discpp::Channel channel(client, *result);
         channels.insert({ channel.id, channel });
@@ -358,7 +359,7 @@ namespace discpp {
 
         std::string body(DumpJson(json_raw));
         discpp::Client* client = GetClient();
-		SendPatchRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/channels"), DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::CHANNEL, body);
+        client->http_client->SendPatchRequest(Endpoint("/guilds/" + std::to_string(id) + "/channels"), client->http_client->DefaultHeaders( { { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::CHANNEL, body);
 	}
 
 	std::shared_ptr<discpp::Member> Guild::GetMember(const Snowflake& id, bool can_request) {
@@ -375,7 +376,7 @@ namespace discpp {
 
         if (can_request) {
             discpp::Client* client = GetClient();
-            std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(this->id) + "/members/"+ std::to_string(id)), DefaultHeaders(client), id, RateLimitBucketType::CHANNEL);
+            std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/"+ std::to_string(id)), client->http_client->DefaultHeaders(), id, RateLimitBucketType::CHANNEL);
 
             auto member = std::make_shared<discpp::Member>(client, *result, this);
             members.emplace(member->user.id, member);
@@ -409,19 +410,19 @@ namespace discpp {
         std::string body("{\"access_token\": \"" + access_token + "\", \"nick\": \"" + nick + "\", \"roles\": " + json_roles + ", \"mute\": " + std::to_string(mute) + ", \"deaf\": " + std::to_string(deaf) + "}");
 
         discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendPutRequest(client, Endpoint("/guilds/" + std::to_string(this->id) + "/members/" + std::to_string(id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD, body);
+		std::unique_ptr<rapidjson::Document> result = client->http_client->SendPutRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/members/" + std::to_string(id)), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 
 		return std::make_shared<discpp::Member>((result->Empty()) ? discpp::Member(client, id, this) : discpp::Member(client, *result, this)); // If the member is already added, return it.
 	}
 
 	void Guild::RemoveMember(const discpp::Member& member) {
         discpp::Client* client = GetClient();
-		SendDeleteRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/members/" + std::to_string(member.user.id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
+        client->http_client->SendDeleteRequest(Endpoint("/guilds/" + std::to_string(id) + "/members/" + std::to_string(member.user.id)), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
 	std::vector<discpp::GuildBan> Guild::GetBans() const {
         discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/bans"), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
+		std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/bans"), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD);
 		
 		std::vector<discpp::GuildBan> guild_bans;
         for (auto const& guild_ban : result->GetArray()) {
@@ -447,7 +448,7 @@ namespace discpp {
 
 	std::string Guild::GetMemberBanReason(const discpp::Member& member) const {
         discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/bans/" + std::to_string(member.user.id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
+		std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/bans/" + std::to_string(member.user.id)), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD);
 		if (ContainsNotNull(*result, "reason")) return (*result)["reason"].GetString();
 
 		return "";
@@ -462,7 +463,7 @@ namespace discpp {
 
         discpp::Client* client = GetClient();
         std::string body("{\"reason\": \"" + EscapeString(reason) + "\"}");
-        SendPutRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/bans/" + std::to_string(user_id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD, body);
+        client->http_client->SendPutRequest(Endpoint("/guilds/" + std::to_string(id) + "/bans/" + std::to_string(user_id)), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
     }
 
 	void Guild::UnbanMember(const discpp::Member& member) {
@@ -473,7 +474,7 @@ namespace discpp {
         Guild::EnsureBotPermission(Permission::BAN_MEMBERS);
 
         discpp::Client* client = GetClient();
-        SendDeleteRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/bans/" + std::to_string(user_id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
+        client->http_client->SendDeleteRequest(Endpoint("/guilds/" + std::to_string(id) + "/bans/" + std::to_string(user_id)), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD);
     }
 
 	void Guild::KickMember(const discpp::Member& member, const std::string& reason) {
@@ -489,7 +490,7 @@ namespace discpp {
         }
 
         discpp::Client* client = GetClient();
-        SendDeleteRequest(client, url, DefaultHeaders(client), id, RateLimitBucketType::GUILD);
+        client->http_client->SendDeleteRequest(url, client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
 	std::shared_ptr<discpp::Role> Guild::GetRole(const Snowflake& id) {
@@ -515,7 +516,7 @@ namespace discpp {
 
         std::string body(DumpJson(json_body));
         discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendPostRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/roles"), DefaultHeaders(client), id, RateLimitBucketType::GUILD, body);
+		std::unique_ptr<rapidjson::Document> result = client->http_client->SendPostRequest(Endpoint("/guilds/" + std::to_string(id) + "/roles"), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 		std::shared_ptr<discpp::Role> new_role = std::make_shared<discpp::Role>(discpp::Role(client, *result));
 
 		roles.insert({ new_role->id, new_role });
@@ -537,7 +538,7 @@ namespace discpp {
 
         std::string body(DumpJson(json_raw));
         discpp::Client* client = GetClient();
-		SendPatchRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/roles"), DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::CHANNEL, body);
+        client->http_client->SendPatchRequest(Endpoint("/guilds/" + std::to_string(id) + "/roles"), client->http_client->DefaultHeaders( { { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::CHANNEL, body);
 	}
 
 	std::shared_ptr<discpp::Role> Guild::ModifyRole(const discpp::Role& role, const std::string& name, const Permissions& permissions, const int& color, const bool hoist, const bool mentionable) {
@@ -552,7 +553,7 @@ namespace discpp {
 
         std::string body(DumpJson(json_body));
         discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendPatchRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD, body);
+		std::unique_ptr<rapidjson::Document> result = client->http_client->SendPatchRequest(Endpoint("/guilds/" + std::to_string(id) + "/roles/" + std::to_string(role.id)), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 		std::shared_ptr<discpp::Role> modified_role = std::make_shared<discpp::Role>(discpp::Role(client, *result));
 
 		auto it = roles.find(role.id);
@@ -566,7 +567,7 @@ namespace discpp {
 	void Guild::DeleteRole(const discpp::Role& role) {
 		Guild::EnsureBotPermission(Permission::MANAGE_ROLES);
         discpp::Client* client = GetClient();
-		SendDeleteRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/roles/" + std::to_string(role.id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
+        client->http_client->SendDeleteRequest(Endpoint("/guilds/" + std::to_string(id) + "/roles/" + std::to_string(role.id)), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD);
 
 		roles.erase(role.id);
 	}
@@ -579,7 +580,7 @@ namespace discpp {
         std::string body("{\"days\": " + std::to_string(days) + "}");
 
         discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/prune"), DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::GUILD, body);
+		std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/prune"), client->http_client->DefaultHeaders( { { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::GUILD, body);
 
 		return GetDataSafely<int>(*result, "pruned");
 	}
@@ -587,12 +588,12 @@ namespace discpp {
 	void Guild::BeginPrune(const int& days) {
         std::string body("{\"days\": " + std::to_string(days) + "}");
         discpp::Client* client = GetClient();
-		SendPostRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/prune"), DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::GUILD, body);
+        client->http_client->SendPostRequest(Endpoint("/guilds/" + std::to_string(id) + "/prune"), client->http_client->DefaultHeaders( { { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::GUILD, body);
 	}
 
 	std::vector<discpp::GuildInvite> Guild::GetInvites() const {
         discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/invites"), DefaultHeaders(client), {}, {});
+		std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/invites"), client->http_client->DefaultHeaders(), {}, {});
 
 		std::vector<discpp::GuildInvite> guild_invites;
         for (auto const& guild_invite : result->GetArray()) {
@@ -609,7 +610,7 @@ namespace discpp {
 
 	std::vector<discpp::Integration> Guild::GetIntegrations() const {
         discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/integrations"), DefaultHeaders(client), {}, {});
+		std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/integrations"), client->http_client->DefaultHeaders(), {}, {});
 
 		std::vector<discpp::Integration> guild_integrations;
 		for (auto const& guild_integration : result->GetArray()) {
@@ -629,7 +630,7 @@ namespace discpp {
 
         std::string body("{\"type\": \"" + type + "\", \"id\": \"" + std::to_string(id) + "\"}");
         discpp::Client* client = GetClient();
-		SendPostRequest(client, Endpoint("/guilds/" + std::to_string(this->id) + "/integrations"), DefaultHeaders(client), this->id, RateLimitBucketType::GUILD, body);
+        client->http_client->SendPostRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/integrations"), client->http_client->DefaultHeaders(), this->id, RateLimitBucketType::GUILD, body);
 	}
 
 	void Guild::ModifyIntegration(const discpp::Integration& guild_integration, const int& expire_behavior, const int& expire_grace_period, const bool enable_emoticons) {
@@ -637,33 +638,33 @@ namespace discpp {
 
         std::string body("{\"expire_behavior\": " + std::to_string(expire_behavior) + ", \"expire_grace_period\": " + std::to_string(expire_grace_period) + ", \"enable_emoticons\": " + std::to_string(enable_emoticons) + "}");
         discpp::Client* client = GetClient();
-		SendPostRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/integrations/" + std::to_string(guild_integration.id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD, body);
+        client->http_client->SendPostRequest(Endpoint("/guilds/" + std::to_string(id) + "/integrations/" + std::to_string(guild_integration.id)), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 	}
 
 	void Guild::DeleteIntegration(const discpp::Integration& guild_integration) {
 		Guild::EnsureBotPermission(Permission::MANAGE_GUILD);
 
         discpp::Client* client = GetClient();
-		SendDeleteRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/integrations/" + std::to_string(guild_integration.id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
+        client->http_client->SendDeleteRequest(Endpoint("/guilds/" + std::to_string(id) + "/integrations/" + std::to_string(guild_integration.id)), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
 	void Guild::SyncIntegration(const discpp::Integration& guild_integration) {
 		Guild::EnsureBotPermission(Permission::MANAGE_GUILD);
 
         discpp::Client* client = GetClient();
-		SendPostRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/integrations/" + std::to_string(guild_integration.id) + "/sync"), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
+        client->http_client->SendPostRequest(Endpoint("/guilds/" + std::to_string(id) + "/integrations/" + std::to_string(guild_integration.id) + "/sync"), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD);
 	}
 
 	discpp::GuildEmbed Guild::GetGuildEmbed() const {
         discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/embed"), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
+		std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/embed"), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD);
 		return discpp::GuildEmbed(*result);
 	}
 
 	discpp::GuildEmbed Guild::ModifyGuildEmbed(const Snowflake& channel_id, const bool enabled) {
         std::string body("{\"channel_id\": \"" + std::to_string(channel_id) + "\", \"enabled\": " + ((enabled) ? "true" : "false") + "}");
         discpp::Client* client = GetClient();
-        std::unique_ptr<rapidjson::Document> result = SendPatchRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/embed"), DefaultHeaders(client), id, RateLimitBucketType::GUILD, body);
+        std::unique_ptr<rapidjson::Document> result = client->http_client->SendPatchRequest(Endpoint("/guilds/" + std::to_string(id) + "/embed"), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 
 		return discpp::GuildEmbed(*result);
 	}
@@ -690,18 +691,18 @@ namespace discpp {
 		}
         std::string body("{\"style\": " + style + "}");
         discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/widget.png"), DefaultHeaders(client), id, RateLimitBucketType::GUILD, body);
+		std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/widget.png"), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 
 		return result->GetString();
 	}
 
-	std::unordered_map<Snowflake, Emoji> Guild::UpdateEmojis() {
+	std::unordered_map<Snowflake, discpp::Emoji, discpp::SnowflakeHash> Guild::UpdateEmojis() {
         std::lock_guard<std::mutex> lock_guard(emojis_mutex);
 
         discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/emojis"), DefaultHeaders(client), {}, {});
+		std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/emojis"), client->http_client->DefaultHeaders(), {}, {});
 
-		std::unordered_map<Snowflake, Emoji> emojis;
+		std::unordered_map<Snowflake, Emoji, discpp::SnowflakeHash> emojis;
         for (auto const& emoji : result->GetArray()) {
             if (!emoji.IsNull()) {
                 rapidjson::Document emoji_json;
@@ -730,7 +731,7 @@ namespace discpp {
 
         if (can_request) {
             discpp::Client* client = GetClient();
-            std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(this->id) + "/emojis/" + std::to_string(id)), DefaultHeaders(client), {}, {});
+            std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/emojis/" + std::to_string(id)), client->http_client->DefaultHeaders(), {}, {});
 
             discpp::Emoji emoji(client, *result);
             emojis.emplace(emoji.id, emoji);
@@ -755,7 +756,7 @@ namespace discpp {
 
         std::string body(DumpJson(body_raw));
         discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendPostRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/emojis"), DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, RateLimitBucketType::GUILD, body);
+		std::unique_ptr<rapidjson::Document> result = client->http_client->SendPostRequest(Endpoint("/guilds/" + std::to_string(id) + "/emojis"), client->http_client->DefaultHeaders( { { "Content-Type", "application/json" } }), id, RateLimitBucketType::GUILD, body);
 
         Emoji emoji = discpp::Emoji(client, *result);
         emojis.insert({ emoji.id, emoji });
@@ -778,7 +779,7 @@ namespace discpp {
 
         std::string body("{\"name\": \"" + name + "\", \"roles\": " + json_roles + "}");
         discpp::Client* client = GetClient();
-		std::unique_ptr<rapidjson::Document> result = SendPatchRequest(client, Endpoint("/guilds/" + std::to_string(this->id) + "/emojis/" + std::to_string(id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD, body);
+		std::unique_ptr<rapidjson::Document> result = client->http_client->SendPatchRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/emojis/" + std::to_string(id)), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD, body);
 
 		discpp::Emoji resulted_emoji = discpp::Emoji(client, *result);
 
@@ -793,7 +794,7 @@ namespace discpp {
 	void Guild::DeleteEmoji(const discpp::Emoji& emoji) {
 		Guild::EnsureBotPermission(Permission::MANAGE_EMOJIS);
         discpp::Client* client = GetClient();
-		SendDeleteRequest(client, Endpoint("/guilds/" + std::to_string(this->id) + "/emojis/" + std::to_string(id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
+        client->http_client->SendDeleteRequest(Endpoint("/guilds/" + std::to_string(this->id) + "/emojis/" + std::to_string(id)), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD);
 
 		emojis.erase(emoji.id);
 	}
@@ -903,7 +904,7 @@ namespace discpp {
         }
 
         std::string body(DumpJson(j_body));
-        std::unique_ptr<rapidjson::Document> result = SendPatchRequest(client, Endpoint("/guilds/" + std::to_string(id)), DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
+        std::unique_ptr<rapidjson::Document> result = client->http_client->SendPatchRequest(Endpoint("/guilds/" + std::to_string(id)), client->http_client->DefaultHeaders( { { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
 
         *this = discpp::Guild(client, *result);
         return *this;
@@ -911,14 +912,14 @@ namespace discpp {
 
     discpp::GuildInvite Guild::GetVanityURL() const {
         discpp::Client* client = GetClient();
-	    std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/vanity-url"), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
+	    std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/vanity-url"), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD);
 
         return discpp::GuildInvite(client, *result);
     }
 
     discpp::AuditLog Guild::GetAuditLog() const {
         discpp::Client* client = GetClient();
-        std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/audit-logs"), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
+        std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/audit-logs"), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD);
 
         return discpp::AuditLog(client, *result);
     }
@@ -949,7 +950,7 @@ namespace discpp {
             return it->second;
         } else {
             discpp::Client* client = GetClient();
-            std::unique_ptr<rapidjson::Document> result = discpp::SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/members/" + std::to_string(member_id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
+            std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("/guilds/" + std::to_string(id) + "/members/" + std::to_string(member_id)), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GUILD);
 
             std::shared_ptr<discpp::Member> member = std::make_shared<discpp::Member>(client, *result, this);
             members.insert({ member_id, member });

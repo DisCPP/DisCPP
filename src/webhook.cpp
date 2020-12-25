@@ -2,9 +2,11 @@
 #include "utils.h"
 #include "message.h"
 #include "client.h"
+#include "http_client.h"
 
 #include <fstream>
 #include <sstream>
+#include <map>
 
 #include <ixwebsocket/IXHttpClient.h>
 
@@ -13,7 +15,11 @@
  */
 
 namespace discpp {
-    Webhook::Webhook(rapidjson::Document& json) {
+    Webhook::Webhook(std::shared_ptr<HttpClient> http_client) : http_client(std::move(http_client)) {
+
+    }
+
+    Webhook::Webhook(std::shared_ptr<HttpClient> http_client, rapidjson::Document& json) : http_client(std::move(http_client)) {
         id = Snowflake(json["id"].GetString());
         type = static_cast<WebhookType>(json["type"].GetInt());
         guild_id = Snowflake(json["guild_id"].GetString());
@@ -26,10 +32,9 @@ namespace discpp {
         token = GetDataSafely<std::string>(json, "token");
     }
 
-	Webhook::Webhook(const discpp::Snowflake& id, const std::string& token) : id(id) {
-		this->token = token;
-		this->id = id;
-	};
+	Webhook::Webhook(std::shared_ptr<HttpClient> http_client, const discpp::Snowflake& id, const std::string& token) : http_client(std::move(http_client)), id(id), token(token) {
+
+    };
 
 	discpp::Message Webhook::Send(const std::string& text, const bool tts, discpp::EmbedBuilder* embed, const std::vector<discpp::File>& files) {
         // Send a file filled with message contents if the message is more than 2000 characters.
@@ -92,7 +97,8 @@ namespace discpp {
             data_parameters["payload_json"] = discpp::DumpJson(message_json);
 
             args->verbose = false;
-            args->extraHeaders = Headers();
+            std::map<std::string, std::string, discpp::CaseInsensitiveLess> head = Headers();
+            args->extraHeaders = ix::WebSocketHttpHeaders(head.begin(), head.end());
 
             // Generate a body from the multipart using IXWebsocket's method but then modify it
             // so the payload_json field will actually be send as json, and not a file.
@@ -111,24 +117,24 @@ namespace discpp {
             return discpp::Message(nullptr, result_json);
         }
 
-        std::unique_ptr<rapidjson::Document> result = SendPostRequest(nullptr, Endpoint("/webhooks/" + std::to_string(id) + "/" + token), DefaultHeaders(nullptr, { { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, DumpJson(message_json));
+        std::unique_ptr<rapidjson::Document> result = http_client->SendPostRequest(Endpoint("/webhooks/" + std::to_string(id) + "/" + token), Headers({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, DumpJson(message_json));
 
 		return discpp::Message(nullptr, *result); // @TODO: Make WebhookMessage
 	}
 
-	void Webhook::EditName(std::string& name) {
+	void Webhook::EditName(const std::string &name) {
         rapidjson::Document result_json(rapidjson::kObjectType);
-        result_json.Parse("{\"name\": \"" + name + "\"}");
-		discpp::SendPatchRequest(nullptr, discpp::Endpoint("/webhooks/" + std::to_string(id)), Headers({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK, DumpJson(result_json));
+        result_json.Parse(R"({"name": ")" + name + "\"}");
+        http_client->SendPatchRequest(discpp::Endpoint("/webhooks/" + std::to_string(id)), Headers({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK, DumpJson(result_json));
+        this->name = name;
 	}
 
 	void Webhook::Remove() {
-		discpp::SendDeleteRequest(nullptr, discpp::Endpoint("/webhooks/" + std::to_string(id) + "/" + token), Headers({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK);
+        http_client->SendDeleteRequest(discpp::Endpoint("/webhooks/" + std::to_string(id) + "/" + token), Headers({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK);
 	}
 
-    ix::WebSocketHttpHeaders Webhook::Headers(const ix::WebSocketHttpHeaders& add) {
-        ix::WebSocketHttpHeaders headers = { { "User-Agent", "DisC++ Webhook (https://github.com/seanomik/DisCPP, v0.0.0)" },
-                                { "X-RateLimit-Precision", "millisecond"} };
-        return headers;
+    std::map<std::string, std::string, discpp::CaseInsensitiveLess> Webhook::Headers(const std::map<std::string, std::string, discpp::CaseInsensitiveLess>& add) {
+        return { { "User-Agent", "DisC++ Webhook (https://github.com/seanomik/DisCPP, v0.0.0)" },
+            { "X-RateLimit-Precision", "millisecond"} };
     }
 }

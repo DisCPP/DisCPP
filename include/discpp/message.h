@@ -159,15 +159,15 @@ namespace discpp {
          * You can use `std::unordered_map::find` to check if a user is contained in it with the users id.
          *
          * ```cpp
-         *      std::unordered_map<discpp::Snowflake, discpp::User> reactors = message.GetReactorOfEmoji(emoji, 50);
+         *      std::unordered_map<discpp::Snowflake, discpp::User, discpp::SnowflakeHash> reactors = message.GetReactorOfEmoji(emoji, 50);
          * ```
          *
          * @param[in] emoji The emoji to get reactors of.
          * @param[in] amount The amount of users to get.
          *
-         * @return std::vector<discpp::User>
+         * @return std::unordered_map<discpp::Snowflake, discpp::User, discpp::SnowflakeHash>
          */
-        std::unordered_map<discpp::Snowflake, discpp::User> GetReactorsOfEmoji(const discpp::Emoji& emoji, const int& amount);
+        std::unordered_map<discpp::Snowflake, discpp::User, discpp::SnowflakeHash> GetReactorsOfEmoji(const discpp::Emoji& emoji, const int& amount);
 
         /**
          * @brief Get reactors of a specific emoji of the specific method.
@@ -175,16 +175,16 @@ namespace discpp {
          * You can use `std::unordered_map::find` to check if a user is contained in it with the users id.
          *
          * ```cpp
-         *      std::unordered_map<discpp::Snowflake, discpp::User> reactors = message.GetReactorOfEmoji(emoji, 50, reaction_method);
+         *      std::unordered_map<discpp::Snowflake, discpp::User, discpp::SnowflakeHash> reactors = message.GetReactorOfEmoji(emoji, 50, reaction_method);
          * ```
          *
          * @param[in] emoji The emoji to get reactors of.
          * @param[in] amount The amount of users to get.
          * @param[in] method The method the users reacted by.
          *
-         * @return std::vector<discpp::User>
+         * @return std::unordered_map<discpp::Snowflake, discpp::User, discpp::SnowflakeHash>
          */
-		std::unordered_map<discpp::Snowflake, discpp::User> GetReactorsOfEmoji(const discpp::Emoji& emoji, const discpp::User& user, const GetReactionsMethod& method);
+		std::unordered_map<discpp::Snowflake, discpp::User, discpp::SnowflakeHash> GetReactorsOfEmoji(const discpp::Emoji& emoji, const discpp::User& user, const GetReactionsMethod& method);
 
         /**
          * @brief Clear message reactions.
@@ -329,9 +329,9 @@ namespace discpp {
 		std::string content;
 		std::chrono::system_clock::time_point timestamp;
 		std::chrono::system_clock::time_point edited_timestamp = std::chrono::system_clock::from_time_t(0);
-		std::unordered_map<discpp::Snowflake, discpp::User> mentions;
+		std::unordered_map<discpp::Snowflake, discpp::User, discpp::SnowflakeHash> mentions;
 		std::vector<discpp::Snowflake> mentioned_roles;
-        std::unordered_map<discpp::Snowflake, ChannelMention> mention_channels;
+        std::unordered_map<discpp::Snowflake, ChannelMention, discpp::SnowflakeHash> mention_channels;
 		std::vector<discpp::Attachment> attachments;
 		std::vector<discpp::EmbedBuilder> embeds;
 		std::vector<discpp::Reaction> reactions;

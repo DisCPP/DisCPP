@@ -119,9 +119,9 @@ namespace discpp {
         /**
          * @brief Returns mutual guilds
          *
-         * @return std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>>
+         * @return std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>, discpp::SnowflakeHash>
          */
-        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>> GetMutualGuilds();
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Guild>, discpp::SnowflakeHash> GetMutualGuilds();
 
         /**
          * @brief Gets the created at time and date for this guild.
