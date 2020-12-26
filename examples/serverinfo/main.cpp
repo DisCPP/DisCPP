@@ -10,14 +10,14 @@
 #include <discpp/event_handler.h>
 #include <discpp/events/ready_event.h>
 
-#include "CommandServerinfo.h"
+#include "command_guild_info.h"
 
 int main(int argc, const char* argv[]) {
 	discpp::ClientConfig config({"!"});
     // Make sure to replace `TOKEN HERE` with your actual token
 	discpp::Client client { "TOKEN_HERE", config }; // Token, config
 
-    client.command_handler->RegisterCommand<ServerinfoCommand>();
+    client.command_handler->RegisterCommand<GuildInfoCommand>();
 
     client.event_handler->RegisterListener<discpp::ReadyEvent>([&] (const discpp::ReadyEvent& event) {
         client.logger->Info("Ready! (v0.1.0)");
