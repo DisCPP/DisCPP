@@ -481,7 +481,7 @@ namespace discpp {
         if (client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            std::unique_ptr<rapidjson::Document> result = http_client->SendPutRequest(Endpoint("users/@me/relationships/" + std::to_string(user.id)), http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            std::unique_ptr<rapidjson::Document> result = http_client->SendPutRequest(Endpoint("users/@me/relationships/" + (std::string) user.id), http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
     }
 
@@ -489,7 +489,7 @@ namespace discpp {
         if (client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            std::unique_ptr<rapidjson::Document> result = http_client->SendDeleteRequest(Endpoint("users/@me/relationships/" + std::to_string(user.id)), http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            std::unique_ptr<rapidjson::Document> result = http_client->SendDeleteRequest(Endpoint("users/@me/relationships/" + (std::string) user.id), http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
     }
 
@@ -522,7 +522,7 @@ namespace discpp {
     }
 
     void Client::LeaveGuild(const discpp::Guild& guild) {
-        http_client->SendDeleteRequest(Endpoint("/users/@me/guilds/" + std::to_string(guild.id)), http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+        http_client->SendDeleteRequest(Endpoint("/users/@me/guilds/" + (std::string) guild.id), http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
     }
 
     void Client::UpdatePresence(discpp::Presence& presence) {

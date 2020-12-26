@@ -133,11 +133,11 @@ namespace discpp {
             }
 #endif
 
-            if (other.id != 0 && id != 0 && !other.name.empty() && !name.empty()) {
+            if (other.id.IsValid() && id.IsValid() && !other.name.empty() && !name.empty()) {
                 return other.id == id && other.name == name;
             } else if (!other.name.empty() && !name.empty()) {
                 return other.name == name;
-            } else if (other.id != 0 && id != 0) {
+            } else if (other.id.IsValid() && id.IsValid()) {
                 return other.id == id;
             }
 
@@ -154,7 +154,7 @@ namespace discpp {
          * @return std::string
          */
         std::string ToString() {
-            if (name.empty() && id == 0) {
+            if (name.empty() && !id.IsValid()) {
 #ifdef WIN32
                 char ansi_emoji[MAX_PATH];
                 if (!WideCharToMultiByte(CP_UTF8, WC_COMPOSITECHECK, unicode.c_str(), -1, ansi_emoji, MAX_PATH, nullptr, nullptr)) {
@@ -187,7 +187,7 @@ namespace discpp {
 			if (name.empty()) {
 				emoji = unicode;
 			} else {
-                return URIEncode(name + ":" + std::to_string(id));
+                return URIEncode(name + ":" + (std::string) id);
 			}
 #ifdef WIN32
 			char ansi_emoji[MAX_PATH];

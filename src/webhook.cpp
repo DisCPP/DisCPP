@@ -109,7 +109,7 @@ namespace discpp {
 
             WaitForRateLimits(nullptr, id, RateLimitBucketType::CHANNEL);
 
-            ix::HttpResponsePtr result = http_client->post(Endpoint("/webhooks/" + std::to_string(id) + "/" + token), body, args);
+            ix::HttpResponsePtr result = http_client->post(Endpoint("/webhooks/" + (std::string) id + "/" + token), body, args);
 
             rapidjson::Document result_json(rapidjson::kObjectType);
             result_json.Parse(result->body);
@@ -117,7 +117,7 @@ namespace discpp {
             return discpp::Message(nullptr, result_json);
         }
 
-        std::unique_ptr<rapidjson::Document> result = http_client->SendPostRequest(Endpoint("/webhooks/" + std::to_string(id) + "/" + token), Headers({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, DumpJson(message_json));
+        std::unique_ptr<rapidjson::Document> result = http_client->SendPostRequest(Endpoint("/webhooks/" + (std::string) id + "/" + token), Headers({ { "Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, DumpJson(message_json));
 
 		return discpp::Message(nullptr, *result); // @TODO: Make WebhookMessage
 	}
@@ -125,12 +125,12 @@ namespace discpp {
 	void Webhook::EditName(const std::string &name) {
         rapidjson::Document result_json(rapidjson::kObjectType);
         result_json.Parse(R"({"name": ")" + name + "\"}");
-        http_client->SendPatchRequest(discpp::Endpoint("/webhooks/" + std::to_string(id)), Headers({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK, DumpJson(result_json));
+        http_client->SendPatchRequest(discpp::Endpoint("/webhooks/" + (std::string) id), Headers({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK, DumpJson(result_json));
         this->name = name;
 	}
 
 	void Webhook::Remove() {
-        http_client->SendDeleteRequest(discpp::Endpoint("/webhooks/" + std::to_string(id) + "/" + token), Headers({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK);
+        http_client->SendDeleteRequest(discpp::Endpoint("/webhooks/" + (std::string) id + "/" + token), Headers({ { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::WEBHOOK);
 	}
 
     std::map<std::string, std::string, discpp::CaseInsensitiveLess> Webhook::Headers(const std::map<std::string, std::string, discpp::CaseInsensitiveLess>& add) {

@@ -62,7 +62,7 @@ namespace discpp {
 	}
 
 	discpp::Channel User::CreateDM() {
-		std::string body("{\"recipient_id\": \"" + std::to_string(id) + "\"}");
+		std::string body("{\"recipient_id\": \"" + (std::string) id + "\"}");
         discpp::Client* client = GetClient();
 		std::unique_ptr<rapidjson::Document> result = client->http_client->SendPostRequest(Endpoint("/users/@me/channels"), client->http_client->DefaultHeaders( { {"Content-Type", "application/json"} }), id, RateLimitBucketType::CHANNEL, body);
 
@@ -94,7 +94,7 @@ namespace discpp {
 		} else {
 		    std::string avatar_str = CombineAvatarHash(avatar_hex);
 
-			std::string url = "https://cdn.discordapp.com/avatars/" + std::to_string(id) + "/" + avatar_str;
+			std::string url = "https://cdn.discordapp.com/avatars/" + (std::string) id + "/" + avatar_str;
 			ImageType tmp = img_type;
 			if (tmp == ImageType::AUTO) tmp = is_avatar_gif ? ImageType::GIF : ImageType::PNG;
 			switch (tmp) {
@@ -139,7 +139,7 @@ namespace discpp {
 	}
 
     std::string User::CreateMention() {
-        return "<@" + std::to_string(id) + ">";
+        return "<@" + (std::string) id + ">";
     }
 
     bool User::IsBot() const {
@@ -162,7 +162,7 @@ namespace discpp {
         if (client->client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            std::unique_ptr<rapidjson::Document> result = client->http_client->SendPutRequest(Endpoint("users/@me/relationships/" + std::to_string(this->id)), client->http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL, "{\"type\":2}");
+            std::unique_ptr<rapidjson::Document> result = client->http_client->SendPutRequest(Endpoint("users/@me/relationships/" + (std::string) this->id), client->http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL, "{\"type\":2}");
         }
     }
 
@@ -171,7 +171,7 @@ namespace discpp {
         if(client->client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            std::unique_ptr<rapidjson::Document> result = client->http_client->SendDeleteRequest(Endpoint("users/@me/relationships/" + std::to_string(this->id)), client->http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            std::unique_ptr<rapidjson::Document> result = client->http_client->SendDeleteRequest(Endpoint("users/@me/relationships/" + (std::string) this->id), client->http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
 	}
 
@@ -180,7 +180,7 @@ namespace discpp {
         if (!client->client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            std::unique_ptr<rapidjson::Document> result = client->http_client->SendPutRequest(Endpoint("users/@me/relationships/" + std::to_string(this->id)), client->http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            std::unique_ptr<rapidjson::Document> result = client->http_client->SendPutRequest(Endpoint("users/@me/relationships/" + (std::string) this->id), client->http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
     }
 
@@ -189,7 +189,7 @@ namespace discpp {
         if(client->client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            std::unique_ptr<rapidjson::Document> result = client->http_client->SendDeleteRequest(Endpoint("users/@me/relationships/" + std::to_string(this->id)), client->http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
+            std::unique_ptr<rapidjson::Document> result = client->http_client->SendDeleteRequest(Endpoint("users/@me/relationships/" + (std::string) this->id), client->http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
     }
 }
