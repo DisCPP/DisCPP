@@ -18,10 +18,17 @@ namespace discpp {
 
 	Message::Message(discpp::Client* client, rapidjson::Document& json) : discpp::DiscordObject(client) {
 		id = GetIDSafely(json, "id");
-		channel = client->cache->GetChannel(Snowflake(json["channel_id"].GetString()));
-		try {
+
+        // If the message is sent in a dm channel, there likely isn't a channel cached for the message.
+        try {
+            channel = client->cache->GetChannel(Snowflake(json["channel_id"].GetString()));
+
+            // The message might not always be in a guild.
+            // This is in the same try catch as the channel since channel must be valid.
             guild = channel.GetGuild();
         } catch (const exceptions::DiscordObjectNotFound&) {
+            channel = discpp::Channel(client);
+            channel.id = Snowflake(json["channel_id"].GetString());
 		} catch (const exceptions::ProhibitedEndpointException&) {}
 
 		author = ConstructDiscppObjectFromJson(client, json, "author", discpp::User());
