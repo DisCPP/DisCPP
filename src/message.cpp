@@ -43,7 +43,7 @@ namespace discpp {
         webhook_id = message.webhook_id;
         type = message.type;
         activity = message.activity;
-        message_reference = message_reference;
+        message_reference = message.message_reference;
     }
 
 	Message::Message(discpp::Client* client, const Snowflake& channel_id, const Snowflake& id, bool can_request) : discpp::DiscordObject(client, id) {
