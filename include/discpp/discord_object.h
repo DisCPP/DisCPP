@@ -25,9 +25,9 @@ namespace discpp {
 		bool operator!=(DiscordObject& other) const;
 		bool operator!=(discpp::Snowflake& other) const;
 #endif
-	private:
+	protected:
 	    uint8_t client_instance_id;
-    protected:
+
         discpp::Client* GetClient() const;
 	};
 }
