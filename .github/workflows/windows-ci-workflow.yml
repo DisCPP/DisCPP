@@ -42,9 +42,9 @@ jobs:
         # Incase we ever remove the `default: run: shell: cmd`
         shell: cmd
         run: |
-          echo "%programfiles%\OpenSSL-Win64\bin" >> $GITHUB_PATH
-          echo "OPENSSL_CONF=%programfiles%\OpenSSL-Win64\bin\openssl.cfg" >> $GITHUB_ENV
-          echo "OPENSSL_ROOT_DIR=%programfiles%\OpenSSL-Win64" >> $GITHUB_ENV
+          echo "C:\Program Files\OpenSSL-Win64\bin" >> $GITHUB_PATH
+          echo "OPENSSL_CONF=C:\Program Files\OpenSSL-Win64\bin\openssl.cfg" >> $GITHUB_ENV
+          echo "OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL-Win64" >> $GITHUB_ENV
 
       - uses: seanmiddleditch/gha-setup-vsdevenv@master
 
