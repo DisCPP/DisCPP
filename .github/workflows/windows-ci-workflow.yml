@@ -38,7 +38,7 @@ jobs:
           args: install openssl -y
 
       - name: Add Environmental Variables for Cached OpenSSL
-        if: steps.cache-key.outputs.cache-hit != 'false'
+        #if: steps.cache-key.outputs.cache-hit != 'false'
         # Incase we ever remove the `default: run: shell: cmd`
         shell: cmd
         run: |
