@@ -360,7 +360,6 @@ namespace discpp {
 		    activity.name = text;
 		    activity.type = type;
 		    activity.url = url;
-            //activity.created_at = std::chrono::system_clock::now();
             activities.push_back(activity);
 		}
 

@@ -8,7 +8,12 @@ namespace discpp {
 
 	Permissions::Permissions(rapidjson::Document& json) {
 		role_user_id = Snowflake(json["id"].GetString());
-		permission_type = (json["type"] == "role") ? PermissionType::ROLE : PermissionType::MEMBER;
+		// For some reason discord thought they should have string-serialized numbers in audit log options...
+		if (json["type"].IsString()) {
+			permission_type = (PermissionType) std::stoi(json["type"].GetString());
+		} else {
+			permission_type = (PermissionType) json["type"].GetInt();
+		}
 		allow_perms = PermissionOverwrite(std::stoi(json["allow"].GetString()));
 		deny_perms = PermissionOverwrite(std::stoi(json["deny"].GetString()));
 	}
