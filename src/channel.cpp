@@ -311,7 +311,7 @@ namespace discpp {
         }
     }
 
-    discpp::GuildInvite Channel::CreateInvite(const int& max_age, const int& max_uses, const bool temporary, const bool unique) {
+    discpp::Invite Channel::CreateInvite(const int& max_age, const int& max_uses, const bool temporary, const bool unique) {
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
             throw std::runtime_error("discpp::Channel::CreateInvite only available for guild channels!");
         }
@@ -320,14 +320,14 @@ namespace discpp {
 
         discpp::Client* client = GetClient();
         std::unique_ptr<rapidjson::Document> result = SendPostRequest(client, Endpoint("/channels/" + std::to_string(id) + "/invites"), DefaultHeaders(client, { {"Content-Type", "application/json" } }), id, RateLimitBucketType::CHANNEL, body);
-        discpp::GuildInvite invite(client, *result);
+        discpp::Invite invite(client, *result);
 
         return invite;
     }
 
-	std::optional<std::vector<discpp::GuildInvite>> Channel::GetInvites() {
+	std::optional<std::vector<discpp::Invite>> Channel::GetInvites() {
         discpp::Client* client = GetClient();
-	    std::optional<std::vector<discpp::GuildInvite>> tmp;
+	    std::optional<std::vector<discpp::Invite>> tmp;
         if (type == ChannelType::GROUP_DM || type == ChannelType::DM) {
             tmp = std::nullopt;
             //throw std::runtime_error("discpp::Channel::GetInvites only available for guild channels!");
@@ -336,12 +336,12 @@ namespace discpp {
             for (auto& invite : result->GetArray()) {
                 rapidjson::Document invite_json;
                 invite_json.CopyFrom(invite, invite_json.GetAllocator());
-                tmp->push_back(discpp::GuildInvite(client, invite_json));
+                tmp->push_back(discpp::Invite(client, invite_json));
             }
         }
 
 		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/channels/" + std::to_string(id) + "/invites"), DefaultHeaders(client), {}, {});
-		std::vector<discpp::GuildInvite> invites;
+		std::vector<discpp::Invite> invites;
 		for (auto& invite : result->GetArray()) {
 			rapidjson::Document invite_json;
 			invite_json.CopyFrom(invite, invite_json.GetAllocator());

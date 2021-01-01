@@ -13,7 +13,7 @@
 
 namespace discpp {
 	class Message;
-	class GuildInvite;
+	class Invite;
 	//class User;
 	class Guild;
 
@@ -288,7 +288,7 @@ namespace discpp {
          * @brief Create an invite for the channel.
          *
          * ```cpp
-         *      discpp::GuildInvite invite = channel.CreateInvite(86400, 5, true, true);
+         *      discpp::Invite invite = channel.CreateInvite(86400, 5, true, true);
          * ```
          *
          * @param[in] max_age How long the invite will last for.
@@ -296,20 +296,20 @@ namespace discpp {
          * @param[in] temporary Whether this invite only grants temporary membership.
          * @param[in] If true, dont try to reuse similar invites.
          *
-         * @return discpp::GuildInvite
+         * @return discpp::Invite
          */
-        GuildInvite CreateInvite(const int& max_age, const int& max_uses, const bool temporary, const bool unique);
+        Invite CreateInvite(const int& max_age, const int& max_uses, const bool temporary, const bool unique);
 
         /**
          * @brief Lists all active invites for this channel
          * ```cpp
-         *      std::optional<std::vector<GuildInvite>> invites = channel.GetInvites();
+         *      std::optional<std::vector<Invite>> invites = channel.GetInvites();
          * ```
          *
-         * @return std::optional<std::vector<GuildInvite>>
+         * @return std::optional<std::vector<Invite>>
          */
 
-        std::optional<std::vector<GuildInvite>> GetInvites();
+        std::optional<std::vector<Invite>> GetInvites();
 
         /**
          * @brief Lists children channels for this category.

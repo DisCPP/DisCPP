@@ -591,17 +591,17 @@ namespace discpp {
 		SendPostRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/prune"), DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::GUILD, body);
 	}
 
-	std::vector<discpp::GuildInvite> Guild::GetInvites() const {
+	std::vector<discpp::Invite> Guild::GetInvites() const {
         discpp::Client* client = GetClient();
 		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/invites"), DefaultHeaders(client), {}, {});
 
-		std::vector<discpp::GuildInvite> guild_invites;
+		std::vector<discpp::Invite> guild_invites;
         for (auto const& guild_invite : result->GetArray()) {
             if (!guild_invite.IsNull()) {
                 rapidjson::Document guild_invite_json;
                 guild_invite_json.CopyFrom(guild_invite, guild_invite_json.GetAllocator());
 
-                guild_invites.push_back(discpp::GuildInvite(client, guild_invite_json));
+                guild_invites.push_back(discpp::Invite(client, guild_invite_json));
             }
         }
 
@@ -910,11 +910,11 @@ namespace discpp {
         return *this;
     }
 
-    discpp::GuildInvite Guild::GetVanityURL() const {
+    discpp::Invite Guild::GetVanityURL() const {
         discpp::Client* client = GetClient();
 	    std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/vanity-url"), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
 
-        return discpp::GuildInvite(client, *result);
+        return discpp::Invite(client, *result);
     }
 
     discpp::AuditLog Guild::GetAuditLog() const {
@@ -1053,7 +1053,19 @@ namespace discpp {
         emojis.emplace(emoji.id, emoji);
     }
 
-    GuildInvite::GuildInvite(discpp::Client* client, rapidjson::Document &json) {
+    Invite::Invite(discpp::Client* client, std::string invite_code, bool with_counts) : client(client) {
+        std::string url = Endpoint("/invites/" + invite_code);
+
+        if (with_counts) {
+            url += "?=with_counts=true";
+        }
+
+        std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, url, DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL);
+
+        *this = Invite(client, *result);
+    }
+
+    Invite::Invite(discpp::Client* client, rapidjson::Document &json) : client(client) {
         code = json["code"].GetString();
         if (ContainsNotNull(json, "guild")) {
             guild = client->cache->GetGuild(discpp::Snowflake(json["guild"]["id"].GetString()));
@@ -1072,6 +1084,10 @@ namespace discpp {
         target_user_type = static_cast<TargetUserType>(GetDataSafely<int>(json, "target_user_type"));
         approximate_presence_count = GetDataSafely<int>(json, "approximate_presence_count");
         approximate_member_count = GetDataSafely<int>(json, "approximate_member_count");
+    }
+
+    void Invite::Delete() {
+        SendDeleteRequest(client, Endpoint("invites/" + code), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL);
     }
 
     VoiceState::VoiceState(discpp::Client *client) : client(client) {

@@ -41,26 +41,41 @@ namespace discpp {
         std::shared_ptr<discpp::User> user; /**< The banned user. */
 	};
 
-	class GuildInvite {
+	class Invite {
 	public:
 	    enum class TargetUserType : int {
 	        STREAM = 1
 	    };
 
-		GuildInvite() = default;
+		Invite() = default;
 
         /**
-         * @brief Constructs a discpp::GuildInvite object from json.
+         * @brief Requests the Invite object from api
          *
-         * ```cpp
-         *      discpp::GuildInvite guild_invite(json);
-         * ```
+         * @param[in] client The client.
+         * @param[in] invite_code The invite code.
+         * @param[in] with_counts Whether the invite should contain approximate member counts.
          *
+         * @return discpp::Invite, this is a constructor.
+         */
+        Invite(discpp::Client* client, std::string invite_code, bool with_counts = true);
+
+        /**
+         * @brief Constructs a discpp::Invite object from json.
+         *
+         * @param[in] client The client.
          * @param[in] json The json data for the guild invite.
          *
-         * @return discpp::GuildInvite, this is a constructor.
+         * @return discpp::Invite, this is a constructor.
          */
-		GuildInvite(discpp::Client* client, rapidjson::Document& json);
+		Invite(discpp::Client* client, rapidjson::Document& json);
+
+        /**
+         * @brief Delete this invite object.
+         *
+         * @return void
+         */
+        void Delete();
 
         std::string code; /**< The invite code (unique ID). */
         std::shared_ptr<discpp::Guild> guild; /**< The guild this invite is for. */
@@ -70,6 +85,8 @@ namespace discpp {
         TargetUserType target_user_type; /**< The type of user target for this invite. */
         int approximate_presence_count; /**< Approximate count of online members (only present when target_user is set). */
         int approximate_member_count; /**< Approximate count of total members. */
+    private:
+        discpp::Client* client;
 	};
 
 	class Integration : public DiscordObject {
@@ -642,12 +659,12 @@ namespace discpp {
          * @brief Get guild invites.
          *
          * ```cpp
-         *      std::vector<discpp::GuildInvite> invites = guild.GetInvites();
+         *      std::vector<discpp::Invite> invites = guild.GetInvites();
          * ```
          *
-         * @return std::vector<discpp::GuildInvite>
+         * @return std::vector<discpp::Invite>
          */
-		std::vector<discpp::GuildInvite> GetInvites() const;
+		std::vector<discpp::Invite> GetInvites() const;
 
         /**
          * @brief Get guild integrations.
@@ -744,12 +761,12 @@ namespace discpp {
          * Requires the MANAGE_GUILD permission. code will be null if a vanity url for the guild is not set. Only `code` and `uses` are valid
          *
          * ```cpp
-         *      discpp::GuildInvite vanity_url = ctx.guild->GetVanityURL();
+         *      discpp::Invite vanity_url = ctx.guild->GetVanityURL();
          * ```
          *
-         * @return discpp::GuildInvite
+         * @return discpp::Invite
          */
-		discpp::GuildInvite GetVanityURL() const;
+		discpp::Invite GetVanityURL() const;
 
         /**
          * @brief Get a widget image url.
