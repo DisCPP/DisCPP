@@ -171,8 +171,6 @@ namespace discpp {
             }
             if (std::chrono::duration_cast<std::chrono::seconds>(created_at.time_since_epoch()).count() != 0) {
                 json.AddMember("created_at", std::chrono::duration_cast<std::chrono::seconds>(created_at.time_since_epoch()).count(), allocator);
-            } else {
-                throw std::runtime_error("created_at must be set somehow!");
             }
 
             auto start_it = timestamps.find("start");
@@ -372,6 +370,7 @@ namespace discpp {
             rapidjson::Document json(rapidjson::kObjectType);
             json.AddMember("status", status, json.GetAllocator());
             json.AddMember("afk", afk, json.GetAllocator());
+            json.AddMember("since", std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count(), json.GetAllocator());
 
             rapidjson::Document activities_json(rapidjson::kArrayType);
             for (const discpp::Activity& activity : activities) {
