@@ -53,9 +53,10 @@ namespace discpp {
 	Message::Message(discpp::Client* client, rapidjson::Document& json) : discpp::DiscordObject(client) {
 		id = GetIDSafely(json, "id");
 
-        // If the message is sent in a dm channel, there likely isn't a channel cached for the message.
+        // If the message is sent in a dm channel, there likely isn't a channel cached for the message for v8.
+        // so we're gonna have to request the channel.
         try {
-            channel = client->cache->GetChannel(Snowflake(json["channel_id"].GetString()));
+            channel = client->cache->GetChannel(Snowflake(json["channel_id"].GetString()), true);
 
             // The message might not always be in a guild.
             // This is in the same try catch as the channel since channel must be valid.
