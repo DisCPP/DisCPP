@@ -453,15 +453,15 @@ namespace discpp {
 		return "";
 	}
 
-	void Guild::BanMember(const discpp::Member& member, const std::string& reason) {
-		BanMemberById(member.user.id, reason);
+	void Guild::BanMember(const discpp::Member& member, const std::string& reason, uint16_t delete_message_days) {
+		BanMemberById(member.user.id, reason, delete_message_days);
 	}
 
-    void Guild::BanMemberById(const discpp::Snowflake& user_id, const std::string& reason) {
+    void Guild::BanMemberById(const discpp::Snowflake& user_id, const std::string& reason, uint16_t delete_message_days) {
         Guild::EnsureBotPermission(Permission::BAN_MEMBERS);
 
         discpp::Client* client = GetClient();
-        std::string body("{\"reason\": \"" + EscapeString(reason) + "\"}");
+        std::string body("{\"reason\": \"" + EscapeString(reason) + "\", \"delete_message_days\": " + std::to_string(delete_message_days) + "}");
         SendPutRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/bans/" + std::to_string(user_id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD, body);
     }
 

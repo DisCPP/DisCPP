@@ -446,7 +446,7 @@ namespace discpp {
          *
          * @return void
          */
-		void BanMember(const discpp::Member& member, const std::string& reason = "");
+		void BanMember(const discpp::Member& member, const std::string& reason = "", uint16_t delete_message_days = 0);
 
         /**
          * @brief Ban a guild member by id.
@@ -460,7 +460,7 @@ namespace discpp {
          *
          * @return void
          */
-		void BanMemberById(const Snowflake& user_id, const std::string& reason = "");
+		void BanMemberById(const Snowflake& user_id, const std::string& reason = "", uint16_t delete_message_days = 0);
 
         /**
          * @brief Unban a guild member.
