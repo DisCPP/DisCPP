@@ -4,6 +4,7 @@
 #include "../event.h"
 #include "../user.h"
 #include "../presence.h"
+
 namespace discpp {
 	class PresenceUpdateEvent : public Event {
 	public:

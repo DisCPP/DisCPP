@@ -5,8 +5,6 @@
 
 #include <cstdint>
 #include <iostream>
-
-
 namespace discpp {
     class Client;
 

@@ -597,7 +597,7 @@ namespace discpp {
         discpp::Presence new_presence(&shard.client, result);
         member->presence = std::make_unique<discpp::Presence>(new_presence);
 
-        shard.client.event_handler->TriggerEvent<discpp::PresenseUpdateEvent>(discpp::PresenseUpdateEvent(shard, user, new_presence));
+        shard.client.event_handler->TriggerEvent<discpp::PresenceUpdateEvent>(discpp::PresenceUpdateEvent(shard, user, new_presence));
     }
 
     void EventDispatcher::TypingStartEvent(Shard& shard, rapidjson::Document& result) {

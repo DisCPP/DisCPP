@@ -27,7 +27,7 @@
 #include "message_reaction_remove_all_event.h"
 #include "message_reaction_remove_event.h"
 #include "message_update_event.h"
-#include "presense_update_event.h"
+#include "presence_update_event.h"
 #include "ready_event.h"
 #include "reconnect_event.h"
 #include "resumed_event.h"
