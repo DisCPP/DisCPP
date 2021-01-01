@@ -4,6 +4,7 @@
 #include "client_config.h"
 #include "cache.h"
 #include "exceptions.h"
+#include "member.h"
 
 namespace discpp {
     void EventDispatcher::ReadyEvent(Shard& shard, rapidjson::Document& result) {
@@ -588,7 +589,15 @@ namespace discpp {
         rapidjson::Document user_json;
         user_json.CopyFrom(result["user"], user_json.GetAllocator());
 
-        shard.client.event_handler->TriggerEvent<discpp::PresenseUpdateEvent>(discpp::PresenseUpdateEvent(shard, discpp::User(&shard.client, user_json)));
+        discpp::User user(&shard.client, user_json);
+
+        std::shared_ptr<discpp::Guild> guild = shard.client.cache->GetGuild(Snowflake(result["guild_id"].GetString()));
+        std::shared_ptr<discpp::Member> member = shard.client.cache->GetMember(guild, user.id);
+
+        discpp::Presence new_presence(&shard.client, result);
+        member->presence = std::make_unique<discpp::Presence>(new_presence);
+
+        shard.client.event_handler->TriggerEvent<discpp::PresenseUpdateEvent>(discpp::PresenseUpdateEvent(shard, user, new_presence));
     }
 
     void EventDispatcher::TypingStartEvent(Shard& shard, rapidjson::Document& result) {

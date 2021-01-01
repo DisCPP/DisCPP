@@ -345,6 +345,7 @@ namespace discpp {
 	    Presence() = default;
 		Presence(discpp::Client* client, rapidjson::Document& json) {
 		    status = json["status"].GetString();
+            client_status = json["client_status"].GetString();
             for (auto const& activity : json["activities"].GetArray()) {
                 rapidjson::Document activity_json(rapidjson::kObjectType);
                 activity_json.CopyFrom(activity, activity_json.GetAllocator());
@@ -395,6 +396,7 @@ namespace discpp {
 		}
 
 		std::string status;
+        std::string client_status;
 		std::vector<discpp::Activity> activities;
 		bool afk;
 	};

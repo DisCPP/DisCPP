@@ -3,15 +3,14 @@
 
 #include "../event.h"
 #include "../user.h"
-
-
-
+#include "../presence.h"
 namespace discpp {
 	class PresenseUpdateEvent : public Event {
 	public:
-		inline PresenseUpdateEvent(Shard& shard, discpp::User user) : Event(shard), user(user) {}
+		inline PresenseUpdateEvent(Shard& shard, discpp::User user, discpp::Presence presence) : Event(shard), user(user), presence(presence) {}
 
 		discpp::User user;
+		discpp::Presence presence;
 
         virtual int GetEventType() const override {
             return 28;
