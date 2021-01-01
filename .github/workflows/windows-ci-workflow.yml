@@ -42,19 +42,25 @@ jobs:
         # Incase we ever remove the `default: run: shell: cmd`
         shell: cmd
         run: |
-          echo "%programfiles%\OpenSSL-Win64\bin" >> $GITHUB_PATH
-          echo "OPENSSL_CONF=%programfiles%\OpenSSL-Win64\bin\openssl.cfg" >> $GITHUB_ENV
-          echo "OPENSSL_ROOT_DIR=%programfiles%\OpenSSL-Win64" >> $GITHUB_ENV
+          echo ::add-path::%programfiles%\OpenSSL-Win64\bin
+          echo ::set-env name=OPENSSL_CONF::%programfiles%\OpenSSL-Win64\bin\openssl.cfg
+          echo ::set-env name=OPENSSL_ROOT_DIR::%programfiles%\OpenSSL-Win64
 
       - uses: seanmiddleditch/gha-setup-vsdevenv@master
 
       - name: CMake Configure
         working-directory: ${{runner.workspace}}/DisCPP/build
-        run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -G "MinGW Makefiles"
+        run: cmake ${{runner.workspace}}/DisCPP -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -G "MinGW Makefiles" -DOPENSSL_CONF="C:/Program Files/OpenSSL-Win64/bin/openssl.cfg" -DOPENSSL_ROOT_DIR="C:/Program Files/OpenSSL-Win64"
+        env:
+          OPENSSL_CONF: "C:/Program Files/OpenSSL-Win64/bin/openssl.cfg"
+          OPENSSL_ROOT_DIR: "C:/Program Files/OpenSSL-Win64/"
       
       - name: CMake Compile
         working-directory: ${{runner.workspace}}/DisCPP/build
         run: cmake --build . --parallel 10
+        env:
+          OPENSSL_CONF: "C:/Program Files/OpenSSL-Win64/bin/openssl.cfg"
+          OPENSSL_ROOT_DIR: "C:/Program Files/OpenSSL-Win64/"
   #windows-clang10:
   #  name: Clang v10.0.0
   #  runs-on: windows-2019
