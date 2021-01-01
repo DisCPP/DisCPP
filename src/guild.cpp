@@ -8,6 +8,7 @@
 #include "audit_log.h"
 #include "user.h"
 #include "cache.h"
+#include "utils.h"
 
 #include <memory>
 
@@ -617,7 +618,7 @@ namespace discpp {
                 rapidjson::Document guild_integration_json;
                 guild_integration_json.CopyFrom(guild_integration, guild_integration_json.GetAllocator());
 
-                guild_integrations.emplace_back(guild_integration_json);
+                guild_integrations.emplace_back(client, guild_integration_json);
             }
         }
 
@@ -1100,25 +1101,32 @@ namespace discpp {
 		suppress = json["suppress"].GetBool();
     }
 
-    Integration::Integration(rapidjson::Document &json) {
+    Integration::Integration(discpp::Client* client, rapidjson::Document &json) : discpp::DiscordObject(client) {
         id = Snowflake(json["id"].GetString());
         name = json["name"].GetString();
         type = json["type"].GetString();
         enabled = json["enabled"].GetBool();
-        syncing = json["syncing"].GetBool();
-        role_id = Snowflake(json["role_id"].GetString());
+        syncing = GetDataSafely<bool>(json, "syncing");
+        role_id = GetIDSafely(json, "role_id");
         enable_emoticons = GetDataSafely<bool>(json, "enable_emoticons");
-        expire_behavior = static_cast<IntegrationExpireBehavior>(json["expire_behavior"].GetInt());
-        expire_grace_period = json["expire_grace_period"].GetInt();
-        if (ContainsNotNull(json, "user")) {
-            rapidjson::Document user_json;
-            user_json.CopyFrom(json["user"], user_json.GetAllocator());
-
-            discpp::Client* client = GetClient();
-            user = std::make_shared<discpp::User>(client, user_json);
+        expire_behavior = static_cast<discpp::Integration::ExpireBehavior>(GetDataSafely<int>(json, "expire_behavior"));
+        expire_grace_period = GetDataSafely<int>(json, "expire_grace_period");
+        user = ConstructDiscppObjectFromJson<discpp::User>(client, json, "user", discpp::User());
+        account = ConstructDiscppObjectFromJson(client, json, "account", discpp::Integration::Account());
+        if (ContainsNotNull(json, "synced_at")) {
+            synced_at = std::chrono::system_clock::from_time_t(discpp::TimeFromDiscord(json["synced_at"].GetString()));
         }
+        subscriber_count = GetDataSafely<int>(json, "subscriber_count");
+        revoked = GetDataSafely<bool>(json, "revoked");
+        application = ConstructDiscppObjectFromJson<discpp::Integration::Application>(client, json, "application", discpp::Integration::Application());
+    }
 
-        account = ConstructDiscppObjectFromJson(json, "account", discpp::IntegrationAccount());
-        synced_at = json["synced_at"].GetString();
+    Integration::Application::Application(discpp::Client* client, rapidjson::Document &json) : discpp::DiscordObject(client) {
+        id = Snowflake(json["id"].GetString());
+        name = json["name"].GetString();
+        SplitAvatarHash(json["icon"].GetString(), icon_hex);
+        description = json["description"].GetString();
+        summary = json["summary"].GetString();
+        bot = ConstructDiscppObjectFromJson<discpp::User>(client, json, "bot", discpp::User());
     }
 }

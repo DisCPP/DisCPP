@@ -250,6 +250,6 @@ discpp::AuditLog::AuditLog(discpp::Client* client, rapidjson::Document& json) {
         rapidjson::Document integration_json(rapidjson::kObjectType);
         integration_json.CopyFrom(integration, integration_json.GetAllocator());
 
-        integrations.push_back(discpp::Integration(integration_json));
+        integrations.emplace_back(nullptr, integration_json);
     }
 }
