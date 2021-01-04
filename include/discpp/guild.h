@@ -981,36 +981,36 @@ namespace discpp {
         /**
          * @brief Get a constant map of roles.
          *
-         * @return std::unordered_map<Snowflake, std::shared_ptr<Role>, discpp::SnowflakeHash>
+         * @return const std::unordered_map<Snowflake, std::shared_ptr<Role>, discpp::SnowflakeHash>&
          */
-        inline std::unordered_map<Snowflake, std::shared_ptr<Role>, discpp::SnowflakeHash> GetRoles() const {
+        inline const std::unordered_map<Snowflake, std::shared_ptr<Role>, discpp::SnowflakeHash>& GetRoles() const {
             return roles;
         }
 
         /**
          * @brief Get a constant map of members.
          *
-         * @return std::unordered_map<Snowflake, std::shared_ptr<Member>, discpp::SnowflakeHash>
+         * @return const std::unordered_map<Snowflake, std::shared_ptr<Member>, discpp::SnowflakeHash>&
          */
-        inline std::unordered_map<Snowflake, std::shared_ptr<Member>, discpp::SnowflakeHash> GetMembers() const {
+        inline const std::unordered_map<Snowflake, std::shared_ptr<Member>, discpp::SnowflakeHash>& GetMembers() const {
             return members;
         }
 
         /**
          * @brief Get a constant map of channels.
          *
-         * @return std::unordered_map<Snowflake, Channel, discpp::SnowflakeHash>
+         * @return const std::unordered_map<Snowflake, Channel, discpp::SnowflakeHash>&
          */
-        inline std::unordered_map<Snowflake, Channel, discpp::SnowflakeHash> GetChannels() const {
+        inline const std::unordered_map<Snowflake, Channel, discpp::SnowflakeHash>& GetChannels() const {
             return channels;
         }
 
         /**
          * @brief Get a constant map of emojis.
          *
-         * @return std::unordered_map<Snowflake, Emoji, discpp::SnowflakeHash>
+         * @return const std::unordered_map<Snowflake, Emoji, discpp::SnowflakeHash>&
          */
-        inline std::unordered_map<Snowflake, Emoji, discpp::SnowflakeHash> GetEmojis() const {
+        inline const std::unordered_map<Snowflake, Emoji, discpp::SnowflakeHash>& GetEmojis() const {
             return emojis;
         }
 
