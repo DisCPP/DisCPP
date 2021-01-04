@@ -5,9 +5,9 @@
 #include <discpp/context.h>
 #include <discpp/command_handler.h>
 
-class ServerinfoCommand : public discpp::Command {
+class GuildInfoCommand : public discpp::Command {
 public:
-	ServerinfoCommand();
+	GuildInfoCommand();
 	bool CanRun(discpp::Context ctx);
 	void CommandBody(discpp::Context ctx) override;
 };

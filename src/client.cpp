@@ -167,12 +167,21 @@ namespace discpp {
             client.logger->Warn(LogTextColor::YELLOW + "[SHARD " + std::to_string(id) + "] Websocket was closed.");
             return;
         } else {
-            client.logger->Error(LogTextColor::RED + "[SHARD " + std::to_string(id) + "] Websocket was closed with error: " + std::to_string(msg->closeInfo.code) + ", " + msg->closeInfo.reason + "! Attempting reconnect...");
+            client.logger->Error(LogTextColor::RED + "[SHARD " + std::to_string(id) + "] Websocket was closed with error: " + std::to_string(msg->closeInfo.code) + ", \"" + msg->closeInfo.reason + "\"!");
         }
 
         heartbeat_acked.store(false);
         disconnected.store(true);
 
+        if (msg->closeInfo.code == 4013) { // 4013 Invalid intent
+            client.logger->Error(LogTextColor::RED + "[SHARD " + std::to_string(id) + "] An invalid intent was sent, we can't try to reconnect...");
+            return;
+        } else if (msg->closeInfo.code == 4014) { // 4014 Disallowed intent
+            client.logger->Error(LogTextColor::RED + "[SHARD " + std::to_string(id) + "] A disallowed intent was sent, we can't try to reconnect. Make sure you have enabled all intents in your bot or that your bot is whitelisted for all the intents.");
+            return;
+        }
+
+        client.logger->Info(LogTextColor::YELLOW + "[SHARD " + std::to_string(id) + "] Attempting reconnect...");
         reconnecting.store(true);
         client.DoFunctionLater(&Shard::ReconnectToWebsocket, this);
     }
@@ -322,6 +331,7 @@ namespace discpp {
 
         rapidjson::Value d(rapidjson::kObjectType);
         d.AddMember("token", client.token, allocator);
+        d.AddMember("intents", client.config.intents, allocator);
 
         rapidjson::Value properties(rapidjson::kObjectType);
         properties.AddMember("$os", GetOsName(), allocator);

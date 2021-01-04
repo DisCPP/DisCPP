@@ -1,19 +1,19 @@
-#include "CommandServerinfo.h"
-#include "PreconditionRequireGuild.h"
+#include "command_server_info.h"
+#include "precondition_require_guild.h"
 #include <discpp/color.h>
 #include <discpp/command.h>
 #include <discpp/command_handler.h>
 
-ServerinfoCommand::ServerinfoCommand() : discpp::Command("serverinfo") {
-	this->description = "displays helpful server information";
+GuildInfoCommand::ServerinfoCommand() : discpp::Command("guildinfo") {
+	this->description = "Displays helpful server information";
 	this->hint_args = { "" };
 }
 
-bool ServerinfoCommand::CanRun(discpp::Context ctx) {
+bool GuildInfoCommand::CanRun(discpp::Context ctx) {
 	return Precondition::RequireGuild(ctx);
 }
 
-void ServerinfoCommand::CommandBody(discpp::Context ctx) {
+void GuildInfoCommand::CommandBody(discpp::Context ctx) {
 	std::shared_ptr<discpp::Guild> guild = ctx.message.guild;
 	discpp::EmbedBuilder* embed = new discpp::EmbedBuilder("", "", 0x3498DB);
 	embed->SetThumbnail(guild->GetIconURL());
