@@ -11,12 +11,34 @@
 
 #include <unordered_map>
 #include <climits>
+#include <locale>
 
 #include <ixwebsocket/IXHttp.h>
 
 namespace discpp {
 	class Client;
 	class Role;
+
+	struct CaseInsensitiveLess {
+		// Case Insensitive compare_less binary function
+		struct NocaseCompare {
+			bool operator()(const unsigned char& c1, const unsigned char& c2) const {
+#ifdef _WIN32
+				return std::tolower(c1, std::locale()) < std::tolower(c2, std::locale());
+#else
+				return std::tolower(c1) < std::tolower(c2);
+#endif
+			}
+		};
+
+		bool operator()(const std::string& s1, const std::string& s2) const {
+			return std::lexicographical_compare(s1.begin(),
+												s1.end(), // source range
+												s2.begin(),
+												s2.end(),         // dest range
+												NocaseCompare()); // comparison
+		}
+	};
 
 	namespace specials {
 		enum class NitroSubscription : uint8_t {
@@ -79,7 +101,7 @@ namespace discpp {
 
 	inline std::string Endpoint(const std::string& endpoint_format) {
 		std::string tmp = endpoint_format[0] == '/' ? endpoint_format : '/' + endpoint_format;
-		return "https://discordapp.com/api/v6" + tmp;
+		return "https://www.discordapp.com/api/v6" + tmp;
 	}
 
 	template <typename type>
@@ -184,9 +206,9 @@ namespace discpp {
 		GLOBAL
 	};
 
-	inline std::unordered_map<Snowflake, RateLimit> guild_ratelimit;
-	inline std::unordered_map<Snowflake, RateLimit> channel_ratelimit;
-	inline std::unordered_map<Snowflake, RateLimit> webhook_ratelimit;
+	inline std::unordered_map<Snowflake, RateLimit, discpp::SnowflakeHash> guild_ratelimit;
+	inline std::unordered_map<Snowflake, RateLimit, discpp::SnowflakeHash> channel_ratelimit;
+	inline std::unordered_map<Snowflake, RateLimit, discpp::SnowflakeHash> webhook_ratelimit;
 	inline RateLimit global_ratelimit;
 
     /**
@@ -208,92 +230,8 @@ namespace discpp {
      *
      * @return int
      */
-	void HandleRateLimits(ix::WebSocketHttpHeaders headers, const Snowflake& object, const RateLimitBucketType& ratelimit_bucket);
+	void HandleRateLimits(const std::map<std::string, std::string, discpp::CaseInsensitiveLess>& headers, const Snowflake& object, const discpp::RateLimitBucketType& ratelimit_bucket);
 	// End of rate limits
-
-    /**
-     * @brief Handles a response from the discpp servers.
-     *
-     * @param[in] reponse The cpr response from the servers.
-     * @param[in] object The object id to handle the ratelimits for.
-     * @param[in] ratelimit_bucket The rate limit bucket.
-     *
-     * @return rapidjson::Document
-     */
-	extern std::unique_ptr<rapidjson::Document> HandleResponse(discpp::Client* client, ix::HttpResponsePtr response, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket);
-
-    /**
-     * @brief Sends a get request to a url.
-     *
-     * @param[in] url The url to create a request to.
-     * @param[in] headers The http header.
-     * @param[in] object The object id to handle the ratelimits for.
-     * @param[in] ratelimit_bucket The rate limit bucket.
-     * @param[in] The cpr response body.
-     *
-     * @return rapidjson::Document
-     */
-    extern std::unique_ptr<rapidjson::Document> SendGetRequest(discpp::Client* client, std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
-
-    /**
-     * @brief Sends a post request to a url.
-     *
-     * @param[in] url The url to create a request to.
-     * @param[in] headers The http header.
-     * @param[in] object The object id to handle the ratelimits for.
-     * @param[in] ratelimit_bucket The rate limit bucket.
-     * @param[in] The cpr response body.
-     *
-     * @return rapidjson::Document
-     */
-    extern std::unique_ptr<rapidjson::Document> SendPostRequest(discpp::Client* client, std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
-
-    /**
-     * @brief Sends a put request to a url.
-     *
-     * @param[in] url The url to create a request to.
-     * @param[in] headers The http header.
-     * @param[in] object The object id to handle the ratelimits for.
-     * @param[in] ratelimit_bucket The rate limit bucket.
-     * @param[in] The cpr response body.
-     *
-     * @return rapidjson::Document
-     */
-    extern std::unique_ptr<rapidjson::Document> SendPutRequest(discpp::Client* client, std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
-
-    /**
-     * @brief Sends a patch request to a url.
-     *
-     * @param[in] url The url to create a request to.
-     * @param[in] headers The http header.
-     * @param[in] object The object id to handle the ratelimits for.
-     * @param[in] ratelimit_bucket The rate limit bucket.
-     * @param[in] The cpr response body.
-     *
-     * @return rapidjson::Document
-     */
-    extern std::unique_ptr<rapidjson::Document> SendPatchRequest(discpp::Client* client, std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket, std::string body = {});
-
-    /**
-     * @brief Sends a delete request to a url.
-     *
-     * @param[in] url The url to create a request to.
-     * @param[in] headers The http header.
-     * @param[in] object The object id to handle the ratelimits for.
-     * @param[in] ratelimit_bucket The rate limit bucket.
-     *
-     * @return std::unique_ptr<rapidjson::Document>
-     */
-    extern std::unique_ptr<rapidjson::Document> SendDeleteRequest(discpp::Client* client, std::string url, ix::WebSocketHttpHeaders headers, discpp::Snowflake object, RateLimitBucketType ratelimit_bucket);
-
-    /**
-     * @brief Gets the default headers to communicate with the discpp servers.
-     *
-     * @param[in] add The headers to add to the default ones.
-     *
-     * @return ix::WebSocketHttpHeaders
-     */
-    ix::WebSocketHttpHeaders DefaultHeaders(discpp::Client* client, ix::WebSocketHttpHeaders add = {});
 
     /**
      * @brief Check if a string starts with another string.

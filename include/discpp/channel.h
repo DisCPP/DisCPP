@@ -317,9 +317,9 @@ namespace discpp {
          *      auto children = category.GetChildren();
          * ```
          *
-         * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
+         * @return std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash>
          */
-        std::unordered_map<discpp::Snowflake, discpp::Channel> GetChildren();
+        std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash> GetChildren();
 
         /**
         * @brief Add a recipient to the group dm.

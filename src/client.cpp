@@ -14,6 +14,7 @@
 #include "events/reconnect_event.h"
 #include "event_handler.h"
 #include "cache.h"
+#include "http_client.h"
 
 #include <ixwebsocket/IXNetSystem.h>
 #include <memory>
@@ -22,7 +23,7 @@ namespace discpp {
     uint8_t Client::next_instance_id = 0;
     std::map<uint8_t, Client*> Client::client_instances;
 
-    Client::Client(const std::string& token, ClientConfig& config) : token(token), config(config) {
+    Client::Client(const std::string& token, std::shared_ptr<discpp::HttpClient> http_client, ClientConfig& config) : token(token), http_client(std::move(http_client)), config(config) {
         fire_command_method = std::bind(discpp::FireCommand, std::placeholders::_1, std::placeholders::_2);
 
         message_cache_count = config.message_cache_size;
@@ -41,6 +42,8 @@ namespace discpp {
         this->cache = std::make_unique<discpp::Cache>(this);
 
         client_instances.emplace(my_instance_id, this);
+
+        this->http_client->SetClient(this);
     }
 
     Client::~Client() = default;
@@ -52,12 +55,12 @@ namespace discpp {
             rapidjson::Document gateway_request(rapidjson::kObjectType);
             switch (config.type) {
                 case TokenType::USER: {
-                    std::unique_ptr<rapidjson::Document> user_doc = SendGetRequest(this, Endpoint("/gateway"), {{"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"}}, {}, {});
+                    std::unique_ptr<rapidjson::Document> user_doc = http_client->SendGetRequest(Endpoint("/gateway"), {{"Authorization", token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"}}, {}, {});
                     gateway_request.CopyFrom(*user_doc, gateway_request.GetAllocator());
 
                     break;
                 } case TokenType::BOT:
-                    std::unique_ptr<rapidjson::Document> bot_doc = SendGetRequest(this, Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
+                    std::unique_ptr<rapidjson::Document> bot_doc = http_client->SendGetRequest(Endpoint("/gateway/bot"), { {"Authorization", "Bot " + token}, {"User-Agent", "discpp (https://github.com/DisCPP/DisCPP, v0.0.0)"} }, {}, {});
                     gateway_request.CopyFrom(*bot_doc, gateway_request.GetAllocator());
 
                     break;
@@ -379,14 +382,14 @@ namespace discpp {
         }
     }
 
-    std::unordered_map<discpp::Snowflake, discpp::Channel> Client::GetUserDMs() {
+    std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash> Client::GetUserDMs() {
 
         if (client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("/users/@me/channels is a user only endpoint");
         } else {
-            std::unordered_map<discpp::Snowflake, discpp::Channel> dm_channels;
+            std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash> dm_channels;
 
-            std::unique_ptr<rapidjson::Document> result = SendGetRequest(this, Endpoint("users/@me/channels"), DefaultHeaders(this), 0, RateLimitBucketType::GLOBAL);
+            std::unique_ptr<rapidjson::Document> result = http_client->SendGetRequest(Endpoint("users/@me/channels"), http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
             for (auto const& channel : result->GetArray()) {
                 rapidjson::Document channel_json(rapidjson::kObjectType);
                 channel_json.CopyFrom(channel, channel_json.GetAllocator());
@@ -401,7 +404,7 @@ namespace discpp {
 
     std::vector<discpp::User::Connection> ClientUser::GetUserConnections() {
         discpp::Client* client = GetClient();
-        std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/users/@me/connections"), DefaultHeaders(client), id, RateLimitBucketType::GLOBAL);
+        std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("/users/@me/connections"), client->http_client->DefaultHeaders(), id, RateLimitBucketType::GLOBAL);
 
         std::vector<Connection> connections;
         for (auto const& connection : result->GetArray()) {
@@ -425,7 +428,7 @@ namespace discpp {
             throw exceptions::ProhibitedEndpointException("users/@me/settings is a user only endpoint");
         } else {
             discpp::Client* client = GetClient();
-            std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("users/@me/settings/"), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL);
+            std::unique_ptr<rapidjson::Document> result = client->http_client->SendGetRequest(Endpoint("users/@me/settings/"), client->http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
             ClientUserSettings user_settings(*result);
             this->settings = user_settings;
             return user_settings;
@@ -480,7 +483,7 @@ namespace discpp {
             if (user_settings.GetStreamNotificationsEnabled() != old_settings.GetStreamNotificationsEnabled()) new_settings.AddMember("stream_notifications_enabled", user_settings.GetStreamNotificationsEnabled(), allocator);
 
             discpp::Client* client = GetClient();
-            std::unique_ptr<rapidjson::Document> result = SendPatchRequest(client, Endpoint("users/@me/settings/"), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL, DumpJson(new_settings));
+            std::unique_ptr<rapidjson::Document> result = client->http_client->SendPatchRequest(Endpoint("users/@me/settings/"), client->http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL, DumpJson(new_settings));
         }
     }
 
@@ -488,7 +491,7 @@ namespace discpp {
         if (client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            std::unique_ptr<rapidjson::Document> result = SendPutRequest(this, Endpoint("users/@me/relationships/" + std::to_string(user.id)), DefaultHeaders(this), 0, RateLimitBucketType::GLOBAL);
+            std::unique_ptr<rapidjson::Document> result = http_client->SendPutRequest(Endpoint("users/@me/relationships/" + (std::string) user.id), http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
     }
 
@@ -496,18 +499,18 @@ namespace discpp {
         if (client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            std::unique_ptr<rapidjson::Document> result = SendDeleteRequest(this, Endpoint("users/@me/relationships/" + std::to_string(user.id)), DefaultHeaders(this), 0, RateLimitBucketType::GLOBAL);
+            std::unique_ptr<rapidjson::Document> result = http_client->SendDeleteRequest(Endpoint("users/@me/relationships/" + (std::string) user.id), http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         }
     }
 
-    std::unordered_map<discpp::Snowflake, discpp::UserRelationship> Client::GetRelationships() {
+    std::unordered_map<discpp::Snowflake, discpp::UserRelationship, discpp::SnowflakeHash> Client::GetRelationships() {
         //todo implement this endpoint
         if (client_user.IsBot()) {
             throw exceptions::ProhibitedEndpointException("users/@me/relationships is a user only endpoint");
         } else {
-            std::unordered_map<discpp::Snowflake, discpp::UserRelationship> relationships;
+            std::unordered_map<discpp::Snowflake, discpp::UserRelationship, discpp::SnowflakeHash> relationships;
 
-            std::unique_ptr<rapidjson::Document> result = SendGetRequest(this, Endpoint("users/@me/relationships/"), DefaultHeaders(this), 0, RateLimitBucketType::GLOBAL);
+            std::unique_ptr<rapidjson::Document> result = http_client->SendGetRequest(Endpoint("users/@me/relationships/"), http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
             for (auto const& relationship : result->GetArray()) {
                 rapidjson::Document relationship_json(rapidjson::kObjectType);
                 relationship_json.CopyFrom(relationship, relationship_json.GetAllocator());
@@ -521,7 +524,7 @@ namespace discpp {
 
     discpp::User Client::ModifyCurrentUser(const std::string& username, discpp::Image& avatar) {
         std::string body("{\"username\": \"" + username + "\", \"avatar\": " + avatar.ToDataURI() + "}");
-        std::unique_ptr<rapidjson::Document> result = SendPatchRequest(this, Endpoint("/users/@me"), DefaultHeaders(this), 0, discpp::RateLimitBucketType::GLOBAL, body);
+        std::unique_ptr<rapidjson::Document> result = http_client->SendPatchRequest(Endpoint("/users/@me"), http_client->DefaultHeaders(), 0, discpp::RateLimitBucketType::GLOBAL, body);
 
         client_user = discpp::ClientUser(this, *result);
 
@@ -529,7 +532,7 @@ namespace discpp {
     }
 
     void Client::LeaveGuild(const discpp::Guild& guild) {
-        SendDeleteRequest(this, Endpoint("/users/@me/guilds/" + std::to_string(guild.id)), DefaultHeaders(this), 0, RateLimitBucketType::GLOBAL);
+        http_client->SendDeleteRequest(Endpoint("/users/@me/guilds/" + (std::string) guild.id), http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
     }
 
     void Client::UpdatePresence(discpp::Presence& presence) {
@@ -543,7 +546,7 @@ namespace discpp {
     }
 
     std::vector<discpp::User::Connection> Client::GetBotUserConnections() {
-        std::unique_ptr<rapidjson::Document> result = SendGetRequest(this, Endpoint("/users/@me/connections"), DefaultHeaders(this), 0, RateLimitBucketType::GLOBAL);
+        std::unique_ptr<rapidjson::Document> result = http_client->SendGetRequest(Endpoint("/users/@me/connections"), http_client->DefaultHeaders(), 0, RateLimitBucketType::GLOBAL);
         std::vector<discpp::User::Connection> connections;
         for (auto const& connection : result->GetArray()) {
             rapidjson::Document connection_json;

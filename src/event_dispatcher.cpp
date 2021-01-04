@@ -4,6 +4,7 @@
 #include "client_config.h"
 #include "cache.h"
 #include "exceptions.h"
+#include "http_client.h"
 
 namespace discpp {
     void EventDispatcher::ReadyEvent(Shard& shard, rapidjson::Document& result) {
@@ -44,7 +45,7 @@ namespace discpp {
         } else {
             if (shard.client.client_user.id == 0) {
                 // Get the bot user
-                std::unique_ptr<rapidjson::Document> user_json = SendGetRequest(&shard.client, Endpoint("/users/@me"), DefaultHeaders(&shard.client), {}, {});
+                std::unique_ptr<rapidjson::Document> user_json = shard.client.http_client->SendGetRequest(Endpoint("/users/@me"), shard.client.http_client->DefaultHeaders(), {}, {});
 
                 shard.client.client_user = discpp::ClientUser(&shard.client, *user_json);
             }
@@ -196,7 +197,7 @@ namespace discpp {
     void EventDispatcher::GuildEmojisUpdateEvent(Shard& shard, rapidjson::Document& result) {
         std::shared_ptr<discpp::Guild> guild = shard.client.cache->GetGuild(Snowflake(result["guild_id"].GetString()));
 
-        std::unordered_map<Snowflake, Emoji> emojis;
+        std::unordered_map<Snowflake, Emoji, discpp::SnowflakeHash> emojis;
         for (auto& emoji : result["emojis"].GetArray()) {
             rapidjson::Document emoji_json;
             emoji_json.CopyFrom(emoji, emoji_json.GetAllocator());
@@ -277,7 +278,7 @@ namespace discpp {
 
     void EventDispatcher::GuildMembersChunkEvent(Shard& shard, rapidjson::Document& result) {
         std::shared_ptr<discpp::Guild> guild = shard.client.cache->GetGuild(Snowflake(result["guild_id"].GetString()));
-        std::unordered_map<discpp::Snowflake, discpp::Member> members;
+        std::unordered_map<discpp::Snowflake, discpp::Member, discpp::SnowflakeHash> members;
         for (auto const& member : result["members"].GetArray()) {
             rapidjson::Document member_json(rapidjson::kObjectType);
             member_json.CopyFrom(member, member_json.GetAllocator());

@@ -24,6 +24,7 @@ namespace discpp {
 	class Image;
 	class EventHandler;
 	class Cache;
+	class HttpClient;
 
 	class ClientUser : public User {
 	public:
@@ -89,6 +90,7 @@ namespace discpp {
 
         discpp::ClientUser client_user; /**< discpp::User object representing current user. */
         std::unique_ptr<discpp::Logger> logger; /**< discpp::Logger object representing current logger. */
+        std::shared_ptr<discpp::HttpClient> http_client; /**< Abstract http client. */
 
         std::unique_ptr<discpp::Cache> cache; /**< Bot cache. Stores members, channels, guilds, etc. */
 
@@ -110,7 +112,7 @@ namespace discpp {
          *
          * @return discpp::Bot, this is a constructor.
          */
-		Client(const std::string& token, ClientConfig& config);
+		Client(const std::string& token, std::shared_ptr<discpp::HttpClient> http_client, ClientConfig& config);
 
 		~Client();
 
@@ -167,9 +169,9 @@ namespace discpp {
         /**
          * @brief Get all friends. Only supports user tokens!
          *
-         * @return std::unordered_map<discpp::Snowflake, discpp::UserRelationship>
+         * @return std::unordered_map<discpp::Snowflake, discpp::UserRelationship, discpp::SnowflakeHash>
          */
-        std::unordered_map<discpp::Snowflake, discpp::UserRelationship> GetRelationships();
+        std::unordered_map<discpp::Snowflake, discpp::UserRelationship, discpp::SnowflakeHash> GetRelationships();
 
         /**
          * @brief Modify the client's user.
@@ -225,9 +227,9 @@ namespace discpp {
         /**
          * @brief Get all DM's for this user. Only supports user tokens!
          *
-         * @return std::vector<discpp::User::Connection>
+         * @return std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash>
          */
-        std::unordered_map<discpp::Snowflake, discpp::Channel> GetUserDMs();
+        std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash> GetUserDMs();
 
         // discpp::Channel CreateGroupDM(std::vector<discpp::User> users); // Deprecated and will not be shown in the discord client.
 

@@ -229,9 +229,9 @@ namespace discpp {
         /**
          * @brief Returns member roles as objects instead of the snowflake vector.
          *
-         * @return std::vector<std::shared_ptr<discpp::Role>>
+         * @return std::vector<std::shared_ptr<discpp::Role>, discpp::SnowflakeHash>
          */
-        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>> GetRoles();
+        std::unordered_map<discpp::Snowflake, std::shared_ptr<discpp::Role>, discpp::SnowflakeHash> GetRoles();
 
         /**
          * @brief Returns member roles but ordered by position.

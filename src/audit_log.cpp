@@ -214,7 +214,7 @@ discpp::AuditLogEntry::AuditLogEntry(discpp::Client* client, rapidjson::Document
             rapidjson::Document change_json(rapidjson::kObjectType);
             change_json.CopyFrom(change, change_json.GetAllocator());
 
-            changes.push_back(discpp::AuditLogChange(client, change_json));
+            changes.emplace_back(client, change_json);
         }
     }
     user = discpp::User(client, Snowflake(json["user_id"].GetString()));
@@ -229,7 +229,7 @@ discpp::AuditLog::AuditLog(discpp::Client* client, rapidjson::Document& json) {
         rapidjson::Document webhook_json(rapidjson::kObjectType);
         webhook_json.CopyFrom(webhook, webhook_json.GetAllocator());
 
-        webhooks.push_back(discpp::Webhook(webhook_json));
+        webhooks.push_back(discpp::Webhook(client->http_client, webhook_json));
     }
 
     for (auto const& user : json["user"].GetArray()) {

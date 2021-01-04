@@ -14,22 +14,22 @@ namespace discpp {
         }
 	}
 
-	bool DiscordObject::operator==(DiscordObject& other) const {
+	bool DiscordObject::operator==(const DiscordObject& other) const {
 		return this->id == other.id;
 	}
 
-	bool DiscordObject::operator==(Snowflake& other) const {
+	bool DiscordObject::operator==(const Snowflake& other) const {
 		return this->id == other;
 	}
 
 #if __cplusplus <= 201703L || defined(__GNUC__)
-		bool DiscordObject::operator!=(DiscordObject& other) const {
-            return this->id != other.id;
-        }
+    bool DiscordObject::operator!=(const DiscordObject& other) const {
+        return this->id != other.id;
+    }
 
-        bool DiscordObject::operator!=(Snowflake& other) const {
-            return this->id != other;
-        }
+    bool DiscordObject::operator!=(const Snowflake& other) const {
+        return this->id != other;
+    }
 #endif
 
     discpp::Client* DiscordObject::GetClient() const {

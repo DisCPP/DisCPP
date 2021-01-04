@@ -273,12 +273,12 @@ namespace discpp {
          * This will send a REST request to receive, and update the guild's channel list.
          *
          * ```cpp
-         *      std::unordered_map<discpp::Snowflake, discpp::Channel> guild.UpdateChannels();
+         *      std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash> guild.UpdateChannels();
          * ```
          *
-         * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
+         * @return std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash>
          */
-		std::unordered_map<discpp::Snowflake, discpp::Channel> UpdateChannels();
+		std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash> UpdateChannels();
 
         /**
          * @brief Gets a list of channel categories in this guild.
@@ -287,12 +287,12 @@ namespace discpp {
          * This makes it easy to find a channel in the array by using the `std::unordered_map::find()` method.
          *
          * ```cpp
-         *      std::unordered_map<discpp::Snowflake, discpp::Channel> guild.GetCategories();
+         *      std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash> guild.GetCategories();
          * ```
          *
-         * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
+         * @return std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash>
          */
-		std::unordered_map<discpp::Snowflake, discpp::Channel> GetCategories();
+		std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash> GetCategories();
 
         /**
          * @brief Gets a list of channel that don't have parents in this guild.
@@ -300,9 +300,9 @@ namespace discpp {
          * The first element in the map is the id of the channel, while the second is the channel object.
          * This makes it easy to find a channel in the array by using the `std::unordered_map::find()` method.
          *
-         * @return std::unordered_map<discpp::Snowflake, discpp::Channel>
+         * @return std::unordered_map<discpp::Snowflake, discpp::Channel, discpp::SnowflakeHash>
          */
-        std::unordered_map<Snowflake, Channel> GetParentlessChannels();
+        std::unordered_map<Snowflake, Channel, discpp::SnowflakeHash> GetParentlessChannels();
 
         /**
          * @brief Gets a channel in this guild.
@@ -756,12 +756,12 @@ namespace discpp {
          * Only do this if, for some reason, the emojis have gotten out of sync!
          *
          * ```cpp
-         *      std::unordered_map<Snowflake, std::shared_ptr<Emoji>> guild_emojis = guild.GetEmojis();
+         *      std::unordered_map<Snowflake, std::shared_ptr<Emoji>, discpp::SnowflakeHash> guild_emojis = guild.GetEmojis();
          * ```
          *
-         * @return std::unordered_map<Snowflake, std::shared_ptr<Emoji>>
+         * @return std::unordered_map<Snowflake, std::shared_ptr<Emoji>, discpp::SnowflakeHash>
          */
-		std::unordered_map<Snowflake, discpp::Emoji> UpdateEmojis();
+        std::unordered_map<Snowflake, discpp::Emoji, discpp::SnowflakeHash> UpdateEmojis();
 
         /**
          * @brief Get a guild emoji.
@@ -981,36 +981,36 @@ namespace discpp {
         /**
          * @brief Get a constant map of roles.
          *
-         * @return std::unordered_map<Snowflake, std::shared_ptr<Role>>
+         * @return const std::unordered_map<Snowflake, std::shared_ptr<Role>, discpp::SnowflakeHash>&
          */
-        inline std::unordered_map<Snowflake, std::shared_ptr<Role>> GetRoles() const {
+        inline const std::unordered_map<Snowflake, std::shared_ptr<Role>, discpp::SnowflakeHash>& GetRoles() const {
             return roles;
         }
 
         /**
          * @brief Get a constant map of members.
          *
-         * @return std::unordered_map<Snowflake, std::shared_ptr<Member>>
+         * @return const std::unordered_map<Snowflake, std::shared_ptr<Member>, discpp::SnowflakeHash>&
          */
-        inline std::unordered_map<Snowflake, std::shared_ptr<Member>> GetMembers() const {
+        inline const std::unordered_map<Snowflake, std::shared_ptr<Member>, discpp::SnowflakeHash>& GetMembers() const {
             return members;
         }
 
         /**
          * @brief Get a constant map of channels.
          *
-         * @return std::unordered_map<Snowflake, Channel>
+         * @return const std::unordered_map<Snowflake, Channel, discpp::SnowflakeHash>&
          */
-        inline std::unordered_map<Snowflake, Channel> GetChannels() const {
+        inline const std::unordered_map<Snowflake, Channel, discpp::SnowflakeHash>& GetChannels() const {
             return channels;
         }
 
         /**
          * @brief Get a constant map of emojis.
          *
-         * @return std::unordered_map<Snowflake, Emoji>
+         * @return const std::unordered_map<Snowflake, Emoji, discpp::SnowflakeHash>&
          */
-        inline std::unordered_map<Snowflake, Emoji> GetEmojis() const {
+        inline const std::unordered_map<Snowflake, Emoji, discpp::SnowflakeHash>& GetEmojis() const {
             return emojis;
         }
 
@@ -1054,10 +1054,10 @@ namespace discpp {
 	    std::mutex members_mutex;
 	    std::mutex channels_mutex;
 
-        std::unordered_map<Snowflake, std::shared_ptr<Role>> roles;
-        std::unordered_map<Snowflake, Emoji> emojis;
-        std::unordered_map<Snowflake, std::shared_ptr<Member>> members;
-        std::unordered_map<Snowflake, discpp::Channel> channels;
+        std::unordered_map<Snowflake, std::shared_ptr<Role>, discpp::SnowflakeHash> roles;
+        std::unordered_map<Snowflake, Emoji, discpp::SnowflakeHash> emojis;
+        std::unordered_map<Snowflake, std::shared_ptr<Member>, discpp::SnowflakeHash> members;
+        std::unordered_map<Snowflake, discpp::Channel, discpp::SnowflakeHash> channels;
 
         unsigned char flags = 0b0;
         uint64_t icon_hex[2] = {0, 0};

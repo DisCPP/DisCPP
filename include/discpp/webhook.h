@@ -7,8 +7,10 @@
 #include "embed_builder.h"
 #include "guild.h"
 #include "user.h"
+#include "http_client.h"
 
 namespace discpp {
+    class HttpClient;
 
     enum WebhookType : int {
         INCOMING = 1,
@@ -18,12 +20,12 @@ namespace discpp {
     // @TODO: Add more endpoints: https://discordapp.com/developers/docs/resources/webhook
 	class Webhook {
 	public:
-	    Webhook() = default;
-	    Webhook(rapidjson::Document& json);
-		Webhook(const Snowflake& id, const std::string& token);
+	    Webhook(std::shared_ptr<HttpClient> http_client);
+	    Webhook(std::shared_ptr<HttpClient> http_client, rapidjson::Document& json);
+		Webhook(std::shared_ptr<HttpClient> http_client, const Snowflake& id, const std::string& token);
 
 		discpp::Message Send(const std::string& text, const bool tts = false, discpp::EmbedBuilder* embed = nullptr, const std::vector<discpp::File>& files = {});
-		void EditName(std::string& name);
+		void EditName(const std::string &name);
 		void Remove();
 
         discpp::Snowflake id = 0;
@@ -35,8 +37,9 @@ namespace discpp {
         std::string token;
 	private:
         uint64_t avatar_hex[2] = {0, 0};
+        std::shared_ptr<HttpClient> http_client;
 
-		ix::WebSocketHttpHeaders Headers(const ix::WebSocketHttpHeaders& add = {});
+        std::map<std::string, std::string, discpp::CaseInsensitiveLess> Headers(const std::map<std::string, std::string, discpp::CaseInsensitiveLess>& add = {});
 	};
 }
 
