@@ -9,6 +9,8 @@ Simplified, but feature rich Discord API wrapper written in modern C++.
 ## DisC++
 DisC++ is a simplified, but feature rich Discord API wrapper written in modern C++. It can run on Linux and Windows. Its also focused on being multi threaded so commands and event listeners are ran on seperate threads, this means you dont have to worry about slowing the bot down with a certain command.
 
+The [development branch](https://github.com/DisCPP/DisCPP/tree/development) will have the newest features and might even be faster, or more stable.
+
 ## What makes DisC++ different?
 * Low memory usage.
 * Even though its very memory optimized, it doesn't loose any readability, usability or features.
@@ -21,7 +23,7 @@ DisC++ is a simplified, but feature rich Discord API wrapper written in modern C
     * You can have several event listeners listening for the same event which are all ran on separate threads.
 
 ## State
-This library is ready to use but is still in development so you may encounter a few issues, if you do, please submit an issue!
+The library has everything implemented but not everything has been tested thoroughly, so if you encounter any issues [create an issue](https://github.com/DisCPP/DisCPP/issues/new). 
 
 <table align="center">
   <tr>
@@ -30,10 +32,12 @@ This library is ready to use but is still in development so you may encounter a 
   </tr>
   <tr>
     <td align="center"><a href="https://dev.azure.com/seanomik/DisCPP/_build">
-    <img src="https://dev.azure.com/seanomik/DisCPP/_apis/build/status/DisCPP.DisCPP?branchName=master">
+    <img src="https://github.com/DisCPP/DisCPP/workflows/Linux%20CI/badge.svg?branch=master">
+    <img src="https://github.com/DisCPP/DisCPP/workflows/Windows%20CI/badge.svg?branch=master">
   </a></td>
     <td align="center"><a href="https://dev.azure.com/seanomik/DisCPP/_build">
-    <img src="https://dev.azure.com/seanomik/DisCPP/_apis/build/status/DisCPP.DisCPP?branchName=development">
+    <img src="https://github.com/DisCPP/DisCPP/workflows/Linux%20CI/badge.svg?branch=development">
+    <img src="https://github.com/DisCPP/DisCPP/workflows/Windows%20CI/badge.svg?branch=development">
   </a></td>
   </tr>
 </table>
