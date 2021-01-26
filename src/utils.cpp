@@ -48,6 +48,13 @@ std::unique_ptr<rapidjson::Document> discpp::HandleResponse(discpp::Client* clie
         client->logger->Error(LogTextColor::RED + "Received HTTPS error: " + response->errorMsg);
     }
 
+    tmp->Parse((!response->body.empty() ? response->body.c_str() : "{}"));
+
+	// Check if we were returned a json error and throw an exception if so.
+	if (!tmp->IsNull() && tmp->IsObject() && ContainsNotNull(*tmp, "code")) {
+        discpp::ThrowException(*tmp);
+    }
+
     // Handle http response codes and throw an exception if it failed.
     if (response->statusCode != 200 && response->statusCode != 201 && response->statusCode != 204) {
         std::string response_msg;
@@ -85,12 +92,6 @@ std::unique_ptr<rapidjson::Document> discpp::HandleResponse(discpp::Client* clie
     }
 
 	HandleRateLimits(response->headers, object, ratelimit_bucket);
-	tmp->Parse((!response->body.empty() ? response->body.c_str() : "{}"));
-
-	// Check if we were returned a json error and throw an exception if so.
-	if (!tmp->IsNull() && tmp->IsObject() && ContainsNotNull(*tmp, "code")) {
-        discpp::ThrowException(*tmp);
-    }
 
     // This shows an error in inteliisense for some reason but compiles fine.
 	return tmp;

@@ -68,7 +68,7 @@ namespace discpp {
         application_id = GetIDSafely(json, "application_id");
 	}
 
-	discpp::Message Channel::Send(const std::string& text, const bool tts, discpp::EmbedBuilder* embed, std::vector<File> files) {
+	discpp::Message Channel::Send(const std::string& text, const bool tts, discpp::EmbedBuilder* embed, std::vector<File> files) const {
         // Send a file filled with message contents if the message is more than 2000 characters.
         if (text.size() >= 2000) {
             // Write message to file

@@ -362,7 +362,8 @@ namespace discpp {
             old_message = *message_it->second;
         }
 
-        shard.client.event_handler->TriggerEvent<discpp::MessageUpdateEvent>(discpp::MessageUpdateEvent(shard, edited_message, old_message, is_edited));
+        discpp::MessageUpdateEvent event(shard, edited_message, old_message, is_edited);
+        shard.client.event_handler->TriggerEvent<discpp::MessageUpdateEvent>(event);
     }
 
     void EventDispatcher::MessageDeleteEvent(Shard& shard, rapidjson::Document& result) {

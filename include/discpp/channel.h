@@ -153,7 +153,7 @@ namespace discpp {
          *
          * @return discpp::Message
          */
-		discpp::Message Send(const std::string& text, const bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {});
+		discpp::Message Send(const std::string& text, const bool tts = false, discpp::EmbedBuilder* embed = nullptr, std::vector<discpp::File> files = {}) const;
 
         /**
          * @brief Modify the channel.
