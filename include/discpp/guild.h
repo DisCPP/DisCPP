@@ -41,26 +41,41 @@ namespace discpp {
         std::shared_ptr<discpp::User> user; /**< The banned user. */
 	};
 
-	class GuildInvite {
+	class Invite {
 	public:
 	    enum class TargetUserType : int {
 	        STREAM = 1
 	    };
 
-		GuildInvite() = default;
+		Invite() = default;
 
         /**
-         * @brief Constructs a discpp::GuildInvite object from json.
+         * @brief Requests the Invite object from api
          *
-         * ```cpp
-         *      discpp::GuildInvite guild_invite(json);
-         * ```
+         * @param[in] client The client.
+         * @param[in] invite_code The invite code.
+         * @param[in] with_counts Whether the invite should contain approximate member counts.
          *
+         * @return discpp::Invite, this is a constructor.
+         */
+        Invite(discpp::Client* client, std::string invite_code, bool with_counts = true);
+
+        /**
+         * @brief Constructs a discpp::Invite object from json.
+         *
+         * @param[in] client The client.
          * @param[in] json The json data for the guild invite.
          *
-         * @return discpp::GuildInvite, this is a constructor.
+         * @return discpp::Invite, this is a constructor.
          */
-		GuildInvite(discpp::Client* client, rapidjson::Document& json);
+		Invite(discpp::Client* client, rapidjson::Document& json);
+
+        /**
+         * @brief Delete this invite object.
+         *
+         * @return void
+         */
+        void Delete();
 
         std::string code; /**< The invite code (unique ID). */
         std::shared_ptr<discpp::Guild> guild; /**< The guild this invite is for. */
@@ -70,51 +85,72 @@ namespace discpp {
         TargetUserType target_user_type; /**< The type of user target for this invite. */
         int approximate_presence_count; /**< Approximate count of online members (only present when target_user is set). */
         int approximate_member_count; /**< Approximate count of total members. */
+    private:
+        discpp::Client* client;
 	};
-
-	class IntegrationAccount : public DiscordObject {
-	public:
-        IntegrationAccount() = default;
-        IntegrationAccount(rapidjson::Document& json) {
-
-            /**
-             * @brief Constructs a discpp::IntegrationAccount object from json.
-             *
-             * ```cpp
-             *      discpp::IntegrationAccount guild_integration_account(json);
-             * ```
-             *
-             * @param[in] json The json data for the integration account.
-             *
-             * @return discpp::IntegrationAccount, this is a constructor.
-             */
-			id = Snowflake(json["id"].GetString());
-			name = json["name"].GetString();
-		}
-
-        std::string name; /**< Name of the account. */
-    };
 
 	class Integration : public DiscordObject {
 	public:
-	    enum class IntegrationExpireBehavior : int {
+	    enum class ExpireBehavior : int {
 	        REMOVE_ROLE = 0,
 	        KICK = 1
 	    };
-		    Integration() = default;
+
+        class Account : public DiscordObject {
+        public:
+            Account() = default;
+            Account(discpp::Client* client) : discpp::DiscordObject(client) {}
+
+            /**
+             * @brief Constructs a discpp::Integration::Account object from json.
+             *
+             * @param[in] json The json data for the integration account.
+             *
+             * @return discpp::Integration::Account, this is a constructor.
+             */
+            Account(discpp::Client* client, rapidjson::Document& json) : discpp::DiscordObject(client) {
+                id = Snowflake(json["id"].GetString());
+                name = json["name"].GetString();
+            }
+
+            std::string name; /**< Name of the account. */
+        };
+
+        class Application : public DiscordObject {
+        public:
+            Application() = default;
+            Application(discpp::Client* client) : discpp::DiscordObject(client) {}
+
+            /**
+             * @brief Constructs a discpp::Integration::Application object from json.
+             *
+             * @param[in] json The json data for the integration application.
+             *
+             * @return discpp::Integration::Application, this is a constructor.
+             */
+            Application(discpp::Client* client, rapidjson::Document& json);
+
+            std::string GetIconURL(const ImageType& img_type = ImageType::AUTO);
+
+            std::string name; /**< The name of the app. */
+            std::string description; /**< The description of the app. */
+            std::string summary; /**< The summary of the app. */
+            discpp::User bot; /**< The bot associated with this application. */
+        private:
+            uint64_t icon_hex[2];
+        };
+
+        Integration() = default;
+		Integration(discpp::Client* client) : discpp::DiscordObject(client) {}
 
         /**
          * @brief Constructs a discpp::Integration object from json.
-         *
-         * ```cpp
-         *      discpp::Integration integration(json);
-         * ```
          *
          * @param[in] json The json data for the integration.
          *
          * @return discpp::Integration, this is a constructor.
          */
-        explicit Integration(rapidjson::Document& json);
+        Integration(discpp::Client* client, rapidjson::Document& json);
 
         std::string name; /**< Integration name. */
         std::string type; /**< Integration type (twitch, youtube, etc). */
@@ -122,12 +158,14 @@ namespace discpp {
         bool syncing; /**< Is this integration syncing? */
         discpp::Snowflake role_id; /**< ID that this integration uses for "subscribers". */
         bool enable_emoticons; /**< Whether emoticons should be synced for this integration (twitch only currently). */
-        IntegrationExpireBehavior expire_behavior; /**< The behavior of expiring subscribers. */
+        discpp::Integration::ExpireBehavior expire_behavior; /**< The behavior of expiring subscribers. */
         int expire_grace_period; /**< The grace period (in days) before expiring subscribers. */
-        std::shared_ptr<discpp::User> user; /**< User for this integration. */
-        discpp::IntegrationAccount account; /**< Integration account information. */
-        // @TODO: Convert to iso8601Time
-        std::string synced_at; /**< When this integration was last synced. */
+        discpp::User user; /**< User for this integration. */
+        discpp::Integration::Account account; /**< Integration account information. */
+        std::chrono::system_clock::time_point synced_at; /**< When this integration was last synced. */
+        int subscriber_count; /**< How many subscribers this integration has. */
+        bool revoked; /**< Has this integration been revoked. */
+        discpp::Integration::Application application; /**< 	The bot/OAuth2 application for discord integrations. */
 	};
 
 	class GuildEmbed : public DiscordObject {
@@ -446,7 +484,7 @@ namespace discpp {
          *
          * @return void
          */
-		void BanMember(const discpp::Member& member, const std::string& reason = "");
+		void BanMember(const discpp::Member& member, const std::string& reason = "", uint16_t delete_message_days = 0);
 
         /**
          * @brief Ban a guild member by id.
@@ -460,7 +498,7 @@ namespace discpp {
          *
          * @return void
          */
-		void BanMemberById(const Snowflake& user_id, const std::string& reason = "");
+		void BanMemberById(const Snowflake& user_id, const std::string& reason = "", uint16_t delete_message_days = 0);
 
         /**
          * @brief Unban a guild member.
@@ -621,12 +659,12 @@ namespace discpp {
          * @brief Get guild invites.
          *
          * ```cpp
-         *      std::vector<discpp::GuildInvite> invites = guild.GetInvites();
+         *      std::vector<discpp::Invite> invites = guild.GetInvites();
          * ```
          *
-         * @return std::vector<discpp::GuildInvite>
+         * @return std::vector<discpp::Invite>
          */
-		std::vector<discpp::GuildInvite> GetInvites() const;
+		std::vector<discpp::Invite> GetInvites() const;
 
         /**
          * @brief Get guild integrations.
@@ -723,12 +761,12 @@ namespace discpp {
          * Requires the MANAGE_GUILD permission. code will be null if a vanity url for the guild is not set. Only `code` and `uses` are valid
          *
          * ```cpp
-         *      discpp::GuildInvite vanity_url = ctx.guild->GetVanityURL();
+         *      discpp::Invite vanity_url = ctx.guild->GetVanityURL();
          * ```
          *
-         * @return discpp::GuildInvite
+         * @return discpp::Invite
          */
-		discpp::GuildInvite GetVanityURL() const;
+		discpp::Invite GetVanityURL() const;
 
         /**
          * @brief Get a widget image url.

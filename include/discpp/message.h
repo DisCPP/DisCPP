@@ -83,6 +83,7 @@ namespace discpp {
 
 	    Message() = default;
 		Message(discpp::Client* client);
+        Message(const Message& message);
 
         /**
          * @brief Constructs a discpp::Message object from an id.

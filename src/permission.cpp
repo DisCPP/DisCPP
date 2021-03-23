@@ -8,9 +8,14 @@ namespace discpp {
 
 	Permissions::Permissions(rapidjson::Document& json) {
 		role_user_id = Snowflake(json["id"].GetString());
-		permission_type = (json["type"] == "role") ? PermissionType::ROLE : PermissionType::MEMBER;
-		allow_perms = PermissionOverwrite(json["allow"].GetInt());
-		deny_perms = PermissionOverwrite(json["deny"].GetInt());
+		// For some reason discord thought they should have string-serialized numbers in audit log options...
+		if (json["type"].IsString()) {
+			permission_type = (PermissionType) std::stoi(json["type"].GetString());
+		} else {
+			permission_type = (PermissionType) json["type"].GetInt();
+		}
+		allow_perms = PermissionOverwrite(std::stoi(json["allow"].GetString()));
+		deny_perms = PermissionOverwrite(std::stoi(json["deny"].GetString()));
 	}
 
     rapidjson::Document Permissions::ToJson() {
@@ -19,8 +24,8 @@ namespace discpp {
         rapidjson::Document json;
         json.AddMember("id", (uint64_t) role_user_id, json.GetAllocator());
         json.AddMember("type", str_type, json.GetAllocator());
-        json.AddMember("allow", allow_perms.value, json.GetAllocator());
-        json.AddMember("deny", deny_perms.value, json.GetAllocator());
+        json.AddMember("allow", std::to_string(allow_perms.value), json.GetAllocator());
+        json.AddMember("deny", std::to_string(deny_perms.value), json.GetAllocator());
 
 		return json;
 	}

@@ -15,8 +15,8 @@
 namespace discpp {
 
 	enum class PermissionType : unsigned char {
-		ROLE,
-		MEMBER
+		ROLE = 0,
+		MEMBER = 1
 	};
 
 	enum Permission : int {

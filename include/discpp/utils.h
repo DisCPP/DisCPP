@@ -79,7 +79,7 @@ namespace discpp {
 
 	inline std::string Endpoint(const std::string& endpoint_format) {
 		std::string tmp = endpoint_format[0] == '/' ? endpoint_format : '/' + endpoint_format;
-		return "https://discordapp.com/api/v6" + tmp;
+		return "https://discordapp.com/api/v8" + tmp;
 	}
 
 	template <typename type>

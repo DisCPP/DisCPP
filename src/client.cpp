@@ -82,7 +82,7 @@ namespace discpp {
                 }
 
                 // Specify version and encoding just ot be safe
-                std::string url = std::string(gateway_request["url"].GetString()) + "/?v=6&encoding=json";
+                std::string url = std::string(gateway_request["url"].GetString()) + "/?v=8&encoding=json";
 
                 for (int i = 0; i < config.shard_amount; i++) {
                     auto* shard = new Shard(*this, i, url);
@@ -534,10 +534,10 @@ namespace discpp {
 
     void Client::UpdatePresence(discpp::Presence& presence) {
         rapidjson::Document payload(rapidjson::kObjectType);
-        std::unique_ptr<rapidjson::Document> activity_json = presence.ToJson();
+        rapidjson::Document activity_json = presence.ToJson();
 
         payload.AddMember("op", Shard::Opcode::STATUS_UPDATE, payload.GetAllocator());
-        payload.AddMember("d", *activity_json, payload.GetAllocator());
+        payload.AddMember("d", activity_json, payload.GetAllocator());
 
         shards.front()->CreateWebsocketRequest(payload);
     }
@@ -560,6 +560,7 @@ namespace discpp {
         if (it != client_instances.end()) {
             return it->second;
         } else {
+            std::cout << "Failed to find client instance with id: " << std::to_string(id) << std::endl;
             throw std::runtime_error("Failed to find client instance with id: " + std::to_string(id));
         }
     }

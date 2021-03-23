@@ -8,6 +8,7 @@
 #include "audit_log.h"
 #include "user.h"
 #include "cache.h"
+#include "utils.h"
 
 #include <memory>
 
@@ -453,15 +454,15 @@ namespace discpp {
 		return "";
 	}
 
-	void Guild::BanMember(const discpp::Member& member, const std::string& reason) {
-		BanMemberById(member.user.id, reason);
+	void Guild::BanMember(const discpp::Member& member, const std::string& reason, uint16_t delete_message_days) {
+		BanMemberById(member.user.id, reason, delete_message_days);
 	}
 
-    void Guild::BanMemberById(const discpp::Snowflake& user_id, const std::string& reason) {
+    void Guild::BanMemberById(const discpp::Snowflake& user_id, const std::string& reason, uint16_t delete_message_days) {
         Guild::EnsureBotPermission(Permission::BAN_MEMBERS);
 
         discpp::Client* client = GetClient();
-        std::string body("{\"reason\": \"" + EscapeString(reason) + "\"}");
+        std::string body("{\"reason\": \"" + EscapeString(reason) + "\", \"delete_message_days\": " + std::to_string(delete_message_days) + "}");
         SendPutRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/bans/" + std::to_string(user_id)), DefaultHeaders(client), id, RateLimitBucketType::GUILD, body);
     }
 
@@ -590,17 +591,17 @@ namespace discpp {
 		SendPostRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/prune"), DefaultHeaders(client, { { "Content-Type", "application/json" } }), id, discpp::RateLimitBucketType::GUILD, body);
 	}
 
-	std::vector<discpp::GuildInvite> Guild::GetInvites() const {
+	std::vector<discpp::Invite> Guild::GetInvites() const {
         discpp::Client* client = GetClient();
 		std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/invites"), DefaultHeaders(client), {}, {});
 
-		std::vector<discpp::GuildInvite> guild_invites;
+		std::vector<discpp::Invite> guild_invites;
         for (auto const& guild_invite : result->GetArray()) {
             if (!guild_invite.IsNull()) {
                 rapidjson::Document guild_invite_json;
                 guild_invite_json.CopyFrom(guild_invite, guild_invite_json.GetAllocator());
 
-                guild_invites.push_back(discpp::GuildInvite(client, guild_invite_json));
+                guild_invites.push_back(discpp::Invite(client, guild_invite_json));
             }
         }
 
@@ -617,7 +618,7 @@ namespace discpp {
                 rapidjson::Document guild_integration_json;
                 guild_integration_json.CopyFrom(guild_integration, guild_integration_json.GetAllocator());
 
-                guild_integrations.emplace_back(guild_integration_json);
+                guild_integrations.emplace_back(client, guild_integration_json);
             }
         }
 
@@ -909,11 +910,11 @@ namespace discpp {
         return *this;
     }
 
-    discpp::GuildInvite Guild::GetVanityURL() const {
+    discpp::Invite Guild::GetVanityURL() const {
         discpp::Client* client = GetClient();
 	    std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, Endpoint("/guilds/" + std::to_string(id) + "/vanity-url"), DefaultHeaders(client), id, RateLimitBucketType::GUILD);
 
-        return discpp::GuildInvite(client, *result);
+        return discpp::Invite(client, *result);
     }
 
     discpp::AuditLog Guild::GetAuditLog() const {
@@ -1052,7 +1053,19 @@ namespace discpp {
         emojis.emplace(emoji.id, emoji);
     }
 
-    GuildInvite::GuildInvite(discpp::Client* client, rapidjson::Document &json) {
+    Invite::Invite(discpp::Client* client, std::string invite_code, bool with_counts) : client(client) {
+        std::string url = Endpoint("/invites/" + invite_code);
+
+        if (with_counts) {
+            url += "?=with_counts=true";
+        }
+
+        std::unique_ptr<rapidjson::Document> result = SendGetRequest(client, url, DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL);
+
+        *this = Invite(client, *result);
+    }
+
+    Invite::Invite(discpp::Client* client, rapidjson::Document &json) : client(client) {
         code = json["code"].GetString();
         if (ContainsNotNull(json, "guild")) {
             guild = client->cache->GetGuild(discpp::Snowflake(json["guild"]["id"].GetString()));
@@ -1071,6 +1084,10 @@ namespace discpp {
         target_user_type = static_cast<TargetUserType>(GetDataSafely<int>(json, "target_user_type"));
         approximate_presence_count = GetDataSafely<int>(json, "approximate_presence_count");
         approximate_member_count = GetDataSafely<int>(json, "approximate_member_count");
+    }
+
+    void Invite::Delete() {
+        SendDeleteRequest(client, Endpoint("invites/" + code), DefaultHeaders(client), 0, RateLimitBucketType::GLOBAL);
     }
 
     VoiceState::VoiceState(discpp::Client *client) : client(client) {
@@ -1100,25 +1117,32 @@ namespace discpp {
 		suppress = json["suppress"].GetBool();
     }
 
-    Integration::Integration(rapidjson::Document &json) {
+    Integration::Integration(discpp::Client* client, rapidjson::Document &json) : discpp::DiscordObject(client) {
         id = Snowflake(json["id"].GetString());
         name = json["name"].GetString();
         type = json["type"].GetString();
         enabled = json["enabled"].GetBool();
-        syncing = json["syncing"].GetBool();
-        role_id = Snowflake(json["role_id"].GetString());
+        syncing = GetDataSafely<bool>(json, "syncing");
+        role_id = GetIDSafely(json, "role_id");
         enable_emoticons = GetDataSafely<bool>(json, "enable_emoticons");
-        expire_behavior = static_cast<IntegrationExpireBehavior>(json["expire_behavior"].GetInt());
-        expire_grace_period = json["expire_grace_period"].GetInt();
-        if (ContainsNotNull(json, "user")) {
-            rapidjson::Document user_json;
-            user_json.CopyFrom(json["user"], user_json.GetAllocator());
-
-            discpp::Client* client = GetClient();
-            user = std::make_shared<discpp::User>(client, user_json);
+        expire_behavior = static_cast<discpp::Integration::ExpireBehavior>(GetDataSafely<int>(json, "expire_behavior"));
+        expire_grace_period = GetDataSafely<int>(json, "expire_grace_period");
+        user = ConstructDiscppObjectFromJson<discpp::User>(client, json, "user", discpp::User());
+        account = ConstructDiscppObjectFromJson(client, json, "account", discpp::Integration::Account());
+        if (ContainsNotNull(json, "synced_at")) {
+            synced_at = std::chrono::system_clock::from_time_t(discpp::TimeFromDiscord(json["synced_at"].GetString()));
         }
+        subscriber_count = GetDataSafely<int>(json, "subscriber_count");
+        revoked = GetDataSafely<bool>(json, "revoked");
+        application = ConstructDiscppObjectFromJson<discpp::Integration::Application>(client, json, "application", discpp::Integration::Application());
+    }
 
-        account = ConstructDiscppObjectFromJson(json, "account", discpp::IntegrationAccount());
-        synced_at = json["synced_at"].GetString();
+    Integration::Application::Application(discpp::Client* client, rapidjson::Document &json) : discpp::DiscordObject(client) {
+        id = Snowflake(json["id"].GetString());
+        name = json["name"].GetString();
+        SplitAvatarHash(json["icon"].GetString(), icon_hex);
+        description = json["description"].GetString();
+        summary = json["summary"].GetString();
+        bot = ConstructDiscppObjectFromJson<discpp::User>(client, json, "bot", discpp::User());
     }
 }

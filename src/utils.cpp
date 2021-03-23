@@ -200,8 +200,7 @@ std::unique_ptr<rapidjson::Document> discpp::SendDeleteRequest(discpp::Client* c
 
 ix::WebSocketHttpHeaders discpp::DefaultHeaders(discpp::Client* client, ix::WebSocketHttpHeaders add) {
     ix::WebSocketHttpHeaders headers = {
-        { "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" },
-        { "X-RateLimit-Precision", "millisecond"}};
+        { "User-Agent", "DiscordBot (https://github.com/seanomik/DisCPP, v0.0.0)" }};
 
     // Add the correct authorization header depending on the token type.
     if (client->config.type == TokenType::USER) {

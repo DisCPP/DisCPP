@@ -127,8 +127,7 @@ namespace discpp {
 	}
 
     ix::WebSocketHttpHeaders Webhook::Headers(const ix::WebSocketHttpHeaders& add) {
-        ix::WebSocketHttpHeaders headers = { { "User-Agent", "DisC++ Webhook (https://github.com/seanomik/DisCPP, v0.0.0)" },
-                                { "X-RateLimit-Precision", "millisecond"} };
+        ix::WebSocketHttpHeaders headers = { { "User-Agent", "DisC++ Webhook (https://github.com/seanomik/DisCPP, v0.0.0)" }};
         return headers;
     }
 }

@@ -12,16 +12,58 @@ namespace discpp {
 
     }
 
+    Message::Message(const Message& message) {
+        id = message.id;
+        client_instance_id = message.client_instance_id;
+        channel = message.channel;
+        guild = message.guild;
+        author = message.author;
+        member = message.member;
+        content = message.content;
+        timestamp = message.timestamp;
+        edited_timestamp = message.edited_timestamp;
+        if (!message.mentions.empty()) {
+            mentions = message.mentions;
+        }
+        if (!message.mentioned_roles.empty()) {
+            mentioned_roles = message.mentioned_roles;
+        }
+        if (!message.mention_channels.empty()) {
+            mention_channels = message.mention_channels;
+        }
+        if (!message.attachments.empty()) {
+            attachments = message.attachments;
+        }
+        if (!message.embeds.empty()) {
+            embeds = message.embeds;
+        }
+        if (!message.reactions.empty()) {
+            reactions = message.reactions;
+        }
+        webhook_id = message.webhook_id;
+        type = message.type;
+        activity = message.activity;
+        message_reference = message.message_reference;
+    }
+
 	Message::Message(discpp::Client* client, const Snowflake& channel_id, const Snowflake& id, bool can_request) : discpp::DiscordObject(client, id) {
         *this = client->cache->GetDiscordMessage(channel_id, id, can_request);
 	}
 
 	Message::Message(discpp::Client* client, rapidjson::Document& json) : discpp::DiscordObject(client) {
 		id = GetIDSafely(json, "id");
-		channel = client->cache->GetChannel(Snowflake(json["channel_id"].GetString()));
-		try {
+
+        // If the message is sent in a dm channel, there likely isn't a channel cached for the message for v8
+        // so we're gonna have to request the channel.
+        try {
+            channel = client->cache->GetChannel(Snowflake(json["channel_id"].GetString()), true);
+
+            // The message might not always be in a guild.
+            // This is in the same try catch as the channel since channel must be valid.
             guild = channel.GetGuild();
         } catch (const exceptions::DiscordObjectNotFound&) {
+            channel = discpp::Channel(client);
+            channel.id = Snowflake(json["channel_id"].GetString());
 		} catch (const exceptions::ProhibitedEndpointException&) {}
 
 		author = ConstructDiscppObjectFromJson(client, json, "author", discpp::User());

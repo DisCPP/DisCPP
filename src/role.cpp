@@ -7,14 +7,14 @@ namespace discpp {
 	}
 
 	Role::Role(discpp::Client* client, rapidjson::Document& json) : DiscordObject(client) {
-		id = Snowflake(json["id"].GetString());
+        id = Snowflake(json["id"].GetString());
 		name = json["name"].GetString();
 		color = json["color"].GetInt();
         if (GetDataSafely<bool>(json, "hoist")) {
             flags |= 0b1;
         }
 		position = json["position"].GetInt();
-        permissions = Permissions(PermissionType::ROLE, json["permissions"].GetInt());
+        permissions = Permissions(PermissionType::ROLE, std::stoi(json["permissions"].GetString()));
         if (GetDataSafely<bool>(json, "managed")) {
             flags |= 0b10;
         }
