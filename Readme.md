@@ -11,6 +11,9 @@ DisC++ is a simplified, but feature rich Discord API wrapper written in modern C
 
 The [development branch](https://github.com/DisCPP/DisCPP/tree/development) will have the newest features and might even be faster, or more stable.
 
+## State
+Library is discontinued. Due to Discord's lack of communication and out-of-touch attitude towards library developers, this library is no longer being maintained. Recommended alternative is [DPP](https://github.com/brainboxdotcc/DPP).
+
 ## What makes DisC++ different?
 * Low memory usage.
 * Even though its very memory optimized, it doesn't loose any readability, usability or features.
@@ -21,9 +24,6 @@ The [development branch](https://github.com/DisCPP/DisCPP/tree/development) will
 * Built in async event handler and listener.
     * Event listeners are dispatched on separate threads.
     * You can have several event listeners listening for the same event which are all ran on separate threads.
-
-## State
-The library has everything implemented but not everything has been tested thoroughly, so if you encounter any issues [create an issue](https://github.com/DisCPP/DisCPP/issues/new). 
 
 <table align="center">
   <tr>
